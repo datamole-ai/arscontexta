@@ -93,7 +93,7 @@ Questions the engine must answer when generating search configuration:
 
 **Derivation Implication:** Generated systems with processing = heavy or moderate should include a hybrid search mode for the reflect and reweave phases. Systems with processing = light can skip hybrid search because they generate fewer notes and the agent can use MOC traversal + keyword search for the limited connection-finding needed.
 
-**Source:** Vault operational experience. The reflect skill uses `mcp__qmd__deep_search` (hybrid) because connection quality justifies the ~20s latency.
+**Source:** Vault operational experience. The reflect skill uses `mcp__qmd__query` (hybrid) because connection quality justifies the ~20s latency.
 
 ---
 
@@ -103,7 +103,7 @@ Questions the engine must answer when generating search configuration:
 
 **Derivation Implication:** Any generated system with a processing pipeline (reduce phase) should include semantic duplicate detection. The reduce skill should check each extracted claim against the existing note corpus via semantic search before creating a new note. This is a quality gate, not an optional convenience.
 
-**Source:** Vault operational experience. The reduce skill uses `mcp__qmd__vector_search` for duplicate detection, and regularly catches duplicates that would be invisible to keyword search.
+**Source:** Vault operational experience. The reduce skill uses `mcp__qmd__query` for duplicate detection, and regularly catches duplicates that would be invisible to keyword search.
 
 ---
 
@@ -113,7 +113,7 @@ Questions the engine must answer when generating search configuration:
 
 **Derivation Implication:** Generated systems with a verify or recite phase should use semantic search (`vector_search`, not `deep_search`) for description quality testing. The absence of reranking is intentional — it tests what agents will actually encounter during routine search.
 
-**Source:** Vault operational experience. The recite and verify skills use `mcp__qmd__vector_search` to test description findability, specifically avoiding the deep_search tool's reranking.
+**Source:** Vault operational experience. The recite and verify skills use `mcp__qmd__query` to test description findability, specifically avoiding the deep_search tool's reranking.
 
 ---
 
@@ -199,7 +199,7 @@ Questions the engine must answer when generating search configuration:
 
 **Derivation Implication:** Generated context files that instruct agents on search usage should distinguish between query formulation for keyword search (short, focused terms) and query formulation for semantic search (natural language descriptions). A single instruction like "search for your concept" is insufficient — the agent needs to know how to phrase queries differently for each modality.
 
-**Source:** Vault operational experience. Full-length descriptions used as BM25 queries via `mcp__qmd__search` frequently returned zero results, while the same descriptions used via `mcp__qmd__vector_search` returned accurate matches.
+**Source:** Vault operational experience. Full-length descriptions used as BM25 queries via `mcp__qmd__query` frequently returned zero results, while the same descriptions used via `mcp__qmd__query` returned accurate matches.
 
 ---
 

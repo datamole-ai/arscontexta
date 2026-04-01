@@ -17,7 +17,7 @@ description: Extract structured knowledge from source material. Comprehensive ex
 version: "1.0"
 generated_from: "arscontexta-{plugin_version}"
 user-invocable: true
-allowed-tools: Read, Write, Grep, Glob, mcp__qmd__vector_search
+allowed-tools: Read, Write, Grep, Glob, mcp__qmd__query
 context: fork
 model: opus
 ---
@@ -128,7 +128,7 @@ Parse immediately:
 3. Hunt for insights that serve the domain (see extraction categories below)
 4. For each candidate:
 {if config.semantic_search}
-   - (preferred): use `mcp__qmd__vector_search` with query "[claim as sentence]", collection="{vocabulary.notes_collection}", limit=5
+   - (preferred): use `mcp__qmd__query` with query "[claim as sentence]", collection="{vocabulary.notes_collection}", limit=5
    - (CLI fallback): `qmd vsearch "[claim as sentence]" --collection {vocabulary.notes_collection} -n 5`
 {endif}
 {if !config.semantic_search}
@@ -372,7 +372,7 @@ For each candidate, run duplicate detection:
 
 {if config.semantic_search}
 ```
-mcp__qmd__vector_search  query="[proposed claim as sentence]"  collection="{vocabulary.notes_collection}"  limit=5
+mcp__qmd__query  query="[proposed claim as sentence]"  collection="{vocabulary.notes_collection}"  limit=5
 ```
 If MCP is unavailable, run:
 ```bash
