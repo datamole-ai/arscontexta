@@ -16,7 +16,6 @@ description: End-to-end source processing -- seed, {vocabulary.reduce}, process 
 version: "1.0"
 generated_from: "arscontexta-{plugin_version}"
 user-invocable: true
-context: fork
 model: opus
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Task
 argument-hint: "[file] — path to source file to process end-to-end"

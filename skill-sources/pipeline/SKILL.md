@@ -4,7 +4,6 @@ description: End-to-end source processing -- seed, reduce, process all claims th
 version: "1.0"
 generated_from: "arscontexta-v1.6"
 user-invocable: true
-context: fork
 model: sonnet
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Task
 argument-hint: "[file] — path to source file to process end-to-end"
