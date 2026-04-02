@@ -1287,7 +1287,7 @@ Generate ALL skills for the detected platform. Every vault ships with the comple
 
 **Skill source templates live at `${CLAUDE_PLUGIN_ROOT}/skill-sources/`.** Each subdirectory contains a `SKILL.md` template that must be read and written to the user's skills directory.
 
-The 16 skill sources to install:
+The 17 skill sources to install:
 
 | Source Directory | Skill Name | Category | Tier |
 |-----------------|------------|----------|------|
@@ -1300,6 +1300,7 @@ The 16 skill sources to install:
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/refactor/` | refactor | Evolution | B |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/seed/` | seed | Orchestration | C |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/pipeline/` | pipeline | Orchestration | C |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/archive-batch/` | archive-batch | Orchestration | C |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/ralph/` | ralph | Orchestration | C |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/rethink/` | rethink | Evolution | C |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/next/` | next | Navigation | C |
@@ -1358,7 +1359,7 @@ These skill sources contain only `{vocabulary.xxx}` patterns in their body. Thos
 
 ##### Tier C — DOMAIN substitution (mechanical string replace)
 
-**Skills:** seed, pipeline, ralph, rethink, next, validate, remember, reduce, verify
+**Skills:** seed, pipeline, archive-batch, ralph, rethink, next, validate, remember, reduce, verify
 
 These skill sources contain `{DOMAIN:xxx}` patterns that must be literally substituted at setup time. They may also contain `{vocabulary.xxx}` patterns — leave those intact.
 
