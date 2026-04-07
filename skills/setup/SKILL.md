@@ -15,11 +15,13 @@ The difference is derivation: understanding WHO this person is, WHAT they need, 
 Read these files to understand the methodology and available components. Read them BEFORE starting any phase.
 
 **Core references (always read):**
+
 - `${CLAUDE_PLUGIN_ROOT}/reference/kernel.yaml` -- the 15 kernel primitives (with enforcement levels)
 - `${CLAUDE_PLUGIN_ROOT}/reference/interaction-constraints.md` -- dimension coupling rules, hard/soft constraint checks
 - `${CLAUDE_PLUGIN_ROOT}/reference/vocabulary-transforms.md` -- domain-native vocabulary mappings (6 transformation levels)
 
 **Deferred references (read at specific steps, not upfront):**
+
 - `${CLAUDE_PLUGIN_ROOT}/reference/use-case-presets.md` -- read in Step 3c (only the matched preset section)
 - `${CLAUDE_PLUGIN_ROOT}/reference/personality-layer.md` -- read in Step 3d (only if personality signals detected)
 - `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md` -- read in Step 3f (only HIGH-risk failure mode sections identified by the inlined matrix)
@@ -27,6 +29,7 @@ Read these files to understand the methodology and available components. Read th
 - `${CLAUDE_PLUGIN_ROOT}/reference/conversation-patterns.md` -- consult only if derivation is ambiguous and worked examples would help
 
 **Generation references (read during Phase 5):**
+
 - `${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md` -- CLAUDE.md generation template
 - `${CLAUDE_PLUGIN_ROOT}/generators/features/*.md` -- composable feature blocks for context file composition
 
@@ -47,10 +50,12 @@ Check filesystem:
 
 Record the platform tier in working memory. It controls which artifacts get generated:
 
-| Platform | Context File | Skills Location | Hooks | Automation Ceiling |
-|----------|-------------|-----------------|-------|--------------------|
-| Claude Code | CLAUDE.md | .claude/skills/ | .claude/hooks/ | Full |
-| Minimal | README.md | (none) | (none) | Convention only |
+
+| Platform    | Context File | Skills Location | Hooks          | Automation Ceiling |
+| ----------- | ------------ | --------------- | -------------- | ------------------ |
+| Claude Code | CLAUDE.md    | .claude/skills/ | .claude/hooks/ | Full               |
+| Minimal     | README.md    | (none)          | (none)         | Convention only    |
+
 
 ---
 
@@ -157,16 +162,18 @@ That is the opening. Do not add options. Do not list use cases. Do not ask "whic
 
 Dimensions default to opinionated best practices and are NOT interrogated during conversation. The defaults:
 
-| Dimension | Default Position |
-|-----------|-----------------|
-| Granularity | Atomic |
-| Organization | Flat |
-| Linking | Explicit + implicit |
-| Processing | Heavy |
-| Navigation | 3-tier |
-| Maintenance | Condition-based |
-| Schema | Moderate |
-| Automation | Full |
+
+| Dimension    | Default Position    |
+| ------------ | ------------------- |
+| Granularity  | Atomic              |
+| Organization | Flat                |
+| Linking      | Explicit + implicit |
+| Processing   | Heavy               |
+| Navigation   | 3-tier              |
+| Maintenance  | Condition-based     |
+| Schema       | Moderate            |
+| Automation   | Full                |
+
 
 The conversation focuses on understanding the user's domain and needs. Users adjust dimensions post-init via `ops/config.yaml` or by running `/setup --advanced` for upfront configuration.
 
@@ -178,68 +185,75 @@ As the user talks, passively extract signals for dimensions. Do not ask about di
 
 **Confidence scoring:**
 
-| Level | Weight | Criteria | Example |
-|-------|--------|----------|---------|
-| HIGH | 1.0 | Explicit statement, domain-specific language, concrete examples | "I extract claims from papers" |
-| MEDIUM | 0.6 | Implicit tone, general preference, domain defaults | "I like to organize things" |
-| LOW | 0.3 | Ambiguous phrasing, contradicted by other signals, single mention | "I want to track everything" |
-| INFERRED | 0.2 | Cascade from resolved dimensions, not directly stated | If atomic granularity -> inferred explicit linking |
+
+| Level    | Weight | Criteria                                                          | Example                                            |
+| -------- | ------ | ----------------------------------------------------------------- | -------------------------------------------------- |
+| HIGH     | 1.0    | Explicit statement, domain-specific language, concrete examples   | "I extract claims from papers"                     |
+| MEDIUM   | 0.6    | Implicit tone, general preference, domain defaults                | "I like to organize things"                        |
+| LOW      | 0.3    | Ambiguous phrasing, contradicted by other signals, single mention | "I want to track everything"                       |
+| INFERRED | 0.2    | Cascade from resolved dimensions, not directly stated             | If atomic granularity -> inferred explicit linking |
+
 
 **Dimension resolution threshold:** A dimension is "resolved" when cumulative confidence from all its signals exceeds 1.5. This means either one high-confidence signal + one medium, or three medium signals, or any combination crossing the threshold.
 
 **Signal pattern table:**
 
-| Signal Pattern | Dimension Position | Confidence |
-|---------------|-------------------|------------|
-| "Claims from papers" | Atomic granularity | High |
-| "Track my reflections" | Moderate granularity | High |
-| "Log what happened" | Coarse granularity | High |
-| "Connections between ideas" | Explicit linking | High |
-| "Across disciplines" | Semantic search need | High |
-| "I process a few a week" | Light processing | High |
-| "Batch process research" | Heavy processing | High |
-| "I read a lot and forget" | Moderate granularity, light processing | Medium |
-| "Small precise insights" | Atomic granularity | High |
-| "Keep it professional" | Formal personality | High |
-| "Feel like a friend" | Warm/playful personality | High |
-| "Multiple projects" | Multi-domain potential | High |
-| "Track people" | Entity tracking module | High |
-| "Notice patterns I miss" | Emotionally attentive personality | Medium |
-| "I want rigor" | Heavy processing, dense schema | High |
-| "Low ceremony" | Light processing, minimal schema | High |
-| "20+ ideas daily" | High volume, pipeline needed | High |
-| "Personal journal" | Single agent, light processing | Medium |
-| "Academic research" | Atomic, heavy, semantic search | High |
-| "Therapy sessions" | Moderate, warm personality, emotional awareness | High |
-| "Project decisions" | Decision-centric, temporal tracking | High |
-| "Creative worldbuilding" | Moderate, heavy linking, playful personality | Medium |
-| "Book notes" | Moderate granularity, light processing | Medium |
-| "Track family/friends" | Entity MOCs, emotional context schema | High |
-| "I revisit old notes often" | Heavy maintenance, reweaving needed | Medium |
-| "I never go back to old stuff" | Light maintenance | High |
-| "Too much structure kills flow" | Light processing, minimal schema | High |
-| "I want the system to surprise me" | Semantic search, dense linking | Medium |
-| "Just keep it simple" | Light processing, minimal schema, flat nav | Medium |
-| "Quick capture, think later" | Temporal separation, pipeline needed | Medium |
-| "Tags not folders" | Flat organization, faceted metadata | High |
-| "I work across 5+ projects" | Multi-domain, dense schema | High |
-| "I hate losing context between sessions" | Session handoff, strong orient phase | High |
-| "AI should handle the organizing" | Full automation | High |
-| "I want full control" | Manual/convention, light automation | High |
+
+| Signal Pattern                           | Dimension Position                              | Confidence |
+| ---------------------------------------- | ----------------------------------------------- | ---------- |
+| "Claims from papers"                     | Atomic granularity                              | High       |
+| "Track my reflections"                   | Moderate granularity                            | High       |
+| "Log what happened"                      | Coarse granularity                              | High       |
+| "Connections between ideas"              | Explicit linking                                | High       |
+| "Across disciplines"                     | Semantic search need                            | High       |
+| "I process a few a week"                 | Light processing                                | High       |
+| "Batch process research"                 | Heavy processing                                | High       |
+| "I read a lot and forget"                | Moderate granularity, light processing          | Medium     |
+| "Small precise insights"                 | Atomic granularity                              | High       |
+| "Keep it professional"                   | Formal personality                              | High       |
+| "Feel like a friend"                     | Warm/playful personality                        | High       |
+| "Multiple projects"                      | Multi-domain potential                          | High       |
+| "Track people"                           | Entity tracking module                          | High       |
+| "Notice patterns I miss"                 | Emotionally attentive personality               | Medium     |
+| "I want rigor"                           | Heavy processing, dense schema                  | High       |
+| "Low ceremony"                           | Light processing, minimal schema                | High       |
+| "20+ ideas daily"                        | High volume, pipeline needed                    | High       |
+| "Personal journal"                       | Single agent, light processing                  | Medium     |
+| "Academic research"                      | Atomic, heavy, semantic search                  | High       |
+| "Therapy sessions"                       | Moderate, warm personality, emotional awareness | High       |
+| "Project decisions"                      | Decision-centric, temporal tracking             | High       |
+| "Creative worldbuilding"                 | Moderate, heavy linking, playful personality    | Medium     |
+| "Book notes"                             | Moderate granularity, light processing          | Medium     |
+| "Track family/friends"                   | Entity MOCs, emotional context schema           | High       |
+| "I revisit old notes often"              | Heavy maintenance, reweaving needed             | Medium     |
+| "I never go back to old stuff"           | Light maintenance                               | High       |
+| "Too much structure kills flow"          | Light processing, minimal schema                | High       |
+| "I want the system to surprise me"       | Semantic search, dense linking                  | Medium     |
+| "Just keep it simple"                    | Light processing, minimal schema, flat nav      | Medium     |
+| "Quick capture, think later"             | Temporal separation, pipeline needed            | Medium     |
+| "Tags not folders"                       | Flat organization, faceted metadata             | High       |
+| "I work across 5+ projects"              | Multi-domain, dense schema                      | High       |
+| "I hate losing context between sessions" | Session handoff, strong orient phase            | High       |
+| "AI should handle the organizing"        | Full automation                                 | High       |
+| "I want full control"                    | Manual/convention, light automation             | High       |
+
 
 **Anti-signals -- patterns that seem like signals but mislead:**
 
-| Anti-Signal | What It Seems Like | What It Actually Means | Correct Response |
-|------------|-------------------|----------------------|-----------------|
-| "I want Zettelkasten" | Atomic + heavy processing | User may want the label, not the discipline | Ask: "Walk me through your last week of note-taking" |
-| "Make it like Obsidian" | Specific tool request | User wants a navigation feel, not a methodology | Ask: "What do you like about Obsidian?" |
-| "I need AI to think for me" | Full automation | Cognitive outsourcing risk | Probe: "What do you want to decide vs what should the system handle?" |
-| "Everything connects to everything" | Dense linking | Undifferentiated linking desire | Ask for a specific example of two things that connect |
-| "I've tried everything" | No clear signal | PKM failure cycle -- needs simple start | Start with minimal config, friction-driven adoption |
+
+| Anti-Signal                         | What It Seems Like        | What It Actually Means                          | Correct Response                                                      |
+| ----------------------------------- | ------------------------- | ----------------------------------------------- | --------------------------------------------------------------------- |
+| "I want Zettelkasten"               | Atomic + heavy processing | User may want the label, not the discipline     | Ask: "Walk me through your last week of note-taking"                  |
+| "Make it like Obsidian"             | Specific tool request     | User wants a navigation feel, not a methodology | Ask: "What do you like about Obsidian?"                               |
+| "I need AI to think for me"         | Full automation           | Cognitive outsourcing risk                      | Probe: "What do you want to decide vs what should the system handle?" |
+| "Everything connects to everything" | Dense linking             | Undifferentiated linking desire                 | Ask for a specific example of two things that connect                 |
+| "I've tried everything"             | No clear signal           | PKM failure cycle -- needs simple start         | Start with minimal config, friction-driven adoption                   |
+
 
 ### Vocabulary Extraction
 
 The user's own words take priority over preset vocabulary. Listen for how they name things:
+
 - "My reflections" -> notes are called "reflections"
 - "Capture reactions" -> reduce phase is called "capture"
 - "Track decisions" -> note type is "decision"
@@ -255,11 +269,13 @@ After the opening response, ask 1-3 follow-up questions targeting:
 3. **Signal conflict resolution** -- if contradictory signals emerged
 
 Follow-up questions MUST be natural and conversational:
+
 - "When you say 'connections,' what kind? Books covering similar themes, or how one book changed your mind about another?"
 - "Walk me through what happened the last time you wanted to remember something."
 - "Who else will use this, or is it just for you?"
 
 Do NOT ask:
+
 - "Do you want atomic or moderate granularity?"
 - "How heavy should processing be?"
 - "What level of schema density?"
@@ -321,6 +337,7 @@ Internal reasoning the user never sees. Do NOT present derivation internals to t
 ### Step 3a: Map Signals to Dimensions
 
 For each of 8 dimensions:
+
 - Collect all signals extracted during conversation
 - Sum confidence weights
 - Determine position (resolved if >= 1.5, tentative if >= 0.6, unresolved otherwise)
@@ -333,6 +350,7 @@ Signals that clearly override defaults get applied. Signals that are ambiguous l
 Once primary dimensions are set, cascade through interaction constraints (already loaded from upfront reference reads).
 
 Key cascades:
+
 - Atomic granularity -> pressure toward explicit linking, deep navigation, heavier processing
 - Full automation -> pressure toward dense schemas, heavy processing, frequent maintenance
 - High volume (>200 projected notes) -> requires deep navigation, semantic search, automated maintenance
@@ -351,6 +369,7 @@ Build the complete vocabulary mapping for all 6 transformation levels (see `${CL
 3. **Closest reference domain blend** -- for novel domains, blend vocabulary from two closest presets
 
 For novel domains (no preset scores above 2.0 affinity):
+
 1. Score all 3 presets by signal overlap
 2. Select top two presets as blending sources
 3. For each term, use the preset with higher overlap for that specific concept
@@ -364,19 +383,23 @@ If personality signals were detected during conversation, read `${CLAUDE_PLUGIN_
 
 Map personality signals to four dimensions:
 
-| Dimension | Poles | Default |
-|-----------|-------|---------|
-| Warmth | clinical / warm / playful | neutral-helpful |
-| Opinionatedness | neutral / opinionated | neutral |
-| Formality | formal / casual | professional |
-| Emotional Awareness | task-focused / emotionally attentive | task-focused |
+
+| Dimension           | Poles                                | Default         |
+| ------------------- | ------------------------------------ | --------------- |
+| Warmth              | clinical / warm / playful            | neutral-helpful |
+| Opinionatedness     | neutral / opinionated                | neutral         |
+| Formality           | formal / casual                      | professional    |
+| Emotional Awareness | task-focused / emotionally attentive | task-focused    |
+
 
 Apply domain defaults where no explicit signal exists:
+
 - Therapy domain -> warm, emotionally attentive
 - Research domain -> neutral, formal
 - Creative domain -> lean playful, opinionated
 
 Personality conflict resolution:
+
 1. Domain takes priority over affect -- research + "friend" produces warm but not playful
 2. Explicit beats implicit -- stated preference overrides tone
 3. Clarifying question when ambiguity remains
@@ -392,6 +415,7 @@ Run BEFORE proceeding to the proposal. Use the interaction constraints already l
 For each hard constraint, evaluate the derived configuration. If violated, BLOCK generation. Explain the conflict to the user in their vocabulary. Ask a targeted resolution question. Re-derive affected dimensions with their answer.
 
 Hard constraints (these produce systems that will fail):
+
 - `atomic + navigation_depth == "2-tier" + volume > 100` -> navigational vertigo
 - `automation == "full" + no_platform_support` -> platform cannot support full automation
 - `processing == "heavy" + automation == "manual" + no_pipeline_skills` -> unsustainable
@@ -401,11 +425,13 @@ Example user-facing explanation: "You want atomic notes for detailed tracking, b
 **Pass 2 -- Soft constraint check:**
 
 For each soft constraint, evaluate the configuration:
+
 - If violated AND the weaker dimension was set by cascade (not explicit user signal) -> auto-adjust the cascaded value
 - If violated AND both dimensions were user-driven -> present warning with trade-off explanation
 - Record resolution in derivation rationale
 
 Soft constraints:
+
 - `atomic + processing == "light"` -> atomic notes need processing to recreate decomposed context
 - `schema == "dense" + automation == "convention"` -> maintenance burden
 - `linking == "explicit+implicit" + no_semantic_search` -> implicit linking needs search tool
@@ -417,6 +443,7 @@ Soft constraints:
 **Pass 3 -- Compensating mechanism check:**
 
 For remaining soft violations, check if compensating mechanisms exist:
+
 - Atomic + medium processing -> semantic search compensates for missing explicit links
 - Dense schema + convention -> good templates reduce manual validation burden
 - High volume + shallow nav -> strong semantic search enables discovery
@@ -429,18 +456,20 @@ Check the derived configuration against the domain vulnerability matrix below. F
 
 **Domain Vulnerability Matrix:**
 
-| Failure Mode | Research | Learning | Therapy | Relationships | Creative | PM | Companion |
-|-------------|----------|----------|---------|---------------|----------|-----|-----------|
-| Collector's Fallacy | HIGH | HIGH | medium | low | medium | medium | low |
-| Orphan Drift | HIGH | HIGH | medium | low | medium | low | low |
-| Link Rot | medium | medium | low | low | medium | low | low |
-| Schema Erosion | medium | medium | medium | medium | low | medium | low |
-| MOC Sprawl | HIGH | medium | low | low | medium | low | low |
-| Verbatim Risk | HIGH | HIGH | low | low | low | low | low |
-| Cognitive Outsourcing | HIGH | medium | HIGH | low | medium | low | medium |
-| Over-Automation | medium | medium | medium | low | low | medium | low |
-| Productivity Porn | HIGH | medium | low | low | medium | HIGH | low |
-| Temporal Staleness | low | medium | low | low | low | HIGH | low |
+
+| Failure Mode          | Research | Learning | Therapy | Relationships | Creative | PM     | Companion |
+| --------------------- | -------- | -------- | ------- | ------------- | -------- | ------ | --------- |
+| Collector's Fallacy   | HIGH     | HIGH     | medium  | low           | medium   | medium | low       |
+| Orphan Drift          | HIGH     | HIGH     | medium  | low           | medium   | low    | low       |
+| Link Rot              | medium   | medium   | low     | low           | medium   | low    | low       |
+| Schema Erosion        | medium   | medium   | medium  | medium        | low      | medium | low       |
+| MOC Sprawl            | HIGH     | medium   | low     | low           | medium   | low    | low       |
+| Verbatim Risk         | HIGH     | HIGH     | low     | low           | low      | low    | low       |
+| Cognitive Outsourcing | HIGH     | medium   | HIGH    | low           | medium   | low    | medium    |
+| Over-Automation       | medium   | medium   | medium  | low           | low      | medium | low       |
+| Productivity Porn     | HIGH     | medium   | low     | low           | medium   | HIGH   | low       |
+| Temporal Staleness    | low      | medium   | low     | low           | low      | HIGH   | low       |
+
 
 Include all HIGH-risk modes in the generated context file. Mention medium-risk modes briefly. Omit low-risk modes.
 
@@ -450,15 +479,17 @@ Read `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md` — but only the section
 
 All generated systems ship with full automation from day one. There are no tiers — every vault gets the complete skill set, all hooks, full processing pipeline, and session capture. The user opts DOWN from full if they want simpler operation (via ops/config.yaml).
 
-| Component | Generated For All | Notes |
-|-----------|-------------------|-------|
-| Context file | Always | Comprehensive, all sections |
-| 16 processing skills + 10 plugin commands | Always | Processing skills vocabulary-transformed with full quality gates |
-| All hooks | Always | Orient, capture, validate, commit |
-| Queue system | Always | ops/tasks.md + ops/queue/ |
-| Templates | Always | With _schema blocks |
-| Self space | If opted in | self/ or ops/ fallback |
-| Semantic search | If opted in | qmd setup |
+
+| Component                                 | Generated For All | Notes                                                            |
+| ----------------------------------------- | ----------------- | ---------------------------------------------------------------- |
+| Context file                              | Always            | Comprehensive, all sections                                      |
+| 16 processing skills + 10 plugin commands | Always            | Processing skills vocabulary-transformed with full quality gates |
+| All hooks                                 | Always            | Orient, capture, validate, commit                                |
+| Queue system                              | Always            | ops/tasks.md + ops/queue/                                        |
+| Templates                                 | Always            | With _schema blocks                                              |
+| Self space                                | If opted in       | self/ or ops/ fallback                                           |
+| Semantic search                           | If opted in       | qmd setup                                                        |
+
 
 **Init generates everything by default.** The context file includes all skill documentation. Processing depth and automation level can be adjusted post-init via ops/config.yaml.
 
@@ -598,6 +629,7 @@ engine_version: "1.0.0"
 ```
 
 This file serves three purposes:
+
 1. **Immediate:** Source of truth for all subsequent generation steps (context resilience)
 2. **Operational:** Enables `/architect` to reason about configuration drift
 3. **Evolution:** Enables `/reseed` to re-derive with updated understanding
@@ -725,6 +757,7 @@ Step 9: Write the file.
 **Structural Marker Protection:** Vocabulary transformation must NEVER touch structural markers. Field names in YAML (`description:`, `topics:`, `relevant_notes:`, `type:`, `status:`, `_schema:`) are structural and stay universal. Domain vocabulary applies to VALUES, prose content, and user-facing labels -- never to YAML field names or structural syntax.
 
 **CRITICAL quality requirements for the generated context file:**
+
 - Tell the agent to ALWAYS read self/ at session start
 - Explain prose-as-title with examples from the user's domain
 - Include domain-specific schema in the YAML section
@@ -1009,6 +1042,7 @@ generated_from: "arscontexta-{version}"
 ```
 
 **Quality gates:**
+
 - All skill references use domain-native names from the derivation conversation
 - All pages link back to [[manual]] via a footer or contextual reference
 - No wiki links to notes/ — manual is self-contained
@@ -1097,16 +1131,19 @@ research:
 ```
 
 **Processing depth levels:**
+
 - `deep` -- Full pipeline, fresh context per phase, maximum quality gates. Best for important sources and initial vault building.
 - `standard` -- Full pipeline, balanced attention. Regular processing, moderate volume.
 - `quick` -- Compressed pipeline, combine connect+verify phases. High volume catch-up, minor sources.
 
 **Pipeline chaining modes:**
+
 - `manual` -- Skills output "Next: /[skill] [target]" -- user decides.
 - `suggested` -- Skills output next step AND add to task queue -- user can skip.
 - `automatic` -- Skills complete → next phase runs immediately via orchestration.
 
 **Research tool detection:** During generation, check for available research tools:
+
 1. If Exa MCP tools available (`mcp__exa__deep_researcher_start`): primary = exa-deep-research
 2. If Exa web search available (`mcp__exa__web_search_exa`): fallback = exa-web-search
 3. Web search is always the last resort
@@ -1212,6 +1249,7 @@ personality:
 **Why this file exists separately from derivation.md:** derivation.md is the human-readable reasoning record (WHY each choice was made, conversation signals, confidence levels). derivation-manifest.md is the machine-readable operational manifest (WHAT the choices are). Skills read the manifest for quick vocabulary lookup without parsing the narrative derivation document.
 
 **Who updates this file:**
+
 - `/setup` generates it
 - `/reseed` regenerates it after re-derivation
 - `/architect` updates it when implementing approved changes
@@ -1226,16 +1264,19 @@ personality:
 Create domain-specific templates in `templates/`:
 
 **Always create:**
+
 - Primary note template (domain-named: `claim-note.md`, `reflection-note.md`, `decision-note.md`, etc.)
 - MOC template (domain-named: `topic-map.md`, `theme.md`, `decision-register.md`, etc.)
 
 **Conditionally create:**
+
 - Source capture template (if processing >= moderate)
 - Observation template (if self-evolution is active -- always)
 
 Each template MUST include a `_schema` block defining required fields, optional fields, enums, and constraints. The template IS the single source of truth for schema.
 
 Template structure:
+
 ```markdown
 ---
 _schema:
@@ -1289,31 +1330,34 @@ Generate ALL skills for the detected platform. Every vault ships with the comple
 
 The 17 skill sources to install:
 
-| Source Directory | Skill Name | Category | Tier |
-|-----------------|------------|----------|------|
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/learn/` | learn | Growth | A |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/tasks/` | tasks | Orchestration | A |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/reflect/` | reflect | Processing | B |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/reweave/` | reweave | Processing | B |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/stats/` | stats | Navigation | B |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/graph/` | graph | Navigation | B |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/refactor/` | refactor | Evolution | B |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/seed/` | seed | Orchestration | C |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/pipeline/` | pipeline | Orchestration | C |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/archive-batch/` | archive-batch | Orchestration | C |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/ralph/` | ralph | Orchestration | C |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/rethink/` | rethink | Evolution | C |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/next/` | next | Navigation | C |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/validate/` | validate | Processing | C |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/remember/` | remember | Growth | C |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/reduce/` | reduce | Processing | C |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/verify/` | verify | Processing | C |
+
+| Source Directory                                     | Skill Name    | Category      | Tier |
+| ---------------------------------------------------- | ------------- | ------------- | ---- |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/learn/`         | learn         | Growth        | A    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/tasks/`         | tasks         | Orchestration | A    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/reflect/`       | reflect       | Processing    | B    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/reweave/`       | reweave       | Processing    | B    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/stats/`         | stats         | Navigation    | B    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/graph/`         | graph         | Navigation    | B    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/refactor/`      | refactor      | Evolution     | B    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/seed/`          | seed          | Orchestration | C    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/pipeline/`      | pipeline      | Orchestration | C    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/archive-batch/` | archive-batch | Orchestration | C    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/ralph/`         | ralph         | Orchestration | C    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/rethink/`       | rethink       | Evolution     | C    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/next/`          | next          | Navigation    | C    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/validate/`      | validate      | Processing    | C    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/remember/`      | remember      | Growth        | C    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/reduce/`        | reduce        | Processing    | C    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/verify/`        | verify        | Processing    | C    |
+
 
 **For Claude Code:** Write each skill to `.claude/skills/[domain-skill-name]/SKILL.md`
 
 **CRITICAL:** Do NOT generate skills from scratch or improvise their content. Read the source template and transform it. The templates contain quality gates, anti-shortcut language, and handoff formats that must be preserved.
 
 Every generated skill must include:
+
 - Anti-shortcut language for quality-critical steps
 - Quality gates with explicit pass/fail criteria
 - Handoff block format for orchestrated execution
@@ -1322,6 +1366,7 @@ Every generated skill must include:
 ##### Tiered Generation Protocol
 
 Skills use two placeholder types:
+
 - `{vocabulary.xxx}` — resolves at **runtime** when the skill reads `ops/derivation-manifest.md`. Do NOT substitute these during setup.
 - `{DOMAIN:xxx}` — literal string templates that must be substituted at **setup time** using the vocabulary mapping.
 
@@ -1335,9 +1380,9 @@ These skill sources contain zero placeholders of either type.
 
 1. Read source `SKILL.md`
 2. Transform frontmatter only:
-   - `name:` → domain-native command name from vocabulary mapping
-   - `description:` → rewrite trigger phrases with domain vocabulary
-   - All other frontmatter fields (`model`, `context`, `allowed-tools`, etc.) → copy verbatim
+  - `name:` → domain-native command name from vocabulary mapping
+  - `description:` → rewrite trigger phrases with domain vocabulary
+  - All other frontmatter fields (`model`, `context`, `allowed-tools`, etc.) → copy verbatim
 3. Copy body verbatim — no scanning, no vocabulary reasoning
 4. Write to skills directory
 
@@ -1349,9 +1394,9 @@ These skill sources contain only `{vocabulary.xxx}` patterns in their body. Thos
 
 1. Read source `SKILL.md`
 2. Transform frontmatter only:
-   - `name:` → domain-native command name from vocabulary mapping
-   - `description:` → rewrite trigger phrases with domain vocabulary
-   - All other frontmatter fields (`model`, `context`, `allowed-tools`, etc.) → copy verbatim
+  - `name:` → domain-native command name from vocabulary mapping
+  - `description:` → rewrite trigger phrases with domain vocabulary
+  - All other frontmatter fields (`model`, `context`, `allowed-tools`, etc.) → copy verbatim
 3. Copy body verbatim — `{vocabulary.xxx}` patterns are **intentionally preserved**
 4. Write to skills directory
 
@@ -1365,9 +1410,9 @@ These skill sources contain `{DOMAIN:xxx}` patterns that must be literally subst
 
 1. Read source `SKILL.md`
 2. Transform frontmatter:
-   - `name:` → domain-native command name from vocabulary mapping
-   - `description:` → rewrite trigger phrases with domain vocabulary
-   - All other frontmatter fields (`model`, `context`, `allowed-tools`, etc.) → copy verbatim
+  - `name:` → domain-native command name from vocabulary mapping
+  - `description:` → rewrite trigger phrases with domain vocabulary
+  - All other frontmatter fields (`model`, `context`, `allowed-tools`, etc.) → copy verbatim
 3. Build DOMAIN substitution map from the vocabulary mapping in `ops/derivation.md` (e.g., `{DOMAIN:reduce}` → `/distill`, `{DOMAIN:notes}` → `claims`, `{DOMAIN:topic map}` → `MOC`)
 4. Mechanical string replace: substitute every `{DOMAIN:xxx}` → literal value in the body
 5. Do NOT touch `{vocabulary.xxx}` patterns — leave them for runtime resolution
@@ -1393,8 +1438,8 @@ These skills were created during initialization. Restart Claude Code to activate
 ...
 ```
 
-3. **SessionStart hook detects activation:** The session-orient.sh hook checks for this section. Once skills are confirmed loaded (appear in skill index), the section can be removed from the context file.
-4. **Phase 6 guidance:** If any skills were created, Phase 6 output includes: "Restart Claude Code now to activate all skills, then try /[domain:help] to see what's available."
+1. **SessionStart hook detects activation:** The session-orient.sh hook checks for this section. Once skills are confirmed loaded (appear in skill index), the section can be removed from the context file.
+2. **Phase 6 guidance:** If any skills were created, Phase 6 output includes: "Restart Claude Code now to activate all skills, then try /[domain:help] to see what's available."
 
 ---
 
@@ -1419,6 +1464,7 @@ Generated hooks MUST NOT overwrite existing user hooks. Before writing any hooks
 Session persistence is critical for continuity across /clear and session restarts.
 
 **Session data layout:**
+
 ```
 ops/
 ├── sessions/
@@ -1523,19 +1569,19 @@ Welcome to your [domain] system.
 
 1. Check if `qmd` is installed: `which qmd`
 2. If installed:
-   - Run `qmd init` in the generated vault root
-   - Configure or update the qmd collection for `{vocabulary.notes_collection}` so it points at the generated notes directory
-   - Create or merge `.mcp.json` in the vault root with this qmd MCP server contract:
-     - `{"mcpServers":{"qmd":{"command":"qmd","args":["mcp"],"autoapprove":["mcp__qmd__query","mcp__qmd__get","mcp__qmd__multi_get","mcp__qmd__status"]}}}`
-   - Run `qmd update && qmd embed` to build the initial index
+  - Run `qmd init` in the generated vault root
+  - Configure or update the qmd collection for `{vocabulary.notes_collection}` so it points at the generated notes directory
+  - Create or merge `.mcp.json` in the vault root with this qmd MCP server contract:
+    - `{"mcpServers":{"qmd":{"command":"qmd","args":["mcp"],"autoapprove":["mcp__qmd__query","mcp__qmd__get","mcp__qmd__multi_get","mcp__qmd__status"]}}}`
+  - Run `qmd update && qmd embed` to build the initial index
 3. If NOT installed:
-   - Add a "Next Steps" section to the Phase 6 summary telling the user to install qmd
-   - Include specific commands:
-     - `npm install -g @tobilu/qmd` (or `bun install -g @tobilu/qmd`)
-     - `qmd init`
-     - `qmd collection add . --name {vocabulary.notes_collection} --mask "**/*.md"`
-     - `qmd update && qmd embed`
-   - Include the `.mcp.json` qmd MCP contract with `autoapprove` entries in setup output so activation is deterministic once qmd is installed
+  - Add a "Next Steps" section to the Phase 6 summary telling the user to install qmd
+  - Include specific commands:
+    - `npm install -g @tobilu/qmd` (or `bun install -g @tobilu/qmd`)
+    - `qmd init`
+    - `qmd collection add . --name {vocabulary.notes_collection} --mask "**/*.md"`
+    - `qmd update && qmd embed`
+  - Include the `.mcp.json` qmd MCP contract with `autoapprove` entries in setup output so activation is deterministic once qmd is installed
 
 ---
 
@@ -1546,23 +1592,26 @@ Welcome to your [domain] system.
 After creating templates (Step 8), read the `_schema` blocks and generate domain-adapted analysis scripts in `ops/queries/` (or `scripts/queries/` for Claude Code).
 
 **Generation algorithm:**
+
 1. Read all `_schema.required` and `_schema.optional` fields from generated templates
 2. Identify queryable dimensions (fields with enum values, date fields, array fields with wiki links)
 3. For each meaningful 2-field combination, generate a ripgrep-based query script:
-   - **Cross-reference queries** -- notes sharing one field value but differing on another
-   - **Temporal queries** -- items older than N days in a given status
-   - **Density queries** -- fields with few entries (gap detection)
-   - **Backlink queries** -- what references a specific entity
+  - **Cross-reference queries** -- notes sharing one field value but differing on another
+  - **Temporal queries** -- items older than N days in a given status
+  - **Density queries** -- fields with few entries (gap detection)
+  - **Backlink queries** -- what references a specific entity
 4. Name each script descriptively
 
 Generate 3-5 scripts appropriate for the domain. Examples:
 
-| Domain | Generated Queries |
-|--------|-------------------|
-| Therapy | `trigger-mood-correlation.sh`, `recurring-triggers.sh`, `stale-patterns.sh` |
-| Research | `cross-methodology.sh`, `low-confidence-candidates.sh`, `source-diversity.sh` |
-| Relationships | `neglected-contacts.sh`, `topic-overlap.sh` |
-| PM | `overdue-items.sh`, `owner-workload.sh`, `priority-distribution.sh` |
+
+| Domain        | Generated Queries                                                             |
+| ------------- | ----------------------------------------------------------------------------- |
+| Therapy       | `trigger-mood-correlation.sh`, `recurring-triggers.sh`, `stale-patterns.sh`   |
+| Research      | `cross-methodology.sh`, `low-confidence-candidates.sh`, `source-diversity.sh` |
+| Relationships | `neglected-contacts.sh`, `topic-overlap.sh`                                   |
+| PM            | `overdue-items.sh`, `owner-workload.sh`, `priority-distribution.sh`           |
+
 
 Include a discovery section in the context file documenting what queries exist, when to run them, and what insights they surface.
 
@@ -1740,6 +1789,7 @@ Next steps:
 ### Conditional Next Steps
 
 Include these based on system state:
+
 - If qmd not installed and semantic-search is active: npm/bun install instructions + qmd init/update/embed + `.mcp.json` contract
 - If personality not enabled: mention `/arscontexta:architect` for future voice tuning once the vault has 50+ notes
 - If any kernel checks failed: specific remediation instructions
@@ -1751,21 +1801,13 @@ Include these based on system state:
 These apply to every generation run. Do not shortcut any of them.
 
 1. **Generated files feel cohesive, not assembled from blocks.** Block boundaries must be invisible in the output. The context file reads as if written from scratch for this specific domain.
-
 2. **Language matches the user's domain.** A therapy user never sees "claim" or "reduce." A PM user never sees "reflection" or "surface." The vocabulary test applies to every generated file.
-
 3. **self/identity.md feels genuine, not templated.** It reads like self-knowledge, not a character sheet.
-
 4. **Every generated file is immediately useful.** No placeholder content. No "TODO: fill this in." Every file serves a purpose from day one.
-
 5. **Dimension settings are justified.** The derivation rationale connects every choice to either a user signal or a research-backed default.
-
 6. **Kernel validation PASSES.** Zero failures on every generated system. If validation fails, fix the generation before presenting results.
-
 7. **Vocabulary consistency across ALL files.** The same universal term must ALWAYS map to the same domain term across all generated files. Run a mental consistency check: if you said "reflection" in the context file, you must say "reflection" in templates, skills, and self/ files.
-
 8. **Three-space boundaries are clean.** Agent self-knowledge in self/. Domain knowledge in notes/. Operational scaffolding in ops/. No conflation.
-
 9. **Discovery-first is enforced.** Every note, every MOC, every template is optimized for future agent discovery. Description quality, MOC membership, title composability.
-
 10. **Personality never contradicts methodology.** A playful agent still enforces quality gates. A warm agent still requires composability checks. Personality affects HOW methodology is communicated, never WHETHER it is enforced.
+
