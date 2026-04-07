@@ -1485,21 +1485,70 @@ Welcome to your [domain] system.
 
 **Only if semantic-search feature is active (linking includes implicit).**
 
+##### Step 12.0: Add `notes_collection` to vocabulary
+
+Before any qmd configuration, derive and register the collection name:
+
+1. Derive a default collection name from `{vocabulary.notes}` (e.g., if notes folder is "claims", default collection name is "claims")
+2. Run `qmd collections list` to check existing collections on the user's system
+3. If the derived name collides with an existing collection, choose an alternative (e.g., append the vault directory name: "claims-myproject") — report the conflict and chosen name in output
+4. Add `notes_collection` to **both** vocabulary stores:
+   - `ops/derivation.md` — add a row to the Vocabulary Mapping table: `| notes_collection | <chosen-name> | qmd collection |`
+   - `ops/derivation-manifest.md` — add `notes_collection: "<chosen-name>"` to the vocabulary section (after Level 6 / before extraction_categories)
+
+##### Step 12.1: Check qmd installation and version
+
 1. Check if `qmd` is installed: `which qmd`
-2. If installed:
-  - Run `qmd init` in the generated vault root
-  - Configure or update the qmd collection for `{vocabulary.notes_collection}` so it points at the generated notes directory
-  - Create or merge `.mcp.json` in the vault root with this qmd MCP server contract:
-    - `{"mcpServers":{"qmd":{"command":"qmd","args":["mcp"],"autoapprove":["mcp__qmd__query","mcp__qmd__get","mcp__qmd__multi_get","mcp__qmd__status"]}}}`
-  - Run `qmd update && qmd embed` to build the initial index
-3. If NOT installed:
-  - Add a "Next Steps" section to the Phase 6 summary telling the user to install qmd
-  - Include specific commands:
-    - `npm install -g @tobilu/qmd` (or `bun install -g @tobilu/qmd`)
-    - `qmd init`
-    - `qmd collection add . --name {vocabulary.notes_collection} --mask "**/*.md"`
-    - `qmd update && qmd embed`
-  - Include the `.mcp.json` qmd MCP contract with `autoapprove` entries in setup output so activation is deterministic once qmd is installed
+2. If installed, check version: `qmd -v` — must be >= 2
+3. If not installed or version < 2: skip to Step 12.4 (not-installed path)
+
+##### Step 12.2: Configure qmd (installed, version >= 2)
+
+1. Configure the qmd collection for `{vocabulary.notes_collection}` pointing at the generated notes directory:
+   - `qmd collection add . --name {vocabulary.notes_collection} --mask "**/*.md"`
+2. Create or merge `.mcp.json` in the vault root with the qmd MCP server contract:
+   - `{"mcpServers":{"qmd":{"command":"qmd","args":["mcp"],"autoapprove":["mcp__qmd__query","mcp__qmd__get","mcp__qmd__multi_get","mcp__qmd__status"]}}}`
+3. Run `qmd update && qmd embed` to build the initial index
+
+##### Step 12.3: SessionStart hook for qmd sync
+
+Generate a bash script `.claude/hooks/qmd-sync.sh`:
+
+```bash
+#!/usr/bin/env bash
+# qmd-sync.sh — keep semantic search index current on session start
+# No-ops gracefully if qmd is not installed
+
+if ! command -v qmd &>/dev/null; then
+  exit 0
+fi
+
+qmd update && qmd embed
+```
+
+Add a SessionStart hook entry to `.claude/settings.json` using the **additive merge protocol from Step 10** (do not overwrite existing hooks). Append this matcher group to the existing `hooks.SessionStart` array:
+
+```json
+{
+  "hooks": [
+    {
+      "type": "command",
+      "command": "bash .claude/hooks/qmd-sync.sh"
+    }
+  ]
+}
+```
+
+##### Step 12.4: Not-installed path
+
+If qmd is not installed or version < 2:
+
+- Add a "Next Steps" section to the Phase 6 summary with install instructions:
+  - `npm install -g @tobilu/qmd` (or `bun install -g @tobilu/qmd`)
+  - `qmd collection add . --name {vocabulary.notes_collection} --mask "**/*.md"`
+  - `qmd update && qmd embed`
+- Include the `.mcp.json` qmd MCP contract with `autoapprove` entries so activation is deterministic once qmd is installed
+- The hook script (`qmd-sync.sh`) is already generated and will activate automatically once qmd is installed
 
 ---
 
@@ -1697,7 +1746,7 @@ Next steps:
   1. Quit and restart Claude Code (required — skills won't work until you do)
   2. Read your CLAUDE.md -- it's your complete methodology
   3. Try /arscontexta:help to see all available commands
-  4. [If qmd not installed: "Install qmd for semantic search: npm install -g @tobilu/qmd (or bun install -g @tobilu/qmd), then run qmd init, qmd update, qmd embed"]
+  4. [If qmd not installed: "Install qmd for semantic search: npm install -g @tobilu/qmd (or bun install -g @tobilu/qmd), then run qmd collection add, qmd update, qmd embed"]
   5. Try /arscontexta:tutorial for a guided walkthrough
 
 ```
@@ -1706,7 +1755,7 @@ Next steps:
 
 Include these based on system state:
 
-- If qmd not installed and semantic-search is active: npm/bun install instructions + qmd init/update/embed + `.mcp.json` contract
+- If qmd not installed and semantic-search is active: npm/bun install instructions + qmd collection add/update/embed + `.mcp.json` contract
 - If any kernel checks failed: specific remediation instructions
 
 ---
