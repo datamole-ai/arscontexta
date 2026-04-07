@@ -418,14 +418,14 @@ Read `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md` — but only the section
 
 ### Step 3g: Full Automation Configuration
 
-All generated systems ship with full automation from day one. There are no tiers — every vault gets the complete skill set, all hooks, full processing pipeline, and session capture. The user opts DOWN from full if they want simpler operation (via ops/config.yaml).
+All generated systems ship with full automation from day one. There are no tiers — every vault gets the complete skill set, full processing pipeline, and session capture. Core hooks (orient, validate, commit) are provided by the arscontexta plugin globally. The user opts DOWN from full if they want simpler operation (via ops/config.yaml).
 
 
 | Component                                 | Generated For All | Notes                                                            |
 | ----------------------------------------- | ----------------- | ---------------------------------------------------------------- |
 | Context file                              | Always            | Comprehensive, all sections                                      |
 | 16 processing skills + 10 plugin commands | Always            | Processing skills vocabulary-transformed with full quality gates |
-| All hooks                                 | Always            | Orient, capture, validate, commit                                |
+| Plugin hooks (orient, validate, commit)   | Via plugin        | Provided by arscontexta plugin globally; vault generates only qmd-sync if semantic search active |
 | Queue system                              | Always            | ops/tasks.md + ops/queue/                                        |
 | Templates                                 | Always            | With _schema blocks                                              |
 | Self space                                | If opted in       | self/ or ops/ fallback                                           |
@@ -1361,99 +1361,7 @@ These skills were created during initialization. Restart Claude Code to activate
 
 ---
 
-#### Step 10: Hooks
-
-**Re-read `ops/derivation.md`** for automation level and vocabulary mapping.
-
-##### Additive Hook Merging Protocol
-
-Generated hooks MUST NOT overwrite existing user hooks. Before writing any hooks:
-
-1. Read existing `.claude/settings.json` (if it exists)
-2. Parse existing hook matcher groups for each event type (hooks.SessionStart, hooks.PostToolUse, hooks.Stop, etc.)
-3. ADD new matcher groups to the event arrays -- never replace existing entries
-4. If a matcher group with the same `command` path already exists for that event, SKIP it (warn in output, don't overwrite)
-5. Write the merged result back to `.claude/settings.json`
-
-**Validation criterion:** After hook generation, all pre-existing hooks are still present and functional.
-
-##### Session Persistence Architecture
-
-Session persistence is critical for continuity across /clear and session restarts.
-
-**Session data layout:**
-
-```
-ops/
-├── sessions/
-│   ├── current.json          # Active session state (updated by hooks)
-│   └── YYYYMMDD-HHMMSS.json  # Archived session records
-├── goals.md                  # Persistent working memory (survives /clear)
-└── config.yaml               # Live configuration
-```
-
-`current.json` tracks: session_id, start_time, notes_created (array), notes_modified (array), discoveries (array), last_activity timestamp.
-
-**Session ID derivation:** Use `CLAUDE_CONVERSATION_ID` environment variable (available in Claude Code hook environment). Fallback to timestamp: `$(date +%Y%m%d-%H%M%S)`.
-
-**Session restore on /clear:** When a user runs /clear, SessionStart fires for the new conversation. The hook detects existing session data (goals.md, ops/ state), re-reads everything, and provides continuity despite context reset.
-
-##### Full Hook Suite (generated for all systems)
-
-For Claude Code, add to `.claude/settings.json` (using additive merge).
-
-**Hook format:** Claude Code uses a nested matcher-group structure. Each event type contains an array of matcher groups, each with an optional `matcher` (regex string filtering when the hook fires) and a `hooks` array of handler objects. Events like `SessionStart` and `Stop` don't need matchers — omit the field. Tool events like `PostToolUse` use the tool name as matcher (e.g., `"Write"`, `"Edit|Write"`). Timeout is in seconds.
-
-```json
-{
-  "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash .claude/hooks/session-orient.sh"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash .claude/hooks/validate-note.sh"
-          },
-          {
-            "type": "command",
-            "command": "bash .claude/hooks/auto-commit.sh",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash .claude/hooks/session-capture.sh"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-**Critical:** The old flat format (`"type": "command"` at the matcher level) is rejected by Claude Code. Each event must use the nested structure: `"EventName": [{ "matcher": "...", "hooks": [{ "type": "command", "command": "..." }] }]`.
-
-Generate all four hook scripts: session-orient.sh, session-capture.sh, validate-note.sh, auto-commit.sh.
-
----
-
-#### Step 11: Hub MOC
+#### Step 10: Hub MOC
 
 Create the vault entry point at `[domain:notes]/index.md`:
 
@@ -1481,11 +1389,11 @@ Welcome to your [domain] system.
 
 ---
 
-#### Step 12: Semantic Search Setup (conditional)
+#### Step 11: Semantic Search Setup (conditional)
 
 **Only if semantic-search feature is active (linking includes implicit).**
 
-##### Step 12.0: Add `notes_collection` to vocabulary
+##### Step 11.0: Add `notes_collection` to vocabulary
 
 Before any qmd configuration, derive and register the collection name:
 
@@ -1496,13 +1404,13 @@ Before any qmd configuration, derive and register the collection name:
    - `ops/derivation.md` — add a row to the Vocabulary Mapping table: `| notes_collection | <chosen-name> | qmd collection |`
    - `ops/derivation-manifest.md` — add `notes_collection: "<chosen-name>"` to the vocabulary section (after Level 6 / before extraction_categories)
 
-##### Step 12.1: Check qmd installation and version
+##### Step 11.1: Check qmd installation and version
 
 1. Check if `qmd` is installed: `which qmd`
 2. If installed, check version: `qmd -v` — must be >= 2
-3. If not installed or version < 2: skip to Step 12.4 (not-installed path)
+3. If not installed or version < 2: skip to Step 11.4 (not-installed path)
 
-##### Step 12.2: Configure qmd (installed, version >= 2)
+##### Step 11.2: Configure qmd (installed, version >= 2)
 
 1. Configure the qmd collection for `{vocabulary.notes_collection}` pointing at the generated notes directory:
    - `qmd collection add . --name {vocabulary.notes_collection} --mask "**/*.md"`
@@ -1510,7 +1418,7 @@ Before any qmd configuration, derive and register the collection name:
    - `{"mcpServers":{"qmd":{"command":"qmd","args":["mcp"],"autoapprove":["mcp__qmd__query","mcp__qmd__get","mcp__qmd__multi_get","mcp__qmd__status"]}}}`
 3. Run `qmd update && qmd embed` to build the initial index
 
-##### Step 12.3: SessionStart hook for qmd sync
+##### Step 11.3: SessionStart hook for qmd sync
 
 Generate a bash script `.claude/hooks/qmd-sync.sh`:
 
@@ -1526,7 +1434,14 @@ fi
 qmd update && qmd embed
 ```
 
-Add a SessionStart hook entry to `.claude/settings.json` using the **additive merge protocol from Step 10** (do not overwrite existing hooks). Append this matcher group to the existing `hooks.SessionStart` array:
+Add a SessionStart hook entry to `.claude/settings.json` using additive merge:
+
+1. Read existing `.claude/settings.json` (if it exists)
+2. If `hooks.SessionStart` array exists, APPEND this matcher group — do not replace existing entries
+3. If a matcher group with the same `command` path already exists, SKIP it
+4. Write the merged result back
+
+Append this matcher group to the `hooks.SessionStart` array:
 
 ```json
 {
@@ -1539,7 +1454,7 @@ Add a SessionStart hook entry to `.claude/settings.json` using the **additive me
 }
 ```
 
-##### Step 12.4: Not-installed path
+##### Step 11.4: Not-installed path
 
 If qmd is not installed or version < 2:
 
@@ -1552,7 +1467,7 @@ If qmd is not installed or version < 2:
 
 ---
 
-#### Step 13: Graph Query Scripts (derived from template schemas)
+#### Step 12: Graph Query Scripts (derived from template schemas)
 
 **Re-read `ops/derivation.md`** and the generated templates for schema fields.
 
@@ -1584,7 +1499,7 @@ Include a discovery section in the context file documenting what queries exist, 
 
 ---
 
-#### Step 14: ops/reminders.md
+#### Step 13: ops/reminders.md
 
 **Always generated.** Create an empty reminders file with format header:
 
@@ -1598,7 +1513,7 @@ Include a discovery section in the context file documenting what queries exist, 
 
 ---
 
-#### Step 15: Vault Marker
+#### Step 14: Vault Marker
 
 Create `.arscontexta` in the vault root. This marker ensures plugin-level hooks only run inside vaults, even when the plugin is installed globally.
 
@@ -1610,7 +1525,7 @@ in your vault, even if you installed the plugin globally
 
 ---
 
-#### Step 16: Git Initialization
+#### Step 15: Git Initialization
 
 ```bash
 git init
@@ -1642,7 +1557,7 @@ Run all 15 primitive checks against the generated system. Use `${CLAUDE_PLUGIN_R
 12. **operational-learning-loop** -- ops/observations/ and ops/tensions/ exist, review trigger documented in context file, /{DOMAIN:rethink} command exists?
 13. **task-stack** -- ops/tasks.md exists? Queue file (ops/queue/queue.json) exists with schema_version >= 3 and maintenance_conditions section? Context file references both in session-orient phase? /{DOMAIN:next} command exists with condition reconciliation?
 14. **methodology-folder** -- ops/methodology/ exists with methodology.md MOC? At least one derivation-rationale note exists? Context file references ops/methodology/ for meta-skill context?
-15. **session-capture** -- ops/sessions/ directory exists? Session-end hook template installed? Condition-based mining trigger exists for unprocessed sessions?
+15. **session-capture** -- ops/sessions/ directory exists? Plugin hook handles session tracking (no vault-local hook needed)? Condition-based mining trigger exists for unprocessed sessions?
 
 Report results: pass/fail per primitive with specific failures listed.
 

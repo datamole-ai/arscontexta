@@ -302,10 +302,9 @@ Create `.claude/skills/skill-name/SKILL.md` with:
 - Quality gates and output format
 
 ### Building Hooks
-Create `.claude/hooks/` scripts that trigger on events:
-- SessionStart: inject context at session start
-- PostToolUse (Write): validate notes after creation
-- Stop: persist session state before exit
+Core hooks (orient, validate, commit) are provided by the arscontexta plugin. To add custom vault-level hooks, create scripts in `.claude/hooks/` and register them in `.claude/settings.json`:
+- Use additive merge — read existing settings, append to event arrays, never overwrite
+- See the qmd-sync hook (if present) as an example
 
 ### Extending Schema
 Add domain-specific YAML fields to your templates. The base fields (description, type, created) are universal. Add fields that make YOUR notes queryable for YOUR use case.
