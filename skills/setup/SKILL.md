@@ -1,9 +1,8 @@
 ---
 name: setup
-description: Scaffold a complete knowledge system. Detects platform, conducts conversation, derives configuration, generates everything. Validates against 15 kernel primitives. Triggers on "/setup", "/setup --advanced", "set up my knowledge system", "create my vault".
+description: Scaffold a complete knowledge system. Conducts conversation, derives configuration, generates everything. Validates against 15 kernel primitives. Triggers on "/setup", "set up my knowledge system", "create my vault".
 model: inherit
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
-argument-hint: "[--advanced for upfront dimension configuration]"
 ---
 
 You are the Ars Contexta derivation engine. You are about to create someone's cognitive architecture. This is the single most important interaction in the product. Get it right and they have a thinking partner for years. Get it wrong and they have a folder of templates they will abandon in a week.
@@ -23,7 +22,6 @@ Read these files to understand the methodology and available components. Read th
 **Deferred references (read at specific steps, not upfront):**
 
 - `${CLAUDE_PLUGIN_ROOT}/reference/use-case-presets.md` -- read in Step 3c (only the matched preset section)
-- `${CLAUDE_PLUGIN_ROOT}/reference/personality-layer.md` -- read in Step 3d (only if personality signals detected)
 - `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md` -- read in Step 3f (only HIGH-risk failure mode sections identified by the inlined matrix)
 - `${CLAUDE_PLUGIN_ROOT}/reference/three-spaces.md` -- not needed; folder structure is fully specified in Step 2
 - `${CLAUDE_PLUGIN_ROOT}/reference/conversation-patterns.md` -- consult only if derivation is ambiguous and worked examples would help
@@ -35,31 +33,7 @@ Read these files to understand the methodology and available components. Read th
 
 ---
 
-## PHASE 1: Platform Detection
-
-Automated. No user interaction needed.
-
-Verify Claude Code environment:
-
-```
-Check filesystem:
-  .claude/ directory exists         -> platform = "claude-code"
-  Neither                           -> platform = "minimal"
-  Existing .md notes detected       -> note for proposal (V1: acknowledge and proceed fresh)
-```
-
-Record the platform tier in working memory. It controls which artifacts get generated:
-
-
-| Platform    | Context File | Skills Location | Hooks          | Automation Ceiling |
-| ----------- | ------------ | --------------- | -------------- | ------------------ |
-| Claude Code | CLAUDE.md    | .claude/skills/ | .claude/hooks/ | Full               |
-| Minimal     | README.md    | (none)          | (none)         | Convention only    |
-
-
----
-
-## PHASE 1.5: Product Onboarding
+## PHASE 1: Product Onboarding
 
 Before the conversation begins, present three prescribed screens. This content is prescribed, not improvised. Output all three screens as clean text before asking the user any questions.
 
@@ -148,7 +122,7 @@ After presenting all three screens, transition seamlessly to Phase 2. The user m
 
 ---
 
-## PHASE 2: Understanding (2-4 conversation turns)
+## PHASE 2: Understanding (2-6 conversation turns)
 
 ### The Opening Question
 
@@ -175,9 +149,7 @@ Dimensions default to opinionated best practices and are NOT interrogated during
 | Automation   | Full                |
 
 
-The conversation focuses on understanding the user's domain and needs. Users adjust dimensions post-init via `ops/config.yaml` or by running `/setup --advanced` for upfront configuration.
-
-**If running in --advanced mode:** After the opening conversation, present the 8 dimensions with recommended positions based on extracted signals. Allow the user to adjust each dimension. Then proceed with the adjusted configuration.
+The conversation focuses on understanding the user's domain and needs. Users adjust dimensions post-init via `ops/config.yaml`.
 
 ### Signal Extraction
 
@@ -210,19 +182,16 @@ As the user talks, passively extract signals for dimensions. Do not ask about di
 | "Batch process research"                 | Heavy processing                                | High       |
 | "I read a lot and forget"                | Moderate granularity, light processing          | Medium     |
 | "Small precise insights"                 | Atomic granularity                              | High       |
-| "Keep it professional"                   | Formal personality                              | High       |
-| "Feel like a friend"                     | Warm/playful personality                        | High       |
 | "Multiple projects"                      | Multi-domain potential                          | High       |
 | "Track people"                           | Entity tracking module                          | High       |
-| "Notice patterns I miss"                 | Emotionally attentive personality               | Medium     |
 | "I want rigor"                           | Heavy processing, dense schema                  | High       |
 | "Low ceremony"                           | Light processing, minimal schema                | High       |
 | "20+ ideas daily"                        | High volume, pipeline needed                    | High       |
 | "Personal journal"                       | Single agent, light processing                  | Medium     |
 | "Academic research"                      | Atomic, heavy, semantic search                  | High       |
-| "Therapy sessions"                       | Moderate, warm personality, emotional awareness | High       |
+| "Therapy sessions"                       | Moderate processing                             | High       |
 | "Project decisions"                      | Decision-centric, temporal tracking             | High       |
-| "Creative worldbuilding"                 | Moderate, heavy linking, playful personality    | Medium     |
+| "Creative worldbuilding"                 | Moderate, heavy linking                         | Medium     |
 | "Book notes"                             | Moderate granularity, light processing          | Medium     |
 | "Track family/friends"                   | Entity MOCs, emotional context schema           | High       |
 | "I revisit old notes often"              | Heavy maintenance, reweaving needed             | Medium     |
@@ -299,7 +268,7 @@ After each turn, evaluate which completeness condition is met:
 
 1. **All resolved:** All 8 dimensions have cumulative confidence >= 1.5 from signals. Proceed to Phase 3 immediately.
 2. **Mostly resolved:** At least 6 dimensions resolved, remaining 2 tentative (confidence >= 0.6). Proceed with cascade filling tentative dimensions.
-3. **Turn limit:** After 4 conversation turns, proceed regardless. Unresolved dimensions use the closest matching use-case preset defaults. Tentative dimensions use cascade from resolved dimensions.
+3. **Turn limit:** After 6 conversation turns, proceed regardless. Unresolved dimensions use the closest matching use-case preset defaults. Tentative dimensions use cascade from resolved dimensions.
 4. **User impatience:** User signals desire to proceed ("just set it up," "whatever you think is best"). Use domain defaults for all unresolved dimensions. Log that defaults were used in derivation rationale.
 
 ### Conflict Resolution Decision Tree
@@ -375,36 +344,9 @@ For novel domains (no preset scores above 2.0 affinity):
 3. For each term, use the preset with higher overlap for that specific concept
 4. Flag all blended terms for user confirmation in the proposal
 
-### Step 3d: Personality Derivation
+### Step 3d: Personality
 
-**Default: neutral-helpful.** Personality is opt-in. The init wizard does NOT ask about personality dimensions unless conversation signals clearly indicate personality preferences.
-
-If personality signals were detected during conversation, read `${CLAUDE_PLUGIN_ROOT}/reference/personality-layer.md` for the full derivation rules. If no personality signals exist (the common case), skip this read — the default neutral-helpful requires no reference file.
-
-Map personality signals to four dimensions:
-
-
-| Dimension           | Poles                                | Default         |
-| ------------------- | ------------------------------------ | --------------- |
-| Warmth              | clinical / warm / playful            | neutral-helpful |
-| Opinionatedness     | neutral / opinionated                | neutral         |
-| Formality           | formal / casual                      | professional    |
-| Emotional Awareness | task-focused / emotionally attentive | task-focused    |
-
-
-Apply domain defaults where no explicit signal exists:
-
-- Therapy domain -> warm, emotionally attentive
-- Research domain -> neutral, formal
-- Creative domain -> lean playful, opinionated
-
-Personality conflict resolution:
-
-1. Domain takes priority over affect -- research + "friend" produces warm but not playful
-2. Explicit beats implicit -- stated preference overrides tone
-3. Clarifying question when ambiguity remains
-
-If personality is derived (strong signals exist), set `personality.enabled: true` in the generated config. If no signals, leave `personality.enabled: false` (neutral-helpful default).
+Personality is warm, neutral, helpful. No derivation needed. This is hardcoded — not a dimension to derive from conversation.
 
 ### Step 3e: Coherence Validation (Three-Pass Check)
 
@@ -417,7 +359,6 @@ For each hard constraint, evaluate the derived configuration. If violated, BLOCK
 Hard constraints (these produce systems that will fail):
 
 - `atomic + navigation_depth == "2-tier" + volume > 100` -> navigational vertigo
-- `automation == "full" + no_platform_support` -> platform cannot support full automation
 - `processing == "heavy" + automation == "manual" + no_pipeline_skills` -> unsustainable
 
 Example user-facing explanation: "You want atomic notes for detailed tracking, but at the volume you described, that needs deeper navigation than a simple index. Should I add topic-level organization?"
@@ -506,9 +447,8 @@ Structure the proposal as:
 3. How their notes work -- with a specific example from their domain using their vocabulary
 4. How processing works, described in their words
 5. How self-knowledge works — "Your system maintains its own methodology in ops/methodology/. Use /ask to query the 249-note methodology knowledge base backing your design, or browse ops/methodology/ directly."
-6. Agent personality description (if personality was derived; otherwise skip)
-7. What was intentionally excluded and why
-8. Any high-risk failure modes flagged
+6. What was intentionally excluded and why
+7. Any high-risk failure modes flagged
 
 End with: **"Would you like me to adjust anything before I create this?"**
 
@@ -571,15 +511,7 @@ engine_version: "1.0.0"
 | Navigation | [value] | "[signal]" | [confidence] |
 | Maintenance | [value] | "[signal]" | [confidence] |
 | Schema | [value] | "[signal]" | [confidence] |
-| Automation | [value] | "[signal + platform tier]" | [confidence] |
-
-## Personality Dimensions
-| Dimension | Position | Signal |
-|-----------|----------|--------|
-| Warmth | [clinical/warm/playful] | [signal or "default"] |
-| Opinionatedness | [neutral/opinionated] | [signal or "default"] |
-| Formality | [formal/casual] | [signal or "default"] |
-| Emotional Awareness | [task-focused/attentive] | [signal or "default"] |
+| Automation | [value] | "[signal]" | [confidence] |
 
 ## Vocabulary Mapping
 | Universal Term | Domain Term | Category |
@@ -597,10 +529,9 @@ engine_version: "1.0.0"
 | topics | [domain term] | schema field |
 | [additional terms] | [domain terms] | [category] |
 
-## Platform
-- Tier: [Claude Code / Minimal]
-- Automation level: [full / convention / manual]
-- Automation: [full (default) / convention / manual]
+## Automation
+- Platform: Claude Code
+- Level: [full (default) / convention / manual]
 
 ## Active Feature Blocks
 [Checked = included, unchecked = excluded with reason]
@@ -671,17 +602,16 @@ The inbox folder is always generated. It provides zero-friction capture regardle
 
 #### Step 3: Context File
 
-**Re-read `ops/derivation.md`** at the start of this step for vocabulary mapping, personality dimensions, active block list, platform tier, and generation parameters.
+**Re-read `ops/derivation.md`** at the start of this step for vocabulary mapping, active block list, and generation parameters.
 
 This is the most critical generation step. The context file IS the system.
 
-**For Claude Code:** Generate `CLAUDE.md` using `${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md` template.
-**For Minimal:** Generate `README.md` as self-contained conventions document.
+Generate `CLAUDE.md` using `${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md` template.
 
 **Context file composition algorithm:**
 
 ```
-Step 1: Read generator template for the platform.
+Step 1: Read generator template.
 
 Step 2: Select feature blocks from ${CLAUDE_PLUGIN_ROOT}/generators/features/.
   Always-included blocks (11): wiki-links, processing-pipeline, schema, maintenance, self-evolution, methodology-knowledge, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis
@@ -694,7 +624,7 @@ Step 3: Process blocks SEQUENTIALLY. For each selected block:
   d. Release the block from context before reading the next
 
 Step 4: Compose in canonical block order:
-  1. Philosophy (derived from personality + domain)
+  1. Philosophy (derived from domain)
   2. session-rhythm -- Orient, work, persist, session capture
   3. atomic-notes -- Note design principles (if active)
   4. wiki-links -- Link philosophy and patterns
@@ -705,7 +635,6 @@ Step 4: Compose in canonical block order:
   9. maintenance -- Health checks and reweaving
   10. self-evolution -- System evolution approach
   10b. methodology-knowledge -- Querying and consulting self-knowledge
-  11. personality -- Voice and identity (if active)
   12. templates -- Template usage
   13. multi-domain -- Cross-domain rules (if active)
   14. self-space -- Agent identity and memory (if active)
@@ -737,7 +666,7 @@ Step 6: Add required sections that are NOT from feature blocks:
 Step 7: Coherence verification.
   - [ ] No orphaned references to excluded blocks
   - [ ] Vocabulary consistent (same universal term -> same domain term everywhere)
-  - [ ] Personality tone consistent across all sections
+  - [ ] Warm, neutral, helpful tone consistent across all sections
   - [ ] All mentioned skills exist in the generated skills (or are documented as dormant tiers)
   - [ ] All mentioned file paths exist in the generated folder structure
   - [ ] All mentioned templates exist in the generated templates
@@ -770,11 +699,9 @@ Step 9: Write the file.
 
 #### Step 4: self/identity.md
 
-**Re-read `ops/derivation.md`** for personality dimensions, vocabulary mapping, and use case context. If personality is derived (personality.enabled = true), also re-read `${CLAUDE_PLUGIN_ROOT}/reference/personality-layer.md` for the personality x artifact transformation matrix.
+**Re-read `ops/derivation.md`** for vocabulary mapping and use case context.
 
-Generate identity.md with personality expressed as natural self-description, not configuration syntax.
-
-If personality is derived (personality.enabled = true), use the personality x artifact transformation matrix from the personality-layer reference. If neutral-helpful (default), write clear, direct, professional self-description.
+Generate identity.md as a warm, neutral, helpful self-description — clear, direct, professional tone.
 
 ```markdown
 ---
@@ -784,17 +711,17 @@ type: moc
 
 # identity
 
-[Adapted to use case and personality. Examples:
+[Adapted to use case. Examples:
 - Research: "I am a research partner building understanding about..."
-- Therapy (warm): "I pay attention to what you write about your sessions..."
-- PM (neutral): "I track decisions across your projects..."
-- Companion (warm): "I remember the things that matter about your life..."]
+- Therapy: "I pay attention to what you write about your sessions..."
+- PM: "I track decisions across your projects..."
+- Companion: "I remember the things that matter about your life..."]
 
 ## Core Values
-- [Relevant values for the use case, derived from personality + domain]
+- [Relevant values for the use case, derived from domain]
 
 ## Working Style
-- [How the agent approaches its work, reflecting personality dimensions]
+- [How the agent approaches its work — warm, neutral, helpful tone]
 
 ---
 
@@ -878,7 +805,7 @@ status: active
 ---
 # derivation rationale for {domain}
 
-{Extract from ops/derivation.md the key dimension choices and the conversation signals that drove them. Include: platform tier, automation level, active feature blocks, and coherence validation results. Write in prose format, not raw transcript — synthesize the reasoning into a readable narrative that future meta-skills can consult.}
+{Extract from ops/derivation.md the key dimension choices and the conversation signals that drove them. Include: automation level, active feature blocks, and coherence validation results. Write in prose format, not raw transcript — synthesize the reasoning into a readable narrative that future meta-skills can consult.}
 
 ---
 
@@ -1120,9 +1047,6 @@ processing:
 
 provenance: [full | minimal | off]
 
-personality:
-  enabled: [true | false]
-
 research:
   primary: [exa-deep-research | web-search]    # best available research tool
   fallback: [exa-web-search | web-search]      # fallback if primary unavailable
@@ -1154,7 +1078,7 @@ research:
 
 #### Step 7b: ops/derivation-manifest.md (Runtime Vocabulary for Inherited Skills)
 
-**Re-read `ops/derivation.md`** for all dimension positions, vocabulary mapping, active blocks, and platform information.
+**Re-read `ops/derivation.md`** for all dimension positions, vocabulary mapping, and active blocks.
 
 Generate the machine-readable derivation manifest. This is the KEY file that enables runtime vocabulary transformation for all inherited processing skills (/reduce, /reflect, /reweave, /verify, /validate). Skills read this file at invocation time to apply domain-specific vocabulary without needing domain-specific skill copies.
 
@@ -1165,7 +1089,6 @@ Generate the machine-readable derivation manifest. This is the KEY file that ena
 engine_version: "0.2.0"
 research_snapshot: "2026-02-10"
 generated_at: [ISO 8601 timestamp]
-platform: [claude-code | minimal]
 kernel_version: "1.0"
 
 dimensions:
@@ -1230,7 +1153,7 @@ vocabulary:
 
 platform_hints:
   context: [fork | single]
-  allowed_tools: [tool list based on platform tier]
+  allowed_tools: [Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion]
   semantic_search_tool: [mcp__qmd__query | null]
   semantic_search_autoapprove:
     - mcp__qmd__query
@@ -1238,11 +1161,6 @@ platform_hints:
     - mcp__qmd__multi_get
     - mcp__qmd__status
 
-personality:
-  warmth: [clinical | warm | playful]
-  opinionatedness: [neutral | opinionated]
-  formality: [formal | casual]
-  emotional_awareness: [task-focused | attentive]
 ---
 ```
 
@@ -1322,9 +1240,9 @@ Apply vocabulary transformation to the template: field labels in comments and ex
 
 #### Step 9: Skills (tiered generation, full suite)
 
-**Re-read `ops/derivation.md`** for processing level, platform, vocabulary mapping, and skills list.
+**Re-read `ops/derivation.md`** for processing level, vocabulary mapping, and skills list.
 
-Generate ALL skills for the detected platform. Every vault ships with the complete skill set from day one. Full automation is the default — users opt down, never up.
+Generate ALL skills. Every vault ships with the complete skill set from day one. Full automation is the default — users opt down, never up.
 
 **Skill source templates live at `${CLAUDE_PLUGIN_ROOT}/skill-sources/`.** Each subdirectory contains a `SKILL.md` template that must be read and written to the user's skills directory.
 
@@ -1443,9 +1361,9 @@ These skills were created during initialization. Restart Claude Code to activate
 
 ---
 
-#### Step 10: Hooks (platform-appropriate)
+#### Step 10: Hooks
 
-**Re-read `ops/derivation.md`** for automation level, platform tier, and vocabulary mapping.
+**Re-read `ops/derivation.md`** for automation level and vocabulary mapping.
 
 ##### Additive Hook Merging Protocol
 
@@ -1754,7 +1672,6 @@ ars contexta
 Your [domain] system is ready.
 
 Configuration:
-  Platform:        [Claude Code / Minimal]
   Automation: Full — all capabilities from day one
   [Key dimension highlights relevant to the user]
 
@@ -1781,8 +1698,7 @@ Next steps:
   2. Read your CLAUDE.md -- it's your complete methodology
   3. Try /arscontexta:help to see all available commands
   4. [If qmd not installed: "Install qmd for semantic search: npm install -g @tobilu/qmd (or bun install -g @tobilu/qmd), then run qmd init, qmd update, qmd embed"]
-  5. [If personality not enabled: "Run /arscontexta:architect later to tune the agent's voice"]
-  6. Try /arscontexta:tutorial for a guided walkthrough
+  5. Try /arscontexta:tutorial for a guided walkthrough
 
 ```
 
@@ -1791,7 +1707,6 @@ Next steps:
 Include these based on system state:
 
 - If qmd not installed and semantic-search is active: npm/bun install instructions + qmd init/update/embed + `.mcp.json` contract
-- If personality not enabled: mention `/arscontexta:architect` for future voice tuning once the vault has 50+ notes
 - If any kernel checks failed: specific remediation instructions
 
 ---
@@ -1809,5 +1724,5 @@ These apply to every generation run. Do not shortcut any of them.
 7. **Vocabulary consistency across ALL files.** The same universal term must ALWAYS map to the same domain term across all generated files. Run a mental consistency check: if you said "reflection" in the context file, you must say "reflection" in templates, skills, and self/ files.
 8. **Three-space boundaries are clean.** Agent self-knowledge in self/. Domain knowledge in notes/. Operational scaffolding in ops/. No conflation.
 9. **Discovery-first is enforced.** Every note, every MOC, every template is optimized for future agent discovery. Description quality, MOC membership, title composability.
-10. **Personality never contradicts methodology.** A playful agent still enforces quality gates. A warm agent still requires composability checks. Personality affects HOW methodology is communicated, never WHETHER it is enforced.
+10. **Tone never contradicts methodology.** The agent's warm, neutral, helpful tone affects HOW methodology is communicated, never WHETHER it is enforced. Quality gates and composability checks apply regardless.
 
