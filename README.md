@@ -9,20 +9,18 @@ and note templates -- tailored to your domain and backed by 249 research claims.
 
 No templates. No configuration. Just conversation.
 
-**v0.8.0** · Claude Code plugin · MIT
-
 ---
 
 ## Installation
 
 1. Add the marketplace to Claude Code:
    ```
-   /plugin marketplace add agenticnotetaking/arscontexta
+   /plugin marketplace add datamole-ai-arscontexta/arscontexta
    ```
 
 2. Install the plugin:
    ```
-   /plugin install arscontexta@agenticnotetaking
+   /plugin install arscontexta@datamole-ai-arscontexta
    ```
 
 3. Restart Claude Code, then run:
@@ -30,7 +28,7 @@ No templates. No configuration. Just conversation.
    /arscontexta:setup
    ```
 
-4. Answer 2-4 questions about your domain (~20 minutes -- token-intensive but one-time)
+4. Answer 2-6 questions about your domain (~20 minutes -- token-intensive but one-time)
 
 5. The engine generates your complete knowledge system
 
@@ -136,7 +134,7 @@ or `decisions/`), but the separation is invariant.
 | `/remember` | Mine session learnings |
 | `/rethink` | Challenge system assumptions |
 | `/refactor` | Structural improvements |
-
+| `/archive-batch` | Archive batch of notes |
 ---
 
 ## Processing Pipeline
@@ -224,7 +222,6 @@ npm install -g @tobilu/qmd
 bun install -g @tobilu/qmd
 
 cd your-vault/
-qmd init
 qmd collection add . --name <notes_directory_name> --mask "<notes_directory_name>/**/*.md"
 qmd embed
 ```
@@ -287,8 +284,6 @@ arscontexta/
 |   |-- reweave/                 # Backward pass
 |   |-- verify/                  # Combined quality check
 |   +-- ...                      # 12 more processing commands
-|-- agents/
-|   +-- knowledge-guide.md       # Pipeline subagent
 |-- hooks/
 |   |-- hooks.json               # Hook configuration
 |   +-- scripts/                 # Hook implementations
@@ -300,9 +295,6 @@ arscontexta/
 |   |-- kernel.yaml              # 15 kernel primitives
 |   |-- three-spaces.md          # Architecture spec
 |   +-- use-case-presets.md      # Pre-validated configs
-|-- platforms/                   # Platform-specific adapters
-|   |-- claude-code/
-|   +-- shared/
 |-- presets/                     # Pre-validated configurations
 |-- scripts/                     # Utility scripts
 +-- README.md
@@ -338,48 +330,3 @@ Every time you make changes, re-install the plugin:
 - `skill-sources/*/SKILL.md` -- generated command templates
 - `skills/setup/SKILL.md` -- the derivation engine
 - `reference/use-case-presets.md` -- preset definitions
-
----
-
-## Presets
-
-Three pre-validated configurations for common use cases:
-
-| Preset | For | What You Get |
-|--------|-----|-------------|
-| **Research** | Academic work, literature reviews, synthesis | Atomic claims, citation tracking, methodology MOCs |
-| **Personal** | Life management, journaling, relationships | Reflective notes, goal tracking, relationship MOCs |
-| **Experimental** | Testing, iteration, rapid prototyping | Lightweight structure, fast capture, minimal ceremony |
-
-Presets provide starting defaults. The derivation engine adapts from there based
-on your conversation.
-
----
-
-## Roadmap
-
-| Feature | Status |
-|---------|--------|
-| Claude Code plugin | Available |
-| Marketplace listing | Available |
-| Multi-agent processing | In progress |
-
----
-
-## Philosophy
-
-The name connects to a tradition. **Ars Combinatoria**, **Ars Memoria**,
-**Ars Contexta**: the art of context.
-
-Llull's rotating wheels generated truth through combination. Bruno's memory wheels
-created millions of image combinations. They were external thinking systems -- tools
-to think with rather than just store in. The missing piece: they required a human
-mind to do the traversing. Now LLMs can traverse. The wheels can spin again.
-
-Built on [Tools for Thought for Agents](https://github.com/agenticnotetaking) research.
-
----
-
-## License
-
-MIT
