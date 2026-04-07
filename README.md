@@ -313,14 +313,14 @@ Clone this repo and add the marketplace to Claude Code:
 Install the plugin:
 
 ```
-/plugin install arscontexta@agenticnotetaking
+/plugin install arscontexta@datamole-ai-arscontexta
 ```
 
 Every time you make changes, re-install the plugin:
 
 ```
-/plugin uninstall arscontexta@agenticnotetaking
-/plugin install arscontexta@agenticnotetaking
+/plugin uninstall arscontexta@datamole-ai-arscontexta
+/plugin install arscontexta@datamole-ai-arscontexta
 ```
 
 ### Key Files for Contributors
