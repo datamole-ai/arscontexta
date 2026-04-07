@@ -2,10 +2,7 @@
 name: recommend
 description: Get research-backed architecture advice for your knowledge system. Describe your use case, constraints, and goals — get specific recommendations grounded in TFT research with rationale for each decision. Triggers on "/recommend", "what would you recommend", "architecture advice", "knowledge system for".
 version: "1.0"
-generated_from: "arscontexta-v1.6"
-user-invocable: true
 context: fork
-model: opus
 allowed-tools: Read, Grep, Glob, mcp__qmd__query, mcp__qmd__get, mcp__qmd__multi_get
 argument-hint: "[use case description and constraints] — describe what you want to build"
 ---

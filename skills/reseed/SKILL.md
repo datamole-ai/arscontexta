@@ -2,7 +2,6 @@
 name: reseed
 description: Re-derive your knowledge system from first principles when structural drift accumulates. Analyzes dimension incoherence, vocabulary mismatch, boundary dissolution, and template divergence. Preserves all content while restructuring architecture.
 context: fork
-model: opus
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, mcp__qmd__query, mcp__qmd__get, mcp__qmd__multi_get, AskUserQuestion
 argument-hint: "[optional: --analysis-only to see drift report without implementing]"
 ---

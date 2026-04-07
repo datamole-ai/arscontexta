@@ -1,7 +1,6 @@
 ---
 name: setup
 description: Scaffold a complete knowledge system. Conducts conversation, derives configuration, generates everything. Validates against 15 kernel primitives. Triggers on "/setup", "set up my knowledge system", "create my vault".
-model: inherit
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 ---
 
@@ -833,7 +832,6 @@ For each page, apply vocabulary transformation: replace universal terms (notes, 
 ---
 description: User manual for your {domain} knowledge system
 type: manual
-generated_from: "arscontexta-{version}"
 ---
 # Manual
 
@@ -855,7 +853,6 @@ Welcome to your {domain} knowledge system. This manual explains how everything w
 ---
 description: First session guide — creating your first {DOMAIN:note} and building connections
 type: manual
-generated_from: "arscontexta-{version}"
 ---
 # Getting Started
 
@@ -874,7 +871,6 @@ generated_from: "arscontexta-{version}"
 ---
 description: Complete reference for every available command
 type: manual
-generated_from: "arscontexta-{version}"
 ---
 # Skills
 
@@ -892,7 +888,6 @@ generated_from: "arscontexta-{version}"
 ---
 description: Processing pipeline, maintenance cycle, and session rhythm
 type: manual
-generated_from: "arscontexta-{version}"
 ---
 # Workflows
 
@@ -911,7 +906,6 @@ generated_from: "arscontexta-{version}"
 ---
 description: How to adjust your system via config.yaml and /architect
 type: manual
-generated_from: "arscontexta-{version}"
 ---
 # Configuration
 
@@ -931,7 +925,6 @@ generated_from: "arscontexta-{version}"
 ---
 description: Deep guide to /ask, /architect, /{DOMAIN:rethink}, and /{DOMAIN:remember}
 type: manual
-generated_from: "arscontexta-{version}"
 ---
 # Meta-Skills
 
@@ -952,7 +945,6 @@ generated_from: "arscontexta-{version}"
 ---
 description: Common issues and resolution patterns
 type: manual
-generated_from: "arscontexta-{version}"
 ---
 # Troubleshooting
 
@@ -973,7 +965,6 @@ generated_from: "arscontexta-{version}"
 - All skill references use domain-native names from the derivation conversation
 - All pages link back to [[manual]] via a footer or contextual reference
 - No wiki links to notes/ — manual is self-contained
-- Each page has `generated_from: "arscontexta-{version}"` in frontmatter
 - Content uses domain-specific examples, not generic/abstract ones
 
 ---

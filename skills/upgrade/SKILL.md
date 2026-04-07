@@ -2,10 +2,7 @@
 name: upgrade
 description: Apply plugin knowledge base updates to an existing generated system. Consults the Ars Contexta research graph for methodology improvements, proposes skill upgrades with research justification. Never auto-implements. Triggers on "/upgrade", "upgrade skills", "check for improvements", "update methodology".
 version: "1.0"
-generated_from: "arscontexta-v1.6"
-user-invocable: true
 context: fork
-model: opus
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 ---
 
@@ -298,7 +295,6 @@ Update the skill's frontmatter:
 ```yaml
 ---
 version: "{incremented}"
-generated_from: "arscontexta-{current_plugin_version}"
 ---
 ```
 

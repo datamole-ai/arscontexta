@@ -1,12 +1,9 @@
 ---
 name: tutorial
 description: Interactive walkthrough for new users. Learn by doing — each step creates real content in your vault. Three tracks (researcher, manager, personal) with a universal learning arc. Triggers on "/tutorial", "walk me through", "how do I use this".
-user-invocable: true
 allowed-tools: Read, Write, Edit, Grep, Glob, AskUserQuestion, Bash
 context: fork
-model: opus
 version: "1.0"
-generated_from: "arscontexta-v1.6"
 ---
 
 ## Runtime Configuration (Step 0 — before any processing)

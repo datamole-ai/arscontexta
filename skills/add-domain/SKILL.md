@@ -2,7 +2,6 @@
 name: add-domain
 description: Add a new knowledge domain to your existing system. Derives domain-specific configuration through conversation, generates domain folders, templates, and vocabulary while preserving and connecting to your existing architecture.
 context: fork
-model: opus
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, AskUserQuestion
 argument-hint: "[domain name or description, e.g. 'therapy sessions' or 'creative writing']"
 ---

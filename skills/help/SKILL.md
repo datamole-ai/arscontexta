@@ -1,10 +1,8 @@
 ---
 name: help
 description: Contextual guidance and command discovery. Three modes — narrative (first-time), contextual (mid-task), compact (quick reference). Shows available commands, active skills, and intelligent suggestions based on vault state. Triggers on "/help", "what can I do", "show commands", "how does this work".
-user-invocable: true
 allowed-tools: Read, Grep, Glob, Bash
 version: "1.0"
-generated_from: "arscontexta-v1.6"
 ---
 
 ## EXECUTE NOW
