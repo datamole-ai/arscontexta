@@ -465,22 +465,22 @@ The init wizard runs conversation (Phases 1-4) + generation (Phase 5) + validati
 
 1. **Derivation persistence first.** `ops/derivation.md` is the FIRST artifact generated -- before folder structure, before any other file. It captures the complete derivation state.
 2. **Stateless generation.** Every subsequent step re-reads `ops/derivation.md` as its source of truth. No generation step relies on conversation memory for configuration decisions.
-3. **Agent delegation.** Each subagent gets a fresh context window focused solely on its assigned files. The main agent's context is preserved for orchestration, error handling, and Phase 6 validation.
+3. **Agent delegation.** Complex generation steps (templates, skills, CLAUDE.md, manual) are delegated to subagents, each getting a fresh context window. Simple scaffolding steps (identity files, config files, semantic search setup) are executed directly by the main agent since they follow explicit templates and don't require additional reasoning.
 
 ### 9-Step Generation Pipeline
 
-Phase 5 is a 9-step sequential pipeline. Steps 1 and 9 are executed by the main agent. Steps 2-8 are delegated to subagents.
+Phase 5 is a 9-step sequential pipeline. Steps 1-3, 8, and 9 are executed by the main agent. Steps 4-7 are delegated to subagents.
 
 | Step | Executor | Scope | Description |
 |------|----------|-------|-------------|
 | 1 | Main agent | derivation.md, folders, reminders.md, vault marker | Foundation setup |
-| 2 | Agent 1 | self/identity.md, self/methodology.md, self/goals.md, ops/methodology/ | Identity & self-knowledge |
-| 3 | Agent 2 | ops/config.yaml, ops/derivation-manifest.md | Ops configuration |
-| 4 | Agent 3 | templates/, ops/queries/ | Templates & query scripts |
-| 5 | Agent 4 | .claude/skills/*/SKILL.md (17 skills) | Skills (tiered generation) |
-| 6 | Agent 5 | CLAUDE.md | Context file |
-| 7 | Agent 6 | manual/ (7 pages), [domain:notes]/index.md | Manual & hub MOC |
-| 8 | Agent 7 | Semantic search setup (conditional) | Semantic search |
+| 2 | Main agent | self/identity.md, self/methodology.md, self/goals.md, ops/methodology/ | Identity & self-knowledge |
+| 3 | Main agent | ops/config.yaml, ops/derivation-manifest.md | Ops configuration |
+| 4 | Agent 1 | templates/, ops/queries/ | Templates & query scripts |
+| 5 | Agent 2 | .claude/skills/*/SKILL.md (17 skills) | Skills (tiered generation) |
+| 6 | Agent 3 | CLAUDE.md | Context file |
+| 7 | Agent 4 | manual/ (7 pages), [domain:notes]/index.md | Manual & hub MOC |
+| 8 | Main agent | Semantic search setup (conditional) | Semantic search |
 | 9 | Main agent | git init/commit | Version control |
 
 ### Agent Prompt Template
@@ -545,20 +545,22 @@ Verification:
 ~~~
 
 **Agent-specific additions to the template:**
-- **Agent 4 (skills):** Include the DOMAIN substitution map as an explicit key-value lookup table
-- **Agent 5 (CLAUDE.md):** Include the list of active feature blocks and their file paths under `${CLAUDE_PLUGIN_ROOT}/generators/features/`
-- **Agent 7 (semantic search):** Include the conditional check logic and notes_collection derivation instructions
+- **Agent 2 (skills):** Include the DOMAIN substitution map as an explicit key-value lookup table
+- **Agent 3 (CLAUDE.md):** Include the list of active feature blocks and their file paths under `${CLAUDE_PLUGIN_ROOT}/generators/features/`
 
 ### Orchestration Protocol
 
 After writing the foundation files (Pipeline Step 1), the main agent:
 
-1. Creates a task list via TaskCreate with one task per agent (7 tasks, or 6 if semantic search is inactive)
-2. Spawns agents 1-7 sequentially, one at a time, using the Agent tool
-3. Emits a progress indicator before each agent spawn
-4. After each agent completes, parses its GENERATION HANDOFF block (see below)
-5. Marks the agent's task as completed
-6. If any agent reports failure or its handoff contains Issues other than NONE, STOPS the sequence and surfaces the error to the user -- does not continue spawning
+1. Executes Steps 2-3 directly (simple scaffolding -- identity files, config files)
+2. Creates a task list via TaskCreate with one task per delegated agent (4 tasks)
+3. Spawns agents 1-4 sequentially, one at a time, using the Agent tool
+4. Emits a progress indicator before each step (including main-agent steps)
+5. After each agent completes, parses its GENERATION HANDOFF block (see below)
+6. Marks the agent's task as completed
+7. If any agent reports failure or its handoff contains Issues other than NONE, STOPS the sequence and surfaces the error to the user -- does not continue spawning
+8. Executes Step 8 directly (semantic search setup, conditional)
+9. Executes Step 9 directly (git init/commit)
 
 **Handoff parsing:** When a subagent returns, the main agent:
 
@@ -722,13 +724,13 @@ in your vault, even if you installed the plugin globally
 
 ---
 
-#### Pipeline Step 2: Identity & Self-Knowledge (Agent 1)
+#### Pipeline Step 2: Identity & Self-Knowledge (Main Agent)
 
-**Agent scope:** self/identity.md, self/methodology.md, self/goals.md, ops/methodology/methodology.md, ops/methodology/derivation-rationale.md
+**Scope:** self/identity.md, self/methodology.md, self/goals.md, ops/methodology/methodology.md, ops/methodology/derivation-rationale.md
 
-**Agent reads:** ops/derivation.md
+**Reads:** ops/derivation.md
 
-The following step instructions are passed verbatim to Agent 1 via the agent prompt template.
+The main agent executes this step directly -- it is straightforward scaffolding from templates.
 
 ---
 
@@ -873,13 +875,13 @@ Topics:
 
 ---
 
-#### Pipeline Step 3: Ops Configuration (Agent 2)
+#### Pipeline Step 3: Ops Configuration (Main Agent)
 
-**Agent scope:** ops/config.yaml, ops/derivation-manifest.md
+**Scope:** ops/config.yaml, ops/derivation-manifest.md
 
-**Agent reads:** ops/derivation.md
+**Reads:** ops/derivation.md
 
-The following step instructions are passed verbatim to Agent 2 via the agent prompt template.
+The main agent executes this step directly -- it is straightforward scaffolding from templates.
 
 ---
 
@@ -1051,7 +1053,7 @@ platform_hints:
 
 ---
 
-#### Pipeline Step 4: Templates & Query Scripts (Agent 3)
+#### Pipeline Step 4: Templates & Query Scripts (Agent 1)
 
 **Agent scope:** templates/*.md, ops/queries/*.sh
 
@@ -1059,7 +1061,7 @@ platform_hints:
 
 **Internal ordering:** Create templates first, then generate query scripts from the template `_schema` blocks.
 
-The following step instructions are passed verbatim to Agent 3 via the agent prompt template.
+The following step instructions are passed verbatim to Agent 1 via the agent prompt template.
 
 ---
 
@@ -1137,7 +1139,7 @@ After creating templates, read the `_schema` blocks and generate domain-adapted 
   - **Backlink queries** -- what references a specific entity
 4. Name each script descriptively
 
-Generate 3-5 scripts appropriate for the domain. Examples:
+Generate 5-10 scripts appropriate for the domain. Examples:
 
 
 | Domain        | Generated Queries                                                             |
@@ -1152,7 +1154,7 @@ Include a discovery section in the context file documenting what queries exist, 
 
 ---
 
-#### Pipeline Step 5: Skills (Agent 4)
+#### Pipeline Step 5: Skills (Agent 2)
 
 **Agent scope:** .claude/skills/[domain-skill-name]/SKILL.md (17 files)
 
@@ -1160,7 +1162,7 @@ Include a discovery section in the context file documenting what queries exist, 
 
 **Agent-specific prompt addition:** Include the DOMAIN substitution map as an explicit key-value lookup table built from the vocabulary mapping in ops/derivation.md. Example: `{DOMAIN:reduce}` → `/distill`, `{DOMAIN:notes}` → `claims`, `{DOMAIN:topic map}` → `MOC`.
 
-The following step instructions are passed verbatim to Agent 4 via the agent prompt template.
+The following step instructions are passed verbatim to Agent 2 via the agent prompt template.
 
 ---
 
@@ -1268,12 +1270,12 @@ These skill sources contain `{DOMAIN:xxx}` patterns that must be literally subst
 
 After creating ALL skill files:
 
-1. **Report to main agent:** List all generated skill names (domain-native) and confirm zero `{DOMAIN:` strings remain in Tier C output. This information is used by Agent 5 (CLAUDE.md) to build the "Recently Created Skills" section.
+1. **Report to main agent:** List all generated skill names (domain-native) and confirm zero `{DOMAIN:` strings remain in Tier C output. This information is used by Agent 3 (CLAUDE.md) to build the "Recently Created Skills" section.
 2. **Phase 6 guidance:** If any skills were created, Phase 6 output includes: "Restart Claude Code now to activate all skills, then try /[domain:help] to see what's available."
 
 ---
 
-#### Pipeline Step 6: Context File (Agent 5)
+#### Pipeline Step 6: Context File (Agent 3)
 
 **Agent scope:** CLAUDE.md
 
@@ -1283,7 +1285,7 @@ After creating ALL skill files:
 
 This agent runs AFTER templates and skills are generated, so it can verify coherence against actual files on disk. All mentioned skills, templates, and file paths can be checked for existence.
 
-The following step instructions are passed verbatim to Agent 5 via the agent prompt template.
+The following step instructions are passed verbatim to Agent 3 via the agent prompt template.
 
 ---
 
@@ -1395,7 +1397,7 @@ Read `.claude/skills/*/SKILL.md` to discover skill names. The SessionStart hook 
 
 ---
 
-#### Pipeline Step 7: Manual & Hub MOC (Agent 6)
+#### Pipeline Step 7: Manual & Hub MOC (Agent 4)
 
 **Agent scope:** manual/ (7 pages), [domain:notes]/index.md
 
@@ -1403,7 +1405,7 @@ Read `.claude/skills/*/SKILL.md` to discover skill names. The SessionStart hook 
 
 This agent runs after all content-generating agents, so manual pages can reference actual skill names and self/ files.
 
-The following step instructions are passed verbatim to Agent 6 via the agent prompt template.
+The following step instructions are passed verbatim to Agent 4 via the agent prompt template.
 
 ---
 
@@ -1584,17 +1586,15 @@ Welcome to your [domain] system.
 
 ---
 
-#### Pipeline Step 8: Semantic Search (Agent 7, conditional)
+#### Pipeline Step 8: Semantic Search (Main Agent, conditional)
 
-**Agent scope:** .mcp.json, .claude/hooks/qmd-sync.sh, .claude/settings.json (additive merge)
+**Scope:** .mcp.json, .claude/hooks/qmd-sync.sh, .claude/settings.json (additive merge)
 
-**Agent reads:** ops/derivation.md, ops/config.yaml, ops/derivation-manifest.md
+**Reads:** ops/derivation.md, ops/config.yaml, ops/derivation-manifest.md
 
-**Condition:** The main agent checks if semantic-search feature is active (linking includes implicit) BEFORE spawning this agent. If inactive, skip entirely.
+**Condition:** Check if semantic-search feature is active (linking includes implicit). If inactive, skip entirely.
 
-**Agent-specific prompt addition:** Include the conditional check logic and notes_collection derivation instructions.
-
-The following step instructions are passed verbatim to Agent 7 via the agent prompt template.
+The main agent executes this step directly -- it is straightforward scaffolding with conditional checks.
 
 ---
 
