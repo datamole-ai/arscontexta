@@ -1,10 +1,19 @@
 {
   "name": "arscontexta",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Conversational derivation engine — generate agent-native memory architecture from natural conversation.",
   "author": {
     "name": "Datamole",
     "email": "marek.nevole@datamole.ai"
   },
-  "repository": "https://github.com/datamole-ai/arscontexta"
+  "homepage": "https://github.com/datamole-ai/arscontexta",
+  "repository": "https://github.com/datamole-ai/arscontexta",
+  "keywords": [
+    "knowledge-management",
+    "tools-for-thought",
+    "agent-memory",
+    "derivation-engine",
+    "zettelkasten",
+    "cognitive-architecture"
+  ]
 }
