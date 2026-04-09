@@ -1222,27 +1222,25 @@ Process tiers in order: **A → B → C** (simplest first, saving context for sk
 
 These skill sources contain zero placeholders of either type.
 
-1. Read source `SKILL.md`
-2. Transform frontmatter only:
+1. Copy source to target: `cp ${CLAUDE_PLUGIN_ROOT}/skill-sources/[skill]/SKILL.md` → `.claude/skills/[domain-skill-name]/SKILL.md`
+2. Read frontmatter only (first ~5 lines) to see current `name:` and `description:` values
+3. Edit in place:
   - `name:` → domain-native command name from vocabulary mapping
   - `description:` → rewrite trigger phrases with domain vocabulary
-  - All other frontmatter fields (`model`, `context`, `allowed-tools`, etc.) → copy verbatim
-3. Copy body verbatim — no scanning, no vocabulary reasoning
-4. Write to skills directory
+4. All other frontmatter fields and the entire body remain untouched — they were preserved by the copy
 
 ##### Tier B — Frontmatter only (runtime vocabulary)
 
 **Skills:** reflect, reweave, stats, graph, refactor
 
-These skill sources contain only `{vocabulary.xxx}` patterns in their body. Those patterns resolve at runtime — they are NOT setup-time templates.
+These skill sources contain only `{vocabulary.xxx}` patterns in their body. Those resolve at runtime — NOT setup-time templates.
 
-1. Read source `SKILL.md`
-2. Transform frontmatter only:
+1. Copy source to target: `cp` source SKILL.md → `.claude/skills/[domain-skill-name]/SKILL.md`
+2. Read frontmatter only (first ~5 lines) to see current `name:` and `description:` values
+3. Edit in place:
   - `name:` → domain-native command name from vocabulary mapping
   - `description:` → rewrite trigger phrases with domain vocabulary
-  - All other frontmatter fields (`model`, `context`, `allowed-tools`, etc.) → copy verbatim
-3. Copy body verbatim — `{vocabulary.xxx}` patterns are **intentionally preserved**
-4. Write to skills directory
+4. All other frontmatter fields and the entire body remain untouched — `{vocabulary.xxx}` patterns are **intentionally preserved**
 
 **CRITICAL:** Do NOT transform `{vocabulary.xxx}` patterns in the body. These are runtime references, not setup-time templates. If you see `{vocabulary.notes}` in the body, leave it exactly as-is.
 
@@ -1252,17 +1250,16 @@ These skill sources contain only `{vocabulary.xxx}` patterns in their body. Thos
 
 These skill sources contain `{DOMAIN:xxx}` patterns that must be literally substituted at setup time. They may also contain `{vocabulary.xxx}` patterns — leave those intact.
 
-1. Read source `SKILL.md`
-2. Transform frontmatter:
+1. Copy source to target: `cp` source SKILL.md → `.claude/skills/[domain-skill-name]/SKILL.md`
+2. Read frontmatter only (first ~5 lines) to see current `name:` and `description:` values
+3. Edit frontmatter in place:
   - `name:` → domain-native command name from vocabulary mapping
   - `description:` → rewrite trigger phrases with domain vocabulary
-  - All other frontmatter fields (`model`, `context`, `allowed-tools`, etc.) → copy verbatim
-3. Build DOMAIN substitution map from the vocabulary mapping in `ops/derivation.md` (e.g., `{DOMAIN:reduce}` → `/distill`, `{DOMAIN:notes}` → `claims`, `{DOMAIN:topic map}` → `MOC`)
-4. Mechanical string replace: substitute every `{DOMAIN:xxx}` → literal value in the body
-5. Do NOT touch `{vocabulary.xxx}` patterns — leave them for runtime resolution
-6. Write to skills directory
+4. Build DOMAIN substitution map from the vocabulary mapping in `ops/derivation.md` (e.g., `{DOMAIN:reduce}` → `/distill`, `{DOMAIN:notes}` → `claims`, `{DOMAIN:topic map}` → `MOC`)
+5. Find and replace all `{DOMAIN:xxx}` patterns in the target file — use Grep to locate them or sed to replace in one pass, whichever is cleaner
+6. Do NOT touch `{vocabulary.xxx}` patterns — leave them for runtime resolution
 
-**Verification:** After writing each Tier C skill, confirm zero `{DOMAIN:` strings remain in the output file. If any remain, the substitution map is incomplete — check `ops/derivation.md` vocabulary mapping for the missing entry.
+**Verification:** After each Tier C skill, confirm zero `{DOMAIN:` strings remain in the output file. If any remain, the substitution map is incomplete — check `ops/derivation.md` vocabulary mapping for the missing entry.
 
 ##### Skill Discoverability Protocol
 
