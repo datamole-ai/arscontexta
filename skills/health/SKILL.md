@@ -55,15 +55,6 @@ Parse the invocation mode immediately:
 
 **START NOW.** Reference below explains each diagnostic category in detail.
 
-### Platform Adaptation
-
-Checks adapt to what the platform supports:
-- If semantic search (qmd) is not configured, skip semantic-dependent checks and note their absence
-- If hooks are not available, note that validation is convention-only (no automated enforcement)
-- If self/ directory does not exist (disabled by config), skip self-space checks but verify ops/ absorbs self-space content correctly
-
-**Report what CAN be checked, not what the platform lacks.**
-
 ---
 
 ## The 8 Diagnostic Categories

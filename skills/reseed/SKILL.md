@@ -184,7 +184,6 @@ For each hard constraint, evaluate the re-derived configuration. If violated, th
 
 Hard constraints:
 - `atomic + navigation_depth == "2-tier" + volume > 100` -- navigational vertigo
-- `automation == "full" + no_platform_support` -- platform cannot support
 - `processing == "heavy" + automation == "manual" + no_pipeline_skills` -- unsustainable
 
 ### Pass 2: Soft constraint check

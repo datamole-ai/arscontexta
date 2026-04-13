@@ -10,7 +10,6 @@ Nine tests that verify the derivation engine produces coherent, functional syste
 
 **Input:**
 - Use case: Research & Academic
-- Platform: Claude Code
 - Focus: Tools for thought for agents
 
 **Derived configuration (from use-case preset):**
@@ -51,7 +50,6 @@ Nine tests that verify the derivation engine produces coherent, functional syste
 
 **Input:**
 - Use case: Therapy & Reflection
-- Platform: Claude Code
 - Focus: Pattern detection, emotional processing, growth tracking
 
 **Derived configuration:**
@@ -129,7 +127,6 @@ _schema:
 
 **Input:**
 - Use case: Custom — Competitive gaming strategy (e.g., fighting games, card games)
-- Platform: Claude Code
 - Focus: Matchup knowledge, meta analysis, improvement tracking
 
 **Knowledge type classification:**
@@ -210,7 +207,6 @@ _schema:
 **Input:**
 - Domain A: Research & Academic (atomic, heavy processing, dense links)
 - Domain B: People & Relationships (moderate, light processing, sparse links)
-- Platform: Claude Code
 
 **Per-domain configurations:**
 
@@ -254,68 +250,6 @@ _schema:
 3. Separate processing: pipeline routes by note type ✓
 4. Shared navigation: hub MOC links to all domains ✓
 5. Cross-domain links: natural, not forced ✓
-
----
-
-## Test 5: Minimal Platform (Convention-Only)
-
-**Question:** Can all 15 kernel primitives be satisfied on a platform with no hooks, no skills, and no subagent support — using only a context file and filesystem access?
-
-**Input:**
-- Use case: Personal journal — regular reflections, goal tracking, occasional pattern review
-- Platform: Generic LLM chat with file access (convention-only — no hooks, no skills, no subagents)
-- Focus: Low-ceremony capture with condition-triggered synthesis
-
-**Derived configuration:**
-
-| Dimension | Value | Rationale |
-|-----------|-------|-----------|
-| Organization | flat | Few enough notes that flat works without friction |
-| Linking | explicit | Wiki links only — no semantic search infrastructure available |
-| Nav depth | 2-tier | Hub → topic areas. Low volume needs minimal hierarchy |
-| Maintenance | condition-based (lax) | Low volume generates few maintenance targets — lax thresholds match the pace |
-| Schema | minimal | `description` and `topics` only — no automated validation to catch richer fields |
-
-**Natural pipeline fit:** /capture — journal entries are multi-faceted whole-day reflections; compound capture is the natural fit for this use case.
-
-**Kernel primitive mapping at convention-only (minimal) implementations:**
-
-| # | Primitive | Convention-Only Implementation | Satisfied? |
-|---|-----------|----------------------|------------|
-| 1 | Markdown + YAML | Context file instructs agent to use YAML frontmatter on every note | YES |
-| 2 | Wiki links | Context file instructs `[[note title]]` linking with unique filenames | YES |
-| 3 | MOC hierarchy | Context file instructs creation of hub MOC and topic MOCs, linking notes to MOCs | YES |
-| 4 | Tree injection | Context file instructs agent to `ls` at session start for orientation | YES |
-| 5 | Description field | Context file instructs `description:` field in YAML that adds context beyond title | YES |
-| 6 | Topics footer | Context file instructs `topics:` field with at least one MOC wiki link per note | YES |
-| 7 | Schema enforcement | Context file instructs manual checking of required fields during note creation | YES |
-| 8 | Semantic search | Context file instructs periodic manual review guided by topic adjacency and MOC scanning | YES (degraded) |
-| 9 | Self space | Context file instructs self/ directory with identity.md, methodology.md, goals.md (CONFIGURABLE — when disabled, goals route to ops/goals.md, methodology to ops/methodology/) | YES |
-| 10 | Session rhythm | Context file documents orient/work/persist cycle — agent reads self/ at start, updates at end | YES |
-| 11 | Discovery-first | Context file includes "Before creating any note, ask: how will a future session find this?" section | YES |
-| 12 | Operational learning loop | Context file instructs agent to note friction in ops/observations/, note contradictions in ops/tensions/, and review when 10+ observations accumulate | YES |
-| 13 | Task stack | Context file instructs agent to check ops/tasks/ for prioritized work items before starting | YES |
-| 14 | Methodology folder | Context file instructs agent to maintain ops/methodology/ with linked notes about vault self-knowledge | YES |
-| 15 | Session capture | Context file instructs agent to save session transcript to ops/sessions/ before ending | YES (degraded — manual save without stop hook) |
-
-**Result: 15/15 PASS.** Every kernel primitive has a viable convention-only implementation. The key is that conventions ARE implementations — instructions in a context file are a legitimate enforcement mechanism, not a placeholder for "real" automation.
-
-**What degrades at convention-only:**
-- Schema enforcement relies on instruction-following, which degrades as context fills — no deterministic fallback catches errors
-- Semantic search reduces to manual adjacency review — misses cross-vocabulary connections
-- Operational learning loop has no threshold automation — the agent must count pending observations manually
-- Tree injection via `ls` loads less structured output than a hook-injected tree
-
-**What does NOT degrade:**
-- Prose-sentence titles work identically regardless of platform
-- Wiki links resolve by filename regardless of automation
-- MOC hierarchy functions the same — it is a structural convention, not an automation feature
-- Self/ space is just files — reading them at session start requires no hooks
-- Session rhythm is behavioral — orient/work/persist is a pattern the agent follows, not infrastructure
-
-**Kernel validation prediction:** 15/15
-
-**Coherence assessment:** The convention-only personal journal demonstrates that the kernel's power comes from structural conventions, not from automation. A context file that says "always add a description field" is not as reliable as a PostToolUse hook that validates it — but it IS a legitimate implementation. The kernel primitives were designed to require only filesystem access and text files. This test confirms that design holds: every primitive can be satisfied through convention when no automation is available. The system will be less robust (no deterministic validation, no automated condition checking), but it will be structurally complete. Full automation is the default — but convention-only systems remain valid for platforms that lack hook support.
 
 ---
 
@@ -372,7 +306,6 @@ The constraint system is productive, not just prohibitive. For each violation, i
 
 **Input:**
 - Use case: Therapy & Reflection (from Test 2 configuration)
-- Platform: Claude Code
 - Generate: full context file, templates, skill instructions, self/ files
 
 **Search methodology:**
@@ -431,7 +364,6 @@ Scan the entire generated output for research-domain terms that should have been
 
 **Input:**
 - Use case: Personal learning system (concepts, study notes, reading insights)
-- Platform: Claude Code
 - Starting configuration: Full automation (all presets ship complete)
 
 **Simulated growth trajectory:**
@@ -477,7 +409,6 @@ When a user disables a feature via /architect, the rest of the system must conti
 
 **Input:**
 - Use case: Research vault (our vault's configuration)
-- Platform: Claude Code
 - Focus: Verify the full loop end-to-end, not just component existence
 
 **Phase 1: Observation Capture**
@@ -609,7 +540,6 @@ Observe (create observation/tension)
 | Cross-domain (Therapy) | Internally consistent | 14-15/15 | Research jargon eliminated | Full |
 | Novel domain (Gaming) | Principled deviation from reference | 15/15 | Domain-native vocabulary | Full |
 | Multi-domain (Research + Relationships) | Per-domain configs composed | 15/15 | Per-domain vocabularies | Full |
-| Minimal platform (Convention-only) | All primitives at convention level | 15/15 | Domain-native (journal) | Full |
 | Constraint violation recovery | 3 violations detected, corrected | 15/15 (post-correction) | N/A (structural test) | Full (after correction) |
 | Vocabulary transformation fidelity | Zero leaked terms | 15/15 | Exhaustive verification | Full |
 | Progressive configuration | Full automation works at all scales | 15/15 (all growth stages) | N/A (infrastructure test) | Full |
@@ -625,10 +555,10 @@ Observe (create observation/tension)
 
 4. **Multi-domain composition works through shared-graph-with-separate-templates.** Our vault already proves this pattern. The derivation engine needs to support it explicitly: generate separate templates per domain, shared navigation, and cross-domain linking conventions.
 
-5. **The kernel requires only filesystem access and conventions.** The minimal platform test (Test 5) proves that all 15 primitives can be satisfied through context file instructions alone. Automation improves reliability but is not required for structural completeness. This means Ars Contexta can generate valid systems for ANY platform that supports text files — the kernel's requirement floor is genuinely minimal.
+5. **The kernel primitives are satisfied through hooks and automation.** All 15 primitives are implemented through Claude Code's hook system, skill infrastructure, and MCP integration. The automation layer provides deterministic enforcement that instruction-following cannot match.
 
 6. **The constraint system is productive, not just prohibitive.** The violation recovery test (Test 6) shows that incoherent configurations are not dead ends — the constraint system guides users toward valid configurations by recommending minimal corrections. This is essential for conversational derivation where users express individually reasonable preferences that are collectively incoherent.
 
 7. **Feature disabling is safe and reversible.** The progressive configuration test (Test 8) confirms that disabling optional features does not break the system. Each optional feature has a fallback path. INVARIANT primitives cannot be disabled, ensuring the structural foundation is always present. The system ships complete and users opt down — the reverse of the former tier-based approach.
 
-**Derivation engine confidence: HIGH.** The 15 kernel primitives provide a universal base. The 5 configuration dimensions parameterize the variation space. Interaction constraints prevent incoherent combinations. The 3 presets (Research, Personal Assistant, Experimental) provide pre-validated starting points. The system derives working configurations for research, therapy, competitive gaming, multi-domain composition, minimal platforms, constraint recovery, vocabulary-verified domains, progressive configuration, and self-improving operational loops.
+**Derivation engine confidence: HIGH.** The 15 kernel primitives provide a universal base. The 5 configuration dimensions parameterize the variation space. Interaction constraints prevent incoherent combinations. The 3 presets (Research, Personal Assistant, Experimental) provide pre-validated starting points. The system derives working configurations for research, therapy, competitive gaming, multi-domain composition, constraint recovery, vocabulary-verified domains, progressive configuration, and self-improving operational loops.

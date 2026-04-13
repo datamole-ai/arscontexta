@@ -566,7 +566,7 @@ Context degrades as it fills. A single-pass extraction of a 3000-line source wil
 
 ### Chunking Strategy
 
-Fresh context per chunk (spawn subagent per chunk if platform supports). Maximum quality.
+Fresh context per chunk (spawn subagent per chunk). Maximum quality.
 
 ### Cross-Chunk Coordination
 
@@ -816,29 +816,6 @@ Would linking to this {vocabulary.note} drag unrelated content along? If yes, th
 **When to skip:** off-topic content that does not pass all four quality criteria
 **When to split:** multiple distinct claims in one extraction
 **When to sharpen:** claim too vague, title is label not statement
-
----
-
-## Research Provenance
-
-When the source file contains provenance metadata (source_type, research_prompt, research_server, generated), preserve the chain:
-
-- Each created {vocabulary.note}'s Source footer links to the source file
-- The source file's YAML contains the research prompt
-- The chain: research query -> inbox file -> /extract -> {vocabulary.notes}
-
-If source has `source_type` in frontmatter, this is research-generated content — handle with extra care for attribution.
-
-**Provenance fields to preserve:**
-
-| Field | Purpose |
-|-------|---------|
-| source_type | How this content was generated |
-| research_prompt | The query or directive that produced this content |
-| research_server | Which research tool was used |
-| generated | When the research was produced |
-
-The research_prompt is the most critical field — it captures the intellectual context that shaped what was returned. Knowing "I searched for X because I was exploring Y" is part of the knowledge graph.
 
 ---
 

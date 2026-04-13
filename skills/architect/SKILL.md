@@ -40,7 +40,7 @@ Parse immediately:
 
 **Execute these phases sequentially:**
 
-1. Locate system files and detect platform
+1. Locate system files
 2. Read derivation record for design intent
 3. Analyze health data (recent report or live check)
 4. Scan for friction patterns across operational surfaces
@@ -70,15 +70,7 @@ You are not guessing what might help. You are diagnosing what IS happening (heal
 
 Automated. No user interaction needed.
 
-Detect the platform and find the system's key files:
-
-```
-Check filesystem:
-  .claude/ directory exists         -> platform = "claude-code"
-  Neither                           -> platform = "minimal"
-```
-
-Locate these files (paths vary by domain vocabulary):
+Locate the system's key files (paths vary by domain vocabulary):
 
 | File Type | What To Find | Typical Locations |
 |-----------|-------------|-------------------|
@@ -429,7 +421,6 @@ Present the ranked recommendations. Use the user's domain vocabulary (from deriv
 ```
 === ARCHITECT REPORT ===
 System: [domain name from derivation]
-Platform: [detected platform]
 Focus: [specific area if requested, or "full system"]
 Date: [YYYY-MM-DD]
 

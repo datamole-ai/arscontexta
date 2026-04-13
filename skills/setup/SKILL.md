@@ -312,9 +312,6 @@ For each hard constraint, evaluate the derived configuration. If violated, BLOCK
 
 Hard constraints (these produce systems that will fail):
 
-- `linking == "explicit+implicit" + platform_lacks_semantic_search` -> implicit linking requires search tool
-
-Example user-facing explanation: "You want semantic search for cross-vocabulary discovery, but your platform doesn't have a search tool configured. Should we stay with explicit linking for now?"
 
 **Pass 2 -- Soft constraint check:**
 
@@ -326,7 +323,6 @@ For each soft constraint, evaluate the configuration:
 
 Soft constraints:
 
-- `linking == "explicit+implicit" + no_semantic_search` -> implicit linking needs search tool
 - `volume > 200 + maintenance_thresholds too lax` -> large vaults need tighter condition thresholds
 - `flat + navigation_depth == "2-tier" + volume > 50` -> crowded navigation
 
@@ -366,18 +362,18 @@ Read `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md` — but only the section
 
 ### Step 3f: Full Automation Configuration
 
-All generated systems ship with full automation from day one. There are no tiers — every vault gets the complete skill set, full processing pipeline, and session capture. Core hooks (orient, validate, commit) are provided by the arscontexta plugin globally. The user opts DOWN from full if they want simpler operation (via ops/config.yaml).
+All generated systems ship with full automation from day one. Every vault gets the complete skill set, full processing pipeline, and session capture. Core hooks (orient, validate, commit) are provided by the arscontexta plugin globally.
 
 
-| Component                                 | Generated For All | Notes                                                            |
-| ----------------------------------------- | ----------------- | ---------------------------------------------------------------- |
-| Context file                              | Always            | Comprehensive, all sections                                      |
-| 16 processing skills + 10 plugin commands | Always            | Processing skills vocabulary-transformed with full quality gates |
-| Plugin hooks (orient, validate, commit)   | Via plugin        | Provided by arscontexta plugin globally; vault generates only qmd-sync if semantic search active |
-| Queue system                              | Always            | ops/tasks.md + ops/queue/                                        |
-| Templates                                 | Always            | With _schema blocks                                              |
-| Self space                                | If opted in       | self/ or ops/ fallback                                           |
-| Semantic search                           | If opted in       | qmd setup                                                        |
+| Component                                 | Notes                                                            |
+| ----------------------------------------- | ---------------------------------------------------------------- |
+| Context file                              | Comprehensive, all sections                                      |
+| 16 processing skills + 10 plugin commands | Processing skills vocabulary-transformed with full quality gates |
+| Plugin hooks (orient, validate, commit)   | Provided by arscontexta plugin globally; vault generates only qmd-sync if semantic search active |
+| Queue system                              | ops/tasks.md + ops/queue/                                        |
+| Templates                                 | With _schema blocks                                              |
+| Self space (if opted in)                  | self/ or ops/ fallback                                           |
+| Semantic search (if opted in)             | qmd setup                                                        |
 
 
 **Init generates everything by default.** The context file includes all skill documentation.
@@ -695,9 +691,6 @@ engine_version: "1.0.0"
 | topics | [domain term] | schema field |
 | [additional terms] | [domain terms] | [category] |
 
-## Automation
-- Platform: Claude Code
-
 ## Active Feature Blocks
 [Checked = included, unchecked = excluded with reason]
 - [x] wiki-links -- always included (kernel)
@@ -976,7 +969,6 @@ processing:
     scope: related         # related | broad | full
     frequency: after_create # after_create | periodic | manual
 
-provenance: [full | minimal | off]
 ```
 
 **Relationship:** config.yaml is the live operational config. derivation.md is the historical record of WHY. Config can drift; `/architect` detects and documents the drift.
@@ -1052,9 +1044,9 @@ vocabulary:
     # ... 4-8 domain-specific categories
 
 platform_hints:
-  context: [fork | single]
+  context: fork
   allowed_tools: [Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion]
-  semantic_search_tool: [mcp__qmd__query | null]
+  semantic_search_tool: [mcp__qmd__query | null]  # null when user opts out of semantic search
   semantic_search_autoapprove:
     - mcp__qmd__query
     - mcp__qmd__get
@@ -1313,7 +1305,7 @@ These skill sources contain `{DOMAIN:xxx}` patterns that must be literally subst
 
 ##### Skill Discoverability Protocol
 
-**Platform limitation:** Claude Code's skill index does not refresh mid-session. Skills created during /setup are not discoverable until the user restarts Claude Code.
+**Note:** The skill index does not refresh mid-session. Skills created during /setup are not discoverable until the user restarts Claude Code.
 
 After creating ALL skill files:
 

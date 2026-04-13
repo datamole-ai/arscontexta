@@ -52,13 +52,6 @@ Each cell describes the pressure that the row dimension's pole creates on the co
 
 When the user selects dimension values, check these rules. WARN on soft violations, BLOCK on hard violations.
 
-### Hard Constraints (BLOCK)
-
-These produce systems that will fail:
-
-1. `automation == "full" + platform_lacks_hooks`
-   → "Full automation requires hooks and skills. Your platform supports convention only."
-
 ### Soft Constraints (WARN)
 
 These produce friction but can work with compensating mechanisms:
@@ -102,7 +95,7 @@ These constraints apply to the 15 kernel primitives and their INVARIANT/CONFIGUR
    → WARN: "Self space is ON by default for Personal Assistant presets. Agent identity and persistent memory are central to the experience. Disable only if the agent's sense of self is not needed."
 
 7. `semantic_search == false + linking == "explicit+implicit"`
-   → WARN: "Semantic search is configured as opt-in. Without qmd, implicit linking falls back to keyword overlap and MOC traversal."
+   → WARN: "Implicit linking works best with semantic search. Without qmd, it falls back to keyword overlap and MOC traversal."
 
 **Condition-based maintenance constraints:**
 

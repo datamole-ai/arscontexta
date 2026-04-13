@@ -229,15 +229,7 @@ If all four phases run in one session, the verify phase runs on degraded attenti
 
 **Processing is orchestrated by default.** /ralph spawns a fresh subagent per phase. /pipeline chains the full sequence. The queue drives what happens next.
 
-**Implementation approaches by platform:**
-
-| Platform Capability | Orchestration Mechanism |
-|---------------------|----------------------|
-| Subagent spawning | Agent tool with worker agents (preferred — true context isolation) |
-| Background processing | Background agents or scheduled skills |
-| No subagent support | Manual invocation with task file handoff between sessions |
-
-The task queue IS the orchestration — {DOMAIN:skills} read from it, write to it, and the queue state drives what happens next. When you say "process this source through the full pipeline," follow the pattern: read queue, pick task, execute phase, advance queue, repeat.
+**Orchestration uses the Agent tool** to spawn fresh worker agents per phase, providing true context isolation. The task queue IS the orchestration — {DOMAIN:skills} read from it, write to it, and the queue state drives what happens next. When you say "process this source through the full pipeline," follow the pattern: read queue, pick task, execute phase, advance queue, repeat.
 
 ### Full Automation From Day One
 
@@ -275,7 +267,7 @@ Every phase has specific gates. Failing a gate does not block progress — it tr
 | {DOMAIN:Verify} | No broken links | Fix or remove broken links |
 | {DOMAIN:Verify} | {DOMAIN:Note} in at least one {DOMAIN:topic map} | Add to relevant {DOMAIN:topic map} |
 
-**Automation of quality gates:** When your platform supports hooks, a PostToolUse hook on Write can validate YAML frontmatter, description fields, and topic links on {DOMAIN:note} creation. This makes methodology invisible — instead of remembering to validate, a hook catches drift automatically. Build hooks for any quality check you want to be automatic.
+**Automation of quality gates:** A PostToolUse hook on Write validates YAML frontmatter, description fields, and topic links on {DOMAIN:note} creation. This makes methodology invisible — instead of remembering to validate, a hook catches drift automatically. Build hooks for any quality check you want to be automatic.
 
 ### Skill Invocation Rules
 
@@ -304,33 +296,6 @@ Your attention degrades as context fills. The first ~40% of context is the "smar
 - Each phase gets your best attention
 - Crashes are recoverable (the task file shows where processing stopped)
 - Multiple {DOMAIN:notes} can be processed without degradation
-
-### Research Provenance
-
-Every file in {DOMAIN:inbox/} from web search or external import MUST include provenance metadata in its YAML frontmatter. Claims without provenance are untraceable.
-
-**Standard provenance fields:**
-
-~~~yaml
-source_type: [web-search | manual | voice | channel | import]
-research_prompt: "the query or directive that generated this content"
-generated: "YYYY-MM-DDTHH:MM:SSZ"
-~~~
-
-The `research_prompt` field is the most critical — it captures the intellectual context that shaped what was returned. Knowing "I searched for X because I was exploring Y" is part of the knowledge graph.
-
-**Provenance chain:** research query (prompt preserved in YAML) -> inbox file -> {DOMAIN:process} -> {DOMAIN:notes}. Each {DOMAIN:note}'s Source footer links back to the inbox file whose YAML contains the research prompt.
-
-**Depth toggle via config:**
-~~~yaml
-# ops/config.yaml
-provenance: full  # full | minimal | off
-~~~
-
-- `full` (default for heavy processing): All fields captured
-- `minimal`: source_type and generated timestamp only
-- `off`: No provenance metadata (for systems that do not use research tools)
-```
 
 ## Dependencies
 Requires: yaml-schema, wiki-links, atomic-notes, mocs

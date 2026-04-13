@@ -321,7 +321,7 @@ type: moc
 
 ### Step 4: Domain guide
 
-Create a domain-specific methodology document that loads when working in this domain. For Claude Code: `.claude/skills/[domain]-guide/SKILL.md` or a section in the context file. For other platforms: a standalone guide file.
+Create a domain-specific methodology document that loads when working in this domain: `.claude/skills/[domain]-guide/SKILL.md` or a section in the context file.
 
 The guide covers:
 - How to capture in this domain

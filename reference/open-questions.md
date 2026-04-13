@@ -24,15 +24,7 @@ These items are specified but not implemented in v1.0. They are concrete enough 
 
 **When to ship:** When user feedback shows significant demand from existing vault owners who want to adopt Ars Contexta methodology on top of their current content.
 
-### 3. Multi-Platform Support
-
-**What:** Supporting additional agent platforms beyond Claude Code, with shared notes/ and self/ while maintaining platform-specific ops/ and automation.
-
-**Why deferred:** Requires solving platform-specific session isolation, context file format adaptation, and shared state reconciliation. Currently focused on Claude Code as the sole supported platform.
-
-**When to ship:** When a second platform stabilizes enough for reliable operation, and when user demand validates multi-platform as a real use case.
-
-### 4. arscontexta.dev Website
+### 3. arscontexta.dev Website
 
 **What:** A web frontend rendering the research graph through a sliding-pane reader for human browsing, plus an MCP endpoint for agent architect queries. Built on the same knowledge graph that the derivation engine reasons from.
 
@@ -40,7 +32,7 @@ These items are specified but not implemented in v1.0. They are concrete enough 
 
 **When to ship:** After v1.0 plugin and MCP server are stable, when human-readable research presentation becomes the growth bottleneck.
 
-### 5. MCP Hosted Server
+### 4. MCP Hosted Server
 
 **What:** A hosted version of the Ars Contexta MCP server that users connect to without running locally. Provides `arscontexta_query`, `arscontexta_recommend`, and `arscontexta_dimensions` tools through a cloud endpoint.
 
@@ -48,7 +40,7 @@ These items are specified but not implemented in v1.0. They are concrete enough 
 
 **When to ship:** When the local MCP server sees enough adoption that hosting becomes a friction reducer rather than a premature investment.
 
-### 6. Advanced Derivation Heuristics
+### 5. Advanced Derivation Heuristics
 
 **What:** Richer conversation analysis beyond keyword-to-dimension mapping. Includes: conversation flow analysis (not just individual signals but signal sequences), confidence calibration across dimensions (some signals are stronger than others), and automated heuristic testing against the conversation pattern corpus.
 
@@ -56,15 +48,15 @@ These items are specified but not implemented in v1.0. They are concrete enough 
 
 **When to ship:** After collecting derivation logs from 50+ real conversations, when patterns in heuristic failures reveal specific improvement targets.
 
-### 7. Sleep-Time Compute
+### 6. Sleep-Time Compute
 
 **What:** Background inference during inactive periods — processing inbox items, finding connections between existing notes, running backward maintenance, detecting synthesis opportunities. Produces a morning briefing in ops/.
 
-**Why deferred:** Requires platform-specific scheduling (hook-suggested on Claude Code). The core derivation engine and processing pipeline work without background compute. Sleep-time compute is an acceleration mechanism, not a prerequisite.
+**Why deferred:** The core derivation engine and processing pipeline work without background compute. Sleep-time compute is an acceleration mechanism, not a prerequisite.
 
 **When to ship:** After the processing pipeline skills are proven reliable, when the incremental value of background processing justifies the scheduling complexity.
 
-### 8. Observation Export
+### 7. Observation Export
 
 **What:** `/health --export-observations` packages ops/observations/ into an anonymized JSON bundle with system context (dimension positions, note count, feature blocks) but no user content. Always manual, always opt-in, always reviewable before sharing.
 
@@ -154,14 +146,6 @@ These questions don't have clear answers yet. They inform the research graph's d
 
 **What a solution looks like:** A test harness that generates systems for each use-case preset, populates them with synthetic content, runs processing and maintenance cycles, and measures quality metrics over simulated time.
 
-### Cross-Platform Hook Equivalence
-
-**Question:** Can we ensure generated systems work equally well across Claude Code and future platforms?
-
-**Context:** The kernel specifies platform-variant implementations for hooks and tree injection. But the variants are hand-specified, not systematically tested for behavioral equivalence.
-
-**Approach:** Platform adapters that translate abstract hook specifications into platform-native implementations, with behavioral equivalence tests verifying that each platform's hooks produce equivalent outcomes.
-
 ### Multi-Agent Collaboration in Generated Systems
 
 **Question:** Can a generated system support multiple agents with different roles?
@@ -233,7 +217,6 @@ These questions don't have clear answers yet. They inform the research graph's d
 | Graph density scoring | High — affects all health checks | Medium — needs quality metrics | High |
 | Context-Bench integration | High — enables objective measurement | Medium — needs test harness | High |
 | MOC split/merge thresholds | Medium — affects maintenance | Medium — community detection is well-studied | Medium |
-| Cross-platform hook equivalence | Medium — affects portability | High — engineering problem | Medium |
 | Personality drift detection | Medium — affects user trust | Medium — needs linguistic analysis | Medium |
 | Background compute | Medium — enables sleep pipeline | High — well-understood scheduling | Medium |
 | Governance layer | High for enterprise — blocking for adoption | Medium — domain expertise needed | Medium |

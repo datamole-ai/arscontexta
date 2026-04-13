@@ -180,8 +180,6 @@ These are derived from tradition presets, adapted for specific use cases. Each c
 
 **Why convention automation for all:** Following Gall's Law (complex systems evolve from simple working systems), all systems start at convention level. Users add automation at friction points rather than deploying full automation from day one.
 
-**Automation upgrades per platform:** The presets above are the floor, not the ceiling. During init, tier-1 platforms (Claude Code) should prompt the user about adding hooks-blueprint and validation-hooks. A Research use case on Claude Code can reasonably start at "convention trending toward automation" — the preset is the starting point, and the init wizard should suggest upgrades when the platform supports them.
-
 ---
 
 ## Mixing Traditions

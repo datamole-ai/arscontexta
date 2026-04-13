@@ -45,9 +45,7 @@ primitives:
     layer: convention
     requires: filesystem
     enforcement: invariant
-    implementation:
-      claude-code: SessionStart hook injects tree output
-      minimal: Context file instructs agent to ls at start
+    implementation: SessionStart hook injects tree output
     validation:
       check: Session start procedure loads file structure
     cognitive_grounding: "Orientation before action — prevents wasting context on discovery"
@@ -80,10 +78,7 @@ primitives:
     layer: convention
     requires: markdown-yaml
     enforcement: invariant
-    implementation:
-      tier-1: Hook-based validation (PostToolUse event)
-      tier-2: Batch validation script
-      tier-3: Context file instructions for manual checking
+    implementation: Hook-based validation (PostToolUse event)
     validation:
       check: Templates exist as single source of truth. Validation mechanism catches missing required fields.
     cognitive_grounding: "Instruction compliance degrades as context fills — deterministic validation catches what instruction-following misses"
@@ -124,10 +119,7 @@ primitives:
     layer: automation
     requires: wiki-links
     enforcement: configurable
-    implementation:
-      tier-1: "Embedding tool (qmd, MCP server)"
-      tier-2: "LLM-assisted similarity search"
-      tier-3: "Periodic manual review guided by topic adjacency"
+    implementation: "Embedding tool (qmd, MCP server)"
     validation:
       check: "Given a note, the mechanism returns related notes that share no significant keywords"
     cognitive_grounding: "Vocabulary divergence — same concept, different words. Structural graph traversal misses these connections."
@@ -151,10 +143,10 @@ primitives:
     enforcement_detail:
       context-file: "Discovery-First Design section — BEFORE creating any note, ask how will a future session find this?"
       skills: "Every skill that creates notes includes a discovery check before writing"
-      hooks: "PostToolUse hook on Write validates discovery criteria (when platform supports hooks)"
+      hooks: "PostToolUse hook on Write validates discovery criteria"
       learning: "When a note IS hard to find, system captures observation about why"
     validation:
-      check: "Generated context file contains Discovery-First Design section. Generated skills include discovery checks. If hooks supported, PostToolUse validation hook exists."
+      check: "Generated context file contains Discovery-First Design section. Generated skills include discovery checks. PostToolUse validation hook exists."
     cognitive_grounding: "Discoverability compounds — the system's value grows through findability. Every note that can't be found is negative value."
 
   - id: operational-learning-loop
@@ -180,10 +172,7 @@ primitives:
         thresholds:
           observations: 10
           tensions: 5
-    implementation:
-      tier-1: "PostToolUse hook logs friction automatically. Skill-integrated tension detection. /{DOMAIN:rethink} command with session-start threshold check."
-      tier-2: "Context file instructs agent to log after significant actions. Context file instructs immediate tension capture. Context file documents threshold + manual review trigger."
-      tier-3: "Agent instructed to note friction in ops/. Agent instructed to note contradictions. Periodic human-triggered review."
+    implementation: "PostToolUse hook logs friction automatically. Skill-integrated tension detection. /{DOMAIN:rethink} command with session-start threshold check."
     validation:
       check: "ops/observations/ and ops/tensions/ directories exist. Review trigger (threshold or condition) documented in context file. /{DOMAIN:rethink} command or equivalent exists."
     cognitive_grounding: "Scientific method applied to knowledge systems — hypothesize, implement, observe, revise. Systems that cannot observe their own friction cannot evolve."

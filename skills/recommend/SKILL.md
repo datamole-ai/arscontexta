@@ -237,11 +237,11 @@ For each of the 8 configuration dimensions, determine the recommended position:
 - Key signals: query needs, metadata tolerance
 - Minimal: description only, low ceremony
 - Moderate: description + type + topics, queryable
-- Dense: full provenance, validation, structured queries
+- Dense: full validation, structured queries
 
 **Automation** — full / convention / manual
 - Key signals: operator type, platform capabilities, trust level
-- Full: agent-operated, platform supports hooks
+- Full: agent-operated with hooks
 - Convention: shared human-agent operation
 - Manual: human-primary, learning the system
 

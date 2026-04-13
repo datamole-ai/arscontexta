@@ -4,7 +4,7 @@
 
 Guide the derivation engine in selecting which search modalities a generated system should support, how they interact, and when each is appropriate. Search is a kernel primitive (semantic-search in kernel.yaml) but implementation varies dramatically by platform, volume, and processing intensity. The wrong search configuration produces either retrieval failures (missing semantic when needed) or wasted complexity (deploying hybrid search for a 30-note vault).
 
-This document answers: given a derived system's configuration (volume, granularity, linking style, platform tier), which search modalities should be enabled, how should they be prioritized, and what fallback chains should be generated?
+This document answers: given a derived system's configuration (volume, granularity, linking style), which search modalities should be enabled, how should they be prioritized, and what fallback chains should be generated?
 
 ---
 
@@ -14,7 +14,7 @@ Questions the engine must answer when generating search configuration:
 
 1. **What is the expected note volume trajectory?** Low (<50), moderate (50-200), high (>200). Search modality requirements shift at each threshold.
 2. **Does the linking dimension include implicit connections?** If linking = explicit+implicit, semantic search is structurally required — it IS the implicit linking mechanism.
-3. **What platform tier is available?** Tier-1 (Claude Code with MCP) enables persistent semantic search servers. Tier-2 (CLI tools) enables batch semantic search. Tier-3 (convention only) limits to keyword search plus manual review.
+3. **Is semantic search opted in?** MCP-based semantic search via qmd is available. The derivation determines whether the user's domain and volume warrant enabling it.
 4. **What is the processing intensity?** Heavy processing generates vocabulary divergence faster (many notes reformulating the same concepts in different words), increasing semantic search value.
 5. **How domain-specific is the vocabulary?** Narrow domains with consistent terminology get less value from semantic search. Broad or cross-domain systems where the same concept appears under different names get maximum value.
 6. **Is duplicate detection a requirement?** If the pipeline includes a reduce phase that extracts claims, semantic duplicate detection prevents the same insight from being captured under different phrasings.
@@ -29,7 +29,7 @@ Questions the engine must answer when generating search configuration:
 
 **Summary:** BM25 (Best Matching 25) is a probabilistic ranking function that scores documents by term frequency, inverse document frequency, and document length normalization. It is the standard algorithm behind keyword search. BM25 excels when the searcher knows the exact vocabulary used in the target document — it is fast (sub-second on large corpora), deterministic, requires no model loading or embedding computation, and works on any system with a text index.
 
-**Derivation Implication:** Every generated system gets keyword search as the floor. Even tier-3 convention-only systems can instruct the agent to use ripgrep or grep. Keyword search is the universal fallback that never fails — it requires only filesystem access.
+**Derivation Implication:** Every generated system gets keyword search as the floor. Keyword search is the universal fallback that never fails — it requires only filesystem access.
 
 **Source:** Robertson & Zaragoza, "The Probabilistic Relevance Framework: BM25 and Beyond" (2009). Validated operationally in the vault's qmd `search` mode.
 
@@ -119,16 +119,6 @@ Questions the engine must answer when generating search configuration:
 
 ### Implementation Guidance
 
-#### Minimum viable search is keyword-only with MOC traversal
-
-**Summary:** A knowledge system with only keyword search (grep/ripgrep) and MOC navigation is fully functional. MOCs provide structural navigation — following curated links from topic hubs to relevant notes. Keyword search provides precision retrieval for known terms. Together they cover the majority of retrieval needs. Semantic search adds value at scale and for cross-vocabulary discovery, but its absence does not make a system non-functional.
-
-**Derivation Implication:** Tier-3 (convention-only) systems generate with keyword search instructions and MOC-based navigation only. No semantic search infrastructure. The context file should still describe the concept of semantic search as a future upgrade path, so the agent understands what it is missing and can recommend adding it when friction emerges.
-
-**Source:** Gall's Law: "A complex system that works is invariably found to have evolved from a simple system that worked." The vault itself operated on keyword + MOC navigation before qmd was added.
-
----
-
 #### Semantic search requires embedding infrastructure with maintenance
 
 **Summary:** Deploying semantic search means running an embedding model, maintaining a vector index, and keeping that index synchronized with the filesystem. Embeddings go stale when notes are created, modified, or deleted without re-indexing. A stale index is worse than no index — it gives the agent false confidence that search is comprehensive when recent content is invisible. Any generated system with semantic search must include index maintenance procedures.
@@ -143,31 +133,21 @@ Questions the engine must answer when generating search configuration:
 
 **Summary:** Search infrastructure can fail: MCP servers crash, embedding models fail to load, vector indices become corrupt. A system that depends entirely on semantic search for connection-finding will be blocked when semantic search fails. Dual discovery paths — semantic search plus structural navigation (MOC traversal + keyword search) — ensure that work continues regardless of search infrastructure state. The fallback is not a degraded mode; it is a parallel path that is always available.
 
-**Derivation Implication:** Every generated system must include a fallback chain in its context file. The pattern: try semantic search first, fall back to keyword search + MOC traversal if semantic fails. Never let search failure block work. For tier-1 systems: MCP tool -> CLI tool with locking -> keyword + MOC. For tier-2: CLI tool -> keyword + MOC. For tier-3: keyword + MOC is the only path (no fallback needed because it is the primary).
+**Derivation Implication:** Every generated system must include a fallback chain in its context file. The pattern: try semantic search first (MCP tool -> CLI tool with locking), fall back to keyword search + MOC traversal if semantic fails. Never let search failure block work.
 
 **Source:** Vault operational experience. The three-tier fallback pattern (MCP -> bash with lock -> grep) was developed after MCP server crashes blocked pipeline processing.
 
 ---
 
-### Platform Adaptation
+### Semantic Search via MCP
 
-#### Claude Code enables persistent semantic search via MCP servers
+#### Persistent semantic search via MCP servers
 
 **Summary:** Claude Code's MCP (Model Context Protocol) integration allows semantic search to run as a persistent server process. The qmd MCP server keeps embedding models loaded in memory between requests, eliminating the 5-10 second cold-start penalty of spawning a new process per query. This makes semantic search practical for interactive use and for pipeline phases that issue multiple queries. The MCP server also solves the parallel worker problem: a singleton LlamaCpp instance with reference-counted sessions prevents multiple workers from loading duplicate models into RAM.
 
-**Derivation Implication:** For Claude Code (tier-1) systems, generate MCP configuration (`.mcp.json`) that points to the semantic search server. Include collection definitions matching the system's folder structure. Document the MCP tool names in the context file so the agent knows which tools to call. Note the MCP-in-subagents limitation: custom agents spawned via Agent tool do not inherit MCP access, requiring the CLI fallback.
+**Derivation Implication:** Generate MCP configuration (`.mcp.json`) that points to the semantic search server. Include collection definitions matching the system's folder structure. Document the MCP tool names in the context file so the agent knows which tools to call. Note the MCP-in-subagents limitation: custom agents spawned via Agent tool do not inherit MCP access, requiring the CLI fallback.
 
 **Source:** Vault operational experience with qmd MCP server. The `.mcp.json` configuration and collection definitions are proven patterns.
-
----
-
-#### Convention-only systems compensate with structured manual review
-
-**Summary:** Systems without any search tooling (tier-3) rely entirely on the agent's ability to navigate the graph through MOCs and keyword search. This works at low-to-moderate volume because the agent can hold the full structure in context. At higher volumes, the context file should instruct the agent to periodically review topic adjacencies manually — reading MOCs in related topics and scanning for connections that keyword search would miss. This is the human-era equivalent of "browse your notes" but systematized as a periodic maintenance task.
-
-**Derivation Implication:** For convention-only systems, generate a "Discovery Patterns" section in the context file that teaches manual cross-topic review. Include the topic adjacency pattern: after creating a note in topic A, scan the MOCs of adjacent topics (B, C) for potential connections. This compensates partially for the absence of semantic search.
-
-**Source:** Pre-computational knowledge management practice (Luhmann's physical Zettelkasten relied on sequential browsing and register-based lookup, not search).
 
 ---
 

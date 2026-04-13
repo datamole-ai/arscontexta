@@ -282,7 +282,7 @@ Methodology notes that make behavioral assertions contradicted by the context fi
 
 - Specific reseed conversation scripts (the exact questions to ask during re-derivation) — these belong in the init/architect command documentation, not in the evolution patterns reference.
 - Multi-user system evolution (how systems shared between multiple users evolve differently) — composition concern outside single-system scope.
-- Version control and rollback mechanisms for system evolution — infrastructure concern that belongs in platform-specific documentation.
+- Version control and rollback mechanisms for system evolution — infrastructure concern outside derivation scope.
 - Migration tooling (scripts to transform a system from one tier to another) — implementation detail, not derivation reference.
 - Domain-specific evolution patterns (how therapy systems evolve differently from research systems) — belongs in use-case-presets.md as evolution addenda, not here.
 

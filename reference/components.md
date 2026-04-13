@@ -136,8 +136,7 @@ Action: Check YAML schema, verify description exists, check for wiki-links
 Purpose: Catch quality drift immediately, not during maintenance
 ```
 
-**Implementation:**
-- Claude Code: `.claude/hooks/` with bash scripts
+**Implementation:** `.claude/hooks/` with bash scripts
 
 ---
 
@@ -213,7 +212,7 @@ Check MOC coverage:
 
 ## Sleep Skill — Nightly Processing Pipeline
 
-**Conditional component:** Enabled when processing >= moderate AND platform supports scheduling. Light-processing systems don't generate enough raw material to justify a sleep pipeline.
+**Conditional component:** Enabled when processing >= moderate. Light-processing systems don't generate enough raw material to justify a sleep pipeline.
 
 **What:** Automated processing that runs during quiet hours, transforming raw capture into structured knowledge.
 

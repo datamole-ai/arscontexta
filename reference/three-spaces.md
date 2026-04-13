@@ -238,7 +238,7 @@ Each conflation pattern produces specific, predictable failures:
 
 ## Filesystem Layout
 
-### Claude Code Platform
+### Standard Layout
 
 ```
 project-root/

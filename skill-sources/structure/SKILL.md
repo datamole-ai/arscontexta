@@ -309,7 +309,7 @@ Context degrades as it fills. A single-pass review of a 3000-line source will mi
 
 ### Chunking Strategy
 
-Fresh context per chunk (spawn subagent per chunk if platform supports). Maximum quality.
+Fresh context per chunk (spawn subagent per chunk). Maximum quality.
 
 ---
 

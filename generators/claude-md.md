@@ -147,7 +147,6 @@ When users ask about system structure, schema, or methodology:
 | "Walk me through..." | /arscontexta:tutorial | Interactive learning |
 | "Challenge assumptions..." | /arscontexta:rethink | Triage observations/tensions |
 
-If arscontexta plugin is not loaded, apply the methodology principles documented in this file.
 ```
 
 ## Feature Blocks
@@ -248,20 +247,6 @@ Pipeline tasks are tracked in a JSON queue. Each {DOMAIN:note} gets one queue en
 Maintenance work lives alongside pipeline work in the same queue. /next evaluates conditions against vault state on each invocation: fired conditions create `type: "maintenance"` queue entries, satisfied conditions auto-close them. Priority derives from consequence speed (session > multi-session > slow). One queue, one command.
 ```
 
-## Research Provenance (include when processing >= moderate)
-
-```markdown
-## Research Provenance
-
-When source files contain provenance metadata (research tool, query, timestamp), preserve the chain:
-
-```
-source query → inbox file (metadata preserved) → process → {DOMAIN:notes}/
-```
-
-Each {DOMAIN:note}'s Source footer links back to the inbox source. That source's YAML contains the research context. The chain is complete when you can trace any claim back to its original query.
-```
-
 ## Self-Extension Blueprints (always include)
 
 ```markdown
@@ -278,7 +263,7 @@ Create `.claude/skills/skill-name/SKILL.md` with:
 ### Building Hooks
 Core hooks (orient, validate, commit) are provided by the arscontexta plugin. To add custom vault-level hooks, create scripts in `.claude/hooks/` and register them in `.claude/settings.json`:
 - Use additive merge — read existing settings, append to event arrays, never overwrite
-- See the qmd-sync hook (if present) as an example
+- See the qmd-sync hook as an example
 
 ### Extending Schema
 Add domain-specific YAML fields to your templates. The base fields (description, type, created) are universal. Add fields that make YOUR notes queryable for YOUR use case.

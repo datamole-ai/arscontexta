@@ -12,7 +12,7 @@ This document answers: what should the agent read at session start, how should i
 
 Questions the engine must answer when generating session configuration:
 
-1. **What platform capabilities exist for session automation?** Hooks (Claude Code) can automate orientation and persistence. Convention-only systems rely on context file instructions.
+1. **What hook configuration is needed for session automation?** Hooks automate orientation and persistence — SessionStart for tree injection and file loading, PostToolUse for validation, Stop for session capture.
 2. **What is the self/ space structure?** Session orientation reads self/ — the derivation must know which files exist to generate the orientation sequence.
 3. **What session types will this system support?** Processing sessions (pipeline work), maintenance sessions (health checks), exploration sessions (research and connection finding), capture sessions (rapid note creation). Different types orient and persist differently.
 4. **What is the expected session frequency?** Frequent sessions need different handoff than infrequent sessions. Systems used rarely need heavier orientation because more has been forgotten.
@@ -39,7 +39,7 @@ Questions the engine must answer when generating session configuration:
 
 **Summary:** The agent must know who it is before it knows what to do. Identity (self/identity.md) establishes voice, values, and approach. Methodology (self/methodology.md) establishes quality standards and operational patterns. Goals (self/goals.md) establishes current work threads and priorities. Loading task context before identity produces an agent that knows what to work on but not how to work on it — and "how" includes quality standards, voice consistency, and behavioral constraints that shape every action. The loading order matters: identity -> methodology -> goals -> task context.
 
-**Derivation Implication:** The generated context file's session start section must specify loading order, not just loading list. For systems with hooks: the session-start hook loads self/ files in identity-first order. For convention systems: the context file instructs the agent to read self/ files in the correct sequence before proceeding to any task.
+**Derivation Implication:** The generated context file's session start section must specify loading order, not just loading list. The session-start hook loads self/ files in identity-first order.
 
 **Source:** Vault operational experience. Voice drift and quality inconsistency were traced to sessions where task context was loaded before identity context.
 
@@ -125,7 +125,7 @@ Questions the engine must answer when generating session configuration:
 
 **Summary:** The beginning and end of a session are the two moments where automated behavior adds the most value. At session start: load orientation files, inject file tree, evaluate condition-based triggers against vault state, display health warnings. At session end: save session transcript to ops/sessions/ (Primitive 15 — session capture), auto-create mining tasks for future processing, validate that notes were saved, check for broken links introduced during the session, auto-commit changes, push to remote. These are deterministic operations (verification, not judgment) that hooks can handle without corrupting quality.
 
-**Derivation Implication:** For hook-capable platforms (Claude Code), generate session-start and stop hooks that automate the deterministic parts of orient and persist. The stop hook MUST save session transcripts (session capture is INVARIANT). For convention-only systems, generate checklist instructions that the agent follows manually. The checklist should cover the same behaviors as the hooks, just without automation. The context file should explain what the hooks do so the agent understands the automated behavior.
+**Derivation Implication:** Generate session-start and stop hooks that automate the deterministic parts of orient and persist. The stop hook MUST save session transcripts (session capture is INVARIANT). The context file should explain what the hooks do so the agent understands the automated behavior.
 
 **Source:** Vault hook infrastructure. The session-start hook (tree injection + condition evaluation) and stop hook (session capture + auto-commit) are proven patterns that eliminate routine tasks without requiring judgment.
 
@@ -151,25 +151,13 @@ Questions the engine must answer when generating session configuration:
 
 ---
 
-### Platform Adaptation
+### Hook-Based Session Automation
 
-#### Claude Code automates session rhythm through hooks
+Hooks automate session rhythm. A SessionStart hook injects the file tree and loads orientation files. A PostToolUse hook on Write operations validates note quality. A Stop hook saves the session transcript and can remind the agent to update goals.md. This automation makes the session rhythm invisible — the agent follows it without conscious effort because the infrastructure enforces it. The hooks encode deterministic verification (does the file exist? is the schema valid?) while leaving judgment operations (is the description good? are the connections meaningful?) to skills.
 
-**Summary:** Claude Code's hook system (PreToolUse, PostToolUse, Stop events) enables automatic session rhythm. A SessionStart hook injects the file tree and loads orientation files. A PostToolUse hook on Write operations validates note quality. A Stop hook (or pre-push hook) can remind the agent to update goals.md. This automation makes the session rhythm invisible — the agent follows it without conscious effort because the infrastructure enforces it. The hooks encode deterministic verification (does the file exist? is the schema valid?) while leaving judgment operations (is the description good? are the connections meaningful?) to skills.
-
-**Derivation Implication:** For Claude Code systems, generate hook configurations in `.claude/hooks/` that automate: (1) tree injection at session start, (2) self/ file loading at session start, (3) note validation on Write, (4) session-end reminders. The context file should document what hooks exist and what they do, so the agent understands the automated behavior and doesn't duplicate it.
+**Derivation Implication:** Generate hook configurations in `.claude/hooks/` that automate: (1) tree injection at session start, (2) self/ file loading at session start, (3) note validation on Write, (4) session-end reminders. The context file should document what hooks exist and what they do, so the agent understands the automated behavior and doesn't duplicate it.
 
 **Source:** Vault `.claude/hooks/` implementation. Proven hook patterns: session-start tree injection, PostToolUse validation, auto-commit.
-
----
-
-#### Convention-only systems encode session rhythm in the context file itself
-
-**Summary:** Systems without hooks or skill infrastructure rely entirely on the context file to teach session rhythm. The context file must include explicit session sections: "When you start a session, read these files in this order. When you finish, update these files." This is the lowest-automation approach but it works — context file instructions are loaded at every session start (by definition), so the session rhythm instructions are always present. The risk is instruction-following degradation as context fills, which means session-end instructions (the persist phase) are the most likely to be skipped.
-
-**Derivation Implication:** For convention-only systems, place session rhythm instructions at the top of the context file (where they benefit from smart-zone attention quality). Use bold formatting and clear headers to make the instructions visually prominent. Include a session-end checklist near the end of the context file with "CRITICAL: Do not end the session without completing these steps" framing to counteract attention degradation.
-
-**Source:** Vault CLAUDE.md session patterns section. Convention-based instruction-following is the foundation layer that all platforms share.
 
 ---
 
@@ -189,7 +177,7 @@ Questions the engine must answer when generating session configuration:
 
 **Summary:** Session capture (Primitive 15, INVARIANT) ensures that every session's transcript is saved to ops/sessions/ via the stop hook. This is not optional — session transcripts contain friction patterns, methodology learnings, and connection discoveries that the user may not have explicitly captured via /remember. Auto-created mining tasks queue these transcripts for future processing, where the system extracts friction signals and operational insights. This means the improvement loop works even when the user forgets to call /remember — the system detects friction on its own from recorded sessions.
 
-**Derivation Implication:** Every generated system MUST include session capture in the stop hook. The stop hook saves the session transcript with a timestamp filename to ops/sessions/ and creates a mining task. For convention-only systems, the context file must include an explicit instruction to save session notes before ending. Session capture feeds the operational learning loop (Primitive 12) and condition-based maintenance — without it, the system loses its ability to learn from its own operation.
+**Derivation Implication:** Every generated system MUST include session capture in the stop hook. The stop hook saves the session transcript with a timestamp filename to ops/sessions/ and creates a mining task. Session capture feeds the operational learning loop (Primitive 12) and condition-based maintenance — without it, the system loses its ability to learn from its own operation.
 
 **Source:** v1.6 Primitive 15 specification. The vault's recursive improvement loop depends on session capture as an automatic input mechanism.
 
@@ -199,7 +187,7 @@ Questions the engine must answer when generating session configuration:
 
 **Summary:** The orient and work phases are naturally motivated — the agent needs orientation to function, and work is the session's purpose. The persist phase has no natural motivation: the agent's session is ending, the user may have moved on, and the "save your progress" step feels like overhead. But skipping persist means the next session starts without handoff, goals.md is outdated, observations are lost, and newly created notes may not be committed. Session capture (Primitive 15) mitigates the worst consequence — transcript loss — by automating it via the stop hook. But goals.md updates and observation capture still require explicit action.
 
-**Derivation Implication:** Generated systems should make the persist phase as prominent and explicit as possible. Session capture (stop hook) automates transcript persistence. For remaining persist actions (goals.md update, observation capture, git commit): hook-based systems should generate reminders or automation. Convention systems should place the session-end checklist prominently with "CRITICAL" framing. The vault's auto-commit hook is an example of automating the most commonly skipped persist action (committing changes to git).
+**Derivation Implication:** Generated systems should make the persist phase as prominent and explicit as possible. Session capture (stop hook) automates transcript persistence. For remaining persist actions (goals.md update, observation capture, git commit): generate reminders or automation. The vault's auto-commit hook is an example of automating the most commonly skipped persist action (committing changes to git).
 
 **Source:** Vault operational observation. Multiple sessions ended without goals.md updates, producing orientation gaps in subsequent sessions.
 
@@ -231,7 +219,7 @@ Questions the engine must answer when generating session configuration:
 
 **Summary:** Goals.md tracks work threads; reminders.md tracks time-bound actions. "Follow up with Sarah by Friday" is not a goal — it is a deadline-bound action that should surface at the right time and disappear when completed. The reminders mechanism (ops/reminders.md as a simple checkbox list with dates) provides a lightweight way for the user to delegate time-sensitive actions to the agent without polluting goals.md with one-off items. At session start, the agent checks reminders.md for due items and surfaces them. This is not a calendar — it is a delegation mechanism for actions the user wants the agent to remind them about.
 
-**Derivation Implication:** Generated systems should include ops/reminders.md with a simple format: `- [ ] YYYY-MM-DD: action description`. The orient phase should include "check reminders.md for due items" as a standard step. This is lightweight enough for all configurations — even convention-only systems can include reminder checking as a context file instruction.
+**Derivation Implication:** Generated systems should include ops/reminders.md with a simple format: `- [ ] YYYY-MM-DD: action description`. The orient phase should include "check reminders.md for due items" as a standard step. This is lightweight enough for all configurations.
 
 **Source:** `three-spaces.md` — reminders specification. Time-bound actions and knowledge work goals serve different purposes and require different tracking mechanisms.
 
@@ -241,7 +229,7 @@ Questions the engine must answer when generating session configuration:
 
 **Summary:** At session start, the system evaluates a set of declared conditions against the current vault state. When a condition fires, it surfaces as a task on the task stack via /next. This replaces all time-based scheduling (weekly health checks, monthly reviews, quarterly rethink). Conditions respond to actual state: "topic MOC exceeds 50 notes" fires when it is true, not on a Tuesday. "Stale nodes exceed 20%" fires when graph metrics warrant it, not monthly. "Unprocessed sessions exceed N" fires when transcripts accumulate. Conditions do not stack during periods of inactivity — if the vault has not changed since the last session, no conditions fire.
 
-**Derivation Implication:** Every generated system should include condition-based triggers evaluated at session start. For hook-capable systems, the session-start hook runs condition evaluation and surfaces fired conditions. For convention-only systems, the context file instructs the agent to check vault state conditions manually. The condition declarations should be domain-appropriate: research vaults check orphan notes and MOC sizes; personal assistant vaults check follow-up due dates and memory staleness.
+**Derivation Implication:** Every generated system should include condition-based triggers evaluated at session start. The session-start hook runs condition evaluation and surfaces fired conditions. The condition declarations should be domain-appropriate: research vaults check orphan notes and MOC sizes; personal assistant vaults check follow-up due dates and memory staleness.
 
 **Source:** v1.6 condition-based maintenance specification. Cognitive science mapping: human prospective memory works through environmental cues, not calendar schedules.
 
@@ -251,7 +239,7 @@ Questions the engine must answer when generating session configuration:
 
 **Summary:** Systems with processing pipelines or maintenance schedules benefit from a "morning briefing" at session start: a summary of what happened since the last session, what conditions have fired, and what the system's health looks like. This is richer than just reading goals.md — it synthesizes queue state, fired conditions, health metrics, and recent observations into a single orientation snapshot. The briefing gives the session a purpose statement: "Today: 3 queue items ready for reflect, 2 conditions fired (orphan notes detected, pending observations threshold exceeded), inbox has 5 new items."
 
-**Derivation Implication:** Generated systems with processing = moderate or heavy should include a morning briefing mechanism. The session-start hook can aggregate condition evaluation results with queue status and inbox count. For convention-only systems, the context file can instruct the agent to manually evaluate conditions and summarize. The briefing pattern transforms "what should I do?" into "here is what needs doing" — reducing the orientation cost.
+**Derivation Implication:** Generated systems with processing = moderate or heavy should include a morning briefing mechanism. The session-start hook aggregates condition evaluation results with queue status and inbox count. The briefing pattern transforms "what should I do?" into "here is what needs doing" — reducing the orientation cost.
 
 **Source:** Vault queue reconciliation pattern. The session-start hook shows queue status and /next runs condition reconciliation, functioning as the morning briefing.
 
