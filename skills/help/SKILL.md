@@ -82,7 +82,7 @@ Extract `name:` and `description:` from each frontmatter. Do NOT hardcode the co
 
 | Category | Commands | When to Show |
 |----------|----------|-------------|
-| Core | /ask, /learn, /next, /help | Always |
+| Core | /ask, /next, /help | Always |
 | Processing | /extract, /structure, /capture, /reflect, /reweave, /verify | Always (all skills from day one) |
 | Maintenance | /health, /rethink, /remember | Always |
 | Evolution | /architect, /reseed, /add-domain, /upgrade | Always |
@@ -120,8 +120,6 @@ Getting started:
 
   /ask [question]    Ask about [domain] -- I will
                      answer from your graph
-  /learn [topic]     Research [topic] and grow
-                     your graph with findings
   /tutorial          Walk through the system
                      step by step (5 minutes)
 
@@ -193,7 +191,6 @@ Commands you might not know:
 
 All commands:
   /ask [question]        Query your knowledge system
-  /learn [topic]         Research and grow your graph
   /next                  Next recommended action
   /{reduce} [source]     Extract insights from material
   /{reflect}             Find connections between notes
@@ -222,7 +219,6 @@ Pick the FIRST matching condition:
 | 10+ observations or 5+ tensions | `Review accumulated evidence: /{rethink}` |
 | Health warnings exist | `Check health: /health` |
 | Notes exist, sparse connections | `Build connections: /{reflect}` |
-| User hasn't tried /learn | `Grow your graph: /learn [topic related to their domain]` |
 | Methodology folder has friction notes | `Your system is learning from friction -- review with /{rethink}` |
 | Methodology folder has notes beyond derivation-rationale | `Your system has [N] operational learnings -- query them with /ask or browse ops/methodology/` |
 | Sessions accumulating without mining | `Mine session learnings: /remember` |
@@ -247,7 +243,6 @@ Add: `For details, see manual/{page}.md`
 **"Commands you might not know" logic:**
 
 Track which commands the user has likely used by checking for their artifacts:
-- /learn used if `ops/sessions/` has learn-related transcripts or inbox has research files
 - /remember used if `ops/methodology/` or `ops/observations/` has files
 - /graph used if... (no artifact, always suggest if note count > 20)
 - /stats used if... (no artifact, always suggest if note count > 10)
@@ -262,7 +257,6 @@ Quick reference. No state analysis. No suggestions. Just the commands.
 --=={ ars contexta : help --compact }==--
 
   /ask [question]        Query knowledge system
-  /learn [topic]         Research and grow graph
   /next                  Next recommended action
   /{reduce} [source]     Extract insights
   /{reflect}             Find connections

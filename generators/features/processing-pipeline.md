@@ -33,7 +33,7 @@ Read the source material through the mission lens: "Does this serve {DOMAIN:the 
 | Enrichments | Content that improves existing {DOMAIN:notes} | Enrichment task |
 | Anti-patterns | What breaks, what to avoid | Problem note |
 
-**The selectivity gate:** Not everything extracts. You must judge: does this add genuine insight, or is it noise? When in doubt, extract — it is easier to merge duplicates than recover missed insights.
+**Quality filter:** Not everything extracts. You must judge: does this add genuine insight, or is it noise? When in doubt, extract — it is easier to merge duplicates than recover missed insights.
 
 **Quality bar for extracted {DOMAIN:notes}:**
 - Title works as prose when linked: `since [[{DOMAIN:note title}]]` reads naturally
@@ -343,5 +343,4 @@ Requires: yaml-schema, wiki-links, atomic-notes, mocs
 - {DOMAIN:maintain} (backward pass, update old notes)
 - {DOMAIN:verify} (combined quality gate: description, schema, links)
 - {DOMAIN:health} (systematic health checks)
-- {DOMAIN:learn} (research and file to inbox)
 - {DOMAIN:rethink} (review accumulated observations and tensions)

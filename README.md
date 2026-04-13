@@ -152,7 +152,6 @@ or `decisions/`), but the separation is invariant.
 |---------|-------------|
 | `/rethink` | Challenge system assumptions |
 | `/remember` | Mine session learnings |
-| `/learn` | Research and grow |
 | `/refactor` | Structural improvements |
 
 Note: `/ask` and `/architect` are plugin-level commands (listed above) and are not generated during setup.

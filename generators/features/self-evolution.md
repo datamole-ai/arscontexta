@@ -212,15 +212,13 @@ What conflicts, why both sides seem valid, and what resolution might look like.
 
 Your knowledge system doesn't just maintain itself — it actively grows. This is the explicit growth cycle:
 
-1. **/{DOMAIN:learn} [topic]** — Research a topic using available sources. Results are filed to {DOMAIN:inbox/} with provenance metadata so you can trace where every claim came from.
+1. **/{DOMAIN:process}** — Extract atomic {DOMAIN:notes} from inbox material. Each source gets scanned through your domain lens: "Does this help me work better in my domain?" Extracted claims become {DOMAIN:notes} with proper schema.
 
-2. **/{DOMAIN:process}** — Extract atomic {DOMAIN:notes} from inbox material. Each source gets scanned through your domain lens: "Does this help me work better in my domain?" Extracted claims become {DOMAIN:notes} with proper schema.
+2. **/{DOMAIN:connect}** — Find connections between new {DOMAIN:notes} and existing ones. Update {DOMAIN:topic maps} to include the new material. Add bidirectional links where relationships are genuine.
 
-3. **/{DOMAIN:connect}** — Find connections between new {DOMAIN:notes} and existing ones. Update {DOMAIN:topic maps} to include the new material. Add bidirectional links where relationships are genuine.
+3. **Compound** — The graph grows. New connections make existing {DOMAIN:notes} more valuable by creating new traversal paths. {DOMAIN:topic maps} become richer. Semantic search becomes more useful as the graph gets denser.
 
-4. **Compound** — The graph grows. New connections make existing {DOMAIN:notes} more valuable by creating new traversal paths. {DOMAIN:topic maps} become richer. Semantic search becomes more useful as the graph gets denser.
-
-5. **Repeat** — Each cycle makes the system more capable. More {DOMAIN:notes} means more connections. More connections means better retrieval. Better retrieval means better synthesis. Better synthesis means better {DOMAIN:notes}.
+4. **Repeat** — Each cycle makes the system more capable. More {DOMAIN:notes} means more connections. More connections means better retrieval. Better retrieval means better synthesis. Better synthesis means better {DOMAIN:notes}.
 
 This is not maintenance — maintenance keeps what you have working. This is active expansion of your system's knowledge and capability. The system gets smarter about your domain with every cycle, because the graph compounds: each new node increases the value of every connected node.
 ```

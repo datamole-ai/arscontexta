@@ -145,7 +145,6 @@ When users ask about system structure, schema, or methodology:
 | "What should I work on..." | /arscontexta:next | Reconcile queue + recommend |
 | "Help / what can I do..." | /arscontexta:help | Show available commands |
 | "Walk me through..." | /arscontexta:tutorial | Interactive learning |
-| "Research / learn about..." | /arscontexta:learn | Deep research with provenance |
 | "Challenge assumptions..." | /arscontexta:rethink | Triage observations/tensions |
 
 If arscontexta plugin is not loaded, apply the methodology principles documented in this file.

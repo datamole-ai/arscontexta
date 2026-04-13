@@ -358,10 +358,9 @@ When the user's question involves their specific system (not abstract methodolog
 ### Step 1: Read Their Derivation
 
 Check for `ops/derivation.md` to understand:
-- Their dimension positions (granularity, organization, etc.)
+- Their dimension positions (organization, etc.)
 - Their vocabulary choices (what are "notes" called in their domain?)
 - Their tradition mapping (which methodology preset, if any?)
-- Their personality settings (formal/warm, clinical/conversational)
 - Their constraint profile (which interaction constraints are active?)
 
 ### Step 2: Apply Domain Vocabulary
@@ -379,8 +378,7 @@ Use `${CLAUDE_PLUGIN_ROOT}/reference/vocabulary-transforms.md` to translate univ
 ### Step 3: Check Interaction Constraints
 
 Reference `${CLAUDE_PLUGIN_ROOT}/reference/interaction-constraints.md` to understand whether their configuration creates specific pressures relevant to the question. Some dimension combinations create tensions that affect the answer:
-- High granularity + flat organization = needs strong semantic search
-- Permissive selectivity + deep processing = high volume, slower throughput
+- flat organization = needs strong semantic search
 - Self space enabled + warm personality = rich identity layer
 
 ### Step 4: Cite Dimension-Specific Research

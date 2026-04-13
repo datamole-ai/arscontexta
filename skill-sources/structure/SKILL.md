@@ -21,13 +21,9 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.topic_map` for MOC/topic map references
    - Use `vocabulary.topic_maps` for plural form
 
-2. **`ops/config.yaml`** — selectivity
-   - `processing.extraction.selectivity`: strict | moderate | permissive
-
-3. **`ops/queue/queue.json`** — current task queue
+2. **`ops/queue/queue.json`** — current task queue
 
 If these files don't exist (pre-init invocation or standalone use), use universal defaults:
-- selectivity: moderate
 - notes folder: `notes/`
 - inbox folder: `inbox/`
 

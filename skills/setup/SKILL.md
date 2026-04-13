@@ -971,7 +971,6 @@ processing_tier: auto    # auto | 1 | 2 | 3 | 4
 processing:
   depth: standard          # deep | standard | quick
   extraction:
-    selectivity: moderate  # strict | moderate | permissive
     categories: auto       # auto (from derivation) | custom list
   reweave:
     scope: related         # related | broad | full
@@ -1220,12 +1219,11 @@ Generate ALL skills. Every vault ships with the complete skill set from day one.
 
 **Skill source templates live at `${CLAUDE_PLUGIN_ROOT}/skill-sources/`.** Each subdirectory contains a `SKILL.md` template that must be read and written to the user's skills directory.
 
-The 19 skill sources to install:
+The 18 skill sources to install:
 
 
 | Source Directory                                     | Skill Name    | Category      | Tier |
 | ---------------------------------------------------- | ------------- | ------------- | ---- |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/learn/`         | learn         | Growth        | A    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/tasks/`         | tasks         | Orchestration | A    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/reflect/`       | reflect       | Processing    | B    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/reweave/`       | reweave       | Processing    | B    |
@@ -1268,7 +1266,7 @@ Process tiers in order: **A → B → C** (simplest first, saving context for sk
 
 ##### Tier A — Copy (no placeholders)
 
-**Skills:** learn, tasks
+**Skills:** tasks
 
 These skill sources contain zero placeholders of either type.
 
@@ -1556,7 +1554,6 @@ System evolution and research. Use these to understand, challenge, and improve y
 
 - /{DOMAIN:rethink} — challenge system assumptions, review observations and tensions, detect drift
 - /{DOMAIN:remember} — capture friction and methodology learnings
-- /{DOMAIN:learn} — research and grow the knowledge base
 - /{DOMAIN:refactor} — structural improvements
 
 {For meta-cognitive skills: 2-3 sentences each on when and how to use, absorbing content formerly in meta-skills.md}
@@ -1906,7 +1903,6 @@ Here's what you can do:
   /arscontexta:health             -- check your knowledge system
   /arscontexta:help               -- see everything available
   /arscontexta:next               -- get intelligent next-action recommendations
-  /arscontexta:learn              -- research a topic and grow your graph
 ```
 
 Note: Plugin commands use the format `/arscontexta:command-name`. List all commands explicitly since they may not appear in tab completion. If skills were generated, note they require a Claude Code restart.

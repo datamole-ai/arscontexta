@@ -22,14 +22,9 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.topic_map` for MOC/topic map references
    - Use `vocabulary.topic_maps` for plural form
 
-2. **`ops/config.yaml`** — selectivity
-   - `processing.extraction.selectivity`: strict | moderate | permissive
-
-3. **`ops/queue/queue.json`** — current task queue
+2. **`ops/queue/queue.json`** — current task queue
 
 If these files don't exist (pre-init invocation or standalone use), use universal defaults:
-- depth: standard
-- selectivity: moderate
 - notes folder: `notes/`
 - inbox folder: `inbox/`
 
@@ -170,20 +165,20 @@ If NO -> skip (RARE for domain-relevant sources — verify it is truly off-topic
 
 **The structural invariant:** Every domain's extraction has these universal categories regardless of domain:
 
-| Category | What to Find | Output Type | Gate Required? |
-|----------|--------------|-------------|----------------|
-| Core domain {vocabulary.note_plural} | Direct assertions about {vocabulary.domain} | {vocabulary.note} | NO |
-| Patterns | Recurring structures across sources | {vocabulary.note} | NO |
-| Comparisons | How different approaches compare, X vs Y, trade-offs | {vocabulary.note} | NO |
-| Tensions | Contradictions, conflicts, unresolved trade-offs | tension note | NO |
-| Anti-patterns | What breaks, what to avoid, failure modes | problem note | NO |
-| Enrichments | Content that adds detail to existing {vocabulary.note_plural} | enrichment task | NO |
-| Open questions | Unresolved questions worth tracking | {vocabulary.note} (open) | NO |
-| Implementation ideas | Techniques, workflows, features to build | methodology note | NO |
-| Validations | Evidence confirming an approach works | {vocabulary.note} | NO |
-| Off-topic general content | Insight unrelated to {vocabulary.domain} | apply selectivity gate | YES |
+| Category | What to Find | Output Type |
+|----------|--------------|-------------|
+| Core domain {vocabulary.note_plural} | Direct assertions about {vocabulary.domain} | {vocabulary.note} |
+| Patterns | Recurring structures across sources | {vocabulary.note} |
+| Comparisons | How different approaches compare, X vs Y, trade-offs | {vocabulary.note} |
+| Tensions | Contradictions, conflicts, unresolved trade-offs | tension note |
+| Anti-patterns | What breaks, what to avoid, failure modes | problem note |
+| Enrichments | Content that adds detail to existing {vocabulary.note_plural} | enrichment task |
+| Open questions | Unresolved questions worth tracking | {vocabulary.note} (open) |
+| Implementation ideas | Techniques, workflows, features to build | methodology note |
+| Validations | Evidence confirming an approach works | {vocabulary.note} |
+| Off-topic general content | Insight unrelated to {vocabulary.domain} | filter using 4-criterion quality check |
 
-**IMPORTANT:** Categories 1-9 bypass the selectivity gate. They extract directly to the appropriate output type. The selectivity gate exists ONLY for filtering off-topic content from general sources.
+**IMPORTANT:** Domain-relevant content (categories 1-9) extracts directly. The 4-criterion quality check (standalone, composable, novel, connected) applies only to off-topic content from general sources.
 
 ### Category Detection Signals
 
@@ -223,25 +218,16 @@ Hunt for these signals in every source:
 
 For EVERY candidate, ask: **"Does this serve {vocabulary.domain}?"**
 
-- YES -> **extract to appropriate category** (gate does NOT apply)
-- NO -> apply selectivity gate (for off-topic filtering only)
+- YES -> **extract to appropriate category**
+- NO -> apply the 4-criterion quality check (standalone, composable, novel, connected)
 
-**For domain-relevant sources:** almost everything is YES. The gate barely applies. Skip rate < 10%.
+**For domain-relevant sources:** almost everything is YES.
 
 ---
 
-## The Selectivity Gate (for OFF-TOPIC content filtering)
+## Off-Topic Filtering
 
-**CRITICAL:** This gate exists to filter OUT content that does not serve {vocabulary.domain}. It applies ONLY to standard claims from GENERAL (off-topic) sources.
-
-**Do NOT use gate to reject:**
-- Implementation ideas ("not a claim" is WRONG — it is roadmap)
-- Tensions ("not a claim" is WRONG — it is wisdom)
-- Enrichments ("duplicate" is WRONG — it adds detail)
-- Validations ("already known" is WRONG — it is evidence)
-- Open questions ("not testable" is WRONG — it is direction)
-
-For STANDARD claims from general sources, verify all four criteria pass:
+For off-topic content (general insights not about {vocabulary.domain}), verify all four criteria pass before extracting:
 
 ### 1. Standalone
 
@@ -330,16 +316,12 @@ This is the critical step that prevents over-rejection. Categorize FIRST, then r
 
 | Category | How to Identify | Route To |
 |----------|-----------------|----------|
-| Core domain {vocabulary.note} | Direct assertion about {vocabulary.domain} | -> {vocabulary.note} (SKIP selectivity gate) |
-| Implementation idea | Describes a feature, tool, system, or workflow to build | -> methodology note (SKIP selectivity gate) |
-| Tension/challenge | Describes a conflict, risk, or trade-off | -> tension note (SKIP selectivity gate) |
-| Validation | Evidence confirming an approach works | -> {vocabulary.note} (SKIP selectivity gate) |
+| Core domain {vocabulary.note} | Direct assertion about {vocabulary.domain} | -> {vocabulary.note} |
+| Implementation idea | Describes a feature, tool, system, or workflow to build | -> methodology note |
+| Tension/challenge | Describes a conflict, risk, or trade-off | -> tension note |
+| Validation | Evidence confirming an approach works | -> {vocabulary.note} |
 | Near-duplicate | Semantic search finds related vault {vocabulary.note} | -> evaluate for enrichment task |
-| Off-topic claim | General insight not about {vocabulary.domain} | -> apply selectivity gate |
-
-**CRITICAL:** Implementation ideas, tensions, validations, and domain {vocabulary.note_plural} do NOT need to pass the 4-criterion selectivity gate. The gate is for off-topic filtering ONLY.
-
-**Why this matters:** The selectivity gate was designed for filtering general insights. But implementation ideas ("build a trails feature"), tensions ("optimization vs readability trade-off"), and validations ("research confirms our approach") are DIFFERENT output types that serve different purposes. Applying the selectivity gate to them is a category error.
+| Off-topic claim | General insight not about {vocabulary.domain} | -> apply 4-criterion quality check |
 
 ### 4. Semantic Search for Duplicates and Enrichment
 
@@ -708,20 +690,6 @@ TOTAL: ?
 
 **If your total outputs are significantly below these ranges, you are over-filtering.**
 
-### Selectivity Adaptation
-
-Processing selectivity adapts based on `ops/config.yaml`:
-
-| Selectivity (config) | Gate Behavior | Skip Rate Target |
-|----------------------|---------------|-----------------|
-| strict | 4-criterion gate applies to ALL claims including domain-relevant | Higher skip rate acceptable |
-| moderate (default) | Gate applies only to off-topic content. Domain-relevant bypasses gate | < 10% for domain sources |
-| permissive | Gate barely applies. Extract nearly everything, heavy enrichment | < 5% overall |
-
-**Strict mode** is for mature vaults where noise reduction matters more than coverage.
-**Permissive mode** is for new vaults building initial density.
-**Moderate** is the default — comprehensive extraction for domain content, selective for off-topic.
-
 ### Mandatory Review If Low Yield
 
 Go back through candidates you marked as "duplicate" or "rejected":
@@ -845,7 +813,7 @@ Could someone disagree with this claim? Vague {vocabulary.note_plural} cannot be
 **3. Clean Linking**
 Would linking to this {vocabulary.note} drag unrelated content along? If yes, the {vocabulary.note} covers too much.
 
-**When to skip:** content does not pass all four selectivity criteria (off-topic content only)
+**When to skip:** off-topic content that does not pass all four quality criteria
 **When to split:** multiple distinct claims in one extraction
 **When to sharpen:** claim too vague, title is label not statement
 
@@ -920,7 +888,7 @@ Never auto-extract. Always present findings and wait for user approval.
 
 **When in doubt, extract.** For domain-relevant sources, err toward capturing. Implementation ideas, tensions, validations, open questions, and near-duplicates all have value — they become different output types, not rejections.
 
-**The principle:** the goal is to capture everything relevant to {vocabulary.domain}. For domain-relevant sources, that is MOST of the content. The selectivity gate exists for OFF-TOPIC filtering, not for rejecting on-mission content that happens to have a different form.
+**The principle:** the goal is to capture everything relevant to {vocabulary.domain}. For domain-relevant sources, that is MOST of the content. The 4-criterion quality check is for off-topic filtering, not for rejecting on-mission content that happens to have a different form.
 
 **Remember:**
 - Implementation ideas are NOT "not claims" — they are roadmap

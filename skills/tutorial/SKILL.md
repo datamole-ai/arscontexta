@@ -273,7 +273,7 @@ Use AskUserQuestion with track-adapted prompt:
 
 Extract 1-2 atomic insights:
 1. Identify propositions worth keeping (not summaries, not logistics)
-2. Apply selectivity: skip purely conversational content, temporary logistics, vague observations
+2. Skip purely conversational content, temporary logistics, vague observations
 3. Check for connections to existing tutorial {vocabulary.note_plural}
 4. Create {vocabulary.note}(s) with proper schema
 5. Link where genuine connections exist
@@ -296,9 +296,8 @@ If nothing worth extracting:
 ```
   No atomic insights found in this material.
   That happens — not everything contains
-  extractable propositions. The selectivity
-  gate is working: better to skip than to
-  create low-value {vocabulary.note_plural}.
+  extractable propositions. Better to skip
+  than to create low-value {vocabulary.note_plural}.
 ```
 
 Update state, then continue to Step 4.
@@ -432,7 +431,6 @@ This is the handoff to productive use. Do not process the response — just ackn
 
   Quick reference:
     /ask [question]     Query your graph
-    /learn [topic]      Research and grow
     /{reduce} [source]  Extract insights
     /{reflect}          Find connections
     /health             Check system health
