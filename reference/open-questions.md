@@ -8,15 +8,7 @@ What we know we don't know, and what we deliberately deferred. This document tra
 
 These items are specified but not implemented in v1.0. They are concrete enough to ship in the next minor release.
 
-### 1. Scan Mode for Health Command
-
-**What:** `/health --scan` performs a lightweight, non-destructive health check that outputs metrics without modifying any files. Currently, `/health` both diagnoses and proposes fixes. Scan mode separates diagnosis from prescription.
-
-**Why deferred:** Health command works without scan mode — the combined mode handles most use cases. Scan mode becomes valuable when users want to monitor without committing to action (CI pipelines, automated monitoring).
-
-**When to ship:** When the first user asks for health metrics in their CI pipeline, or when automated monitoring reveals demand for read-only health checks.
-
-### 2. Migration Assistant
+### 1. Migration Assistant
 
 **What:** A guided flow for importing existing note collections into a generated Ars Contexta system. Detects common formats (Obsidian, Notion export, plain markdown), maps existing structure to the three-space architecture, and proposes schema additions for existing frontmatter.
 
@@ -24,7 +16,7 @@ These items are specified but not implemented in v1.0. They are concrete enough 
 
 **When to ship:** When user feedback shows significant demand from existing vault owners who want to adopt Ars Contexta methodology on top of their current content.
 
-### 3. arscontexta.dev Website
+### 2. arscontexta.dev Website
 
 **What:** A web frontend rendering the research graph through a sliding-pane reader for human browsing, plus an MCP endpoint for agent architect queries. Built on the same knowledge graph that the derivation engine reasons from.
 
@@ -32,7 +24,7 @@ These items are specified but not implemented in v1.0. They are concrete enough 
 
 **When to ship:** After v1.0 plugin and MCP server are stable, when human-readable research presentation becomes the growth bottleneck.
 
-### 4. MCP Hosted Server
+### 3. MCP Hosted Server
 
 **What:** A hosted version of the Ars Contexta MCP server that users connect to without running locally. Provides `arscontexta_query`, `arscontexta_recommend`, and `arscontexta_dimensions` tools through a cloud endpoint.
 
@@ -40,7 +32,7 @@ These items are specified but not implemented in v1.0. They are concrete enough 
 
 **When to ship:** When the local MCP server sees enough adoption that hosting becomes a friction reducer rather than a premature investment.
 
-### 5. Advanced Derivation Heuristics
+### 4. Advanced Derivation Heuristics
 
 **What:** Richer conversation analysis beyond keyword-to-dimension mapping. Includes: conversation flow analysis (not just individual signals but signal sequences), confidence calibration across dimensions (some signals are stronger than others), and automated heuristic testing against the conversation pattern corpus.
 
@@ -48,7 +40,7 @@ These items are specified but not implemented in v1.0. They are concrete enough 
 
 **When to ship:** After collecting derivation logs from 50+ real conversations, when patterns in heuristic failures reveal specific improvement targets.
 
-### 6. Sleep-Time Compute
+### 5. Sleep-Time Compute
 
 **What:** Background inference during inactive periods — processing inbox items, finding connections between existing notes, running backward maintenance, detecting synthesis opportunities. Produces a morning briefing in ops/.
 
@@ -56,7 +48,7 @@ These items are specified but not implemented in v1.0. They are concrete enough 
 
 **When to ship:** After the processing pipeline skills are proven reliable, when the incremental value of background processing justifies the scheduling complexity.
 
-### 7. Observation Export
+### 6. Observation Export
 
 **What:** `/health --export-observations` packages ops/observations/ into an anonymized JSON bundle with system context (dimension positions, note count, feature blocks) but no user content. Always manual, always opt-in, always reviewable before sharing.
 

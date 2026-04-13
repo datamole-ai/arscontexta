@@ -1,10 +1,9 @@
 ---
 name: health
-description: Run condition-based vault health diagnostics. 8 categories — schema compliance, orphan detection, link health, description quality, three-space boundaries, processing throughput, stale notes, MOC coherence. 3 modes — quick (schema+orphans+links), full (all 8), three-space (boundary violations only). Returns actionable FAIL/WARN/PASS report with specific fixes ranked by impact. Triggers on "/health", "check vault health", "maintenance report", "what needs fixing".
+description: Run condition-based vault health diagnostics. 8 categories — schema compliance, orphan detection, link health, description quality, three-space boundaries, processing throughput, stale notes, MOC coherence. Returns actionable FAIL/WARN/PASS report with specific fixes ranked by impact. Triggers on "/health", "check vault health", "maintenance report", "what needs fixing".
 version: "1.0"
 context: fork
 allowed-tools: Read, Grep, Glob, Bash, mcp__qmd__query
-argument-hint: "[optional: 'quick', 'full', or 'three-space']"
 ---
 
 ## Runtime Configuration (Step 0 — before any processing)
@@ -20,7 +19,7 @@ Read these files to configure domain-specific behavior:
 
 2. **`ops/config.yaml`** — thresholds
 
-3. **Three-space reference** — `${CLAUDE_PLUGIN_ROOT}/reference/three-spaces.md` for boundary rules (load only for full and three-space modes)
+3. **Three-space reference** — `${CLAUDE_PLUGIN_ROOT}/reference/three-spaces.md` for boundary rules
 
 4. **Templates** — read template files to understand required schema fields for validation
 
@@ -33,25 +32,14 @@ If these files don't exist (pre-init invocation or standalone use), use universa
 
 ## EXECUTE NOW
 
-**Target: $ARGUMENTS**
-
-Parse the invocation mode immediately:
-
-| Input | Mode | Categories Run |
-|-------|------|---------------|
-| empty or `quick` | Quick | 1 (Schema), 2 (Orphans), 3 (Links) |
-| `full` | Full | All 8 categories |
-| `three-space` | Three-Space | 5 (Three-Space Boundaries) only |
-
 **Execute these steps:**
 
-1. **Detect mode** from arguments
-2. **Scan the vault** — inventory all note files, {vocabulary.topic_map} files, inbox items, ops files
-3. **Run each applicable diagnostic category** in order (1-8)
-4. **Classify each result** as PASS, WARN, or FAIL using the thresholds below
-5. **Surface condition-based maintenance signals** (check against threshold table)
-6. **Generate the health report** with specific file paths, counts, and recommended actions
-7. **Write report to** `ops/health/YYYY-MM-DD-report.md`
+1. **Scan the vault** — inventory all note files, {vocabulary.topic_map} files, inbox items, ops files
+2. **Run each diagnostic category** in order (1-8)
+3. **Classify each result** as PASS, WARN, or FAIL using the thresholds below
+4. **Surface condition-based maintenance signals** (check against threshold table)
+5. **Generate the health report** with specific file paths, counts, and recommended actions
+6. **Write report to** `ops/health/YYYY-MM-DD-report.md`
 
 **START NOW.** Reference below explains each diagnostic category in detail.
 
@@ -59,7 +47,7 @@ Parse the invocation mode immediately:
 
 ## The 8 Diagnostic Categories
 
-### Category 1: Schema Compliance (quick, full)
+### Category 1: Schema Compliance
 
 **What it checks:** Every {vocabulary.note} in {vocabulary.notes}/ and self/memory/ (if self/ is enabled) has valid YAML frontmatter with required fields.
 
@@ -106,7 +94,7 @@ done
     12/15 notes fully compliant
 ```
 
-### Category 2: Orphan Detection (quick, full)
+### Category 2: Orphan Detection
 
 **What it checks:** Every {vocabulary.note} has at least one incoming wiki link from another file.
 
@@ -144,7 +132,7 @@ done
     Recommendation: run /reflect on forgotten-insight.md and old-observation.md
 ```
 
-### Category 3: Link Health (quick, full)
+### Category 3: Link Health
 
 **What it checks:** Every wiki link `[[target]]` in every file resolves to an existing file.
 
@@ -185,7 +173,7 @@ done
     Recommendation: create missing notes or remove broken links
 ```
 
-### Category 4: Description Quality (full only)
+### Category 4: Description Quality
 
 **What it checks:** Every {vocabulary.note}'s description adds genuine information beyond the title — not just a restatement.
 
@@ -230,7 +218,7 @@ For each {vocabulary.note}:
     Recommendation: rewrite descriptions to add scope, mechanism, or implication
 ```
 
-### Category 5: Three-Space Boundary Check (full, three-space)
+### Category 5: Three-Space Boundary Check
 
 **What it checks:** Content respects the boundaries between self/, {vocabulary.notes}/, and ops/. Each space has a purpose — conflating them degrades search quality, navigation, and trust.
 
@@ -340,7 +328,7 @@ fi
     Recommendation: move task-tracking.md to ops/queue/
 ```
 
-### Category 6: Processing Throughput (full only)
+### Category 6: Processing Throughput
 
 **What it checks:** The inbox-to-knowledge ratio. High ratios indicate collector's fallacy — capturing more than processing.
 
@@ -379,7 +367,7 @@ echo "Inbox: $INBOX_COUNT | Notes: $NOTES_COUNT | In-progress: $QUEUE_COUNT | Ra
     Recommendation: run /extract, /structure, or /capture on oldest inbox items, or /pipeline for end-to-end processing
 ```
 
-### Category 7: Stale Note Detection (full only)
+### Category 7: Stale Note Detection
 
 **What it checks:** Notes not modified recently AND with low link density. Staleness is condition-based (low link density + no activity since N new notes were added), not purely calendar-based.
 
@@ -431,7 +419,7 @@ done
     Recommendation: run /reweave on these notes to find connections, or archive if no longer relevant
 ```
 
-### Category 8: {vocabulary.topic_map} Coherence (full only)
+### Category 8: {vocabulary.topic_map} Coherence
 
 **What it checks:** Each {vocabulary.topic_map} has a healthy number of linked notes, and notes in the same topic area are actually linked.
 
@@ -536,11 +524,10 @@ PENDING_TASKS=$(jq '[.tasks[] | select(.status=="pending")] | length' ops/queue/
 
 ## Output Format
 
-The complete health report follows this structure. Every report, regardless of mode, uses this format.
+The complete health report follows this structure.
 
 ```
 === HEALTH REPORT ===
-Mode: [quick | full | three-space]
 Date: YYYY-MM-DD
 Notes scanned: N | Topic maps: N | Inbox items: N
 
@@ -568,19 +555,19 @@ PASS:
 [3] Link Health .................. PASS | WARN | FAIL
     [details — specific dangling links, where referenced]
 
-[4] Description Quality .......... PASS | WARN | FAIL  (full mode only)
+[4] Description Quality .......... PASS | WARN | FAIL
     [details — specific files, title vs description comparison]
 
-[5] Three-Space Boundaries ....... PASS | WARN | FAIL  (full/three-space mode)
+[5] Three-Space Boundaries ....... PASS | WARN | FAIL
     [details — specific boundary violations by type]
 
-[6] Processing Throughput ........ PASS | WARN | FAIL  (full mode only)
+[6] Processing Throughput ........ PASS | WARN | FAIL
     inbox: N | notes: N | in-progress: N | ratio: N%
 
-[7] Stale Notes .................. PASS | WARN | FAIL  (full mode only)
+[7] Stale Notes .................. PASS | WARN | FAIL
     [N notes older than 30d with <2 incoming links, sorted by priority]
 
-[8] MOC Coherence ................ PASS | WARN | FAIL  (full mode only)
+[8] MOC Coherence ................ PASS | WARN | FAIL
     [details — note count per topic map, coverage gaps, bare links]
 
 ---
@@ -650,45 +637,6 @@ Not all issues are equal. The recommended actions section ranks by impact:
 **FAIL is reserved for:** Dangling links (broken graph), persistent orphans (> 7 days), severe schema violations (missing frontmatter entirely), critical boundary violations.
 
 **WARN is for everything else** that is suboptimal but not broken.
-
----
-
-## Mode-Specific Behavior
-
-### Quick Mode (default)
-
-Runs categories 1-3 only: Schema, Orphans, Links.
-
-**Use when:**
-- Session start health check
-- Quick pulse on vault integrity
-- After a batch of note creation
-
-**Runtime:** Should complete in < 30 seconds for vaults up to 200 notes.
-
-### Full Mode
-
-Runs all 8 categories plus maintenance signals.
-
-**Use when:**
-- Periodic comprehensive health review
-- After significant vault changes (large batch processing, restructuring)
-- When something "feels wrong" about the vault
-- Before a /architect or /reseed session
-
-**Runtime:** May take 1-3 minutes for larger vaults due to description quality analysis and {vocabulary.topic_map} coherence checks.
-
-### Three-Space Mode
-
-Runs category 5 only: boundary violation checks.
-
-**Use when:**
-- After /reseed to verify boundaries are intact
-- When search results seem contaminated (ops content in knowledge queries)
-- When self/ is being enabled or disabled
-- Debugging "why does my search return weird results?"
-
-**Runtime:** Should complete in < 30 seconds.
 
 ---
 
