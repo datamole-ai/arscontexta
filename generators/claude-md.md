@@ -193,13 +193,6 @@ Include each enabled feature's corresponding block from `generators/features/`. 
 
 Full automation is active from day one. All processing skills, all quality gates, all maintenance mechanisms are available immediately. You do not need to reach a certain vault size before using orchestrated processing.
 
-### Processing Depth
-
-Configured in ops/config.yaml. Three levels affect all processing skills:
-- **deep** — Full pipeline, fresh context per phase, maximum quality gates
-- **standard** — Full pipeline, balanced attention (default)
-- **quick** — Compressed pipeline, combine phases, high volume catch-up
-
 ### Pipeline Chaining
 
 Configured in ops/config.yaml. Controls how phases connect:

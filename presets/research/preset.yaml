@@ -29,7 +29,6 @@ blocks:
     - self-space  # OFF for research (goals route to ops/)
 self_space: false
 qmd: true  # opted in during onboarding
-processing_depth: "full quality gates from day one"
 starter_mocs:
   - "{DOMAIN:domain}-overview"
   - "methods"

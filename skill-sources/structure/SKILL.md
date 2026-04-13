@@ -21,14 +21,12 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.topic_map` for MOC/topic map references
    - Use `vocabulary.topic_maps` for plural form
 
-2. **`ops/config.yaml`** — processing depth, selectivity
-   - `processing.depth`: deep | standard | quick
+2. **`ops/config.yaml`** — selectivity
    - `processing.extraction.selectivity`: strict | moderate | permissive
 
 3. **`ops/queue/queue.json`** — current task queue
 
 If these files don't exist (pre-init invocation or standalone use), use universal defaults:
-- depth: standard
 - selectivity: moderate
 - notes folder: `notes/`
 - inbox folder: `inbox/`
@@ -313,13 +311,9 @@ Context degrades as it fills. A single-pass review of a 3000-line source will mi
 
 **Cross-chunk coordination:** When processing in chunks, maintain a running list of identified clusters across chunks. Later chunks may ADD to earlier clusters — check before creating separate notes.
 
-### Processing Depth Adaptation
+### Chunking Strategy
 
-| Depth (from config) | Chunking Behavior |
-|---------------------|-------------------|
-| deep | Fresh context per chunk (spawn subagent per chunk if platform supports). Maximum quality. |
-| standard | Process chunks sequentially in current session. Reset orientation between chunks. |
-| quick | Larger chunks (1500-2000 lines). Fewer, faster passes. |
+Fresh context per chunk (spawn subagent per chunk if platform supports). Maximum quality.
 
 ---
 

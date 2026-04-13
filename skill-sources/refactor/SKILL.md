@@ -237,8 +237,7 @@ For each skill affected by the dimension changes:
 1. Read the current skill from the generated skills directory
 2. Consult `${CLAUDE_PLUGIN_ROOT}/reference/` for the latest skill generation approach
 3. Apply vocabulary transformation from derivation-manifest
-4. Apply processing depth settings from the new config
-5. Write the regenerated skill
+4. Write the regenerated skill
 
 **Skills most commonly affected by dimension changes:**
 

@@ -380,7 +380,7 @@ All generated systems ship with full automation from day one. There are no tiers
 | Semantic search                           | If opted in       | qmd setup                                                        |
 
 
-**Init generates everything by default.** The context file includes all skill documentation. Processing depth and automation level can be adjusted post-init via ops/config.yaml.
+**Init generates everything by default.** The context file includes all skill documentation.
 
 ### Step 3g: Schema Derivation
 
@@ -979,12 +979,6 @@ processing:
 
 provenance: [full | minimal | off]
 ```
-
-**Processing depth levels:**
-
-- `deep` -- Full pipeline, fresh context per phase, maximum quality gates. Best for important sources and initial vault building.
-- `standard` -- Full pipeline, balanced attention. Regular processing, moderate volume.
-- `quick` -- Compressed pipeline, combine connect+verify phases. High volume catch-up, minor sources.
 
 **Relationship:** config.yaml is the live operational config. derivation.md is the historical record of WHY. Config can drift; `/architect` detects and documents the drift.
 

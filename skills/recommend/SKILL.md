@@ -70,7 +70,6 @@ Extract signals from the user's description. Every word is a signal:
 |-----------------|----------|---------|
 | **Domain** | "therapy sessions", "research papers", "trading journal" | Closest preset, schema design |
 | **Scale** | "just starting", "hundreds of notes", "massive corpus" | Granularity, navigation tiers |
-| **Processing style** | "quick capture", "deep analysis", "both" | Processing depth, automation level |
 | **Platform** | "Obsidian", "Claude Code", "plain files" | Platform capabilities, linking type |
 | **Existing system** | "I use PARA", "I have a Zettelkasten", "starting fresh" | Tradition preset baseline |
 | **Pain points** | "can't find anything", "too much ceremony", "notes go stale" | Dimension adjustments |
@@ -129,7 +128,6 @@ Score each preset against the user's signals:
 | Criterion | Weight | How to Score |
 |-----------|--------|-------------|
 | Domain match | High | Does the preset's intended domain match? |
-| Processing style match | High | Does the preset's processing depth match the user's style? |
 | Scale match | Medium | Is the preset designed for the user's expected scale? |
 | Pain point coverage | Medium | Does the preset address the user's stated friction? |
 | Goal alignment | High | Does the preset optimize for what the user wants? |
@@ -236,7 +234,7 @@ For each of the 8 configuration dimensions, determine the recommended position:
 - Manual: minimal ceremony, on-demand only
 
 **Schema** — minimal / moderate / dense
-- Key signals: query needs, processing depth, metadata tolerance
+- Key signals: query needs, metadata tolerance
 - Minimal: description only, low ceremony
 - Moderate: description + type + topics, queryable
 - Dense: full provenance, validation, structured queries
@@ -535,7 +533,6 @@ because deep processing generates metadata that light schemas can't capture.
 
 Resolution: Processing → moderate, Schema → moderate
   This gives meaningful analysis without overwhelming ceremony.
-  You can increase processing depth later if you want deeper extraction.
 ```
 
 ### User Asks "What's Best?"

@@ -16,9 +16,6 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.cmd_reweave` for the next-phase suggestion
    - Use `vocabulary.inbox` for the inbox folder name
 
-2. **`ops/config.yaml`** — processing depth
-   - `processing.depth`: deep | standard | quick
-
 If these files don't exist, use universal defaults.
 
 ## Granularity-Aware Processing
@@ -29,13 +26,7 @@ After reading the target {vocabulary.note}, check its `granularity` frontmatter 
 - **`structure`**: Forward connections at both topic and section level — the {vocabulary.note} as a whole connects to topics, but individual sections may connect to specific existing {vocabulary.note_plural}. Backward connections to {vocabulary.note_plural} relating to any sub-claim. {vocabulary.topic_map} placement.
 - **`capture`**: Lighter treatment — scan verbatim content for references to existing topics and {vocabulary.note_plural}. Add wikilinks ONLY outside the fenced block (in Relevant Notes and Topics footer sections). **NEVER modify content inside the fenced block.** {vocabulary.topic_map} placement.
 
-**Processing depth adaptation:**
-
-| Depth | Connection Behavior |
-|-------|-------------------|
-| deep | Full dual discovery (MOC + semantic search). Evaluate every candidate. Multiple passes. Synthesis opportunity detection. Bidirectional link evaluation for all connections. |
-| standard | Dual discovery with top 5-10 candidates. Standard evaluation. Bidirectional check for strong connections only. |
-| quick | Single pass — either MOC or semantic search. Accept obvious connections only. Skip synthesis detection. |
+**Connection behavior:** Full dual discovery (MOC + semantic search). Evaluate every candidate. Multiple passes. Synthesis opportunity detection. Bidirectional link evaluation for all connections.
 
 ## EXECUTE NOW
 

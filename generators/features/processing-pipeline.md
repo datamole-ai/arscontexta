@@ -239,32 +239,6 @@ If all four phases run in one session, the verify phase runs on degraded attenti
 
 The task queue IS the orchestration — {DOMAIN:skills} read from it, write to it, and the queue state drives what happens next. When you say "process this source through the full pipeline," follow the pattern: read queue, pick task, execute phase, advance queue, repeat.
 
-### Processing Depth Configuration
-
-Not every source deserves the same attention. A critical research paper warrants fresh context per phase and maximum quality gates. A quick note from a conversation can be processed in a single pass.
-
-**Three depth levels** (configurable via ops/config.yaml):
-
-| Level | Behavior | Context Strategy | Use When |
-|-------|----------|-----------------|----------|
-| Deep | Full pipeline, fresh context per phase, maximum quality gates | Spawn subagent per phase | Important sources, research, initial vault building |
-| Standard | Full pipeline, balanced attention, inline execution | Sequential phases in current session | Regular processing, moderate volume (default) |
-| Quick | Compressed pipeline, combine {DOMAIN:connect}+{DOMAIN:verify} phases | Fast single-pass | High volume catch-up, minor sources |
-
-~~~yaml
-# ops/config.yaml
-processing:
-  depth: standard  # deep | standard | quick
-~~~
-
-**What changes at each depth:**
-
-- **Deep** runs each phase in isolated context. The {DOMAIN:process} phase gets a fresh context window loaded with only the source material and extraction context. The {DOMAIN:connect} phase gets a fresh window loaded with the existing knowledge graph. No phase is contaminated by the work of another. This is the maximum quality setting and should be used for sources that will produce many {DOMAIN:notes}.
-
-- **Standard** runs all phases sequentially within the current session. Quality is good because each phase gets focused attention, but context does accumulate across phases. This is the right default for most work.
-
-- **Quick** combines {DOMAIN:connect} and {DOMAIN:verify} into a single pass and reduces the depth of backward-connection checking. Use this for processing accumulated minor sources when volume matters more than depth.
-
 ### Full Automation From Day One
 
 Every vault ships with the complete pipeline active from the first session. All processing skills, all quality gates, all maintenance mechanisms are available immediately. You do not need to "level up" or wait for your vault to reach a certain size before using orchestrated processing, fresh context isolation, or queue management.

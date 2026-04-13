@@ -14,18 +14,9 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.topic_map` for MOC references
    - Use `vocabulary.templates` for the templates folder path
 
-2. **`ops/config.yaml`** — processing depth
-   - `processing.depth`: deep | standard | quick
-
 If these files don't exist, use universal defaults.
 
-**Processing depth adaptation:**
-
-| Depth | Validation Behavior |
-|-------|---------------------|
-| deep | Full schema validation. All checks enabled including composability analysis and cross-reference verification |
-| standard | Full validation — all checks enabled |
-| quick | Basic schema validation only — required fields, YAML validity, enum values |
+**Validation behavior:** Full schema validation. All checks enabled including composability analysis and cross-reference verification.
 
 ## Template Selection by Granularity
 

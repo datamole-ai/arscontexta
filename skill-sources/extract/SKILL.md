@@ -22,8 +22,7 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.topic_map` for MOC/topic map references
    - Use `vocabulary.topic_maps` for plural form
 
-2. **`ops/config.yaml`** — processing depth, selectivity
-   - `processing.depth`: deep | standard | quick
+2. **`ops/config.yaml`** — selectivity
    - `processing.extraction.selectivity`: strict | moderate | permissive
 
 3. **`ops/queue/queue.json`** — current task queue
@@ -583,13 +582,9 @@ Context degrades as it fills. A single-pass extraction of a 3000-line source wil
 
 **Chunk boundaries:** Split at natural section breaks (headings, topic transitions). Never split mid-paragraph or mid-argument. A chunk should be a coherent unit of content.
 
-### Processing Depth Adaptation
+### Chunking Strategy
 
-| Depth (from config) | Chunking Behavior |
-|---------------------|-------------------|
-| deep | Fresh context per chunk (spawn subagent per chunk if platform supports). Maximum quality. |
-| standard | Process chunks sequentially in current session. Reset orientation between chunks. |
-| quick | Larger chunks (1500-2000 lines). Fewer, faster passes. |
+Fresh context per chunk (spawn subagent per chunk if platform supports). Maximum quality.
 
 ### Cross-Chunk Coordination
 

@@ -29,5 +29,4 @@ blocks:
   disabled: []
 self_space: "user_choice"
 qmd: "user_choice"
-processing_depth: "full quality gates by default, user can opt down"
 starter_mocs: []  # user-chosen

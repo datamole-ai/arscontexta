@@ -16,19 +16,6 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.templates` for the templates folder path
    - Use `vocabulary.cmd_reflect` for redirect when missing connections found
 
-2. **`ops/config.yaml`** — processing depth
-   - `processing.depth`: deep | standard | quick
-
-If these files don't exist, use universal defaults.
-
-**Processing depth adaptation:**
-
-| Depth | Verification Behavior |
-|-------|-----------------------|
-| deep | Full verification: cold-read prediction, complete schema check, exhaustive link verification, MOC coverage, orphan risk analysis, content staleness detection, bundling analysis |
-| standard | Balanced: cold-read prediction, schema check, link verification, MOC coverage |
-| quick | Basic: schema check, link verification only. Skip cold-read prediction and health analysis |
-
 ## Granularity-Aware Verification
 
 After reading the target {vocabulary.note}, check its `granularity` frontmatter field:
@@ -245,7 +232,7 @@ Run these 5 checks on the note:
 - **Exclude** wiki links inside backtick-wrapped code blocks (single backtick or triple backtick) — these are syntax examples, not real links
 - A single dangling link = FAIL with the specific broken link identified
 
-**Deep-only checks (when processing.depth = deep):**
+**Health analysis checks:**
 
 **6. Orphan risk assessment**
 - Count incoming links: grep for `[[note title]]` across all .md files

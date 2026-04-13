@@ -29,7 +29,6 @@ blocks:
   disabled: []
 self_space: true
 qmd: "user_choice"  # choice during onboarding
-processing_depth: "full quality gates"
 starter_mocs:
   - "life-areas"
   - "people"

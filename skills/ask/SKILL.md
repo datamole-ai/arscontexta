@@ -309,8 +309,6 @@ Every answer follows this structure:
 > 3. Each chunk extracts independently with a running duplicate list across chunks
 > 4. The final extraction report covers all chunks combined
 >
-> **Your config** has `processing.depth: standard`, which means chunks process sequentially in the current session. If you switch to `deep`, each chunk would get its own isolated context (maximum quality, but slower).
-
 #### Example 3: WHAT Question
 
 **Question:** "What would a cooking recipe vault look like?"
@@ -360,7 +358,7 @@ When the user's question involves their specific system (not abstract methodolog
 ### Step 1: Read Their Derivation
 
 Check for `ops/derivation.md` to understand:
-- Their dimension positions (granularity, organization, processing depth, etc.)
+- Their dimension positions (granularity, organization, etc.)
 - Their vocabulary choices (what are "notes" called in their domain?)
 - Their tradition mapping (which methodology preset, if any?)
 - Their personality settings (formal/warm, clinical/conversational)

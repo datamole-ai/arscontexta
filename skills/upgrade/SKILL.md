@@ -20,7 +20,7 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.rethink` for the meta-cognitive verb
    - Use `vocabulary.topic_map` for MOC references
 
-2. **`ops/config.yaml`** — processing depth, domain context
+2. **`ops/config.yaml`** — domain context
 
 3. **`ops/derivation.md`** — derivation state and engine version
 

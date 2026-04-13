@@ -17,7 +17,7 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.inbox` for the inbox folder name
    - Use `vocabulary.notes_collection` for semantic search collection name
 
-2. **`ops/config.yaml`** — processing depth, automation settings
+2. **`ops/config.yaml`** — automation settings
 
 If no derivation file exists, use universal terms (notes, MOCs, etc.).
 

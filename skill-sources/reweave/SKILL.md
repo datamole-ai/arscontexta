@@ -15,8 +15,7 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.topic_map` / `vocabulary.topic_map_plural` for MOC references
    - Use `vocabulary.cmd_verify` for the next-phase suggestion
 
-2. **`ops/config.yaml`** — processing depth
-   - `processing.depth`: deep | standard | quick
+2. **`ops/config.yaml`** — reweave scope
    - `processing.reweave.scope`: related | broad | full
 
 If these files don't exist, use universal defaults.
@@ -35,13 +34,7 @@ Read the target {vocabulary.note}'s frontmatter. If `granularity: capture`, outp
 "Capture {vocabulary.note} — reweaving skipped (no new claims to propagate)."
 Mark phase complete in task file and return.
 
-**Processing depth adaptation:**
-
-| Depth | Reweave Behavior |
-|-------|-----------------|
-| deep | Full reconsideration. Search extensively for newer related {vocabulary.note_plural}. Consider splits, rewrites, challenges. Evaluate claim sharpening. Multiple search passes. |
-| standard | Balanced review. Search semantic neighbors and same-{vocabulary.topic_map} {vocabulary.note_plural}. Add connections, sharpen if needed. |
-| quick | Minimal backward pass. Add obvious connections only. No rewrites or splits. |
+**Reweave behavior:** Full reconsideration. Search extensively for newer related {vocabulary.note_plural}. Consider splits, rewrites, challenges. Evaluate claim sharpening. Multiple search passes.
 
 **Reweave scope:**
 

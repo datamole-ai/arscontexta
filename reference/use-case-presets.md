@@ -39,7 +39,6 @@ Named points in the configuration space derived from methodology traditions and 
 **Key settings:**
 - `self_space: false`
 - `qmd: true` (opted in during onboarding)
-- `processing_depth: "full quality gates from day one"`
 
 **Extraction categories:** claims, evidence, methodology-comparisons, contradictions, open-questions, design-patterns, design-dimensions
 
@@ -103,7 +102,6 @@ Named points in the configuration space derived from methodology traditions and 
 **Key settings:**
 - `self_space: true`
 - `qmd: "user_choice"` (choice during onboarding)
-- `processing_depth: "full quality gates"`
 
 **Extraction categories:** reflections, relationship-dynamics, goals, habits, gratitude, lessons
 
@@ -166,7 +164,6 @@ Named points in the configuration space derived from methodology traditions and 
 **Key settings:**
 - `self_space: "user_choice"`
 - `qmd: "user_choice"`
-- `processing_depth: "full quality gates by default, user can opt down"`
 
 **Extraction categories:** User-defined during init, guided by examples from research and personal-assistant presets
 

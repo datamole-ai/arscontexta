@@ -18,7 +18,7 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.topic_map` for MOC references
    - Use `vocabulary.inbox` for the inbox folder name
 
-2. **`ops/config.yaml`** — processing depth, domain context
+2. **`ops/config.yaml`** — domain context
 
 If these files don't exist, use universal defaults.
 

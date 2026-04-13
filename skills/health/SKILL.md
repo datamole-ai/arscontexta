@@ -18,7 +18,7 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.topic_map` for MOC/topic map references
    - Use `vocabulary.topic_maps` for plural form
 
-2. **`ops/config.yaml`** — processing depth, thresholds
+2. **`ops/config.yaml`** — thresholds
 
 3. **Three-space reference** — `${CLAUDE_PLUGIN_ROOT}/reference/three-spaces.md` for boundary rules (load only for full and three-space modes)
 
