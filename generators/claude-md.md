@@ -142,10 +142,10 @@ When users ask about system structure, schema, or methodology:
 | "Research best practices for..." | /arscontexta:ask | Read bundled references |
 | "What does my system know about..." | Check ops/methodology/ directly | /arscontexta:ask for research backing |
 | "I want to add a new area/domain..." | /arscontexta:add-domain | Manual folder + template creation |
-| "What should I work on..." | /arscontexta:next | Reconcile queue + recommend |
+| "What should I work on..." | /next | Reconcile queue + recommend |
 | "Help / what can I do..." | /arscontexta:help | Show available commands |
 | "Walk me through..." | /arscontexta:tutorial | Interactive learning |
-| "Challenge assumptions..." | /arscontexta:rethink | Triage observations/tensions |
+| "Challenge assumptions..." | /rethink | Triage observations/tensions |
 
 ```
 
@@ -191,12 +191,6 @@ Include each enabled feature's corresponding block from `generators/features/`. 
 
 Full automation is active from day one. All processing skills, all quality gates, all maintenance mechanisms are available immediately. You do not need to reach a certain vault size before using orchestrated processing.
 
-### Pipeline Chaining
-
-Configured in ops/config.yaml. Controls how phases connect:
-- **manual** — Skills output "Next: /[skill] [target]" — you decide when
-- **suggested** — Skills output next step AND add to task queue
-- **automatic** — Skills complete → next phase runs immediately
 ```
 
 ## Self-Improvement Loop (always include)

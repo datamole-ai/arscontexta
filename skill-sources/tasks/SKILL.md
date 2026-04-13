@@ -16,7 +16,7 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.topic_map` for MOC references
    - Use `vocabulary.cmd_reflect` / `vocabulary.cmd_reweave` / `vocabulary.cmd_verify` for phase command names
 
-2. **`ops/config.yaml`** — automation settings
+2. **`ops/config.yaml`** — dimension and feature settings
 
 If no derivation file exists, use universal terms.
 

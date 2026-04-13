@@ -21,7 +21,7 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.cmd_verify` for verification command name
    - Use `vocabulary.architect` for the command name in output
 
-2. **`ops/config.yaml`** — automation settings
+2. **`ops/config.yaml`** — dimension and feature settings
 
 3. **`ops/derivation.md`** — original derivation record (the design intent baseline)
 

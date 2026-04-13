@@ -475,30 +475,6 @@ Review:
 Overall: [PASS/WARN/FAIL]
 ```
 
-## Pipeline Chaining
-
-Verify is the **final pipeline phase**. After verification completes:
-
-- **manual:** Output "Verified. Pipeline complete." — no next step
-- **suggested:** Output completion summary AND suggest marking task done in queue
-- **automatic:** Task marked done, summary logged to task file
-
-If verification FAILS (recite score < 3 or any FAIL-level issue), do NOT mark done. Instead:
-- Output what failed and what needs fixing
-- Keep task at `current_phase: "verify"` for re-run after fixes
-
-
-## queue.json update (interactive execution)
-
-When running interactively (NOT via orchestrator), YOU must execute queue updates:
-
-```bash
-TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-jq '(.tasks[] | select(.id=="TASK_ID")).status = "done" | (.tasks[] | select(.id=="TASK_ID")).completed = "'"$TIMESTAMP"'"' ops/queue/queue.json > tmp.json && mv tmp.json ops/queue/queue.json
-```
-
-The queue path uses the domain-native operations folder. Check `ops/` or equivalent.
-
 ## critical constraints
 
 **never:**

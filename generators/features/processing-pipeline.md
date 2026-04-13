@@ -104,7 +104,7 @@ Everything enters through {DOMAIN:inbox/}. Do not think about structure at captu
 
 ### Processing Principles
 
-- **Fresh context per phase** — Do not chain all phases in one session. Each phase benefits from focused attention. Your attention degrades as context fills, so critical work should happen when your context is fresh.
+- **Fresh context per phase** — Do not run all phases in one session. Each phase benefits from focused attention. Your attention degrades as context fills, so critical work should happen when your context is fresh.
 - **Quality over speed** — One well-connected {DOMAIN:note} is worth more than ten orphaned ones. The graph compounds quality, not quantity.
 - **The generation effect** — Moving information is not processing. You must TRANSFORM it: generate descriptions, find connections, create synthesis. Passive transfer does not create understanding.
 - **Skills encode methodology** — If a {DOMAIN:skill} exists for a processing step, use it. Do not manually replicate the workflow. {DOMAIN:Skills} contain quality gates that manual execution bypasses.
@@ -227,7 +227,7 @@ If all four phases run in one session, the verify phase runs on degraded attenti
 - State transfers through persistent files, not accumulated conversation
 - This makes crashes recoverable and processing auditable
 
-**Processing is orchestrated by default.** /ralph spawns a fresh subagent per phase. /pipeline chains the full sequence. The queue drives what happens next.
+**Processing is orchestrated by default.** /ralph spawns a fresh subagent per phase. /pipeline orchestrates the full sequence. The queue drives what happens next.
 
 **Orchestration uses the Agent tool** to spawn fresh worker agents per phase, providing true context isolation. The task queue IS the orchestration — {DOMAIN:skills} read from it, write to it, and the queue state drives what happens next. When you say "process this source through the full pipeline," follow the pattern: read queue, pick task, execute phase, advance queue, repeat.
 

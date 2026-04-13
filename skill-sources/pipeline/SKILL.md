@@ -30,7 +30,7 @@ Read `ops/derivation-manifest.md` (or fall back to `ops/derivation.md`) for doma
 
 ## Pipeline Overview
 
-The pipeline chains four phases. Each phase uses skill invocation or /ralph for subagent-based processing. State lives in the queue file — the pipeline is stateless orchestration on top of stateful queue entries.
+The pipeline orchestrates four phases. Each phase uses skill invocation or /ralph for subagent-based processing. State lives in the queue file — the pipeline is stateless orchestration on top of stateful queue entries.
 
 ```
 Source file
