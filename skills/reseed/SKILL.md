@@ -29,7 +29,6 @@ Read these during the re-derivation phases:
 - `${CLAUDE_PLUGIN_ROOT}/reference/methodology.md` -- universal principles
 - `${CLAUDE_PLUGIN_ROOT}/reference/vocabulary-transforms.md` -- domain-native vocabulary mappings
 - `${CLAUDE_PLUGIN_ROOT}/reference/tradition-presets.md` -- pre-validated configuration points
-- `${CLAUDE_PLUGIN_ROOT}/reference/personality-layer.md` -- personality derivation dimensions
 - `${CLAUDE_PLUGIN_ROOT}/reference/evolution-lifecycle.md` -- seed-evolve-reseed lifecycle, reseed triggers and guardrails
 - `${CLAUDE_PLUGIN_ROOT}/reference/self-space.md` -- identity generation rules, identity vs configuration distinction
 
@@ -173,10 +172,6 @@ The re-derivation should answer for each dimension:
 
 Read `${CLAUDE_PLUGIN_ROOT}/reference/vocabulary-transforms.md`. Compare the current vocabulary mapping against how the user actually talks about their system (evidence from session logs, observations, user-facing text in notes). If the user has developed their own vocabulary that differs from the mapping, adopt the user's terms.
 
-### Personality re-evaluation
-
-If personality was derived at init, check whether the personality dimensions still fit. Evidence sources: self/identity.md, agent notes in MOCs, session log tone. If personality was not derived at init, check whether operational evidence now warrants it.
-
 ---
 
 ## PHASE 4: Check Coherence
@@ -308,7 +303,7 @@ If navigation depth changed:
 **PRESERVE self/memory/ entirely.** Never modify or delete memory files.
 
 Update:
-- `self/identity.md` -- if personality changed
+- `self/identity.md` -- if voice or domain changed
 - `self/methodology.md` -- if processing or maintenance changed
 - `self/goals.md` -- add "post-reseed orientation" as active thread
 

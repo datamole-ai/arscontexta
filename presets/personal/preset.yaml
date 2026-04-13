@@ -21,7 +21,6 @@ blocks:
     - ethical-guardrails
     - helper-functions
     - graph-analysis
-    - personality
     - self-space
   conditional:
     - semantic-search  # if qmd opted in
@@ -30,7 +29,6 @@ blocks:
   disabled: []
 self_space: true
 qmd: "user_choice"  # choice during onboarding
-personality: "warm-supportive"
 processing_depth: "full quality gates"
 starter_mocs:
   - "life-areas"

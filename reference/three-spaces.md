@@ -313,6 +313,5 @@ Is this about the agent itself?
 ## Cross-Reference
 
 - **Failure modes that afflict each space:** See `failure-modes.md` for the full failure mode taxonomy. Conflation failures (this document) are structural; failure-modes.md covers operational decay (collector's fallacy, orphan drift, schema erosion).
-- **How personality affects each space:** See `personality-layer.md` for how warmth/formality dimensions change the voice of self/identity.md, skill instructions, and health reports.
 - **What goes in each space per domain:** See `use-case-presets.md` for domain-specific routing decisions (therapy reflections vs research claims vs PM decisions).
 - **Kernel primitives that depend on three-space separation:** `self-space` (configurable), `session-rhythm`, `discovery-first`, `task-stack`, `methodology-folder`, and `session-capture` all assume clean space boundaries. See `kernel.yaml`.

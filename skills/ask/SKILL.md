@@ -100,7 +100,6 @@ The plugin's knowledge base has three distinct parts, each serving a different f
 - `derivation-validation.md` — validation tests for derived systems
 
 **Behavioral & Quality:**
-- `personality-layer.md` — personality derivation and encoding
 - `conversation-patterns.md` — worked examples of full derivation paths
 - `failure-modes.md` — how knowledge systems die and prevention patterns
 

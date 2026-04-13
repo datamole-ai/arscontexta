@@ -30,7 +30,6 @@ Every reference document should follow this structure:
 | tradition-presets.md | MISSING | MISSING | MISSING | MISSING | MISSING | **Non-compliant** |
 | vocabulary-transforms.md | MISSING | MISSING | MISSING | MISSING | MISSING | **Non-compliant** |
 | conversation-patterns.md | MISSING | MISSING | MISSING | MISSING | MISSING | **Non-compliant** |
-| personality-layer.md | MISSING | MISSING | MISSING | MISSING | MISSING | **Non-compliant** |
 | failure-modes.md | MISSING | MISSING | MISSING | MISSING | MISSING | **Non-compliant** |
 | three-spaces.md | MISSING | MISSING | MISSING | MISSING | MISSING | **Non-compliant** |
 | derivation-validation.md | EXEMPT | EXEMPT | EXEMPT | EXEMPT | EXEMPT | **EXEMPT** |
@@ -49,10 +48,10 @@ Every reference document should follow this structure:
 |--------|-------|-------|
 | **Fully compliant** | 4 | semantic-vs-keyword.md, session-lifecycle.md, evolution-lifecycle.md, self-space.md |
 | **Partially compliant** | 1 | dimension-claim-map.md (has claim content organized by dimension but not in the Summary/Derivation Implication/Source per-claim format) |
-| **Non-compliant** | 9 | interaction-constraints.md, tradition-presets.md, vocabulary-transforms.md, conversation-patterns.md, personality-layer.md, failure-modes.md, three-spaces.md, open-questions.md, use-case-presets.md |
+| **Non-compliant** | 8 | interaction-constraints.md, tradition-presets.md, vocabulary-transforms.md, conversation-patterns.md, failure-modes.md, three-spaces.md, open-questions.md, use-case-presets.md |
 | **Exempt** | 2 | kernel.yaml, derivation-validation.md |
 
-**Compliance rate (non-exempt files):** 4 of 14 fully compliant = **28.6%**
+**Compliance rate (non-exempt files):** 4 of 13 fully compliant = **30.8%**
 
 ---
 
@@ -129,16 +128,6 @@ Additionally, the following non-document items exist in `reference/`:
 
 ---
 
-### personality-layer.md
-
-**What it has:** Detailed specification of four personality dimensions (Warmth, Opinionatedness, Formality, Emotional Awareness), signal patterns, conflict resolution rules, personality x artifact transformation matrix, encoding format, evolution guidance.
-
-**What it is missing:** All five required sections.
-
-**Gap severity:** MEDIUM-HIGH — This document contains many discrete claims about personality derivation that would benefit from the per-claim structure (Summary, Derivation Implication, Source). The personality x artifact matrix is particularly valuable and would be well-served by explicit derivation implications.
-
----
-
 ### failure-modes.md
 
 **What it has:** 10 failure modes, each with What/Why/Vulnerable domains/Prevention/Warning signs structure. Domain vulnerability matrix. Integration with init guidance.
@@ -179,7 +168,7 @@ Additionally, the following non-document items exist in `reference/`:
 
 ---
 
-## Top 5 Most Critical Gaps (Prioritized Recommendations)
+## Top 4 Most Critical Gaps (Prioritized Recommendations)
 
 ### 1. three-spaces.md — Highest Priority
 
@@ -187,25 +176,19 @@ Additionally, the following non-document items exist in `reference/`:
 
 **Recommendation:** Restructure to add Purpose, Derivation Questions, and Version sections. Convert the three-space specification content into curated claims format (the six failure modes of conflation are natural claim candidates). Add Exclusion Notes for three-space patterns that were considered but rejected.
 
-### 2. personality-layer.md — High Priority
-
-**Why critical:** Personality derivation is a differentiating feature of Ars Contexta. The document contains rich, discrete claims (each personality dimension, each signal pattern, each conflict resolution rule) that would directly benefit from the Summary/Derivation Implication/Source format. It is referenced by session-lifecycle.md, self-space.md, and use-case-presets.md.
-
-**Recommendation:** Add all five sections. Each personality dimension section can be restructured as curated claims. The signal patterns table and conflict resolution rules are natural claim candidates with clear derivation implications.
-
-### 3. failure-modes.md — High Priority
+### 2. failure-modes.md — High Priority
 
 **Why critical:** Failure modes directly inform what warnings go into generated context files. Each of the 10 failure modes maps naturally to the curated claim format (What maps to Summary, Prevention maps to Derivation Implication, and source claims exist in the vault). The domain vulnerability matrix is a key derivation artifact.
 
 **Recommendation:** Add all five sections. Each failure mode becomes a claim under a "Failure Taxonomy" category. The domain vulnerability matrix can remain as an additional section after the standard template sections.
 
-### 4. dimension-claim-map.md — High Priority
+### 3. dimension-claim-map.md — High Priority
 
 **Why critical:** This is the core mapping between research claims and configuration dimensions. It is the document that most directly needs the per-claim format because each claim has a clear derivation implication (how it affects a specific dimension choice).
 
 **Recommendation:** Restructure from table format to per-claim format with Summary, Derivation Implication, and Source. The existing "What It Says" column maps to Summary, "Informs" maps to Derivation Implication, and claim wiki links provide Source. Add Purpose, Derivation Questions, Exclusion Notes, and Version sections.
 
-### 5. interaction-constraints.md — Medium-High Priority
+### 4. interaction-constraints.md — Medium-High Priority
 
 **Why critical:** Coherence validation is a core derivation function. The hard/soft constraint classification and cascade documentation are essential derivation artifacts. Multiple constraints are grounded in research claims that should be explicitly cited.
 

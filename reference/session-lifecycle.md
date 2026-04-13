@@ -285,4 +285,4 @@ Questions the engine must answer when generating session configuration:
 - Sources reviewed: 20
 - Claims included: 22
 - Claims excluded: 5
-- Cross-references: `kernel.yaml` (session-rhythm and self-space primitives), `three-spaces.md` (self/ space specification, session rhythm integration), `personality-layer.md` (personality affects session communication style), `components.md` (hooks component blueprint), `methodology.md` (session rhythm section), `failure-modes.md` (temporal staleness)
+- Cross-references: `kernel.yaml` (session-rhythm and self-space primitives), `three-spaces.md` (self/ space specification, session rhythm integration), `components.md` (hooks component blueprint), `methodology.md` (session rhythm section), `failure-modes.md` (temporal staleness)

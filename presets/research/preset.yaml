@@ -24,13 +24,11 @@ blocks:
   conditional:
     - semantic-search  # if qmd opted in
     - multi-domain     # if needed
-  optional:
-    - personality
+  optional: []
   disabled:
     - self-space  # OFF for research (goals route to ops/)
 self_space: false
 qmd: true  # opted in during onboarding
-personality: "neutral-analytical"
 processing_depth: "full quality gates from day one"
 starter_mocs:
   - "{DOMAIN:domain}-overview"

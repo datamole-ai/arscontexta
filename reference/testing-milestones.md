@@ -806,30 +806,6 @@ for PRESET in "${PRESETS[@]}"; do
         esac
     done
 
-    # 5. Personality in identity.md
-    echo ""
-    echo "--- Personality Validation ---"
-    if [ -f "$VAULT/self/identity.md" ]; then
-        WARMTH=$(grep 'warmth:' "presets/$PRESET/preset.yaml" | awk '{print $2}')
-        if (( $(echo "$WARMTH > 0.5" | bc -l) )); then
-            # High warmth — identity should feel warm
-            if grep -qi "care\|support\|here for you\|partner\|companion" "$VAULT/self/identity.md"; then
-                echo "  PASS: Warm personality reflected in identity.md"
-            else
-                echo "  WARN: High warmth preset but identity.md lacks warm language"
-            fi
-        else
-            # Low warmth — identity should be analytical/neutral
-            if grep -qi "analy\|systematic\|rigorous\|precise" "$VAULT/self/identity.md"; then
-                echo "  PASS: Analytical personality reflected in identity.md"
-            else
-                echo "  WARN: Low warmth preset but identity.md lacks analytical language"
-            fi
-        fi
-    else
-        echo "  FAIL: self/identity.md not found"
-    fi
-
     echo ""
 done
 ```
@@ -841,7 +817,6 @@ Each preset should produce:
 - Vocabulary: domain-native terms present, zero cross-domain leakage
 - Constraints: all coherence checks PASS
 - Features: all active blocks (from 16 available) produce output in context file
-- Personality: voice in identity.md matches warmth/formality dimensions (when self space is enabled)
 - Session capture: ops/sessions/ exists and stop hook configured
 
 **Common failure modes and remediation:**
@@ -851,7 +826,6 @@ Each preset should produce:
 | Personal Assistant preset fails kernel on MOC hierarchy | Light-processing preset skipped MOC generation | Even light-processing systems need at least a hub MOC — enforce in /setup |
 | Experimental preset leaks "claim" into context file | Feature block `atomic-notes.md` uses "claim" generically | Parameterize all feature blocks with vocabulary variables |
 | Any preset missing ops/observations/ | Operational learning loop not generated | Learning loop is a kernel primitive — must be generated regardless of preset |
-| Research personality says "I care about you" | Personality template not filtered by warmth dimension | Generate identity.md text conditionally based on personality.warmth value |
 | Session capture missing from generated vault | Stop hook not configured or ops/sessions/ not created | Session capture is Primitive 15 (INVARIANT) — must be generated for all presets |
 | Self space generated when disabled | Preset has self space OFF but self/ was created | Check self space optionality flag — research preset defaults to OFF |
 

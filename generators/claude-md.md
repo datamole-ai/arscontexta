@@ -153,7 +153,7 @@ If arscontexta plugin is not loaded, apply the methodology principles documented
 
 ## Feature Blocks
 
-Include each enabled feature's corresponding block from `generators/features/`. Compose them in this canonical order (17 blocks total):
+Include each enabled feature's corresponding block from `generators/features/`. Compose them in this canonical order (16 blocks total):
 
 1. note-granularity (always)
 2. wiki-links (always)
@@ -164,18 +164,17 @@ Include each enabled feature's corresponding block from `generators/features/`. 
 7. maintenance (always)
 8. self-evolution (always)
 8b. methodology-knowledge (always)
-9. personality (when personality is derived)
-10. session-rhythm (always)
-11. templates (always)
-12. multi-domain (if multiple domains detected)
-13. ethical-guardrails (always)
-14. self-space (optional — off for research, on for personal assistant)
-15. helper-functions (always)
-16. graph-analysis (always)
+9. session-rhythm (always)
+10. templates (always)
+11. multi-domain (if multiple domains detected)
+12. ethical-guardrails (always)
+13. self-space (optional — off for research, on for personal assistant)
+14. helper-functions (always)
+15. graph-analysis (always)
 
 **Always-included blocks (12):** note-granularity, wiki-links, processing-pipeline, schema, maintenance, self-evolution, methodology-knowledge, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis.
 
-**Conditional blocks (5):** mocs (navigation depth), semantic-search (qmd opt-in), personality (derivation), multi-domain (multiple domains), self-space (user choice).
+**Conditional blocks (4):** mocs (navigation depth), semantic-search (qmd opt-in), multi-domain (multiple domains), self-space (user choice).
 
 **Composition rules:**
 - Block boundaries must be invisible in output — compose as cohesive prose
@@ -183,7 +182,7 @@ Include each enabled feature's corresponding block from `generators/features/`. 
 - Cross-reference elimination: if a block is excluded, remove/rephrase references to it in remaining blocks
 - If self-space is excluded, references to self/ in other blocks route to ops/ equivalents
 - If semantic-search is excluded, references to "semantic search" become "search your notes"
-- Coherence verification: no orphaned references, consistent vocabulary, consistent personality tone
+- Coherence verification: no orphaned references, consistent vocabulary
 
 ## Pipeline Enforcement (always include)
 
@@ -255,23 +254,6 @@ Pipeline tasks are tracked in a JSON queue. Each {DOMAIN:note} gets one queue en
 
 ### Maintenance Queue
 Maintenance work lives alongside pipeline work in the same queue. /next evaluates conditions against vault state on each invocation: fired conditions create `type: "maintenance"` queue entries, satisfied conditions auto-close them. Priority derives from consequence speed (session > multi-session > slow). One queue, one command.
-```
-
-## Personality Encoding (include when personality is derived)
-
-```markdown
-## Voice
-
-[Generated based on personality derivation from ops/derivation.md. The four dimensions (warmth, opinionatedness, formality, emotional awareness) combine to produce a specific voice. Examples by combination:]
-
-**Warm + Casual:** Write like you're thinking out loud with a friend. Use connective words. Show enthusiasm for connections.
-**Warm + Formal:** Professional but approachable. Complete sentences, clear structure, with genuine warmth.
-**Clinical + Casual:** Direct and efficient. Brief observations, clear actions, no fluff.
-**Clinical + Formal:** Precise, structured, evidence-based. Report-style communication.
-
-[Include specific examples of how to write notes, health reports, and skill output in the derived personality.]
-
-**Invariant:** Personality never contradicts methodology. A playful agent that ignores quality gates is worse than a neutral one that enforces them.
 ```
 
 ## Research Provenance (include when processing >= moderate)

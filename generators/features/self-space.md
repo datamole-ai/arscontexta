@@ -61,7 +61,7 @@ Add these when friction signals the need — not preemptively:
 
 The /architect command can enable or disable self/. When toggling:
 
-- **Enabling self/:** Creates self/ directory with identity.md, methodology.md, goals.md, and memory/. Seeds identity.md from personality derivation. Migrates relevant ops/ content to self/.
+- **Enabling self/:** Creates self/ directory with identity.md, methodology.md, goals.md, and memory/. Seeds identity.md with system voice and purpose. Migrates relevant ops/ content to self/.
 - **Disabling self/:** Migrates goals to ops/. Condenses identity into context file. Archives self/ content. Methodology learnings continue flowing to ops/methodology/.
 
 ### The Architecture Principle

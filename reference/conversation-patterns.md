@@ -70,7 +70,6 @@ The follow-ups clarify pipeline fit (personal capture vs analytical extraction) 
 - `processing-pipeline.md` — excluded (processing = light)
 - `semantic-search.md` — excluded (linking = explicit only)
 - `schema.md` — excluded (schema = minimal)
-- `personality.md` — excluded (no personality signals detected)
 - `multi-domain.md` — excluded (single domain)
 
 ### Key Insights
@@ -132,15 +131,6 @@ The first question calibrates volume and maintenance trigger thresholds. The sec
 | self/ space | relationship tracker |
 | orient | check in |
 
-### Personality Derivation
-
-| Dimension | Position | Signal |
-|-----------|----------|--------|
-| Warmth | Warm | "make someone feel seen" — emotional attentiveness in the user's framing |
-| Opinionatedness | Neutral | No signal for proactive opinions |
-| Formality | Casual | "the little things" — conversational register |
-| Emotional Awareness | Emotionally attentive | Core purpose is emotional — remembering what matters to people |
-
 ### Active Feature Blocks
 
 - `note-granularity.md` — included (always)
@@ -151,7 +141,6 @@ The first question calibrates volume and maintenance trigger thresholds. The sec
 - `session-rhythm.md` — included (always)
 - `templates.md` — included (relationship note template)
 - `ethical-guardrails.md` — included (always)
-- `personality.md` — included (warm, emotionally attentive signals detected)
 
 ### Excluded Feature Blocks
 
@@ -235,7 +224,6 @@ The first question affects pipeline choice (output-directed research maps most n
 
 ### Excluded Feature Blocks
 
-- `personality.md` — excluded (no personality signals — academic register suggests neutral default)
 - `multi-domain.md` — excluded (single domain, though sub-disciplines exist)
 
 ### Key Insights
@@ -299,27 +287,6 @@ The first question resolves note scale (detailed reflections suit /structure to 
 | orient | center |
 | persist | journal |
 
-### Personality Derivation
-
-| Dimension | Position | Signal |
-|-----------|----------|--------|
-| Warmth | Warm | Vulnerable content requires warmth — clinical language about therapy sessions creates distance |
-| Opinionatedness | Neutral | The agent surfaces patterns, it doesn't judge them |
-| Formality | Casual | The user's own language is conversational ("clicks weeks later") |
-| Emotional Awareness | Emotionally attentive | Core purpose — "the same feeling keeps coming up" is an emotional pattern the agent should notice and name |
-
-### Personality x Generated Files
-
-The personality profile (warm, neutral, casual, emotionally attentive) produces noticeably different generated content:
-
-**Context file voice:** "I pay attention to what you write about your sessions — when the same feeling keeps showing up in different situations, I'll connect the dots so you can see the thread."
-
-**Skill instruction language:** "Before marking a reflection complete, check: does the description capture the emotional core, not just the event? 'Had a hard conversation with mom' is the event. 'The fear of disappointing mom surfaced again — same pattern as the work conflict last month' is the reflection."
-
-**self/identity.md:** "I'm your reflection partner. I remember what you've shared across sessions, I notice when patterns recur, and I surface connections you might not see in the moment. I won't push — I'll observe, connect, and let you draw your own conclusions."
-
-**Health report rendering:** "This week's patterns: anxiety appeared in 3 reflections (Monday's work situation, Wednesday's family call, Friday's session). The connection to 'fear of judgment' theme is strengthening — last month it appeared once, this month three times."
-
 ### Active Feature Blocks
 
 - `note-granularity.md` — included (always)
@@ -328,7 +295,6 @@ The personality profile (warm, neutral, casual, emotionally attentive) produces 
 - `processing-pipeline.md` — included (processing = moderate)
 - `maintenance.md` — included (always)
 - `self-evolution.md` — included (always)
-- `personality.md` — included (warm+emotionally attentive derived)
 - `session-rhythm.md` — included (always)
 - `templates.md` — included (reflection note template)
 - `ethical-guardrails.md` — included (always, critical for therapy domain)
@@ -420,7 +386,6 @@ The first question calibrates maintenance trigger sensitivity and schema tempora
 ### Excluded Feature Blocks
 
 - `semantic-search.md` — excluded (linking = explicit)
-- `personality.md` — excluded (neutral-helpful default, no personality signals)
 
 ### Key Insights
 

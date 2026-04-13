@@ -33,8 +33,6 @@ Questions the engine must answer when generating the self/ space:
 
 **Derivation Implication:** The generation process for identity.md must not include any configuration syntax, dimension labels, or technical personality terminology. Generate prose that a reader would describe as "warm" or "clinical" without knowing those terms were part of the generation input. Test the generated identity.md by reading it aloud: does it sound like someone describing themselves, or like a settings file being narrated?
 
-**Source:** See `personality-layer.md` for the full personality dimension specification and the personality x artifact transformation matrix. The identity.md voice examples in that document demonstrate the target quality.
-
 ---
 
 #### Domain context shapes methodology.md content, not just vocabulary
@@ -65,7 +63,7 @@ Questions the engine must answer when generating the self/ space:
 
 **Derivation Implication:** Generate both ops/derivation.md (configuration, machine-readable, includes signals and rationale) and self/identity.md (self-knowledge, prose, the agent's voice about itself). They encode the same personality but in different formats for different consumers. The agent loads identity.md at session start; the derivation engine reads derivation.md at reseed. Never conflate them.
 
-**Source:** `three-spaces.md` — the ops/ vs self/ separation is architecturally motivated by different durability profiles, growth patterns, and query characteristics. `personality-layer.md` — the encoding format in derivation.md vs the voice examples in identity.md demonstrate both formats.
+**Source:** `three-spaces.md` — the ops/ vs self/ separation is architecturally motivated by different durability profiles, growth patterns, and query characteristics.
 
 ---
 
@@ -73,9 +71,9 @@ Questions the engine must answer when generating the self/ space:
 
 **Summary:** A warm, casual personality produces different prose in identity.md ("I care about getting this right for you") than in methodology.md ("Check that the description actually adds something — it deserves better than a restatement of the title") than in goals.md ("Currently working through the first batch of therapy reflections — some heavy stuff in there"). The personality is consistent; the content context varies. Identity.md is about who the agent is. Methodology.md is about how it works. Goals.md is about what it is doing. Each file expresses the same personality in a different register suited to its purpose.
 
-**Derivation Implication:** When generating self/ files, apply personality dimensions to each file independently. Do not copy the voice of identity.md into methodology.md — instead, apply the same personality dimensions to methodology-specific content. Use the personality x artifact transformation matrix from `personality-layer.md` as the guide for how personality manifests across different content types.
+**Derivation Implication:** When generating self/ files, apply the system voice to each file independently. Do not copy the voice of identity.md into methodology.md — instead, apply the same voice to methodology-specific content.
 
-**Source:** `personality-layer.md` — the transformation matrix shows how the same personality produces different outputs for context files, skill instructions, identity.md, and health reports. Self/ files are a subset of this transformation space.
+**Source:** Self/ file examples across different agent types demonstrate how the same voice produces different outputs for different content types.
 
 ---
 
@@ -191,7 +189,6 @@ When self space is disabled (e.g., Research preset default), goals route to ops/
 **When ON:**
 - self/ directory is created with identity.md, methodology.md, goals.md
 - Session-start hook reads self/ files in identity-first order
-- Full personality derivation applies
 - Memory architecture (self/memory/) available for accumulated self-knowledge
 
 **Toggle mechanism:** /architect allows toggling self space during or after init. Toggling ON creates self/ with generated content from the derivation conversation. Toggling OFF moves goals to ops/goals.md and removes the self/ directory (methodology is already in ops/methodology/). The toggle is safe and reversible.
@@ -208,9 +205,9 @@ When self space is disabled (e.g., Research preset default), goals route to ops/
 
 **Summary:** The derivation engine must produce identity.md prose that embodies the derived personality dimensions. A warm, emotionally attentive therapy agent's identity.md might read: "I pay attention to the patterns that emerge across your reflections. When the same feeling surfaces in different contexts, I connect the dots — not to diagnose, but to help you see threads you might miss in the moment. I hold what you share with care. My role is to notice, organize, and surface, never to interpret or judge." A clinical, task-focused research agent's identity.md might read: "I extract claims from source material and evaluate them against existing knowledge. Precision matters: each claim must be specific enough to disagree with. I track methodology provenance so claims can be traced to their intellectual foundations. Quality over speed — I would rather produce three well-connected claims than ten isolated ones." Same structural template, completely different voice and content.
 
-**Derivation Implication:** The generation pipeline should produce identity.md last (after all other self/ files) because identity.md is the synthesis — it expresses the personality that the other files demonstrate functionally. Use the personality x artifact matrix from `personality-layer.md` to derive the appropriate voice, then write identity.md as a person describing themselves in that voice. Test by reading aloud: does this sound like a person, or like a configuration file?
+**Derivation Implication:** The generation pipeline should produce identity.md last (after all other self/ files) because identity.md is the synthesis — it expresses the personality that the other files demonstrate functionally. Write identity.md as a person describing themselves in their own voice. Test by reading aloud: does this sound like a person, or like a configuration file?
 
-**Source:** `personality-layer.md` — identity.md voice examples across clinical, warm, and playful dimensions.
+**Source:** Identity.md voice examples across different agent types.
 
 ---
 
@@ -254,7 +251,7 @@ When self space is disabled (e.g., Research preset default), goals route to ops/
 
 **Derivation Implication:** Build a signal-to-file mapping table that routes derivation conversation signals to specific self/ files. Each signal produces prose content in the appropriate file. The agent never sees the signal routing — it only reads the resulting self-knowledge. The ops/derivation.md file records the mapping for audit and reseed.
 
-**Source:** `personality-layer.md` — signal patterns table maps user statements to personality dimensions. This reference extends that mapping from personality dimensions to self/ file content.
+**Source:** Signal-to-file mapping extends from user statements to self/ file content.
 
 ---
 
@@ -286,4 +283,4 @@ When self space is disabled (e.g., Research preset default), goals route to ops/
 - Sources reviewed: 18
 - Claims included: 20
 - Claims excluded: 5
-- Cross-references: `three-spaces.md` (self space specification, failure modes of conflation, memory type routing), `personality-layer.md` (personality dimensions, personality x artifact transformation matrix, encoding format), `session-lifecycle.md` (session orientation, goals.md as handoff), `kernel.yaml` (self-space and session-rhythm primitives), `methodology.md` (session rhythm, self/ structure), `components.md` (self/ space blueprint), `vocabulary-transforms.md` (domain-specific self/ vocabulary)
+- Cross-references: `three-spaces.md` (self space specification, failure modes of conflation, memory type routing), `session-lifecycle.md` (session orientation, goals.md as handoff), `kernel.yaml` (self-space and session-rhythm primitives), `methodology.md` (session rhythm, self/ structure), `components.md` (self/ space blueprint), `vocabulary-transforms.md` (domain-specific self/ vocabulary)

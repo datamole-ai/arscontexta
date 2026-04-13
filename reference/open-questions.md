@@ -177,17 +177,6 @@ These questions don't have clear answers yet. They inform the research graph's d
 **Context:** Full transformation is expensive — every skill instruction, every context file section, every template field. If shallow transformation (key terms only) produces equivalent agent behavior, the derivation engine can be simpler.
 
 **Approach:** Generate two systems for the same domain — one with full transformation, one with shallow. Compare: agent compliance with methodology, user satisfaction with system voice, and long-term engagement.
-
-### Personality Drift Detection
-
-**Question:** How do we detect when the agent's actual behavior has drifted from its encoded personality?
-
-**Context:** Personality is encoded in ops/derivation.md and expressed through generated files. But there's no mechanism to verify that the agent's runtime behavior matches the encoded profile. A warm agent might gradually become clinical if the user's content becomes more analytical.
-
-**Approach:** Periodic personality audits that sample recent agent outputs (health reports, skill completions, session logs), score them against the personality encoding, and flag drift when measured personality diverges from encoded personality.
-
-**What a solution looks like:** A /architect sub-command that reads recent ops/sessions/ entries, scores linguistic markers (warmth, formality, emotional acknowledgment), and compares against the personality encoding.
-
 ### Selective Forgetting Algorithms
 
 **Question:** Should knowledge systems deliberately forget?
@@ -275,5 +264,4 @@ The derivation engine references this document in three situations:
 - **Interaction constraints that complicate answers:** See `interaction-constraints.md` — many open questions involve dimension interactions.
 - **Failure modes these questions would prevent:** See `failure-modes.md` for the failure modes that better metrics would detect earlier.
 - **Current validation tests:** See `derivation-validation.md` for the 4 worked tests that validate the derivation engine today.
-- **Personality layer questions:** See `personality-layer.md` for how personality drift detection relates to the encoding format.
 - **Three-space architecture questions:** See `three-spaces.md` for the memory type routing that selective forgetting would extend.

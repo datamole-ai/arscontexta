@@ -23,13 +23,11 @@ blocks:
   conditional:
     - mocs
     - semantic-search
-    - personality
     - self-space
     - multi-domain
   optional: []
   disabled: []
 self_space: "user_choice"
 qmd: "user_choice"
-personality: "derived_from_conversation"
 processing_depth: "full quality gates by default, user can opt down"
 starter_mocs: []  # user-chosen

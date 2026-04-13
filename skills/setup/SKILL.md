@@ -21,7 +21,7 @@ Read these files to understand the methodology and available components. Read th
 **Deferred references (read at specific steps, not upfront):**
 
 - `${CLAUDE_PLUGIN_ROOT}/reference/use-case-presets.md` -- read in Step 3c (only the matched preset section)
-- `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md` -- read in Step 3f (only HIGH-risk failure mode sections identified by the inlined matrix)
+- `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md` -- read in Step 3e (only HIGH-risk failure mode sections identified by the inlined matrix)
 - `${CLAUDE_PLUGIN_ROOT}/reference/three-spaces.md` -- not needed; folder structure is fully specified in Pipeline Step 1
 - `${CLAUDE_PLUGIN_ROOT}/reference/conversation-patterns.md` -- consult only if derivation is ambiguous and worked examples would help
 
@@ -302,11 +302,7 @@ For novel domains (no preset scores above 2.0 affinity):
 3. For each term, use the preset with higher overlap for that specific concept
 4. Flag all blended terms for user confirmation in the proposal
 
-### Step 3d: Personality
-
-Personality is warm, neutral, helpful. No derivation needed. This is hardcoded — not a dimension to derive from conversation.
-
-### Step 3e: Coherence Validation (Three-Pass Check)
+### Step 3d: Coherence Validation (Three-Pass Check)
 
 Run BEFORE proceeding to the proposal. Use the interaction constraints already loaded from upfront reference reads.
 
@@ -343,7 +339,7 @@ For remaining soft violations, check if compensating mechanisms exist:
 
 Note active compensations in derivation rationale. Flag compensated dimensions for monitoring by health command.
 
-### Step 3f: Failure Mode Risk Assessment
+### Step 3e: Failure Mode Risk Assessment
 
 Check the derived configuration against the domain vulnerability matrix below. Flag all HIGH-risk failure modes for this configuration. These get included in the generated context file's "Common Pitfalls" section.
 
@@ -368,7 +364,7 @@ Include all HIGH-risk modes in the generated context file. Mention medium-risk m
 
 Read `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md` — but only the sections for HIGH-risk failure modes identified above. Use the prevention patterns, warning signs, and domain-specific descriptions to write the "Common Pitfalls" section in domain-native vocabulary. Skip sections for medium and low-risk modes.
 
-### Step 3g: Full Automation Configuration
+### Step 3f: Full Automation Configuration
 
 All generated systems ship with full automation from day one. There are no tiers — every vault gets the complete skill set, full processing pipeline, and session capture. Core hooks (orient, validate, commit) are provided by the arscontexta plugin globally. The user opts DOWN from full if they want simpler operation (via ops/config.yaml).
 
@@ -386,15 +382,15 @@ All generated systems ship with full automation from day one. There are no tiers
 
 **Init generates everything by default.** The context file includes all skill documentation. Processing depth and automation level can be adjusted post-init via ops/config.yaml.
 
-### Step 3h: Schema Derivation
+### Step 3g: Schema Derivation
 
 Derive initial `_schema` blocks for each note type (extract, structure, capture). This step makes schema derivation explicit — it was previously implicit in Pipeline Step 4.
 
 **Inputs from prior steps:**
 - Vocabulary mapping (Step 3c) — domain-native field labels, enum values
 - Schema density dimension — minimal (few optional fields), moderate (standard set), dense (many optional fields with domain-specific enums)
-- Coherence results (Step 3e) — any constraints that affect schema structure
-- Automation config (Step 3g) — which note types are active
+- Coherence results (Step 3d) — any constraints that affect schema structure
+- Automation config (Step 3f) — which note types are active
 
 **For each note type, derive a `_schema` block containing:**
 - `entity_type` — domain-named note identifier

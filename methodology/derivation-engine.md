@@ -5,7 +5,7 @@ type: moc
 
 # derivation-engine
 
-The methodology of the /setup wizard. Signal extraction from conversation, dimension resolution, cascade effects, coherence validation, personality derivation, and vocabulary transformation.
+The methodology of the /setup wizard. Signal extraction from conversation, dimension resolution, cascade effects, coherence validation, and vocabulary transformation.
 
 ## Core Ideas
 
