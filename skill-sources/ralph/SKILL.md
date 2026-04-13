@@ -46,7 +46,7 @@ Each phase maps to specific Agent tool parameters. Use these EXACTLY when spawni
 |-------|---------------|---------|
 | process | /extract, /structure, or /capture (based on task.granularity) | Extract notes from source material |
 | create | (inline note creation) | Write the {DOMAIN:note} file |
-| enrich | /enrich | Add content to existing {DOMAIN:note} |
+| enrich | (inline enrichment) | Add content to existing {DOMAIN:note} |
 | reflect | /reflect | Find connections, update {DOMAIN:topic map}s |
 | reweave | /reweave | Update older {DOMAIN:note_plural} with new connections |
 | verify | /verify | Description quality + schema + health checks |
@@ -175,8 +175,23 @@ Read the task file at ops/queue/{FILE} for context.
 You are processing task {ID} from the work queue.
 Phase: enrich | Target: {TARGET}
 
-Run /enrich using the task file for context.
-The task file specifies which existing {DOMAIN:note} to enrich and what to add.
+The task file frontmatter specifies which existing {DOMAIN:note} to enrich (target_note)
+and what to add (addition, source_lines).
+
+Enrich the existing {DOMAIN:note}:
+1. Read the target {DOMAIN:note} file
+2. Read the source lines referenced in the task file
+3. Integrate the new content into the existing {DOMAIN:note}:
+   - Weave new detail into existing body (don't append a disconnected section)
+   - Preserve the {DOMAIN:note}'s voice and structure
+   - Update description in frontmatter if the addition materially changes scope
+4. If enrichment causes the {DOMAIN:note} to cover multiple distinct claims,
+   set post_enrich_action: split-recommended in the task file
+5. If the title no longer fits after integration,
+   set post_enrich_action: title-sharpen in the task file
+6. If the {DOMAIN:note} now substantially overlaps another,
+   set post_enrich_action: merge-candidate in the task file
+7. Update the task file's ## Enrich section with what was changed and why
 ONE PHASE ONLY. Do NOT run reflect.
 ```
 

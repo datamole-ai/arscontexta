@@ -397,7 +397,7 @@ This note originally claimed [X]. Based on [[evidence]], the claim is revised: [
 
 ## Enrichment-Triggered Actions
 
-When processing a {vocabulary.note} that came through the enrichment pipeline, check the task file for `post_enrich_action` signals. These were surfaced by /enrich and need execution:
+When processing a {vocabulary.note} that came through the enrichment pipeline, check the task file for `post_enrich_action` signals. These were surfaced during the enrich phase and need execution:
 
 ### title-sharpen
 
