@@ -872,12 +872,6 @@ processing:
     frequency: after_create # after_create | periodic | manual
 
 provenance: [full | minimal | off]
-
-research:
-  primary: [exa-deep-research | web-search]    # best available research tool
-  fallback: [exa-web-search | web-search]      # fallback if primary unavailable
-  last_resort: web-search                       # always available
-  default_depth: moderate                       # light | moderate | deep
 ```
 
 **Processing depth levels:**
@@ -891,12 +885,6 @@ research:
 - `manual` -- Skills output "Next: /[skill] [target]" -- user decides.
 - `suggested` -- Skills output next step AND add to task queue -- user can skip.
 - `automatic` -- Skills complete → next phase runs immediately via orchestration.
-
-**Research tool detection:** During generation, check for available research tools:
-
-1. If Exa MCP tools available (`mcp__exa__deep_researcher_start`): primary = exa-deep-research
-2. If Exa web search available (`mcp__exa__web_search_exa`): fallback = exa-web-search
-3. Web search is always the last resort
 
 **Relationship:** config.yaml is the live operational config. derivation.md is the historical record of WHY. Config can drift; `/architect` detects and documents the drift.
 

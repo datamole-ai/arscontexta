@@ -393,15 +393,13 @@ Your attention degrades as context fills. The first ~40% of context is the "smar
 
 ### Research Provenance
 
-Every file in {DOMAIN:inbox/} from a research tool (web search, deep research, API import) MUST include provenance metadata in its YAML frontmatter. Claims without provenance are untraceable.
+Every file in {DOMAIN:inbox/} from web search or external import MUST include provenance metadata in its YAML frontmatter. Claims without provenance are untraceable.
 
 **Standard provenance fields:**
 
 ~~~yaml
-source_type: [research | web-search | manual | voice | channel | import]
+source_type: [web-search | manual | voice | channel | import]
 research_prompt: "the query or directive that generated this content"
-research_server: "exa | google | brave | manual"
-research_model: "exa-research-pro | exa-research-fast | n/a"
 generated: "YYYY-MM-DDTHH:MM:SSZ"
 ~~~
 

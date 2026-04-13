@@ -1,7 +1,7 @@
 ---
 name: learn
-description: Research a topic and grow your knowledge graph. Uses Exa deep researcher, web search, or basic search to investigate topics, files results with full provenance, and chains to processing pipeline. Triggers on "/learn", "/learn [topic]", "research this", "find out about".
-allowed-tools: Read, Write, Edit, Grep, Glob, Bash, mcp__exa__web_search_exa, mcp__exa__deep_researcher_start, mcp__exa__deep_researcher_check, WebSearch
+description: Research a topic and grow your knowledge graph. Uses web search to investigate topics, files results with full provenance, and chains to processing pipeline. Triggers on "/learn", "/learn [topic]", "research this", "find out about".
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash, WebSearch
 ---
 
 ## EXECUTE NOW
@@ -11,17 +11,15 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash, mcp__exa__web_search_exa, mc
 Parse immediately:
 - If topic provided: research that topic
 - If topic empty: read `self/goals.md` for highest-priority unexplored direction and propose it
-- If topic includes `--deep`/`--light`/`--moderate`: force that depth, strip flag from topic
 - If no topic and no goals.md: ask "What would you like to research?"
 
 **Steps:**
 
-1. **Read config** — tool preferences, depth, domain vocabulary
-2. **Determine depth** — from flags, config default, or fallback to moderate
-3. **Research** — tool cascade: primary → fallback → last resort
-4. **File to inbox** — with full provenance metadata
-5. **Chain to processing** — next step based on pipeline chaining mode
-6. **Update goals.md** — append new research directions discovered
+1. **Read config** — pipeline chaining mode, domain vocabulary
+2. **Research** — WebSearch
+3. **File to inbox** — with provenance metadata
+4. **Chain to processing** — next step based on pipeline chaining mode
+5. **Update goals.md** — append new research directions discovered
 
 **START NOW.** Reference below explains methodology.
 
@@ -30,17 +28,12 @@ Parse immediately:
 ## Step 1: Read Configuration
 
 ```
-ops/config.yaml             — research tools, depth, pipeline chaining
+ops/config.yaml             — pipeline chaining mode
 ops/derivation-manifest.md  — domain vocabulary (inbox folder, reduce skill name)
 ```
 
 **From config.yaml** (defaults if missing):
 ```yaml
-research:
-  primary: exa-deep-research      # exa-deep-research | exa-web-search | web-search
-  fallback: exa-web-search
-  last_resort: web-search
-  default_depth: moderate          # light | moderate | deep
 pipeline:
   chaining: suggested             # manual | suggested | automatic
 ```
@@ -52,69 +45,32 @@ pipeline:
 
 ---
 
-## Step 2: Determine Depth
-
-Priority: explicit flag > config default > `moderate`
-
-| Depth | Tool | Sources | Duration | Use When |
-|-------|------|---------|----------|----------|
-| light | WebSearch | 2-3 | ~5s | Checking a specific fact |
-| moderate | mcp__exa__web_search_exa | 5-8 | ~10-30s | Exploring a subtopic |
-| deep | mcp__exa__deep_researcher_start | Comprehensive | 15s-3min | Major research direction |
-
----
-
-## Step 3: Research — Tool Cascade
+## Step 2: Research
 
 Output header:
 ```
 Researching: [topic]
-
-  Depth: [depth]
-  Using: [tool name]
 ```
 
-Try tools in config priority order. If a tool fails (MCP unavailable, error, empty results), fall to next tier. If ALL tiers fail:
-```
-FAIL: Research failed — no research tools available
-
-  Tried:
-    1. [primary] — [error]
-    2. [fallback] — [error]
-    3. WebSearch — [error]
-
-  Try again later or manually add research to [inbox-folder]/
-```
-
-### Tool Invocation Patterns
-
-**exa-deep-research:**
-```
-mcp__exa__deep_researcher_start
-  instructions: "Research comprehensively: [topic]. Focus on practical findings, key patterns, recent developments, and actionable insights."
-  model: "exa-research-fast" (moderate) | "exa-research" (deep)
-```
-Poll with `mcp__exa__deep_researcher_check` until `completed`. Output during wait:
-```
-  Research ID: [id]
-  Waiting for results...
-```
-
-**exa-web-search:**
-```
-mcp__exa__web_search_exa  query: "[topic]"  numResults: 8
-```
-
-**web-search (last resort, also used for light depth):**
+Call WebSearch:
 ```
 WebSearch  query: "[topic]"
 ```
 
-On completion: `Research complete — [source count] sources analyzed`
+If WebSearch fails or returns empty:
+```
+FAIL: Research failed
+
+  WebSearch returned no results for "[topic]"
+
+  Try refining the topic or manually add research to [inbox-folder]/
+```
+
+On success: `Research complete`
 
 ---
 
-## Step 4: File Results to Inbox
+## Step 3: File Results to Inbox
 
 **Filename:** `YYYY-MM-DD-[slugified-topic].md` — lowercase, spaces to hyphens, no special chars.
 
@@ -122,26 +78,16 @@ On completion: `Research complete — [source count] sources analyzed`
 
 ### Provenance Frontmatter
 
-Every field serves the provenance chain. The `exa_prompt` field is most critical — it captures the intellectual context that shaped the research.
-
 ```yaml
 ---
 description: [1-2 sentence summary of key findings]
-source_type: exa-deep-research | exa-web-search | web-search
-exa_prompt: "[full query/instruction string sent to the research tool]"
-exa_research_id: "[deep researcher ID, omit for web search]"
-exa_model: "[exa-research-fast | exa-research, omit for web search]"
-exa_tool: "[mcp tool name, omit for deep researcher]"
+source_type: web-search
+research_prompt: "[query sent to WebSearch]"
 generated: [ISO 8601 timestamp — run: date -u +"%Y-%m-%dT%H:%M:%SZ"]
 domain: "[domain name from derivation-manifest]"
 topics: ["[[domain-hub-moc]]"]
 ---
 ```
-
-Include only the fields relevant to the tool used:
-- Deep researcher: `source_type`, `exa_prompt`, `exa_research_id`, `exa_model`, `generated`, `domain`, `topics`
-- Exa web search: `source_type`, `exa_prompt`, `exa_tool`, `generated`, `domain`, `topics`
-- WebSearch: `source_type`, `exa_prompt`, `exa_tool`, `generated`, `domain`, `topics`
 
 ### Body Structure
 
@@ -166,7 +112,7 @@ should be a clear proposition the reduce phase can extract as an atomic insight.
 
 ---
 
-## Step 5: Chain to Processing
+## Step 4: Chain to Processing
 
 Read chaining mode from config (default: `suggested`).
 
@@ -185,7 +131,7 @@ Append based on mode:
 
 ---
 
-## Step 6: Update goals.md
+## Step 5: Update goals.md
 
 If `self/goals.md` exists AND the research uncovered meaningful new directions:
 
@@ -207,10 +153,6 @@ ars contexta
 
 Researching: [topic]
 
-  Depth: [depth]
-  Using: [tool name]
-  [Research ID: abc-123]
-
   Research complete -- [N] sources analyzed
 
   Filed to: [inbox-folder]/[filename]
@@ -228,9 +170,7 @@ Researching: [topic]
 | Error | Behavior |
 |-------|----------|
 | No topic, no goals.md | Ask: "What would you like to research?" |
-| Exa MCP unavailable | Fall through cascade to WebSearch |
-| All tools fail | Report failures with FAIL status, suggest manual inbox filing |
-| Deep researcher timeout (>5 min) | Report timeout, suggest `--moderate` |
+| WebSearch fails | Report failure, suggest manual inbox filing |
 | Empty results | Report "No results found", suggest refining topic |
 | Config files missing | Use defaults silently |
 | Inbox folder missing | Create it before writing |
