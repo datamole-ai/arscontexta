@@ -973,10 +973,6 @@ processing:
   extraction:
     selectivity: moderate  # strict | moderate | permissive
     categories: auto       # auto (from derivation) | custom list
-  verification:
-    description_test: true
-    schema_check: true
-    link_check: true
   reweave:
     scope: related         # related | broad | full
     frequency: after_create # after_create | periodic | manual

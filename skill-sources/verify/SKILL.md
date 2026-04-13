@@ -16,11 +16,8 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.templates` for the templates folder path
    - Use `vocabulary.cmd_reflect` for redirect when missing connections found
 
-2. **`ops/config.yaml`** — processing depth, verification settings
+2. **`ops/config.yaml`** — processing depth
    - `processing.depth`: deep | standard | quick
-   - `processing.verification.description_test`: true | false
-   - `processing.verification.schema_check`: true | false
-   - `processing.verification.link_check`: true | false
 
 If these files don't exist, use universal defaults.
 
