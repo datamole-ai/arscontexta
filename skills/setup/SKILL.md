@@ -1021,10 +1021,7 @@ features:
   processing-pipeline: [true | false]
   sleep-processing: [true | false]
 
-processing_tier: auto    # auto | 1 | 2 | 3 | 4
-
 processing:
-  depth: standard          # deep | standard | quick
   extraction:
     categories: auto       # auto (from derivation) | custom list
   reweave:
