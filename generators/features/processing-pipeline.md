@@ -227,19 +227,7 @@ If all four phases run in one session, the verify phase runs on degraded attenti
 - State transfers through persistent files, not accumulated conversation
 - This makes crashes recoverable and processing auditable
 
-**Processing modes:**
-
-| Mode | Behavior | When to Use |
-|------|----------|-------------|
-| Interactive | You invoke each phase manually, review between | Learning the system, important sources |
-| Orchestrated | Automated phase-by-phase with fresh context | Batch processing, high volume |
-| Compressed | Phases run sequentially in same session (quality trade-off) | Quick processing, minor sources |
-
-Default: Interactive mode for new users, Orchestrated for experienced users. Configurable via `ops/config.yaml`:
-~~~yaml
-pipeline:
-  processing_mode: interactive  # interactive | orchestrated | compressed
-~~~
+**Processing is orchestrated by default.** /ralph spawns a fresh subagent per phase. /pipeline chains the full sequence. The queue drives what happens next.
 
 **Implementation approaches by platform:**
 
@@ -249,7 +237,7 @@ pipeline:
 | Background processing | Background agents or scheduled skills |
 | No subagent support | Manual invocation with task file handoff between sessions |
 
-The task queue IS the orchestration — {DOMAIN:skills} read from it, write to it, and the queue state drives what happens next. You do not need a separate orchestrator command. When you say "process this source through the full pipeline," follow the pattern: read queue, pick task, execute phase, advance queue, repeat.
+The task queue IS the orchestration — {DOMAIN:skills} read from it, write to it, and the queue state drives what happens next. When you say "process this source through the full pipeline," follow the pattern: read queue, pick task, execute phase, advance queue, repeat.
 
 ### Processing Depth Configuration
 
@@ -276,53 +264,6 @@ processing:
 - **Standard** runs all phases sequentially within the current session. Quality is good because each phase gets focused attention, but context does accumulate across phases. This is the right default for most work.
 
 - **Quick** combines {DOMAIN:connect} and {DOMAIN:verify} into a single pass and reduces the depth of backward-connection checking. Use this for processing accumulated minor sources when volume matters more than depth.
-
-### Pipeline Chaining
-
-{DOMAIN:Skills} need to chain their outputs. Without chaining, the pipeline is documentation — you complete one phase but forget to run the next. Three activation modes control how aggressively chaining happens:
-
-| Mode | Behavior | Who Controls |
-|------|----------|-------------|
-| Manual | {DOMAIN:Skill} outputs "Next: /{DOMAIN:skill} [target]" — you decide whether to run it | You |
-| Suggested | {DOMAIN:Skill} outputs next step AND adds to task queue — you can skip | You + system |
-| Automatic | {DOMAIN:Skill} completes -> next phase runs immediately via orchestration | System |
-
-Default: Suggested mode. Automatic mode activates when you run batch processing or orchestrated mode. Configurable:
-
-~~~yaml
-# ops/config.yaml
-pipeline:
-  chaining: suggested  # manual | suggested | automatic
-~~~
-
-**The chaining model:**
-
-~~~
-/{DOMAIN:learn} [topic]
-    -> files to {DOMAIN:inbox} with provenance
-    -> [CHAIN] queue for processing
-User chooses pipeline:
-  /extract [{DOMAIN:inbox}-file]
-      -> extracts atomic {DOMAIN:notes}
-      -> [CHAIN] queues all extracted {DOMAIN:notes} for {DOMAIN:connect}
-  /structure [{DOMAIN:inbox}-file]
-      -> groups related claims into structured {DOMAIN:notes}
-      -> [CHAIN] queues all structured {DOMAIN:notes} for {DOMAIN:connect}
-  /capture [{DOMAIN:inbox}-file]
-      -> preserves source verbatim with frontmatter
-      -> [CHAIN] queues capture {DOMAIN:note} for {DOMAIN:connect}
-/{DOMAIN:connect} [{DOMAIN:note}]
-    -> finds connections, updates {DOMAIN:topic maps}
-    -> [CHAIN] queues {DOMAIN:note} for {DOMAIN:maintain}
-/{DOMAIN:maintain} [{DOMAIN:note}]
-    -> updates old {DOMAIN:notes} with new connections
-    -> [CHAIN] queues {DOMAIN:note} for {DOMAIN:verify}
-/{DOMAIN:verify} [{DOMAIN:note}]
-    -> tests description, schema, links
-    -> [END] marks task complete
-~~~
-
-**Queue-driven chaining:** When /extract, /structure, or /capture creates {DOMAIN:notes}, each gets a task queue entry with `current_phase: "{DOMAIN:connect}"`. The queue drives the pipeline — chaining happens through queue state management, not through {DOMAIN:skills} directly invoking each other.
 
 ### Full Automation From Day One
 

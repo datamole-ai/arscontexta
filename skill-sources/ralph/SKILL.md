@@ -3,7 +3,7 @@ name: ralph
 description: Queue processing with fresh context per phase. Processes N tasks from the queue, spawning isolated subagents to prevent context contamination. Supports batch filter and type filter modes. Triggers on "/ralph", "/ralph N", "process queue", "run pipeline tasks".
 version: "1.0"
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Agent
-argument-hint: "N [--batch id] [--type process] [--handoff] — N = number of tasks to process"
+argument-hint: "N [--batch id] [--type process] — N = number of tasks to process"
 ---
 
 ## EXECUTE NOW
@@ -14,7 +14,6 @@ Parse arguments:
 - N (required): number of tasks to process
 - --batch [id]: process only tasks from specific batch
 - --type [type]: process only tasks of a specific type (process, note, enrichment)
-- --handoff: output structured RALPH HANDOFF block at end (for pipeline chaining)
 
 ### Step 0: Read Vocabulary
 
@@ -133,9 +132,8 @@ File: {file}
 Construct a prompt based on `current_phase`. Every prompt MUST include:
 - Reference to the task file path (from queue's `file` field)
 - The task identity (id, current_phase, target)
-- The skill to invoke with `--handoff`
+- The skill to invoke
 - `ONE PHASE ONLY` constraint
-- Instruction to output RALPH HANDOFF block
 
 **Phase-specific prompts:**
 
@@ -147,7 +145,7 @@ You are processing task {ID} from the work queue.
 Phase: process | Target: {TARGET}
 Granularity: {GRANULARITY} (from task.granularity)
 
-Run /{GRANULARITY_SKILL} --handoff on the source file referenced in the task file.
+Run /{GRANULARITY_SKILL} on the source file referenced in the task file.
 (granularity "extract" → /extract, "structure" → /structure, "capture" → /capture)
 After processing: create per-note task files, update the queue with new entries
 (1 entry per note with type: note, current_phase/completed_phases), output RALPH HANDOFF.
@@ -177,7 +175,7 @@ Read the task file at ops/queue/{FILE} for context.
 You are processing task {ID} from the work queue.
 Phase: enrich | Target: {TARGET}
 
-Run /enrich --handoff using the task file for context.
+Run /enrich using the task file for context.
 The task file specifies which existing {DOMAIN:note} to enrich and what to add.
 ONE PHASE ONLY. Do NOT run reflect.
 ```
@@ -197,7 +195,7 @@ OTHER CLAIMS FROM THIS BATCH (check connections to these alongside regular disco
 - [[{SIBLING_TARGET}]]
 {end for, or "None yet" if this is the first claim}
 
-Run /reflect --handoff on: {TARGET}
+Run /reflect on: {TARGET}
 Use dual discovery: {DOMAIN:topic map} exploration AND semantic search.
 Add inline links where genuine connections exist — including sibling claims listed above.
 Update relevant {DOMAIN:topic map} with this {DOMAIN:note}.
@@ -219,7 +217,7 @@ OTHER CLAIMS FROM THIS BATCH:
 - [[{SIBLING_TARGET}]]
 {end for}
 
-Run /reweave --handoff for: {TARGET}
+Run /reweave for: {TARGET}
 This is the BACKWARD pass. Find OLDER {DOMAIN:note_plural} AND sibling claims
 that should reference this {DOMAIN:note} but don't.
 Add inline links FROM older {DOMAIN:note_plural} TO this {DOMAIN:note}.
@@ -233,7 +231,7 @@ Read the task file at ops/queue/{FILE} for context.
 You are processing task {ID} from the work queue.
 Phase: verify | Target: {TARGET}
 
-Run /verify --handoff on: {TARGET}
+Run /verify on: {TARGET}
 Combined verification: recite (cold-read prediction test), validate (schema check),
 review (per-note health).
 IMPORTANT: Recite runs FIRST — read only title+description, predict content,
@@ -356,7 +354,7 @@ Next steps:
 
 **Verification:** The "Subagents spawned" count MUST equal "Tasks processed." If it does not, the lead executed tasks inline — this is a process violation. Report it as an error.
 
-If `--handoff` flag was set, also output:
+Also output the RALPH HANDOFF block:
 
 ```
 === RALPH HANDOFF: orchestration ===

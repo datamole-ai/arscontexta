@@ -46,7 +46,6 @@ After reading the target {vocabulary.note}, check its `granularity` frontmatter 
 
 Parse immediately:
 - If target contains a note name: verify that specific note
-- If target contains `--handoff`: output RALPH HANDOFF block at end
 - If target is "all" or "recent": verify recently created/modified notes
 - If target is empty: ask which note to verify
 
@@ -325,7 +324,7 @@ Recommended Actions:
 - If a task file is in context (pipeline execution): update the `## Verify` section with results
 - Reflect on the process: friction? surprises? methodology insights? process gaps?
 - If any observations worth capturing: create atomic note in the observations directory per the observation capture pattern
-- If `--handoff` in target: output RALPH HANDOFF block (see below)
+- Output RALPH HANDOFF block (see below)
 
 **START NOW.** The reference material below explains philosophy and methodology — use to guide reasoning, not as output to repeat.
 
@@ -435,13 +434,9 @@ Run all three checks on a specific note. Full detailed report.
 
 Comprehensive audit of all notes in {DOMAIN:notes}/. Summary table + flagged failures.
 
-### /verify --handoff [note]
+## RALPH HANDOFF Output
 
-Pipeline mode for orchestrator. Runs full workflow, outputs RALPH HANDOFF block.
-
-## handoff mode (--handoff flag)
-
-When invoked with `--handoff`, output this structured format at the END of the session:
+Always output this structured format at the END of the session:
 
 ```
 === RALPH HANDOFF: verify ===
@@ -508,7 +503,6 @@ If verification FAILS (recite score < 3 or any FAIL-level issue), do NOT mark do
 - Output what failed and what needs fixing
 - Keep task at `current_phase: "verify"` for re-run after fixes
 
-The chaining output uses domain-native vocabulary from the derivation manifest.
 
 ## queue.json update (interactive execution)
 

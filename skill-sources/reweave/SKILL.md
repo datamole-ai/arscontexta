@@ -15,9 +15,8 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.topic_map` / `vocabulary.topic_map_plural` for MOC references
    - Use `vocabulary.cmd_verify` for the next-phase suggestion
 
-2. **`ops/config.yaml`** — processing depth, pipeline chaining
+2. **`ops/config.yaml`** — processing depth
    - `processing.depth`: deep | standard | quick
-   - `processing.chaining`: manual | suggested | automatic
    - `processing.reweave.scope`: related | broad | full
 
 If these files don't exist, use universal defaults.
@@ -58,7 +57,6 @@ Mark phase complete in task file and return.
 
 Parse immediately:
 - If target contains `[[note name]]` or note name: reweave that specific {vocabulary.note}
-- If target contains `--handoff`: output RALPH HANDOFF block at end
 - If target is empty: find {vocabulary.note_plural} that most need reweaving (oldest, sparsest, most outdated)
 - If target is "recent" or "--since Nd": reweave {vocabulary.note_plural} not touched in N days
 - If target is "sparse": find {vocabulary.note_plural} with fewest connections
@@ -79,7 +77,7 @@ Parse immediately:
 7. **Update {vocabulary.topic_map_plural}** — if the {vocabulary.note}'s topic membership changed, update relevant {vocabulary.topic_map_plural}
 8. **If task file exists:** update the {vocabulary.reweave} section
 9. **Report** — structured summary of what changed and why
-10. If `--handoff` in target: output RALPH HANDOFF block
+10. Output RALPH HANDOFF block
 
 **START NOW.** Reference below explains methodology — use to guide, not as output.
 
@@ -141,13 +139,6 @@ Reweave all {vocabulary.note_plural} not updated in N days.
 # Find notes not modified in 30 days
 find {vocabulary.notes}/ -name "*.md" -mtime +30 -type f
 ```
-
-### /reweave --handoff [[note]]
-
-External loop mode for /ralph:
-- Execute full workflow as normal
-- At the end, output structured RALPH HANDOFF block
-- Used when running isolated phases with fresh context per task
 
 ---
 
@@ -281,54 +272,7 @@ Never: "related" or "see also"
 
 ### Phase 5: Apply Changes
 
-**For pipeline execution (--handoff mode):** Apply changes directly. The pipeline needs to proceed without waiting for approval.
-
-**For interactive execution (no --handoff):** Present the reweave proposal first, then apply after approval.
-
-**Reweave proposal format (interactive only):**
-
-```markdown
-## Reweave Proposal: [[target note]]
-
-**Last modified:** YYYY-MM-DD
-**Current knowledge evaluated:** N newer {vocabulary.note_plural}, M backlinks
-
-### Claim Assessment
-
-[Does the claim hold? Need sharpening? Splitting? Revision?]
-
-### Proposed Changes
-
-**1. [change type]: [description]**
-
-Current:
-> [existing text]
-
-Proposed:
-> [new text]
-
-Rationale: [why this change]
-
-**2. [change type]: [description]**
-...
-
-### Connections to Add
-
-- [[newer note A]] — [relationship]: [specific reason]
-- [[newer note B]] — [relationship]: [specific reason]
-
-### Connections to Verify (other {vocabulary.note_plural} should link here)
-
-- [[note X]] might benefit from referencing this because...
-
-### Not Changing
-
-- [What was considered but rejected, and why]
-
----
-
-Apply these changes? (yes/no/modify)
-```
+Apply changes directly. The pipeline needs to proceed without waiting for approval.
 
 **When applying changes:**
 
@@ -579,11 +523,9 @@ The test: **if this {vocabulary.note} were written today with everything you kno
 - Split {vocabulary.note_plural} into pieces too thin to stand alone
 - Add connections without articulating why
 - Rewrite voice/style (preserve the {vocabulary.note}'s character)
-- Make changes without approval in interactive mode
 - Create wiki links to non-existent files
 
 **Always:**
-- Present proposals before editing (interactive mode)
 - Explain rationale for each change
 - Preserve what is still valid
 - Log significant claim changes
@@ -601,13 +543,11 @@ The network compounds through evolution, not just accumulation.
 
 ---
 
-## Handoff Mode (--handoff flag)
+## RALPH HANDOFF Output
 
-When invoked with `--handoff`, output this structured format at the END of the session. This enables external loops (/ralph) to parse results and update the task queue.
+Always output this structured format at the END of the session. This enables external loops (/ralph) to parse results and update the task queue.
 
-**Detection:** Check if `$ARGUMENTS` contains `--handoff`. If yes, append this block after completing normal workflow.
-
-**Handoff format:**
+**Format:**
 
 ```
 === RALPH HANDOFF: {vocabulary.reweave} ===
@@ -634,40 +574,12 @@ Queue Updates:
 === END HANDOFF ===
 ```
 
-### Task File Update (when invoked via ralph loop)
+### Task File Update
 
-When running in handoff mode via /ralph, the prompt includes the task file path. After completing the workflow, update the `## {vocabulary.reweave}` section of that task file with:
+When a task file path is in context (pipeline execution via /ralph), update it. After completing the workflow, update the `## {vocabulary.reweave}` section of that task file with:
 - Older {vocabulary.note_plural} updated and why
 - Claim status (unchanged/sharpened/challenged/split)
 - Network effect summary
 
 **Critical:** The handoff block is OUTPUT, not a replacement for the workflow. Do the full reweave workflow first, update task file, then format results as handoff.
 
-### Queue Update (interactive execution)
-
-When running interactively (NOT via /ralph), YOU must advance the phase in the queue. /ralph handles this automatically, but interactive sessions do not.
-
-**After completing the workflow, advance the phase:**
-
-```bash
-# get timestamp
-TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-# advance phase (current_phase -> next, append to completed_phases)
-# NEXT_PHASE is the phase after reweave in phase_order (i.e., verify)
-jq '(.tasks[] | select(.id=="TASK_ID")).current_phase = "{vocabulary.verify}" |
-    (.tasks[] | select(.id=="TASK_ID")).completed_phases += ["{vocabulary.reweave}"]' \
-    ops/queue/queue.json > tmp.json && mv tmp.json ops/queue/queue.json
-```
-
-The handoff block's "Queue Updates" section is not just output — it is your own todo list when running interactively.
-
-## Pipeline Chaining
-
-After reweaving completes, output the next step based on `ops/config.yaml` pipeline.chaining mode:
-
-- **manual:** Output "Next: {vocabulary.cmd_verify} [note]" — user decides when to proceed
-- **suggested:** Output next step AND advance task queue entry to `current_phase: "{vocabulary.verify}"`
-- **automatic:** Queue entry advanced and verification proceeds immediately
-
-The chaining output uses domain-native command names from the derivation manifest.

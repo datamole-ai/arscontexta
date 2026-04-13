@@ -15,10 +15,7 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.note` / `vocabulary.note_plural` for note type references
    - Use `vocabulary.topic_map` / `vocabulary.topic_maps` for MOC references
 
-2. **`ops/config.yaml`** — processing settings
-   - `processing.chaining`: manual | suggested | automatic
-
-3. **`ops/queue/queue.json`** — current task queue (for handoff mode)
+2. **`ops/queue/queue.json`** — current task queue
 
 ---
 
@@ -178,13 +175,32 @@ No enrichment tasks — capture does not analyze content deeply enough to spot e
 
 ---
 
-## Handoff
+## RALPH HANDOFF Output
 
-Based on `processing.chaining` config:
+After creating the queue entry, always output the RALPH HANDOFF block:
 
-- **manual**: Output "Next: /{vocabulary.reflect} [note title]"
-- **suggested**: Output next step AND add queue entry (already done above)
-- **automatic**: Signal for orchestrator to continue
+```
+=== RALPH HANDOFF: capture ===
+Target: [source file]
+
+Work Done:
+- Captured [source] as verbatim note
+- Created queue entry: [id]
+
+Files Modified:
+- {vocabulary.notes}/[note title].md
+- ops/queue/queue.json
+
+Learnings:
+- [Friction]: [description] | NONE
+- [Surprise]: [description] | NONE
+- [Methodology]: [description] | NONE
+- [Process gap]: [description] | NONE
+
+Queue Updates:
+- Create: [id] (current_phase: "reflect")
+=== END HANDOFF ===
+```
 
 ---
 

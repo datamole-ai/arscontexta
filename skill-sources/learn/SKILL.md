@@ -15,10 +15,10 @@ Parse immediately:
 
 **Steps:**
 
-1. **Read config** — pipeline chaining mode, domain vocabulary
+1. **Read config** — domain vocabulary
 2. **Research** — WebSearch
 3. **File to inbox** — with provenance metadata
-4. **Chain to processing** — next step based on pipeline chaining mode
+4. **Queue for processing** — suggest /pipeline as next step
 5. **Update goals.md** — append new research directions discovered
 
 **START NOW.** Reference below explains methodology.
@@ -28,14 +28,7 @@ Parse immediately:
 ## Step 1: Read Configuration
 
 ```
-ops/config.yaml             — pipeline chaining mode
 ops/derivation-manifest.md  — domain vocabulary (inbox folder, reduce skill name)
-```
-
-**From config.yaml** (defaults if missing):
-```yaml
-pipeline:
-  chaining: suggested             # manual | suggested | automatic
 ```
 
 **From derivation-manifest.md** (universal defaults if missing):
@@ -112,22 +105,15 @@ should be a clear proposition the reduce phase can extract as an atomic insight.
 
 ---
 
-## Step 4: Chain to Processing
-
-Read chaining mode from config (default: `suggested`).
+## Step 4: Queue for Processing
 
 ```
 Research complete
 
   Filed to: [inbox-folder]/[filename]
 
-  Next: /[reduce-skill-name] [inbox-folder]/[filename]
+  Next: /pipeline [inbox-folder]/[filename]
 ```
-
-Append based on mode:
-- **manual:** (nothing extra)
-- **suggested:** `Ready for processing when you are.`
-- **automatic:** Replace "Next" line with `Queued for /[reduce-skill-name] -- processing will begin automatically.`
 
 ---
 
@@ -158,7 +144,6 @@ Researching: [topic]
   Filed to: [inbox-folder]/[filename]
 
   Next: /[reduce-skill-name] [inbox-folder]/[filename]
-    [chaining context]
 
   [goals.md updated with N new research directions]
 ```

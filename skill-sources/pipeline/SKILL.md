@@ -12,7 +12,6 @@ argument-hint: "[file] [--extract] [--structure] [--capture] — path to source 
 
 Parse immediately:
 - Source file path: the file to process (required)
-- `--handoff`: output RALPH HANDOFF block at end (for chaining)
 - If target is empty: list files in {DOMAIN:inbox}/ and ask which to process
 
 **Granularity flag:**
@@ -226,7 +225,7 @@ Summary: {batch_id}-summary.md
 - ...
 ```
 
-If `--handoff` flag was set, also output:
+Also output the RALPH HANDOFF block:
 
 ```
 === RALPH HANDOFF: pipeline ===

@@ -21,16 +21,14 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.topic_map` for MOC/topic map references
    - Use `vocabulary.topic_maps` for plural form
 
-2. **`ops/config.yaml`** — processing depth, pipeline chaining, selectivity
+2. **`ops/config.yaml`** — processing depth, selectivity
    - `processing.depth`: deep | standard | quick
-   - `processing.chaining`: manual | suggested | automatic
    - `processing.extraction.selectivity`: strict | moderate | permissive
 
-3. **`ops/queue/queue.json`** — current task queue (for handoff mode)
+3. **`ops/queue/queue.json`** — current task queue
 
 If these files don't exist (pre-init invocation or standalone use), use universal defaults:
 - depth: standard
-- chaining: suggested
 - selectivity: moderate
 - notes folder: `notes/`
 - inbox folder: `inbox/`
@@ -82,7 +80,6 @@ If YES -> split into separate structure notes
 
 Parse immediately:
 - If target contains a file path: group claims from that file into structure notes
-- If target contains `--handoff`: output RALPH HANDOFF block + task entries at end
 - If target is empty: scan {vocabulary.inbox}/ for unprocessed items, pick one
 - If target is "inbox" or "all": process all inbox items sequentially
 
@@ -98,7 +95,7 @@ Parse immediately:
    - If existing note covers same scope: evaluate for enrichment or merge
 5. Output grouping report with proposed structure notes, sub-claims listed, and rationale
 6. Wait for user approval before writing files
-7. If `--handoff` in target: create per-note task files, update queue, output RALPH HANDOFF block
+7. Create per-note task files, update queue, output RALPH HANDOFF block
 
 **START NOW.** Reference below explains methodology — use to guide, not as output.
 
@@ -455,13 +452,11 @@ TOTAL: ?
 
 ---
 
-## Handoff Mode (--handoff flag)
+## Queue Management
 
-When invoked with `--handoff`, this skill handles queue management for orchestrated execution.
+This skill always handles queue management for orchestrated execution.
 
-**Detection:** Check if `$ARGUMENTS` contains `--handoff`.
-
-### Per-Note Task Files (REQUIRED in handoff mode)
+### Per-Note Task Files
 
 After structuring, for EACH approved note, create a task file in `ops/queue/`:
 
@@ -511,7 +506,7 @@ Semantic neighbor: [if found, explain why DISTINCT not DUPLICATE]
 (to be filled by {vocabulary.cmd_verify} phase)
 ```
 
-### Queue Updates (REQUIRED in handoff mode)
+### Queue Updates
 
 After creating task files, update `ops/queue/queue.json`:
 
@@ -591,18 +586,6 @@ Queue Updates:
 === END HANDOFF ===
 ```
 
-### Queue Update (Interactive Execution)
-
-When running interactively (NOT via orchestrator), YOU must execute the queue updates.
-
-```bash
-# Get timestamp
-TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-# Mark structure task done (replace TASK_ID with actual task ID)
-jq '(.tasks[] | select(.id=="TASK_ID")).status = "done" | (.tasks[] | select(.id=="TASK_ID")).completed = "'"$TIMESTAMP"'"' ops/queue/queue.json > tmp.json && mv tmp.json ops/queue/queue.json
-```
-
 ---
 
 ## Template Reference
@@ -620,16 +603,6 @@ After structuring completes, the created {vocabulary.note_plural} proceed throug
 | {vocabulary.note} just created | /{vocabulary.cmd_reflect} | New {vocabulary.note_plural} need connections |
 | After connecting | /{vocabulary.cmd_reweave} | Old {vocabulary.note_plural} need updating |
 | Quality check | /{vocabulary.cmd_verify} | Combined verification gate |
-
-## Pipeline Chaining
-
-After structuring completes, output the next step based on `ops/config.yaml` pipeline chaining mode:
-
-- **manual:** Output "Next: {vocabulary.cmd_reflect} [created notes]" — user decides when to proceed
-- **suggested:** Output next step AND add each created {vocabulary.note} to `ops/queue/queue.json` with `current_phase: "create"` and `completed_phases: []`
-- **automatic:** Queue entries created and processing continues immediately via orchestration
-
-The chaining output uses domain-native command names from the derivation manifest.
 
 ---
 

@@ -41,7 +41,6 @@ Read the target {vocabulary.note}'s `granularity` field to select the correct te
 
 Parse immediately:
 - If target contains a note name: validate that specific note
-- If target contains `--handoff`: output RALPH HANDOFF block at end
 - If target is "all" or "notes": validate all notes in {DOMAIN:notes}/ directory
 - If target is empty: ask which note to validate
 
@@ -233,9 +232,9 @@ If WARN or FAIL items exist, include:
 - **type**: Change to valid enum value or propose adding "observation" to template
 ```
 
-## Handoff Mode (--handoff flag)
+## RALPH HANDOFF Output
 
-When invoked with `--handoff`, output this structured format at the END:
+Always output this structured format at the END:
 
 ```
 === RALPH HANDOFF: validate ===

@@ -16,7 +16,7 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.topic_map` for MOC references
    - Use `vocabulary.cmd_reflect` / `vocabulary.cmd_reweave` / `vocabulary.cmd_verify` for phase command names
 
-2. **`ops/config.yaml`** — pipeline chaining mode, automation settings
+2. **`ops/config.yaml`** — automation settings
 
 If no derivation file exists, use universal terms.
 

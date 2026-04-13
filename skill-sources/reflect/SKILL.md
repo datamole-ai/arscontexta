@@ -16,9 +16,8 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.cmd_reweave` for the next-phase suggestion
    - Use `vocabulary.inbox` for the inbox folder name
 
-2. **`ops/config.yaml`** — processing depth, pipeline chaining
+2. **`ops/config.yaml`** — processing depth
    - `processing.depth`: deep | standard | quick
-   - `processing.chaining`: manual | suggested | automatic
 
 If these files don't exist, use universal defaults.
 
@@ -44,7 +43,6 @@ After reading the target {vocabulary.note}, check its `granularity` frontmatter 
 
 Parse immediately:
 - If target contains `[[note name]]` or note name: find connections for that {vocabulary.note}
-- If target contains `--handoff`: output RALPH HANDOFF block at end
 - If target is empty: check for recently created {vocabulary.note_plural} or ask which {vocabulary.note}
 - If target is "recent" or "new": find connections for all {vocabulary.note_plural} created today
 
@@ -61,7 +59,7 @@ Parse immediately:
 7. Update relevant {vocabulary.topic_map}(s) with this {vocabulary.note}
 8. If task file in context: update the {vocabulary.reflect} section
 9. Report what was connected and why
-10. If `--handoff` in target: output RALPH HANDOFF block
+10. Output RALPH HANDOFF block
 
 **START NOW.** Reference below explains methodology — use to guide, not as output.
 
@@ -106,13 +104,6 @@ Synthesize an area:
 1. Read the relevant {vocabulary.topic_map}
 2. Identify {vocabulary.note_plural} that should connect
 3. Weave connections, update synthesis
-
-### /reflect --handoff [note]
-
-External loop mode for /ralph:
-- Execute full workflow as normal
-- At the end, output structured RALPH HANDOFF block
-- Used when running isolated phases with fresh context per task
 
 ## Workflow
 
@@ -660,13 +651,11 @@ The graph is not just storage. It is an external thinking structure. Build it wi
 
 ---
 
-## Handoff Mode (--handoff flag)
+## RALPH HANDOFF Output
 
-When invoked with `--handoff`, output this structured format at the END of the session. This enables external loops (/ralph) to parse results and update the task queue.
+Always output this structured format at the END of the session. This enables external loops (/ralph) to parse results and update the task queue.
 
-**Detection:** Check if `$ARGUMENTS` contains `--handoff`. If yes, append this block after completing normal workflow.
-
-**Handoff format:**
+**Format:**
 
 ```
 === RALPH HANDOFF: {vocabulary.reflect} ===
@@ -695,9 +684,9 @@ Queue Updates:
 === END HANDOFF ===
 ```
 
-### Task File Update (when invoked via ralph loop)
+### Task File Update
 
-When running in handoff mode via /ralph, the prompt includes the task file path. After completing the workflow, update the `## {vocabulary.reflect}` section of that task file with:
+When a task file path is in context (pipeline execution via /ralph), update it. After completing the workflow, update the `## {vocabulary.reflect}` section of that task file with:
 - Connections added and why
 - {vocabulary.topic_map} updates made
 - Articulation test results
@@ -705,30 +694,3 @@ When running in handoff mode via /ralph, the prompt includes the task file path.
 
 **Critical:** The handoff block is OUTPUT, not a replacement for the workflow. Do the full reflect workflow first, update task file, then format results as handoff.
 
-### Queue Update (interactive execution)
-
-When running interactively (NOT via /ralph), YOU must advance the phase in the queue. /ralph handles this automatically, but interactive sessions do not.
-
-**After completing the workflow, advance the phase:**
-
-```bash
-# get timestamp
-TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-# advance phase (current_phase -> next, append to completed_phases)
-jq '(.tasks[] | select(.id=="TASK_ID")).current_phase = "{vocabulary.reweave}" |
-    (.tasks[] | select(.id=="TASK_ID")).completed_phases += ["{vocabulary.reflect}"]' \
-    ops/queue/queue.json > tmp.json && mv tmp.json ops/queue/queue.json
-```
-
-The handoff block's "Queue Updates" section is not just output — it is your own todo list when running interactively.
-
-## Pipeline Chaining
-
-After connection finding completes, output the next step based on `ops/config.yaml` pipeline.chaining mode:
-
-- **manual:** Output "Next: {vocabulary.cmd_reweave} [note]" — user decides when to proceed
-- **suggested:** Output next step AND advance task queue entry to `current_phase: "{vocabulary.reweave}"`
-- **automatic:** Queue entry advanced and backward pass proceeds immediately
-
-The chaining output uses domain-native command names from the derivation manifest.

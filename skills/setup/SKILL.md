@@ -970,7 +970,6 @@ processing_tier: auto    # auto | 1 | 2 | 3 | 4
 
 processing:
   depth: standard          # deep | standard | quick
-  chaining: suggested      # manual | suggested | automatic
   extraction:
     selectivity: moderate  # strict | moderate | permissive
     categories: auto       # auto (from derivation) | custom list
@@ -990,12 +989,6 @@ provenance: [full | minimal | off]
 - `deep` -- Full pipeline, fresh context per phase, maximum quality gates. Best for important sources and initial vault building.
 - `standard` -- Full pipeline, balanced attention. Regular processing, moderate volume.
 - `quick` -- Compressed pipeline, combine connect+verify phases. High volume catch-up, minor sources.
-
-**Pipeline chaining modes:**
-
-- `manual` -- Skills output "Next: /[skill] [target]" -- user decides.
-- `suggested` -- Skills output next step AND add to task queue -- user can skip.
-- `automatic` -- Skills complete → next phase runs immediately via orchestration.
 
 **Relationship:** config.yaml is the live operational config. derivation.md is the historical record of WHY. Config can drift; `/architect` detects and documents the drift.
 
