@@ -60,7 +60,6 @@ Before collecting state, evaluate all maintenance conditions and reconcile the q
 | observation_accumulation | Count status: pending in ops/observations/. |
 | tension_accumulation | Count status: pending or open in ops/tensions/. |
 | pipeline_stalled | Queue tasks with status: pending unchanged across sessions. |
-| unprocessed_sessions | Count files in ops/sessions/ without mined: true. |
 | moc_oversize | For each topic map, count linked notes. |
 | stale_notes | Notes not modified in 30+ days with < 2 links. |
 | low_link_density | Average link count across all notes. |
@@ -124,12 +123,11 @@ Gather all signals. Run independent checks in parallel where possible. Record ea
 | **Tensions** | Count files with `status: pending` or `status: open` in `ops/tensions/` | Count |
 | **Methodology** | Check `ops/methodology/` for recent captures (files modified in last 7 days) | Count of recent, total count |
 | **Health** | Read most recent report in `ops/health/` — note timestamp and issues | Last run date, issue count, any critical issues |
-| **Sessions** | Check `ops/sessions/` for files without `mined: true` in frontmatter | Count of unmined sessions |
 | **Recent /next** | Read `ops/next-log.md` (if exists) — last 3 recommendations | Previous suggestions to avoid repetition |
 
 **Adaptation rules:**
 - Directory names adapt to domain vocabulary (e.g., {vocabulary.inbox} instead of hardcoded "inbox")
-- Skip checks silently for directories that do not exist — do not report "ops/sessions/ not found"
+- Skip checks silently for directories that do not exist
 - A missing directory means that feature is not active, which is valid state
 
 **Signal collection commands:**
@@ -147,9 +145,6 @@ OBS_COUNT=$(grep -rl '^status: pending' ops/observations/ 2>/dev/null | wc -l | 
 
 # Pending tensions
 TENSION_COUNT=$(grep -rl '^status: pending\|^status: open' ops/tensions/ 2>/dev/null | wc -l | tr -d ' ')
-
-# Unmined sessions
-SESSION_COUNT=$(grep -rL '^mined: true' ops/sessions/*.md 2>/dev/null | wc -l | tr -d ' ')
 ```
 
 ---
@@ -160,7 +155,7 @@ Evaluate every signal against consequence speed — how fast does inaction degra
 
 | Speed | Signals | Threshold | Why This Priority |
 |-------|---------|-----------|-------------------|
-| **Session** | Inbox > 5 items, orphan notes (any), dangling links (any), 10+ pending observations, 5+ pending tensions, unprocessed sessions > 3 | Immediate — these degrade work quality right now | Orphans are invisible to traversal. Dangling links confuse navigation. Inbox pressure means lost ideas. Observation/tension thresholds mean the system is accumulating unprocessed friction. |
+| **Session** | Inbox > 5 items, orphan notes (any), dangling links (any), 10+ pending observations, 5+ pending tensions | Immediate — these degrade work quality right now | Orphans are invisible to traversal. Dangling links confuse navigation. Inbox pressure means lost ideas. Observation/tension thresholds mean the system is accumulating unprocessed friction. |
 | **Multi-session** | Pipeline queue backlog > 10, research gaps identified in goals, stale notes > 10, inbox items aging > 7 days, methodology captures > 5 in same category | Soon — these compound over days | Unfinished pipeline batches block downstream connections. Stale notes represent decaying knowledge. Aging inbox means capture is outpacing processing. |
 | **Slow** | Health check not run in 14+ days, {DOMAIN:topic map} oversized (>40 notes), link density below 2.0 average, low note count relative to time | Background — annoying but not blocking | These are maintenance tasks. Important for long-term health but not urgent. |
 
@@ -208,7 +203,6 @@ If no task stack items, pick the highest-impact session-priority signal:
 | Dangling links / orphans | /health or specific fix command | "You have [N] orphan notes invisible to traversal. Connecting them increases graph density and retrieval quality." |
 | 10+ observations or 5+ tensions | /{DOMAIN:rethink} | "[N] pending observations have accumulated. Pattern detection requires processing this backlog to evolve the system." |
 | Inbox > 5 items | /extract, /structure, or /capture [specific file] | "Your inbox has [N] items (oldest: [age]). [File X] has the highest connection potential based on [reason]." |
-| Unprocessed sessions > 3 | /remember --mine-sessions | "[N] sessions have uncaptured friction patterns. Mining them prevents methodology regressions." |
 
 **When recommending inbox processing:** Choose the specific inbox item that aligns best with current goals or has the most connection potential to existing notes. Recommend a concrete file, not "process some inbox."
 

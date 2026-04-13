@@ -54,8 +54,7 @@ The self space connects directly to the session rhythm:
 
 Add these when friction signals the need — not preemptively:
 
-- **sessions/** — Session logs tracking what happened each day. Useful when you want a detailed record of session-by-session progress beyond what goals.md captures.
-- **journal/** — Raw session capture for later processing into atomic {DOMAIN:notes}. Functions like a personal {DOMAIN:inbox} for self-directed observations.
+- **journal/** — Reflective writing and self-directed observations. Functions like a personal {DOMAIN:inbox} for agent insights.
 
 ### Toggle Mechanism
 

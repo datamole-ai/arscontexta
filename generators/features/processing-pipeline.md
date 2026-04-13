@@ -239,16 +239,6 @@ The philosophy: it is easier to disable features you do not need than to discove
 
 **All skills are available from day one.** /extract, /structure, /capture, /{DOMAIN:connect}, /{DOMAIN:maintain}, /{DOMAIN:verify}, /{DOMAIN:health}, and all other skills are ready to invoke on the first source you process. The full pipeline runs on the first {DOMAIN:note} you create.
 
-### Session Capture
-
-Every session's work is captured automatically as part of the session rhythm:
-
-- **Stop hooks save session transcripts** to ops/sessions/ when a session ends
-- **Auto-creates mining tasks** for future processing of session content
-- **Friction detection runs automatically** on session transcripts — the system detects friction signals without requiring explicit /{DOMAIN:remember} invocation (though /{DOMAIN:remember} remains available for immediate, explicit capture)
-
-Session capture ensures no work is lost between sessions. The transcript becomes a source that can be processed through the standard pipeline, mining insights that were not explicitly flagged during the session.
-
 ### Quality Gates Summary
 
 Every phase has specific gates. Failing a gate does not block progress — it triggers correction.

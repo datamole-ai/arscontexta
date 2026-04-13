@@ -145,7 +145,7 @@ Questions the engine must answer when generating evolution-ready systems:
 
 #### Every vault ships complete — users opt down, not up
 
-**Summary:** v1.6 reverses the progressive complexity approach. Instead of starting simple and adding features when friction demands, every vault ships with full automation: all processing skills, all hooks, all maintenance mechanisms, session capture, methodology folder, task stack. The philosophy is that it is easier to remove features than to discover and add them. The overhead of unused features is near-zero (hooks that never fire, skills that are never invoked, directories that stay empty), while the cost of discovering and adding features when friction emerges was higher than anticipated. Users who want less complexity disable features via /architect.
+**Summary:** v1.6 reverses the progressive complexity approach. Instead of starting simple and adding features when friction demands, every vault ships with full automation: all processing skills, all hooks, all maintenance mechanisms, methodology folder, task stack. The philosophy is that it is easier to remove features than to discover and add them. The overhead of unused features is near-zero (hooks that never fire, skills that are never invoked, directories that stay empty), while the cost of discovering and adding features when friction emerges was higher than anticipated. Users who want less complexity disable features via /architect.
 
 **Derivation Implication:** The derivation engine generates the maximum viable system for the chosen preset. All 3 presets (Research, Personal Assistant, Experimental) include full automation by default. /architect allows users to toggle optional features (semantic search, self space) without regenerating. INVARIANT primitives cannot be disabled.
 
@@ -163,21 +163,11 @@ Questions the engine must answer when generating evolution-ready systems:
 
 ---
 
-#### Session capture feeds the learning loop automatically
-
-**Summary:** Session capture (Primitive 15, INVARIANT) saves every session's transcript to ops/sessions/ via the stop hook. The system mines transcripts for friction patterns when unprocessed session count exceeds threshold and methodology learnings that the user did not explicitly flag via /remember. This means the recursive improvement loop works even passively — the system detects friction on its own. Auto-created mining tasks queue transcripts for future processing.
-
-**Derivation Implication:** Every generated vault MUST include session capture. The stop hook saves transcripts with timestamp filenames. Mining tasks are auto-created. The methodology folder (Primitive 14, ops/methodology/) receives the distilled learnings from session mining. This is part of the evolution substrate — without session capture, the system loses its primary automatic input for self-improvement.
-
-**Source:** v1.6 Primitive 15 specification. Session capture closes the gap between explicit friction reporting (/remember) and passive friction detection.
-
----
-
 #### The methodology folder is the vault's self-knowledge substrate
 
 **Summary:** The methodology folder (Primitive 14, INVARIANT, ops/methodology/) stores the vault's operational self-knowledge as linked notes. Derivation rationale, active kernel state, friction observations, and methodology learnings live here. Unlike self/ (which is the agent's personal identity and is CONFIGURABLE), ops/methodology/ is structural infrastructure — it records how the vault works, not who the agent is. When evidence accumulates beyond configured thresholds, condition-based hooks surface a suggestion to run /rethink.
 
-**Derivation Implication:** Every generated vault MUST include ops/methodology/. The methodology folder is part of the evolution substrate alongside session capture. /remember writes to ops/methodology/. /rethink reads from it. The folder uses the same atomic note + linking pattern as the notes/ space.
+**Derivation Implication:** Every generated vault MUST include ops/methodology/. /remember writes to ops/methodology/. /rethink reads from it. The folder uses the same atomic note + linking pattern as the notes/ space.
 
 **Source:** v1.6 specification. ops/methodology/ replaces the former friction file approach with a structured, linkable knowledge space for vault self-knowledge.
 
@@ -185,7 +175,7 @@ Questions the engine must answer when generating evolution-ready systems:
 
 #### Feature disabling is safe because INVARIANT primitives cannot be removed
 
-**Summary:** Users can disable optional features (semantic search, self space, processing pipeline) via /architect. INVARIANT primitives (wiki links, schema enforcement, methodology folder, session capture) cannot be disabled. This creates a safe disabling guarantee: the structural foundation is always present regardless of which optional features the user removes. Re-enabling any feature restores full functionality. When self space is disabled, its content routes to ops/ (goals to ops/goals.md, methodology to ops/methodology/).
+**Summary:** Users can disable optional features (semantic search, self space, processing pipeline) via /architect. INVARIANT primitives (wiki links, schema enforcement, methodology folder) cannot be disabled. This creates a safe disabling guarantee: the structural foundation is always present regardless of which optional features the user removes. Re-enabling any feature restores full functionality. When self space is disabled, its content routes to ops/ (goals to ops/goals.md, methodology to ops/methodology/).
 
 **Derivation Implication:** Generated systems should clearly distinguish INVARIANT from CONFIGURABLE primitives in the context file. /architect should prevent disabling INVARIANT primitives and warn about consequences when disabling optional features. The fallback paths for each optional feature should be documented.
 
@@ -219,9 +209,9 @@ Questions the engine must answer when generating evolution-ready systems:
 
 #### The kernel is invariant across all evolution
 
-**Summary:** The 15 kernel primitives (markdown-yaml, wiki-links, moc-hierarchy, tree-injection, description-field, topics-footer, schema-enforcement, semantic-search, self-space, session-rhythm, unique-addresses, discovery-first, operational-learning-loop, task-stack, methodology-folder, session-capture) are the structural foundation. INVARIANT primitives (wiki links, schema enforcement, methodology folder, session capture) cannot be disabled. CONFIGURABLE primitives (self space, semantic search) can be toggled via /architect. Evolution adds on top of the kernel; it never removes or contradicts kernel primitives. A system that evolves away from prose-sentence titles, or stops requiring topics footers, or abandons self/ loading at session start has evolved into incoherence. The kernel is the stable core that makes everything above it interoperable.
+**Summary:** The 14 kernel primitives (markdown-yaml, wiki-links, moc-hierarchy, tree-injection, description-field, topics-footer, schema-enforcement, semantic-search, self-space, session-rhythm, unique-addresses, discovery-first, operational-learning-loop, task-stack, methodology-folder) are the structural foundation. INVARIANT primitives (wiki links, schema enforcement, methodology folder) cannot be disabled. CONFIGURABLE primitives (self space, semantic search) can be toggled via /architect. Evolution adds on top of the kernel; it never removes or contradicts kernel primitives. A system that evolves away from prose-sentence titles, or stops requiring topics footers, or abandons self/ loading at session start has evolved into incoherence. The kernel is the stable core that makes everything above it interoperable.
 
-**Derivation Implication:** The generated context file should mark kernel primitives as invariant (not subject to user override or evolution drift). The reseed process should validate that all 15 kernel primitives remain intact. Evolution guidance should explicitly state: "You can add schema fields, create new MOC types, build new skills, and modify session workflow — but these 15 primitives are foundational and must not be removed."
+**Derivation Implication:** The generated context file should mark kernel primitives as invariant (not subject to user override or evolution drift). The reseed process should validate that all 14 kernel primitives remain intact. Evolution guidance should explicitly state: "You can add schema fields, create new MOC types, build new skills, and modify session workflow — but these 14 primitives are foundational and must not be removed."
 
 **Source:** kernel.yaml specification. The kernel was distilled from the vault's operational experience — these are the primitives that remained constant while everything else evolved.
 

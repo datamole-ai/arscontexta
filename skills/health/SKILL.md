@@ -491,7 +491,6 @@ After running all applicable diagnostic categories, check these condition-based 
 | Pending observations | >= 10 files in ops/observations/ | Consider running /rethink |
 | Open tensions | >= 5 files in ops/tensions/ | Consider running /rethink |
 | Inbox items | >= 3 items | Consider /extract, /structure, /capture, or /pipeline |
-| Unprocessed sessions | >= 5 files in ops/sessions/ | Consider /remember --mine-sessions |
 | Orphan notes | Any persistent (> 7d) | Run /reflect on orphaned notes |
 | Dangling links | Any | Fix broken references immediately |
 | Stale notes | Low links + old | Consider /reweave |
@@ -511,8 +510,6 @@ TENSION_COUNT=$(find ops/tensions/ -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
 # Inbox items
 INBOX_COUNT=$(find {vocabulary.inbox}/ -name '*.md' -not -path '*/archive/*' 2>/dev/null | wc -l | tr -d ' ')
 
-# Unprocessed sessions
-SESSION_COUNT=$(find ops/sessions/ -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
 
 # Queue stalled
 PENDING_TASKS=$(jq '[.tasks[] | select(.status=="pending")] | length' ops/queue/queue.json 2>/dev/null || echo 0)

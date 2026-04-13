@@ -1,6 +1,6 @@
 ---
 name: setup
-description: Scaffold a complete knowledge system. Conducts conversation, derives configuration, generates everything. Validates against 15 kernel primitives. Triggers on "/setup", "set up my knowledge system", "create my vault".
+description: Scaffold a complete knowledge system. Conducts conversation, derives configuration, generates everything. Validates against 14 kernel primitives. Triggers on "/setup", "set up my knowledge system", "create my vault".
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Agent, TaskCreate, TaskUpdate, TaskGet
 ---
 
@@ -14,7 +14,7 @@ Read these files to understand the methodology and available components. Read th
 
 **Core references (always read):**
 
-- `${CLAUDE_PLUGIN_ROOT}/reference/kernel.yaml` -- the 15 kernel primitives (with enforcement levels)
+- `${CLAUDE_PLUGIN_ROOT}/reference/kernel.yaml` -- the 14 kernel primitives (with enforcement levels)
 - `${CLAUDE_PLUGIN_ROOT}/reference/interaction-constraints.md` -- dimension coupling rules, hard/soft constraint checks
 - `${CLAUDE_PLUGIN_ROOT}/reference/vocabulary-transforms.md` -- domain-native vocabulary mappings (6 transformation levels)
 
@@ -362,7 +362,7 @@ Read `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md` — but only the section
 
 ### Step 3f: Full Automation Configuration
 
-All generated systems ship with full automation from day one. Every vault gets the complete skill set, full processing pipeline, and session capture. Core hooks (orient, validate, commit) are provided by the arscontexta plugin globally.
+All generated systems ship with full automation from day one. Every vault gets the complete skill set and full processing pipeline. Core hooks (orient, validate, commit) are provided by the arscontexta plugin globally.
 
 
 | Component                                 | Notes                                                            |
@@ -1410,7 +1410,7 @@ Step 3: Process blocks SEQUENTIALLY. For each selected block:
 
 Step 4: Compose in canonical block order:
   1. Philosophy (derived from domain)
-  2. session-rhythm -- Orient, work, persist, session capture
+  2. session-rhythm -- Orient, work, persist
   3. note-granularity -- Three pipelines, one graph (always included)
   4. wiki-links -- Link philosophy and patterns
   5. mocs -- Navigation structure (if active)
@@ -1904,8 +1904,6 @@ Run all 15 primitive checks against the generated system. Use `${CLAUDE_PLUGIN_R
 12. **operational-learning-loop** -- ops/observations/ and ops/tensions/ exist, review trigger documented in context file, /{DOMAIN:rethink} command exists?
 13. **task-stack** -- ops/tasks.md exists? Queue file (ops/queue/queue.json) exists with schema_version >= 3 and maintenance_conditions section? Context file references both in session-orient phase? /{DOMAIN:next} command exists with condition reconciliation?
 14. **methodology-folder** -- ops/methodology/ exists with methodology.md MOC? At least one derivation-rationale note exists? Context file references ops/methodology/ for meta-skill context?
-15. **session-capture** -- ops/sessions/ directory exists? Plugin hook handles session tracking (no vault-local hook needed)? Condition-based mining trigger exists for unprocessed sessions?
-
 Report results: pass/fail per primitive with specific failures listed.
 
 ### Pipeline Smoke Test

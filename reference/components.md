@@ -89,8 +89,7 @@ self/           — agent's persistent mind space
   ├── methodology.md
   ├── goals.md
   ├── memory/   — atomic insights
-  ├── sessions/ — session logs
-  └── journal/  — raw session capture
+  └── journal/  — reflective writing
 templates/      — note templates per domain
 ```
 
@@ -108,7 +107,6 @@ templates/      — note templates per domain
 - One template per domain (research, learning, relationships, etc.)
 - Universal base template for domain-agnostic notes
 - MOC template for navigation hubs
-- Session log template for session capture
 - Templates define valid enum values for constrained fields
 
 **Templates are the single source of truth for schema.** Validation checks notes against templates.
@@ -282,23 +280,6 @@ Check MOC coverage:
 - Meta-skills (/ask, /architect, /rethink) read from it
 
 **Quality gate:** Can the agent explain WHY the vault is configured the way it is? If it can answer "why do we use flat folders?" or "why is self/ disabled?" by reading ops/methodology/, the self-knowledge layer is functional.
-
----
-
-## Session Capture — Automatic Transcript Preservation
-
-**What:** Every session transcript is saved automatically. Stop hooks save transcripts to ops/sessions/. Auto-creates mining tasks. Friction detection runs on transcripts.
-
-**Why:** The operational learning loop depends on evidence. Session transcripts contain every redirection, correction, and implicit friction signal — mining them catches what explicit /remember misses. Without session capture, the system can only learn from what the agent explicitly notices and records during the session.
-
-**How to implement:**
-- `ops/sessions/` directory for transcript storage
-- Session-end hook (Stop event) saves the transcript automatically
-- Condition-based mining trigger: when unprocessed sessions accumulate, surface a mining task
-- Mining extracts friction signals, corrections, and methodology adjustments from transcripts
-- Extracted insights flow into ops/observations/ or ops/methodology/ via the operational learning loop
-
-**Quality gate:** Are session transcripts being saved? When a session ends, does a transcript appear in ops/sessions/? If yes, the capture mechanism works. Mining quality is a separate concern — capture must be reliable first.
 
 ---
 

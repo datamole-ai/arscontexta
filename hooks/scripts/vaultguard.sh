@@ -18,7 +18,6 @@ if [ -f "$MARKER" ]; then
 # Do not delete — hooks only run when this file exists.
 
 git: true
-session_capture: true
 EOF
   fi
   exit 0
@@ -32,7 +31,6 @@ if [ -f ops/config.yaml ] || [ -f .claude/hooks/session-orient.sh ]; then
 # Do not delete — hooks only run when this file exists.
 
 git: true
-session_capture: true
 EOF
   exit 0
 fi

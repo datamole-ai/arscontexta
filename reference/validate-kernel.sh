@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# validate-kernel.sh — Check a knowledge system against the 15 universal primitives
+# validate-kernel.sh — Check a knowledge system against the 14 universal primitives
 # Usage: ./validate-kernel.sh [path-to-vault]
 # Defaults to current directory if no path given.
 
@@ -412,20 +412,6 @@ else
     warn "No ops/methodology/ directory detected"
 fi
 
-# --- Primitive 15: Session capture ---
-echo "15. Session capture"
-has_sessions_dir=false
-
-for candidate in "ops/sessions" "04_meta/sessions" "self/sessions"; do
-    [ -d "$VAULT/$candidate" ] && has_sessions_dir=true && break
-done
-
-if $has_sessions_dir; then
-    pass "Session capture directory found"
-else
-    warn "No ops/sessions/ directory detected"
-fi
-
 # --- Summary ---
 echo ""
 echo "=== Kernel Validation Summary ==="
@@ -435,7 +421,7 @@ echo -e "  ${RED}FAIL:${NC} $FAIL"
 echo ""
 
 if [ "$FAIL" -eq 0 ] && [ "$WARN" -eq 0 ]; then
-    echo -e "${GREEN}All 15 primitives validated successfully.${NC}"
+    echo -e "${GREEN}All 14 primitives validated successfully.${NC}"
     exit 0
 elif [ "$FAIL" -eq 0 ]; then
     echo -e "${YELLOW}Kernel present with warnings. $WARN primitive(s) need attention.${NC}"

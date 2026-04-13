@@ -59,7 +59,6 @@ Before ending a session, externalize what happened:
 2. **Commit changes** — Every change must be committed. Nothing persists without this. Use clear commit messages that describe what changed and why.
 3. **Log what happened** — If the session produced observations or tensions, capture them as atomic notes in ops/observations/ or ops/tensions/. This is future-you's memory of what current-you learned.
 4. **Leave a handoff** — If work continues in the next session, leave a clear note about where you stopped and what's next. This can be in ops/reminders.md or a comment in the relevant task file.
-5. **Session capture** — Stop hooks automatically save the session transcript to ops/sessions/. The system runs lightweight friction detection on the transcript and creates mining tasks for any detected friction or insights. This ensures no work is lost, even when you forget to explicitly capture something during the session.
 
 ### Handoff Protocol
 

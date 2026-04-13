@@ -72,7 +72,7 @@ domain needs and why.
 | **Derivation** | Maps signals to eight configuration dimensions with confidence scoring |
 | **Proposal** | Shows what will be generated and why, in your vocabulary |
 | **Generation** | Produces all files: context file, folders, templates, skills, hooks, manual |
-| **Validation** | Checks all 15 kernel primitives, runs pipeline smoke test |
+| **Validation** | Checks all 14 kernel primitives, runs pipeline smoke test |
 
 The whole process takes about 20 minutes. It's token-intensive because the engine
 reads research claims, reasons about your domain, and generates substantial output.
@@ -198,7 +198,6 @@ Four hooks automate quality enforcement:
 | **Session Orient** | `SessionStart` | Injects workspace tree, loads identity, surfaces maintenance signals |
 | **Write Validate** | `PostToolUse` (Write) | Schema enforcement on every note write |
 | **Auto Commit** | `PostToolUse` (Write, async) | Git auto-commit, non-blocking |
-| **Session Capture** | `Stop` | Persists session state to `ops/sessions/` |
 
 ---
 
@@ -312,7 +311,7 @@ arscontexta/
 |   +-- features/                # 17 composable feature blocks
 |-- methodology/                 # 249 research claims
 |-- reference/                   # Core reference documents
-|   |-- kernel.yaml              # 15 kernel primitives
+|   |-- kernel.yaml              # 14 kernel primitives
 |   |-- three-spaces.md          # Architecture spec
 |   +-- use-case-presets.md      # Pre-validated configs
 |-- presets/                     # Pre-validated configurations
@@ -345,7 +344,7 @@ Every time you make changes, re-install the plugin:
 
 ### Key Files for Contributors
 
-- `reference/kernel.yaml` -- 15 primitives every system must include
+- `reference/kernel.yaml` -- 14 primitives every system must include
 - `generators/features/*.md` -- composable feature blocks
 - `skill-sources/*/SKILL.md` -- generated command templates
 - `skills/setup/SKILL.md` -- the derivation engine

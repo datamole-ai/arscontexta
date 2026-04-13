@@ -14,7 +14,7 @@ Every feature in this system is a module you can toggle. The question is never "
 **The pattern:**
 1. Work with your current setup
 2. Notice friction — something repeatedly takes too long, breaks, or gets forgotten
-3. Use /{DOMAIN:remember} to capture the friction signal (or let session capture detect it automatically from the transcript)
+3. Use /{DOMAIN:remember} to capture the friction signal
 4. Identify which module addresses that friction
 5. Activate it and adapt it to your domain
 6. Monitor — did the friction decrease?
@@ -33,7 +33,7 @@ Every feature in this system is a module you can toggle. The question is never "
 Your system maintains its own self-knowledge as linked notes in `ops/methodology/`. This is where the system records what it has learned about its own operation:
 
 - **Derivation rationale** — Why each configuration choice was made (generated at init)
-- **Friction captures** — Observations from /{DOMAIN:remember} and automatic session mining
+- **Friction captures** — Observations from /{DOMAIN:remember}
 - **Configuration state** — Active features, thresholds, processing preferences
 
 The methodology folder is referenced by meta-skills (/{DOMAIN:rethink}, /architect) when reasoning about system evolution. It is the substrate for self-awareness — without it, the system cannot explain why it works the way it does.

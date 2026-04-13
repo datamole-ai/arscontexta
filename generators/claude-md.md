@@ -58,7 +58,6 @@ Before session ends:
 - Update relevant MOCs
 - Update goals (self/goals.md if enabled, ops/ if disabled)
 - Capture anything learned about methodology
-- Session capture: stop hooks save transcript to ops/sessions/ and auto-create mining tasks
 ```
 
 ## Self Space (conditional — on for personal assistant, off for research)
@@ -199,7 +198,7 @@ Full automation is active from day one. All processing skills, all quality gates
 ## Self-Improvement
 
 When friction occurs (search fails, content placed wrong, user corrects you, workflow breaks):
-1. Use /{DOMAIN:remember} to capture it as an observation in ops/observations/ — or let session capture detect it automatically from the transcript
+1. Use /{DOMAIN:remember} to capture it as an observation in ops/observations/
 2. Continue your current work — don't derail
 3. If the same friction occurs 3+ times, propose updating this context file
 4. If user explicitly says "remember this" or "always do X", update this context file immediately

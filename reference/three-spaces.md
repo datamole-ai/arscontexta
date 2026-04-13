@@ -114,7 +114,6 @@ These hold across all generated systems:
 ### What Does NOT Belong in Notes
 
 - Processing queue state -> ops/queue/
-- Session logs -> ops/sessions/
 - Agent self-knowledge -> self/
 - Health reports -> ops/health/
 - Temporary scaffolding -> ops/
@@ -168,7 +167,6 @@ These hold across all generated systems:
 ```
 ops/observations/ -> notes/ (when observation proves durable)
 ops/observations/ -> self/methodology.md (when observation is about agent operation)
-ops/sessions/ -> self/memory/ (when session insight is personally significant)
 ```
 
 Content never moves FROM notes/ or self/ INTO ops/. Durable knowledge doesn't become temporal scaffolding.
@@ -300,7 +298,6 @@ Is this about the agent itself?
 |-------------|-------------|-----|
 | "I work best when..." | self/methodology.md | Agent operational learning |
 | "The user prefers..." | self/relationships.md | Agent knowledge about user |
-| "Today I processed..." | ops/sessions/ | Temporal processing state |
 | "Spaced repetition helps memory" | notes/ | Domain knowledge |
 | "The reduce skill over-extracts" | ops/observations/ | Operational friction (may promote) |
 | "Queue has 12 items" | ops/queue/ | Temporal coordination state |
@@ -314,4 +311,4 @@ Is this about the agent itself?
 
 - **Failure modes that afflict each space:** See `failure-modes.md` for the full failure mode taxonomy. Conflation failures (this document) are structural; failure-modes.md covers operational decay (collector's fallacy, orphan drift, schema erosion).
 - **What goes in each space per domain:** See `use-case-presets.md` for domain-specific routing decisions (therapy reflections vs research claims vs PM decisions).
-- **Kernel primitives that depend on three-space separation:** `self-space` (configurable), `session-rhythm`, `discovery-first`, `task-stack`, `methodology-folder`, and `session-capture` all assume clean space boundaries. See `kernel.yaml`.
+- **Kernel primitives that depend on three-space separation:** `self-space` (configurable), `session-rhythm`, `discovery-first`, `task-stack`, and `methodology-folder` all assume clean space boundaries. See `kernel.yaml`.

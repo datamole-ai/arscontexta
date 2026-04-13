@@ -263,7 +263,7 @@ The first question resolves note scale (detailed reflections suit /structure to 
 | Organization | Flat | Flat with theme MOCs. Themes (anxiety, relationships, work stress, growth) emerge organically and cross-cut chronology. |
 | Linking | Explicit | Direct connections between reflections that share patterns. At moderate volume, explicit links suffice. Semantic search adds value later if collection grows past 100. |
 | Navigation | 2-tier | Hub ("my themes") -> theme MOCs (anxiety patterns, relationship insights, growth milestones). Volume stays moderate — regular journaling produces ~50 reflections/year. |
-| Maintenance | Condition-based (tight thresholds) | Aligned with session rhythm. Health check after each session capture surfaces "you mentioned anxiety three times recently" — which is precisely the kind of insight the user seeks. |
+| Maintenance | Condition-based (tight thresholds) | Aligned with session rhythm. Condition-based health checks surface "you mentioned anxiety three times recently" — which is precisely the kind of insight the user seeks. |
 | Schema | Moderate | `category` (pattern/trigger/coping-strategy/insight/growth-goal), `confidence` (observed/hypothesized/verified), `frequency` (once/occasional/regular/constant). Rich enough for pattern queries without imposing clinical structure. |
 
 **Natural pipeline fit:** `/structure` — per-session reflections contain multiple observations (pattern, trigger, response) that benefit from organized structure. /capture suits quick in-the-moment notes; /structure suits the more deliberate post-session reflection the user describes.

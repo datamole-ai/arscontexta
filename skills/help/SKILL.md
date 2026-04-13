@@ -38,7 +38,6 @@ Determine the **notes folder** by checking which domain-named directory exists (
 - **Queue state:** pending tasks in `ops/queue/queue.yaml` or `ops/queue/queue.json`
 - **Health warnings:** check latest report in `ops/health/` if it exists
 - **Tutorial state:** check `ops/tutorial-state.yaml` for incomplete tutorial
-- **Session count:** estimate from `ops/sessions/` file count (indicates usage maturity)
 
 ```bash
 # Quick state gathering

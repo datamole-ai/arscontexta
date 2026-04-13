@@ -12,7 +12,7 @@ This document answers: what should the agent read at session start, how should i
 
 Questions the engine must answer when generating session configuration:
 
-1. **What hook configuration is needed for session automation?** Hooks automate orientation and persistence — SessionStart for tree injection and file loading, PostToolUse for validation, Stop for session capture.
+1. **What hook configuration is needed for session automation?** Hooks automate orientation and persistence — SessionStart for tree injection and file loading, PostToolUse for validation.
 2. **What is the self/ space structure?** Session orientation reads self/ — the derivation must know which files exist to generate the orientation sequence.
 3. **What session types will this system support?** Processing sessions (pipeline work), maintenance sessions (health checks), exploration sessions (research and connection finding), capture sessions (rapid note creation). Different types orient and persist differently.
 4. **What is the expected session frequency?** Frequent sessions need different handoff than infrequent sessions. Systems used rarely need heavier orientation because more has been forgotten.
@@ -123,11 +123,11 @@ Questions the engine must answer when generating session configuration:
 
 #### Session boundaries create natural points for automated behavior
 
-**Summary:** The beginning and end of a session are the two moments where automated behavior adds the most value. At session start: load orientation files, inject file tree, evaluate condition-based triggers against vault state, display health warnings. At session end: save session transcript to ops/sessions/ (Primitive 15 — session capture), auto-create mining tasks for future processing, validate that notes were saved, check for broken links introduced during the session, auto-commit changes, push to remote. These are deterministic operations (verification, not judgment) that hooks can handle without corrupting quality.
+**Summary:** The beginning and end of a session are the two moments where automated behavior adds the most value. At session start: load orientation files, inject file tree, evaluate condition-based triggers against vault state, display health warnings. At session end: validate that notes were saved, check for broken links introduced during the session, auto-commit changes, push to remote. These are deterministic operations (verification, not judgment) that hooks can handle without corrupting quality.
 
-**Derivation Implication:** Generate session-start and stop hooks that automate the deterministic parts of orient and persist. The stop hook MUST save session transcripts (session capture is INVARIANT). The context file should explain what the hooks do so the agent understands the automated behavior.
+**Derivation Implication:** Generate session-start hooks that automate the deterministic parts of orient and persist. The context file should explain what the hooks do so the agent understands the automated behavior.
 
-**Source:** Vault hook infrastructure. The session-start hook (tree injection + condition evaluation) and stop hook (session capture + auto-commit) are proven patterns that eliminate routine tasks without requiring judgment.
+**Source:** Vault hook infrastructure. The session-start hook (tree injection + condition evaluation) and auto-commit hook are proven patterns that eliminate routine tasks without requiring judgment.
 
 ---
 
@@ -173,21 +173,11 @@ Hooks automate session rhythm. A SessionStart hook injects the file tree and loa
 
 ---
 
-#### Session capture saves transcripts automatically for future mining
-
-**Summary:** Session capture (Primitive 15, INVARIANT) ensures that every session's transcript is saved to ops/sessions/ via the stop hook. This is not optional — session transcripts contain friction patterns, methodology learnings, and connection discoveries that the user may not have explicitly captured via /remember. Auto-created mining tasks queue these transcripts for future processing, where the system extracts friction signals and operational insights. This means the improvement loop works even when the user forgets to call /remember — the system detects friction on its own from recorded sessions.
-
-**Derivation Implication:** Every generated system MUST include session capture in the stop hook. The stop hook saves the session transcript with a timestamp filename to ops/sessions/ and creates a mining task. Session capture feeds the operational learning loop (Primitive 12) and condition-based maintenance — without it, the system loses its ability to learn from its own operation.
-
-**Source:** v1.6 Primitive 15 specification. The vault's recursive improvement loop depends on session capture as an automatic input mechanism.
-
----
-
 #### Skipping the persist phase is the most common and most damaging session failure
 
-**Summary:** The orient and work phases are naturally motivated — the agent needs orientation to function, and work is the session's purpose. The persist phase has no natural motivation: the agent's session is ending, the user may have moved on, and the "save your progress" step feels like overhead. But skipping persist means the next session starts without handoff, goals.md is outdated, observations are lost, and newly created notes may not be committed. Session capture (Primitive 15) mitigates the worst consequence — transcript loss — by automating it via the stop hook. But goals.md updates and observation capture still require explicit action.
+**Summary:** The orient and work phases are naturally motivated — the agent needs orientation to function, and work is the session's purpose. The persist phase has no natural motivation: the agent's session is ending, the user may have moved on, and the "save your progress" step feels like overhead. But skipping persist means the next session starts without handoff, goals.md is outdated, observations are lost, and newly created notes may not be committed.
 
-**Derivation Implication:** Generated systems should make the persist phase as prominent and explicit as possible. Session capture (stop hook) automates transcript persistence. For remaining persist actions (goals.md update, observation capture, git commit): generate reminders or automation. The vault's auto-commit hook is an example of automating the most commonly skipped persist action (committing changes to git).
+**Derivation Implication:** Generated systems should make the persist phase as prominent and explicit as possible. For persist actions (goals.md update, observation capture, git commit): generate reminders or automation. The vault's auto-commit hook is an example of automating the most commonly skipped persist action (committing changes to git).
 
 **Source:** Vault operational observation. Multiple sessions ended without goals.md updates, producing orientation gaps in subsequent sessions.
 
@@ -244,14 +234,6 @@ Hooks automate session rhythm. A SessionStart hook injects the file tree and loa
 **Source:** Vault queue reconciliation pattern. The session-start hook shows queue status and /next runs condition reconciliation, functioning as the morning briefing.
 
 ---
-
-#### Session logs provide historical context that goals.md cannot
-
-**Summary:** While goals.md captures current state, session logs (ops/sessions/) capture history — what was tried, what failed, what was learned, and how understanding evolved. Session logs are append-only and temporal. They serve a different purpose than goals.md: goals.md answers "what should I do next?" while session logs answer "what has been tried before?" For systems with complex multi-session projects, session logs prevent the agent from re-attempting failed approaches or re-discovering insights already captured.
-
-**Derivation Implication:** Generated systems with processing = moderate or heavy should include session logging in ops/sessions/. Systems with processing = light may skip session logs — goals.md provides sufficient handoff for simple systems. The context file should distinguish between the two: goals.md is mandatory, session logs are optional based on complexity.
-
-**Source:** Vault ops/sessions/ pattern (mapped to 04_meta/logs/ in the vault's structure). Session logs proved valuable during multi-week research sprints where approaches were tried and abandoned.
 
 ---
 

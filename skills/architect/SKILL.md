@@ -76,7 +76,7 @@ Locate the system's key files (paths vary by domain vocabulary):
 |-----------|-------------|-------------------|
 | Context file | System methodology and rules | CLAUDE.md, README.md |
 | Self space | Agent identity and memory | self/identity.md, self/methodology.md, self/goals.md |
-| Ops directory | Operational infrastructure | ops/derivation.md, ops/config.yaml, ops/sessions/, ops/observations/, ops/health/ |
+| Ops directory | Operational infrastructure | ops/derivation.md, ops/config.yaml, ops/observations/, ops/health/ |
 | Notes directory | Primary knowledge directory | {vocabulary.notes}/ (may be domain-named: reflections/, concepts/, etc.) |
 | Queue system | Pipeline state | ops/queue/queue.yaml or ops/queue/queue.json |
 | Templates | Note schemas | ops/templates/ or templates/ |
@@ -224,18 +224,6 @@ Read each methodology note. Look for:
 - Behavioral corrections that suggest the original design was wrong
 - Methodology notes with multiple evidence entries (strong signal)
 
-### 4c. Session Logs
-
-```bash
-# Read recent session logs (last 5-10 sessions)
-ls -t ops/sessions/*.md 2>/dev/null | head -10
-```
-
-Scan session logs for:
-- Repeated complaints or workarounds
-- Steps that get skipped consistently
-- Patterns in what the agent does vs what the system recommends
-- Error patterns or tool failures
 
 ### 4d. Self Space
 
@@ -520,7 +508,7 @@ Then recommend /reseed instead of incremental patches:
 
 Recommendations based on current state analysis only. Note in report: "Without derivation history, recommendations cannot assess drift or design intent. Consider running /reseed to establish a derivation baseline."
 
-### No ops/observations/ or ops/sessions/
+### No ops/observations/
 
 Friction analysis is limited. Note: "No operational friction data available. Recommendations based on health analysis and research only. Begin capturing observations during work to enable friction-based evolution."
 

@@ -6,14 +6,14 @@ Seven validation milestones for the Ars Contexta v1.6 plugin. Each milestone tes
 
 ## Milestone 1: Kernel Validation
 
-**What it tests:** A freshly generated vault contains all 15 universal primitives from kernel.yaml. This is the foundational check — if the kernel is missing primitives, nothing built on top of it will function correctly.
+**What it tests:** A freshly generated vault contains all 14 universal primitives from kernel.yaml. This is the foundational check — if the kernel is missing primitives, nothing built on top of it will function correctly.
 
 **Prerequisites:**
 - A generated vault from /setup (any domain, any preset)
 - The vault must have at least 3 notes created (to exercise link and MOC checks)
 - `validate-kernel.sh` accessible at `./reference/validate-kernel.sh`
 
-**Pass criteria:** 15/15 checks pass (PASS status). WARN is acceptable for semantic search (primitive 8) if the platform does not support qmd and for self space (primitive 9) if disabled via configuration, but all other primitives must be PASS.
+**Pass criteria:** 14/14 checks pass (PASS status). WARN is acceptable for semantic search (primitive 8) if the platform does not support qmd and for self space (primitive 9) if disabled via configuration, but all other primitives must be PASS.
 
 **Verification steps:**
 
@@ -60,15 +60,12 @@ Seven validation milestones for the Ars Contexta v1.6 plugin. Each milestone tes
   PASS Task stack mechanism found (ops/tasks/ or equivalent)
 14. Methodology folder for vault self-knowledge
   PASS ops/methodology/ exists with linked notes
-15. Session capture for automatic transcript persistence
-  PASS Session transcripts saved to ops/sessions/, mining tasks auto-created
-
 === Kernel Validation Summary ===
-  PASS: 15
+  PASS: 14
   WARN: 0
   FAIL: 0
 
-All 15 primitives validated successfully.
+All 14 primitives validated successfully.
 ```
 
 **Common failure modes and remediation:**
@@ -84,7 +81,6 @@ All 15 primitives validated successfully.
 | FAIL on primitive 12 (learning loop) | Missing ops/observations/ or ops/tensions/ directories | Ensure /setup creates both directories and documents condition-based triggers in context file |
 | FAIL on primitive 13 (task stack) | Missing ops/tasks/ or task stack mechanism | Ensure /setup creates task stack infrastructure |
 | FAIL on primitive 14 (methodology folder) | Missing ops/methodology/ directory | Ensure /setup creates ops/methodology/ with linked notes |
-| FAIL on primitive 15 (session capture) | Missing ops/sessions/ or stop hook for transcript persistence | Ensure /setup creates ops/sessions/ and configures session capture hook |
 
 ---
 
@@ -557,69 +553,7 @@ rm -f "$VAULT/self/goals.md.bak"
 
 ---
 
-## Milestone 5b: Session Capture
-
-**What it tests:** The stop hook saves session transcripts to ops/sessions/ and auto-creates mining tasks for future processing. Session capture is Primitive 15 (INVARIANT) — it must function for all presets.
-
-**Prerequisites:**
-- Generated vault with stop hook configured for session capture
-- ops/sessions/ directory exists
-- Active agent session
-
-**Pass criteria:**
-1. Session transcript is saved to ops/sessions/ with timestamp filename
-2. Mining task is auto-created for future processing of the transcript
-3. Session capture works regardless of whether self space is enabled or disabled
-
-**Verification steps:**
-
-```bash
-VAULT="/path/to/generated-vault"
-
-# Step 1: Check ops/sessions/ exists
-echo "=== Step 1: Session Directory ==="
-if [ -d "$VAULT/ops/sessions" ]; then
-    echo "  PASS: ops/sessions/ exists"
-else
-    echo "  FAIL: ops/sessions/ not found"
-fi
-
-# Step 2: Check stop hook is configured
-echo ""
-echo "=== Step 2: Stop Hook Configuration ==="
-if [ -f "$VAULT/.claude/settings.json" ]; then
-    if grep -q '"Stop"' "$VAULT/.claude/settings.json"; then
-        echo "  PASS: Stop hook configured in settings.json"
-    else
-        echo "  FAIL: No Stop hook found in settings.json"
-    fi
-else
-    echo "  FAIL: .claude/settings.json not found"
-fi
-
-# Step 3: After a session, verify transcript was saved
-echo ""
-echo "=== Step 3: Transcript Persistence (post-session) ==="
-SESSIONS=$(find "$VAULT/ops/sessions" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
-if [ "$SESSIONS" -gt 0 ]; then
-    echo "  PASS: $SESSIONS session transcript(s) found"
-else
-    echo "  WARN: No session transcripts found yet — run a session first"
-fi
-```
-
-**Common failure modes and remediation:**
-
-| Failure | Cause | Fix |
-|---------|-------|-----|
-| ops/sessions/ missing | /setup did not create session directory | Add ops/sessions/ creation to /setup — session capture is INVARIANT |
-| Stop hook not configured | Hook template missing session capture | Add session-capture to stop hook template for all presets |
-| Transcript not saved | Stop hook script has permissions or path error | Check hook script writes to correct path with write permissions |
-| Mining task not created | Auto-task creation logic missing from stop hook | Add task creation to stop hook — transcripts should be queued for mining |
-
----
-
-## Milestone 5c: Condition-Based Maintenance
+## Milestone 5b: Condition-Based Maintenance
 
 **What it tests:** Maintenance triggers fire based on vault state conditions, not time-based schedules. Condition-based maintenance replaces all time-based triggers in v1.6.
 
@@ -695,7 +629,7 @@ fi
 - validate-kernel.sh accessible
 
 **Pass criteria:** For each preset:
-1. Kernel validation passes (15/15, or 14/15 with WARN for semantic search if qmd not configured, or self space if disabled)
+1. Kernel validation passes (14/14, or 13/14 with WARN for semantic search if qmd not configured, or self space if disabled)
 2. Vocabulary is domain-native (zero cross-domain term leakage)
 3. Interaction constraints are satisfied (no hard constraint violations)
 4. Active feature blocks match the preset's `active_blocks` list (17 blocks available)
@@ -812,11 +746,10 @@ done
 **Expected output on success:**
 
 Each preset should produce:
-- Kernel: 15/15 PASS, or 14/15 PASS + 1 WARN (semantic search if qmd not configured, or self space if disabled)
+- Kernel: 14/14 PASS, or 13/14 PASS + 1 WARN (semantic search if qmd not configured, or self space if disabled)
 - Vocabulary: domain-native terms present, zero cross-domain leakage
 - Constraints: all coherence checks PASS
 - Features: all active blocks (from 16 available) produce output in context file
-- Session capture: ops/sessions/ exists and stop hook configured
 
 **Common failure modes and remediation:**
 
@@ -825,7 +758,6 @@ Each preset should produce:
 | Personal Assistant preset fails kernel on MOC hierarchy | Light-processing preset skipped MOC generation | Even light-processing systems need at least a hub MOC — enforce in /setup |
 | Experimental preset leaks "claim" into context file | Feature block `atomic-notes.md` uses "claim" generically | Parameterize all feature blocks with vocabulary variables |
 | Any preset missing ops/observations/ | Operational learning loop not generated | Learning loop is a kernel primitive — must be generated regardless of preset |
-| Session capture missing from generated vault | Stop hook not configured or ops/sessions/ not created | Session capture is Primitive 15 (INVARIANT) — must be generated for all presets |
 | Self space generated when disabled | Preset has self space OFF but self/ was created | Check self space optionality flag — research preset defaults to OFF |
 
 ---
@@ -844,8 +776,7 @@ echo "=== Milestone 2: Context ==="  # (run section checks manually or via scrip
 echo "=== Milestone 3: Vocabulary ===" # (run against therapy vault)
 echo "=== Milestone 4: Pipeline ===" # (requires active agent session)
 echo "=== Milestone 5: Persistence ===" # (requires active Claude Code session)
-echo "=== Milestone 5b: Session Capture ===" # (verify stop hook and ops/sessions/)
-echo "=== Milestone 5c: Condition-Based ===" # (verify condition triggers, no time-based)
+echo "=== Milestone 5b: Condition-Based ===" # (verify condition triggers, no time-based)
 echo "=== Milestone 6: Presets ===" # (run for all 3 presets)
 ```
 
@@ -857,8 +788,7 @@ M2 (Context) ← M1 (kernel must pass first)
 M3 (Vocabulary) ← M2 (context must exist)
 M4 (Pipeline) ← M1 + M2 (kernel + context)
 M5 (Persistence) ← M1 (kernel, specifically session-rhythm)
-M5b (Session Capture) ← M1 (kernel, specifically Primitive 15)
-M5c (Condition-Based) ← M1 + M2 (kernel + context)
+M5b (Condition-Based) ← M1 + M2 (kernel + context)
 M6 (Presets) ← M1 + M2 + M3 (validates all three for each preset)
 ```
 

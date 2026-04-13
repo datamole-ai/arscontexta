@@ -200,9 +200,9 @@ Trace each changed dimension through its cascade chain. Verify that downstream d
 
 Using `${CLAUDE_PLUGIN_ROOT}/reference/three-spaces.md`, verify the re-derived architecture maintains clean boundaries. Check for each of the six conflation patterns.
 
-### Pass 5: Kernel validation (15 primitives)
+### Pass 5: Kernel validation (14 primitives)
 
-Using `${CLAUDE_PLUGIN_ROOT}/reference/derivation-validation.md`, verify the re-derived system will pass all 15 kernel primitives.
+Using `${CLAUDE_PLUGIN_ROOT}/reference/derivation-validation.md`, verify the re-derived system will pass all 14 kernel primitives.
 
 ---
 
@@ -315,7 +315,7 @@ Write a new derivation record with:
 - Coherence validation results
 
 ### Step 10: Log the reseed
-Create a session log in `ops/sessions/` documenting the reseed: what changed, why, and what to watch for.
+Create a methodology note in `ops/methodology/` documenting the reseed: what changed, why, and what to watch for.
 
 ---
 
@@ -323,7 +323,7 @@ Create a session log in `ops/sessions/` documenting the reseed: what changed, wh
 
 Run the full validation suite on the re-derived system.
 
-### Kernel validation (15 primitives)
+### Kernel validation (14 primitives)
 
 Run `${CLAUDE_PLUGIN_ROOT}/reference/validate-kernel.sh` if available, otherwise manually check each primitive:
 

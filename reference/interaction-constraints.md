@@ -70,14 +70,11 @@ These produce friction but can work with compensating mechanisms:
 
 ### Kernel Primitive Constraints
 
-These constraints apply to the 15 kernel primitives and their INVARIANT/CONFIGURABLE status:
+These constraints apply to the 14 kernel primitives and their INVARIANT/CONFIGURABLE status:
 
 **INVARIANT primitives (always present, cannot be disabled):**
 
-1. `session_capture == false` (Primitive 15)
-   → BLOCK: "Session capture is INVARIANT. Every vault saves session transcripts. The operational learning loop depends on this evidence."
-
-2. `methodology_folder == false` (Primitive 14)
+1. `methodology_folder == false` (Primitive 14)
    → BLOCK: "The methodology folder is INVARIANT. Meta-skills (/ask, /architect, /rethink) require ops/methodology/ to reason about system state."
 
 3. `schema_enforcement == false` (Primitive 7)

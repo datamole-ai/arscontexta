@@ -27,7 +27,7 @@ Nine tests that verify the derivation engine produces coherent, functional syste
 **Result: 5/5 match.** The derived configuration is a near-perfect prediction of what the vault evolved to organically. One dimension shows evolution beyond the starting preset (nav depth approaching 4-tier), which aligns with the seed-evolve-reseed lifecycle claim.
 
 **Features correctly enabled:**
-- Kernel (all 15 primitives): YES — vault has all 15 (self space disabled by default for research, but primitive still passes as CONFIGURABLE)
+- Kernel (all 14 primitives): YES — vault has all 14 (self space disabled by default for research, but primitive still passes as CONFIGURABLE)
 - inbox-processing: YES (processing = heavy ≥ moderate) — vault has 00_inbox/
 - processing-pipeline: YES (processing = heavy) — vault has /ralph, /pipeline, full 6R pipeline
 - semantic-search: YES (linking = explicit+implicit) — vault has qmd with 4 collections
@@ -59,7 +59,7 @@ Nine tests that verify the derivation engine produces coherent, functional syste
 | Organization | flat | Same benefit as research: reflections aren't categories, they're connected experiences |
 | Linking | explicit | Direct connections between reflections (no semantic search initially — volume is low) |
 | Nav depth | 2-tier | Hub → topic MOCs (moods, triggers, patterns, growth areas). Volume stays moderate. |
-| Maintenance | condition-based (tight) | Review triggered after each session capture. Therapy's value comes from revisiting, not accumulating. |
+| Maintenance | condition-based (tight) | Review triggered by observation/tension thresholds. Therapy's value comes from revisiting, not accumulating. |
 | Schema | moderate | Mood, trigger, and pattern fields make reflections queryable. Not dense — just enough for retrieval. |
 
 **Natural pipeline fit:** /capture — reflections are compound journal entries captured whole; atomic extraction would fragment the emotional arc that gives therapy notes their meaning.
@@ -115,7 +115,7 @@ _schema:
 - `methodology.md`: "I surface connections between reflections, track recurring patterns, and help you see growth over time..."
 - `goals.md`: Active growth threads, not research questions
 
-**Kernel validation prediction:** 15/15 PASS (or 14 PASS + 1 WARN on semantic search if not configured)
+**Kernel validation prediction:** 14/14 PASS (or 14 PASS + 1 WARN on semantic search if not configured)
 
 **Coherence assessment:** The configuration is internally consistent. Tight condition-based maintenance enables pattern detection — the core therapy value. Schema fields use emotional vocabulary (mood, trigger, pattern), not research jargon. Note that the "moderate granularity" noted in signal extraction describes how the user naturally produces notes (compound reflections rather than atomic claims) — granularity is not a configured dimension; it is observed per-invocation. The system would feel natural to use for its purpose.
 
@@ -194,7 +194,7 @@ _schema:
 
 **Key derivation insight:** The `meta_state` field addresses temporal dynamics that the Research preset doesn't capture. The "outdated" value enables filtering stale strategies — critical for competitive gaming where last patch's knowledge can be wrong. This field emerged from the interaction between temporal dynamics and schema density.
 
-**Kernel validation prediction:** 15/15 PASS (assuming semantic search is configured)
+**Kernel validation prediction:** 14/14 PASS (assuming semantic search is configured)
 
 **Coherence assessment:** The derived configuration makes gaming-domain sense. Moderate granularity captures strategies as compound thoughts without forcing artificial decomposition ("jab into frame trap when opponent respects plus frames" is one idea, not three). Tight condition-based maintenance responds to patch cycles and meta shifts. The `meta_state` field solves the temporal problem naturally. The system would be immediately useful for tracking matchup knowledge.
 
@@ -242,7 +242,7 @@ _schema:
 3. The shared graph (wiki links) handles cross-domain naturally
 4. Hub MOC (index.md) provides unified entry point
 
-**Kernel validation prediction:** 15/15 PASS
+**Kernel validation prediction:** 14/14 PASS
 
 **Coherence assessment:** Multi-domain composition works when the shared layer (wiki links, MOC hierarchy, description fields) is domain-agnostic while templates and processing are domain-specific. The five composition rules (from the composable-knowledge-architecture blueprint) hold:
 1. Shared graph: wiki links are domain-agnostic ✓
@@ -294,7 +294,7 @@ The constraint system is productive, not just prohibitive. For each violation, i
 
 **Post-correction constraint check:** Zero violations. The corrected configuration is internally consistent.
 
-**Kernel validation prediction:** 15/15 (corrected configuration satisfies all primitives)
+**Kernel validation prediction:** 14/14 (corrected configuration satisfies all primitives)
 
 **Coherence assessment:** The constraint system serves as a design advisor, not a gatekeeper. It detected three issues in the input configuration, explained why each was problematic, recommended specific corrections, and produced a valid configuration. The key insight is that the constraint system is productive — it does not simply reject bad configurations but guides users toward coherent ones. This is essential for the conversational derivation flow, where users may express preferences that are individually reasonable but collectively incoherent. The system respects user preferences when possible (flat organization and explicit linking survived unchanged) while adjusting dimensions that were in tension with the rest (dense schema downgraded, 4-tier navigation reduced, very lax maintenance thresholds tightened). The corrections are minimal — changing only what is necessary to achieve coherence.
 
@@ -352,7 +352,7 @@ Scan the entire generated output for research-domain terms that should have been
 2. The ops/derivation.md file records the derivation rationale and may reference the research-domain mapping as part of its provenance trail
 3. Template `_schema` blocks use structural field names (`entity_type`, `applies_to`) that are system-internal, not user-facing
 
-**Kernel validation prediction:** 15/15
+**Kernel validation prediction:** 14/14
 
 **Coherence assessment:** Vocabulary transformation fidelity is not cosmetic — it determines whether the system feels native to its domain. A therapy user encountering "extract claims from sources" would experience cognitive dissonance: the system sounds like it was built for someone else and awkwardly repurposed. When every term is domain-native ("surface patterns in reflections"), the system feels purpose-built. This test validates that the transformation is complete and systematic, not partial. The search methodology is intentionally exhaustive because partial transformation is worse than no transformation — a system that says "surface reflections" in one paragraph and "extract claims" in the next signals inconsistency. The test also documents the narrow exceptions where research vocabulary is acceptable (meta-documentation, derivation provenance), preventing false positives from flagging legitimate uses.
 
@@ -372,7 +372,7 @@ In v1.6, all vaults ship with full automation from day one. There are no tier bo
 
 | Note Count | Activity | Expected Behavior |
 |------------|----------|------------------|
-| 0-5 | Initial capture, first concepts | Full system operational. All skills available. Templates enforce schema. Hooks automate orientation. Session capture saves transcripts. |
+| 0-5 | Initial capture, first concepts | Full system operational. All skills available. Templates enforce schema. Hooks automate orientation. |
 | 5-15 | Regular capture, first MOC created | Hub MOC appears naturally. Agent creates topic MOCs as clusters emerge. Condition-based maintenance has nothing to fire yet. |
 | 15-50 | Steady growth, processing routine | Processing pipeline handles volume. Condition-based hooks begin evaluating state but most thresholds not yet reached. |
 | 50-100 | Accelerating growth | Semantic search becomes increasingly valuable. Condition-based triggers begin firing (orphan detection, MOC size thresholds). /next surfaces maintenance tasks. |
@@ -387,7 +387,6 @@ When a user disables a feature via /architect, the rest of the system must conti
 |-----------------|-------------------|-------------|
 | Semantic search (qmd) | Keyword search only. Skills fall back to grep. | Cross-vocabulary discovery reduced |
 | Self space | Goals route to ops/goals.md, methodology to ops/methodology/. No self/ directory. | Identity persistence reduced but operational |
-| Session capture | No stop hook saves transcripts. /remember still works manually. | Automatic friction detection lost |
 | Processing pipeline | Manual processing only. Skills available but no orchestration. | Quality gates still in skills, no batch processing |
 
 **Critical invariant: disabling features is safe and reversible.**
@@ -395,11 +394,11 @@ When a user disables a feature via /architect, the rest of the system must conti
 - Disabling semantic search does not break any skill (skills fall back to keyword search)
 - Disabling self space routes its content to ops/ (no data loss)
 - Re-enabling any feature restores full functionality
-- The kernel primitives that are INVARIANT (wiki links, schema enforcement, methodology folder, session capture) cannot be disabled
+- The kernel primitives that are INVARIANT (wiki links, schema enforcement, methodology folder) cannot be disabled
 
-**Kernel validation prediction:** 15/15 at all growth stages
+**Kernel validation prediction:** 14/14 at all growth stages
 
-**Coherence assessment:** v1.6 reverses the Gall's Law application: instead of growing from simple to complex, all vaults ship complete and users opt down. This works because the overhead of unused features is near-zero (hooks that never fire, skills that are never invoked, directories that stay empty). The cost of discovering and adding features was higher than the cost of having them present but dormant. The critical invariant shifts from "additive transitions" to "safe disabling" — removing a feature must never break the system. This is validated by the feature disabling table: each optional feature has a fallback path. INVARIANT primitives (wiki links, schema enforcement, methodology folder, session capture) cannot be disabled, ensuring the structural foundation is always present.
+**Coherence assessment:** v1.6 reverses the Gall's Law application: instead of growing from simple to complex, all vaults ship complete and users opt down. This works because the overhead of unused features is near-zero (hooks that never fire, skills that are never invoked, directories that stay empty). The cost of discovering and adding features was higher than the cost of having them present but dormant. The critical invariant shifts from "additive transitions" to "safe disabling" — removing a feature must never break the system. This is validated by the feature disabling table: each optional feature has a fallback path. INVARIANT primitives (wiki links, schema enforcement, methodology folder) cannot be disabled, ensuring the structural foundation is always present.
 
 ---
 
@@ -526,7 +525,7 @@ Observe (create observation/tension)
             → Observe again (new friction from improved system)
 ```
 
-**Kernel validation prediction:** 15/15
+**Kernel validation prediction:** 14/14
 
 **Coherence assessment:** The operational learning loop is the system's immune system — it detects friction, accumulates evidence, and triggers targeted improvement. This test validates the entire cycle, not just the existence of obs/observations/ and ops/tensions/ directories. The critical findings are: (1) the threshold mechanism works as an attention filter — below threshold, observations accumulate silently; above threshold, the system demands review, (2) the four-disposition triage model (promote, implement, archive, keep) provides clear action paths for every observation, (3) the status lifecycle has valid transitions that prevent regression (you cannot un-promote or un-implement), and (4) the loop is genuinely recursive — improvements generate new friction, which generates new observations, which feeds back into the loop. Without this primitive, the system is static: it works as generated but never improves from experience. With it, the system converges toward its optimal configuration through accumulated operational evidence.
 
@@ -536,14 +535,14 @@ Observe (create observation/tension)
 
 | Test | Configuration Match | Kernel Passes | Vocabulary Correct | Coherence |
 |------|--------------------|--------------|--------------------|-----------|
-| Self-derivation (Research) | 5/5 dimensions | 15/15 | N/A (is the source) | Full |
-| Cross-domain (Therapy) | Internally consistent | 14-15/15 | Research jargon eliminated | Full |
-| Novel domain (Gaming) | Principled deviation from reference | 15/15 | Domain-native vocabulary | Full |
-| Multi-domain (Research + Relationships) | Per-domain configs composed | 15/15 | Per-domain vocabularies | Full |
-| Constraint violation recovery | 3 violations detected, corrected | 15/15 (post-correction) | N/A (structural test) | Full (after correction) |
-| Vocabulary transformation fidelity | Zero leaked terms | 15/15 | Exhaustive verification | Full |
-| Progressive configuration | Full automation works at all scales | 15/15 (all growth stages) | N/A (infrastructure test) | Full |
-| Operational learning loop | Full cycle validated | 15/15 | N/A (primitive-specific test) | Full |
+| Self-derivation (Research) | 5/5 dimensions | 14/14 | N/A (is the source) | Full |
+| Cross-domain (Therapy) | Internally consistent | 14-14/14 | Research jargon eliminated | Full |
+| Novel domain (Gaming) | Principled deviation from reference | 14/14 | Domain-native vocabulary | Full |
+| Multi-domain (Research + Relationships) | Per-domain configs composed | 14/14 | Per-domain vocabularies | Full |
+| Constraint violation recovery | 3 violations detected, corrected | 14/14 (post-correction) | N/A (structural test) | Full (after correction) |
+| Vocabulary transformation fidelity | Zero leaked terms | 14/14 | Exhaustive verification | Full |
+| Progressive configuration | Full automation works at all scales | 14/14 (all growth stages) | N/A (infrastructure test) | Full |
+| Operational learning loop | Full cycle validated | 14/14 | N/A (primitive-specific test) | Full |
 
 **Key findings:**
 
@@ -555,10 +554,10 @@ Observe (create observation/tension)
 
 4. **Multi-domain composition works through shared-graph-with-separate-templates.** Our vault already proves this pattern. The derivation engine needs to support it explicitly: generate separate templates per domain, shared navigation, and cross-domain linking conventions.
 
-5. **The kernel primitives are satisfied through hooks and automation.** All 15 primitives are implemented through Claude Code's hook system, skill infrastructure, and MCP integration. The automation layer provides deterministic enforcement that instruction-following cannot match.
+5. **The kernel primitives are satisfied through hooks and automation.** All 14 primitives are implemented through Claude Code's hook system, skill infrastructure, and MCP integration. The automation layer provides deterministic enforcement that instruction-following cannot match.
 
 6. **The constraint system is productive, not just prohibitive.** The violation recovery test (Test 6) shows that incoherent configurations are not dead ends — the constraint system guides users toward valid configurations by recommending minimal corrections. This is essential for conversational derivation where users express individually reasonable preferences that are collectively incoherent.
 
 7. **Feature disabling is safe and reversible.** The progressive configuration test (Test 8) confirms that disabling optional features does not break the system. Each optional feature has a fallback path. INVARIANT primitives cannot be disabled, ensuring the structural foundation is always present. The system ships complete and users opt down — the reverse of the former tier-based approach.
 
-**Derivation engine confidence: HIGH.** The 15 kernel primitives provide a universal base. The 5 configuration dimensions parameterize the variation space. Interaction constraints prevent incoherent combinations. The 3 presets (Research, Personal Assistant, Experimental) provide pre-validated starting points. The system derives working configurations for research, therapy, competitive gaming, multi-domain composition, constraint recovery, vocabulary-verified domains, progressive configuration, and self-improving operational loops.
+**Derivation engine confidence: HIGH.** The 14 kernel primitives provide a universal base. The 5 configuration dimensions parameterize the variation space. Interaction constraints prevent incoherent combinations. The 3 presets (Research, Personal Assistant, Experimental) provide pre-validated starting points. The system derives working configurations for research, therapy, competitive gaming, multi-domain composition, constraint recovery, vocabulary-verified domains, progressive configuration, and self-improving operational loops.
