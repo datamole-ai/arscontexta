@@ -116,27 +116,46 @@ or `decisions/`), but the separation is invariant.
 
 ### Generated (available after setup)
 
+#### Pipeline
+
 | Command | What It Does |
 |---------|-------------|
+| `/pipeline` | End-to-end source processing |
+
+#### Pipeline Sub-Skills
+
+| Command | What It Does |
+|---------|-------------|
+| `/seed` | Create extraction task with duplicate detection |
 | `/extract` | Extract atomic insights from sources |
 | `/structure` | Extract grouped insights preserving shared context |
-| `/capture` | Quick-capture a thought directly into your graph |
+| `/capture` | Verbatim capture — preserves source without transformation |
 | `/reflect` | Find connections, update MOCs |
 | `/reweave` | Update older notes with new connections |
 | `/verify` | Combined quality check: description + schema + health |
 | `/validate` | Schema compliance checking |
-| `/seed` | Create extraction task with duplicate detection |
 | `/ralph` | Queue-based orchestration with fresh context per phase |
-| `/pipeline` | End-to-end source processing |
-| `/tasks` | Queue management |
+| `/archive-batch` | Archive batch of notes |
+
+#### Operational
+
+| Command | What It Does |
+|---------|-------------|
 | `/stats` | Vault metrics |
 | `/graph` | Graph analysis |
+| `/tasks` | Queue management |
 | `/next` | Next-action recommendation |
-| `/learn` | Research and grow |
-| `/remember` | Mine session learnings |
+
+#### Meta-Cognitive
+
+| Command | What It Does |
+|---------|-------------|
 | `/rethink` | Challenge system assumptions |
+| `/remember` | Mine session learnings |
+| `/learn` | Research and grow |
 | `/refactor` | Structural improvements |
-| `/archive-batch` | Archive batch of notes |
+
+Note: `/ask` and `/architect` are plugin-level commands (listed above) and are not generated during setup.
 ---
 
 ## Processing Pipeline

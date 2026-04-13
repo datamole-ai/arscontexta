@@ -1503,11 +1503,11 @@ Welcome to your {domain} knowledge system. This manual explains how everything w
 
 ## Pages
 
-- [[getting-started]] — Your first session, first {DOMAIN:note}, and first connection
-- [[skills]] — Every available command with when to use it and examples
-- [[workflows]] — The processing pipeline, maintenance cycle, and session rhythm
+- [[getting-started]] — Your first session: drop a file in inbox, run /pipeline, see results
+- [[pipeline]] — The pipeline deep-dive: granularity modes, phases, resumability
+- [[skills]] — Every available command grouped by role, with examples
+- [[workflows]] — The core processing loop, session rhythm, and maintenance cycle
 - [[configuration]] — How to adjust settings via config.yaml or /architect
-- [[meta-skills]] — /ask, /architect, /{DOMAIN:rethink}, and /{DOMAIN:remember} explained
 - [[troubleshooting]] — Common issues and how to resolve them
 ```
 
@@ -1515,56 +1515,173 @@ Welcome to your {domain} knowledge system. This manual explains how everything w
 
 ```markdown
 ---
-description: First session guide — creating your first {DOMAIN:note} and building connections
+description: First session guide — run your first pipeline and build connections
 type: manual
 ---
 # Getting Started
 
 {Generate content covering:}
-- What to expect in your first session
-- Creating your first {DOMAIN:note} (walk through the process)
-- How connections work (wiki links, {DOMAIN:topic maps})
-- The orient-work-persist session rhythm
-- Where to go next (link to [[workflows]] and [[skills]])
-- Running /tutorial for an interactive walkthrough
+- Drop something in {DOMAIN:inbox}/ — any file, paste, or voice transcript
+- Run /{DOMAIN:pipeline} — it asks which granularity (extract/structure/capture), then handles everything
+- See what happened — pipeline report shows created {DOMAIN:note_plural}, connections, updated {DOMAIN:topic map}s
+- Browse the results — follow wiki links from new {DOMAIN:note_plural} to see how the graph connects
+- The session rhythm: orient (session start shows pending work) -> work (pipeline or manual commands) -> persist (session end saves state)
+- Where to go next: link to [[pipeline]] for the deep-dive, [[skills]] for manual alternatives, /tutorial for interactive walkthrough
 ```
 
 **Page 3: skills.md**
 
 ```markdown
 ---
-description: Complete reference for every available command
+description: Complete reference for every available command, grouped by role
 type: manual
 ---
 # Skills
 
-{Generate content covering:}
-- Every generated skill with domain-native name, purpose, and example invocation
-- Group by category: Processing, Orchestration, Meta-Cognitive, Diagnostic, Knowledge, Research, Lifecycle, Onboarding
-- For each skill: when to use it, what it does, example command
-- Link to [[workflows]] for how skills chain together
-- Link to [[meta-skills]] for detailed meta-skill documentation
+{Generate content with these groups. For each skill: one-line purpose, when to use it, example invocation.}
+
+## Pipeline
+
+The primary workflow. One command for end-to-end source processing.
+
+- /{DOMAIN:pipeline} — end-to-end processing: seed, extract/structure/capture, reflect, reweave, verify, archive
+
+## Pipeline Sub-Skills
+
+What pipeline runs for you. Use directly for fine-grained control.
+
+- /{DOMAIN:seed} — create queue entry with duplicate detection
+- /extract — atomic note extraction (one {DOMAIN:note} per claim)
+- /structure — grouped note extraction (related claims in one {DOMAIN:note})
+- /capture — verbatim capture (no transformation)
+- /{DOMAIN:reflect} — find connections, update {DOMAIN:topic map}s
+- /{DOMAIN:reweave} — update older {DOMAIN:note_plural} with new context
+- /{DOMAIN:verify} — description + schema + health check
+- /{DOMAIN:validate} — schema compliance only
+- /{DOMAIN:orchestrate} — queue-based orchestration engine (fresh context per phase)
+- /archive-batch — archive completed batch
+
+## Operational
+
+Vault state and diagnostics.
+
+- /{DOMAIN:stats} — vault metrics
+- /{DOMAIN:graph} — graph analysis
+- /{DOMAIN:tasks} — queue management
+- /{DOMAIN:next} — next-action recommendation
+
+Note: /arscontexta:health (plugin-level) also performs diagnostics but is always available, not generated.
+
+## Meta-Cognitive
+
+System evolution and research. Use these to understand, challenge, and improve your system.
+
+- /{DOMAIN:rethink} — challenge system assumptions, review observations and tensions, detect drift
+- /{DOMAIN:remember} — capture friction and methodology learnings
+- /{DOMAIN:learn} — research and grow the knowledge base
+- /{DOMAIN:refactor} — structural improvements
+
+{For meta-cognitive skills: 2-3 sentences each on when and how to use, absorbing content formerly in meta-skills.md}
+
+## Plugin-Level (always available)
+
+These come with the plugin, not generated during setup. Referenced here for completeness.
+
+- /arscontexta:ask — query the bundled research knowledge base and local methodology
+- /arscontexta:architect — research-backed configuration advice
+- /arscontexta:health — run diagnostic checks on your vault
+- /arscontexta:help — contextual guidance and command discovery
+- /arscontexta:tutorial — interactive walkthrough
+
+- Link to [[pipeline]] for how skills chain together in the pipeline
+- Link to [[workflows]] for the processing loop and session rhythm
 ```
 
 **Page 4: workflows.md**
 
 ```markdown
 ---
-description: Processing pipeline, maintenance cycle, and session rhythm
+description: The core processing loop, session rhythm, and maintenance cycle
 type: manual
 ---
 # Workflows
 
 {Generate content covering:}
-- The full processing pipeline: {DOMAIN:seed} -> /extract or /structure or /capture -> {DOMAIN:connect} -> {DOMAIN:maintain} -> {DOMAIN:verify}
-- Session rhythm: orient (what's happening) -> work (do the thing) -> persist (save state)
-- Maintenance cycle: condition-based triggers, what to do when conditions fire
-- Batch processing with /{DOMAIN:orchestrate}
-- Link to [[skills]] for command details
+
+## The Core Loop
+
+inbox -> /{DOMAIN:pipeline} -> connected knowledge. This is the primary workflow. Everything else supports it.
+
+## Processing Pipeline
+
+The 6 Rs: Record (capture into {DOMAIN:inbox}), Reduce (/extract or /structure or /capture), Reflect (find connections), Reweave (update older {DOMAIN:note_plural}), Verify (quality checks), Rethink (challenge assumptions). Link to [[pipeline]] for the deep-dive.
+
+## Session Rhythm
+
+Orient (session start shows pending work and maintenance signals) -> work (run /{DOMAIN:pipeline} on inbox items, or manual commands) -> persist (session end saves state).
+
+## Maintenance Cycle
+
+Condition-based triggers, what to do when they fire, frequency guidance.
+
+## Manual Processing
+
+For when you want to run individual phases yourself. Link to [[skills]] for the sub-commands.
+
+- Link to [[pipeline]] for pipeline details
+- Link to [[skills]] for command reference
 - Link to [[configuration]] for adjusting pipeline settings
 ```
 
-**Page 5: configuration.md**
+**Page 5: pipeline.md**
+
+```markdown
+---
+description: The pipeline deep-dive — granularity modes, processing phases, and resumability
+type: manual
+---
+# Pipeline
+
+{Generate content covering:}
+
+## What Pipeline Does
+
+One command, full processing: {DOMAIN:seed} -> extract/structure/capture -> {DOMAIN:reflect} -> {DOMAIN:reweave} -> {DOMAIN:verify} -> archive. Drop a file in {DOMAIN:inbox}/, run /{DOMAIN:pipeline}, get connected knowledge.
+
+## Three Granularity Modes
+
+Present all three as equal choices:
+
+- `/{DOMAIN:pipeline} --extract` — one atomic {DOMAIN:note} per claim. Best for dense sources where each idea stands alone.
+- `/{DOMAIN:pipeline} --structure` — grouped {DOMAIN:note_plural} preserving shared context. Best for sources where ideas are interrelated.
+- `/{DOMAIN:pipeline} --capture` — verbatim preservation, no transformation. Best for reference material you want searchable but unaltered.
+- No flag — pipeline asks you to choose.
+
+## Processing Phases
+
+Brief explanation of each phase: seed (duplicate detection, queue entry), extraction (granularity-routed), reflect (forward connections and {DOMAIN:topic map} updates), reweave (backward updates to older {DOMAIN:note_plural}), verify (quality gate), archive (cleanup and summary). What each does and why it matters.
+
+## Resumability
+
+Pipeline can be interrupted and resumed at any point. Queue state persists across sessions. Table:
+
+| Interrupted At | How to Resume |
+|----------------|---------------|
+| Before seed | Run /{DOMAIN:pipeline} again |
+| After seed, before extraction | /{DOMAIN:orchestrate} 1 --batch {id} --type process |
+| During note processing | /{DOMAIN:orchestrate} --batch {id} |
+| Before archive | /archive-batch {id} |
+
+## Batch Orchestration
+
+/{DOMAIN:orchestrate} for processing multiple items. Queue management with /{DOMAIN:tasks}. Fresh context per phase ensures quality doesn't degrade.
+
+## Going Manual
+
+Any phase can be run individually. Link to [[skills]] for the sub-commands. Pipeline is the convenience wrapper; sub-skills are the building blocks.
+```
+
+**Page 6: configuration.md**
 
 ```markdown
 ---
@@ -1579,28 +1696,8 @@ type: manual
 - Feature toggling: what can be enabled/disabled
 - Preset explanation: what your preset includes and why
 - Dimension positions and what they mean for your domain
-- Link to [[meta-skills]] for /architect details
+- Link to [[skills]] for /architect details
 - Link to [[troubleshooting]] for configuration issues
-```
-
-**Page 6: meta-skills.md**
-
-```markdown
----
-description: Deep guide to /ask, /architect, /{DOMAIN:rethink}, and /{DOMAIN:remember}
-type: manual
----
-# Meta-Skills
-
-{Generate content covering:}
-- /ask — querying the bundled research knowledge base + local methodology
-- /architect — getting research-backed configuration advice
-- /{DOMAIN:rethink} — reviewing accumulated observations and tensions, drift detection
-- /{DOMAIN:remember} — capturing friction and methodology learnings (Rule Zero: methodology as spec)
-- When to use each meta-skill
-- How meta-skills relate to system evolution
-- Link to [[configuration]] for config changes
-- Link to [[troubleshooting]] for drift-related issues
 ```
 
 **Page 7: troubleshooting.md**
@@ -1613,14 +1710,14 @@ type: manual
 # Troubleshooting
 
 {Generate content covering:}
-- Orphan {DOMAIN:notes} — notes with no incoming links (run /{DOMAIN:connect})
-- Dangling links — wiki links to non-existent {DOMAIN:notes} (check after renames)
-- Stale content — {DOMAIN:notes} not updated in 30+ days with sparse connections (run /{DOMAIN:maintain})
+- Orphan {DOMAIN:notes} — {DOMAIN:note_plural} with no incoming links (run /{DOMAIN:reflect})
+- Dangling links — wiki links to non-existent {DOMAIN:note_plural} (check after renames)
+- Stale content — {DOMAIN:note_plural} not updated in 30+ days with sparse connections (run /{DOMAIN:reweave})
 - Methodology drift — system behavior diverging from methodology spec (run /{DOMAIN:rethink} drift)
-- Inbox overflow — too many items accumulating (run /extract, /structure, or /capture on inbox items, or /{DOMAIN:pipeline})
-- Pipeline stalls — tasks stuck in queue (check with /{DOMAIN:next})
+- Inbox overflow — too many items accumulating (run /{DOMAIN:pipeline} to process inbox items)
+- Pipeline stalls — tasks stuck in queue (check with /{DOMAIN:tasks}, resume with /{DOMAIN:orchestrate} --batch {id}). See [[pipeline]] resumability section.
 - Common mistakes table with corrections
-- Link to [[meta-skills]] for /rethink and /remember
+- Link to [[skills]] for command reference
 - Link to [[configuration]] for threshold adjustments
 ```
 
