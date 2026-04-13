@@ -42,7 +42,6 @@ All graph participation happens OUTSIDE the fenced block:
 - Meeting transcripts
 - Reference documents where exact wording matters
 - Articles or content to preserve as-is
-- Voice capture transcripts
 - Source material that may be processed later via /extract or /structure
 - Any content where transformation would lose value
 

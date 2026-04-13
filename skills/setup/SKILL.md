@@ -969,7 +969,6 @@ features:
   semantic-search: [true | false]
   processing-pipeline: [true | false]
   sleep-processing: [true | false]
-  voice-capture: false
 
 processing_tier: auto    # auto | 1 | 2 | 3 | 4
 

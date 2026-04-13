@@ -96,7 +96,6 @@ Everything enters through {DOMAIN:inbox/}. Do not think about structure at captu
 - URLs with a brief note about why they matter
 - Quick ideas and observations
 - Sources (PDFs, articles, research results)
-- Voice capture transcripts
 - Anything where destination is unclear
 
 **Processing inbox items:** Inbox items get processed via /extract, /structure, or /capture based on source material and user intent. Research papers with decomposable claims → /extract. Meeting notes mixing multiple topics → /structure. Verbatim transcripts and reference documents → /capture.
