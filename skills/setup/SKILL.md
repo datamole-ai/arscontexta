@@ -386,11 +386,44 @@ All generated systems ship with full automation from day one. There are no tiers
 
 **Init generates everything by default.** The context file includes all skill documentation. Processing depth and automation level can be adjusted post-init via ops/config.yaml.
 
+### Step 3h: Schema Derivation
+
+Derive initial `_schema` blocks for each note type (extract, structure, capture). This step makes schema derivation explicit — it was previously implicit in Pipeline Step 4.
+
+**Inputs from prior steps:**
+- Vocabulary mapping (Step 3c) — domain-native field labels, enum values
+- Schema density dimension — minimal (few optional fields), moderate (standard set), dense (many optional fields with domain-specific enums)
+- Coherence results (Step 3e) — any constraints that affect schema structure
+- Automation config (Step 3g) — which note types are active
+
+**For each note type, derive a `_schema` block containing:**
+- `entity_type` — domain-named note identifier
+- `granularity` — extract, structure, or capture
+- `required` — fields that must be present (always includes: description, granularity, topics)
+- `optional` — domain-specific fields scaled by schema density setting
+- `enums` — valid values for enum fields, adapted to domain vocabulary
+- `constraints` — field-level rules (max length, format, array requirements)
+
+**Reference inputs:**
+- Read `${CLAUDE_PLUGIN_ROOT}/reference/templates/extract/base-note.md` for extract invariants
+- Read `${CLAUDE_PLUGIN_ROOT}/reference/templates/structure/base-note.md` for structure invariants (has canonical `_schema` block)
+- Read `${CLAUDE_PLUGIN_ROOT}/reference/templates/capture/base-note.md` for capture invariants (has canonical `_schema` block)
+
+Preserve all invariant fields and constraints from reference templates. Add domain-specific optional fields and enum values based on schema density and conversation signals.
+
+**For each field in the derived schema, record a one-line rationale** connecting it to a conversation signal, preset default, or reference template invariant. These rationales are used in Phase 4b to explain field choices to the user.
+
+Hold the derived schemas and rationales in working memory for Phase 4.
+
 ---
 
 ## PHASE 4: Proposal
 
-Present the derived system in concrete terms using the user's own vocabulary. This is the user's chance to adjust before generation proceeds.
+Present the derived system and schemas to the user for review. Phase 4 has three sub-sections: system proposal (4a), schema walkthrough (4b), and schema consolidation (4c).
+
+### Phase 4a: System Proposal
+
+Present the derived system in concrete terms using the user's own vocabulary. This is the user's chance to adjust the system design before reviewing schemas.
 
 Structure the proposal as:
 
@@ -402,9 +435,92 @@ Structure the proposal as:
 6. What was intentionally excluded and why
 7. Any high-risk failure modes flagged
 
-End with: **"Would you like me to adjust anything before I create this?"**
+End with: **"Would you like me to adjust anything about the system design?"**
 
-Record any user overrides in the derivation rationale. If the user overrides a dimension, re-run the coherence check for affected constraints before proceeding to generation.
+Record any user overrides in the derivation rationale. If the user overrides a dimension, re-run the coherence check for affected constraints.
+
+### Phase 4b: Schema Walkthrough
+
+After the user approves the system design, walk through the schemas. Present each note type one at a time, in this order: extract, structure, capture. Extract comes first because it has the most domain-specific adaptation. If the derivation excluded a note type, skip it.
+
+**For each note type:**
+
+1. **Present** the derived `_schema` block in YAML format with inline rationale comments explaining why each field is included:
+
+```yaml
+_schema:
+  entity_type: "research-note"
+  granularity: extract
+  required:
+    - description   # Context sentence for the claim (~150 chars)
+    - granularity   # Note type marker (invariant)
+    - type          # Your core claim categories
+    - topics        # Connections to topic maps (wiki-links)
+  optional:
+    - source_url    # You mentioned working with academic papers
+    - confidence    # Some of your claims have varying certainty
+  enums:
+    type: [insight, pattern, fact, decision]
+  constraints:
+    description: "One sentence, ~150 characters"
+    topics: "At least one wiki-link"
+```
+
+2. **Explain** each non-obvious field by connecting it to a conversation signal: "I included `source_url` as optional because you mentioned working with academic papers. `confidence` is there because you said some findings are more tentative than others."
+
+3. **Ask** one focused question: "Anything you'd add, remove, or rename?"
+
+4. **Apply** any adjustments the user requests. Confirm the updated schema before moving to the next note type. If an adjustment affects a required/invariant field (description, granularity, topics), explain why it's required and confirm the user still wants the change.
+
+### Phase 4c: Schema Consolidation
+
+After all note types have been reviewed individually:
+
+1. **Consolidated view** — Present all approved schemas together. Highlight shared fields (description, topics, granularity appear in all types) vs. type-specific fields.
+
+2. **Cross-type consistency check** — If the user renamed or adjusted a shared field on one type (e.g., changed `topics` label), ask whether the same change should apply to the other types.
+
+3. **Final approval** — "These are the schemas I'll use to generate your templates. Look good?"
+
+### Write approved schemas
+
+After the user approves the consolidated schemas, write `ops/schemas.md` to the vault directory. Use this format:
+
+```markdown
+# Approved Schemas
+
+Generated during setup. These schemas were used to create the templates in `ops/templates/`.
+To modify schemas after setup, use `/refactor`.
+
+## [Note Type Name]
+
+[1-2 sentence rationale connecting to user's domain]
+
+\`\`\`yaml
+_schema:
+  entity_type: "[domain]-note"
+  granularity: [extract|structure|capture]
+  required:
+    - field_name   # rationale comment
+  optional:
+    - field_name   # rationale comment
+  enums:
+    field_name: [value1, value2]
+  constraints:
+    field_name: "constraint description"
+\`\`\`
+
+### Rationale
+- **field** — longer explanation for non-obvious choices
+
+[Repeat for each note type]
+```
+
+After writing `ops/schemas.md`, proceed to the final confirmation:
+
+**"Would you like me to adjust anything before I create this?"**
+
+This final prompt covers both the system design and schemas. If the user requests changes, apply them — re-run coherence check if a dimension was overridden, update `ops/schemas.md` if a schema was changed.
 
 ---
 
@@ -986,7 +1102,7 @@ platform_hints:
 
 **Agent scope:** templates/*.md, ops/queries/*.sh
 
-**Agent reads:** ops/derivation.md
+**Agent reads:** ops/derivation.md, ops/schemas.md
 
 **Internal ordering:** Create templates first, then generate query scripts from the template `_schema` blocks.
 
@@ -1023,15 +1139,14 @@ ops/templates/
 
 Read `${CLAUDE_PLUGIN_ROOT}/reference/templates/` for canonical template structure per granularity. Each subfolder contains reference templates showing invariant fields, constraints, and body patterns.
 
-Read `ops/derivation.md` for:
-- Domain vocabulary (field labels, enum values, note type names)
-- Schema density setting (minimal → few optional fields, dense → more optional fields with domain-specific enums)
+Read `ops/schemas.md` for the approved `_schema` blocks. Use these as the authoritative schema definitions for each note type. Do NOT re-derive schemas from scratch — the user has already reviewed and approved these exact field sets, enums, and constraints.
+
+Read `ops/derivation.md` for domain vocabulary (field labels, note type names) and body structure guidance.
 
 For each granularity subfolder:
-- Preserve all invariant fields and constraints from the reference templates
-- Adapt to domain: field labels, enum values, optional fields based on schema density setting
-- Extract templates need the most domain adaptation (type enums, domain-specific optional fields)
-- Structure and capture templates often work close to the base reference — add domain fields only when genuinely needed
+- Use the approved `_schema` block from `ops/schemas.md` verbatim as the template's `_schema` section
+- Read the reference template for body structure (markdown layout below frontmatter)
+- Apply vocabulary transformation to body content and comments — but do not alter the `_schema` field definitions
 - MOC template is granularity-agnostic, adapt vocabulary only
 
 Each template MUST include a `_schema` block defining required fields, optional fields, enums, and constraints. The template IS the single source of truth for schema.
