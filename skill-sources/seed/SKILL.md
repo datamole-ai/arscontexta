@@ -121,6 +121,24 @@ Use `$FINAL_SOURCE` in the task file — this is the path all downstream phases 
 
 **Why move immediately:** All references (task files, {DOMAIN:note_plural}' Source footers) use the final archived path from the start. No path updates needed later. If it is in {DOMAIN:inbox}, it is unclaimed. Claimed sources live in archive.
 
+## Step 4b: Copy to Domain Archive
+
+For inbox sources only, copy the original to `{DOMAIN:archive}/` for easy discoverability. This runs after the move — `$FINAL_SOURCE` already points to `ops/queue/archive/`.
+
+```bash
+if [[ "$FILE" == *"{DOMAIN:inbox}"* ]] || [[ "$FILE" == *"inbox"* ]]; then
+  mkdir -p "{DOMAIN:archive}/"
+  ARCHIVE_COPY="{DOMAIN:archive}/${DATE}-${SOURCE_BASENAME}.md"
+  if [[ -f "$ARCHIVE_COPY" ]]; then
+    echo "WARN: $ARCHIVE_COPY already exists, skipping copy"
+  else
+    cp "$FINAL_SOURCE" "$ARCHIVE_COPY"
+  fi
+fi
+```
+
+Sources outside {DOMAIN:inbox} (living docs) skip this step — no archive copy is made.
+
 ## Step 5: Determine Claim Numbering
 
 Find the highest existing claim number across the queue and archive to ensure globally unique claim IDs.
@@ -222,6 +240,7 @@ Add the extract task entry to the queue file.
 Seeded: {SOURCE_BASENAME}
 Source: {original path} -> {FINAL_SOURCE}
 Archive folder: {ARCHIVE_DIR}
+Archived copy: {DOMAIN:archive}/{DATE}-{SOURCE_BASENAME}.md
 Size: {line count} lines
 Content type: {detected type}
 
@@ -234,6 +253,8 @@ Next steps:
   /ralph 1 --batch {SOURCE_BASENAME} --extract/structure/capture  (extract claims)
   /pipeline will handle this automatically
 ```
+
+For non-inbox sources (living docs), omit the "Archived copy" line since no copy is made.
 
 ---
 
@@ -264,6 +285,7 @@ Claim numbers (NNN) are globally unique across all batches, ensuring every filen
     | /seed
     v
 ops/queue/archive/2026-01-30-article/article.md  <- source moved here
+{DOMAIN:archive}/2026-01-30-article.md            <- archive copy
 ops/queue/article.md                               <- task file created
 ```
 
