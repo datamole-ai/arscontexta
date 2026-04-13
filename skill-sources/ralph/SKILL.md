@@ -1,9 +1,9 @@
 ---
 name: ralph
-description: Queue processing with fresh context per phase. Processes N tasks from the queue, spawning isolated subagents to prevent context contamination. Supports serial, parallel, batch filter, and dry run modes. Triggers on "/ralph", "/ralph N", "process queue", "run pipeline tasks".
+description: Queue processing with fresh context per phase. Processes N tasks from the queue, spawning isolated subagents to prevent context contamination. Supports batch filter and type filter modes. Triggers on "/ralph", "/ralph N", "process queue", "run pipeline tasks".
 version: "1.0"
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Agent
-argument-hint: "N [--parallel] [--batch id] [--type process] [--dry-run] — N = number of tasks to process"
+argument-hint: "N [--batch id] [--type process] [--handoff] — N = number of tasks to process"
 ---
 
 ## EXECUTE NOW
@@ -11,11 +11,9 @@ argument-hint: "N [--parallel] [--batch id] [--type process] [--dry-run] — N =
 **Target: $ARGUMENTS**
 
 Parse arguments:
-- N (required unless --dry-run): number of tasks to process
-- --parallel: concurrent claim workers (max 5) + cross-connect validation
+- N (required): number of tasks to process
 - --batch [id]: process only tasks from specific batch
 - --type [type]: process only tasks of a specific type (process, note, enrichment)
-- --dry-run: show what would execute without running
 - --handoff: output structured RALPH HANDOFF block at end (for pipeline chaining)
 
 ### Step 0: Read Vocabulary
@@ -113,36 +111,11 @@ Read `task.granularity` to determine which skill to invoke:
 - `"structure"` → spawn /structure worker
 - `"capture"` → spawn /capture worker
 
-## Step 3: If --dry-run, Report and Stop
-
-Show this and STOP (do not process):
-
-```
---=={ ralph dry-run }==--
-
-Queue: X total tasks (Y pending, Z done)
-
-Phase distribution:
-  Claims:       {create: N, reflect: N, reweave: N, verify: N}
-  Enrichments:  {enrich: N, reflect: N, reweave: N, verify: N}
-
-Next tasks to process:
-1. {id} — phase: {current_phase} — {target}
-2. {id} — phase: {current_phase} — {target}
-...
-
-Estimated: ~{N} subagent spawns
-```
-
----
-
-## Step 4: Process Loop (SERIAL MODE)
-
-**If `--parallel` is set, skip to Step 6 instead.**
+## Step 3: Process Loop
 
 Process up to N tasks (default 1). For each iteration:
 
-### 4a. Select Next Task
+### 3a. Select Next Task
 
 Pick the first pending task from the filtered list. Read its metadata: `id`, `type`, `file`, `target`, `batch`, `current_phase`, `completed_phases`.
 
@@ -155,7 +128,7 @@ Target: {target}
 File: {file}
 ```
 
-### 4b. Build Subagent Prompt
+### 3b. Build Subagent Prompt
 
 Construct a prompt based on `current_phase`. Every prompt MUST include:
 - Reference to the task file path (from queue's `file` field)
@@ -268,13 +241,13 @@ THEN read full {DOMAIN:note}.
 Final phase for this claim. ONE PHASE ONLY.
 ```
 
-### 4c. Spawn Subagent (MANDATORY — NEVER SKIP)
+### 3c. Spawn Subagent (MANDATORY — NEVER SKIP)
 
 Call the Agent tool with the constructed prompt:
 
 ```
 Agent(
-  prompt = {the constructed prompt from 4b},
+  prompt = {the constructed prompt from 3b},
   description = "{current_phase}: {short target}" (5 words max)
 )
 ```
@@ -283,7 +256,7 @@ Agent(
 
 Wait for the subagent to complete and capture its return value.
 
-### 4d. Evaluate Return
+### 3d. Evaluate Return
 
 When the subagent returns:
 
@@ -292,7 +265,7 @@ When the subagent returns:
 3. **If handoff missing:** Log a warning but continue — the work was still completed
 4. **Capture learnings:** If Learnings section has non-NONE entries, note them for the final report
 
-### 4e. Update Queue (Phase Progression)
+### 3e. Update Queue (Phase Progression)
 
 After evaluating the return, advance the task to the next phase.
 
@@ -312,7 +285,7 @@ Look up `phase_order` from the queue header to determine the next phase. Find `c
 
 **For process tasks ONLY:** Re-read the queue after marking done. The processing skill (/extract, /structure, or /capture) writes new task entries (1 entry per note/enrichment with `current_phase`/`completed_phases`) to the queue during execution. The lead must pick these up for subsequent iterations.
 
-### 4f. Report Progress
+### 3f. Report Progress
 
 ```
 === Task {id} complete ({i}/{N}) ===
@@ -322,15 +295,15 @@ Phase: {current_phase} -> {next_phase or "done"}
 If learnings were captured, show a brief summary.
 If more unblocked tasks exist, show the next one.
 
-### 4g. Re-filter Tasks
+### 3g. Re-filter Tasks
 
 Before the next iteration, re-read the queue and re-filter tasks. Phase advancement may have changed eligibility (e.g., after completing a `create` phase, the task is now at `reflect` — if filtering by `--type reflect`, it becomes eligible).
 
 ---
 
-## Step 5: Post-Batch Cross-Connect (Serial Mode)
+## Step 4: Post-Batch Cross-Connect
 
-After advancing a task to "done" (Step 4e), check if ALL tasks in that batch now have `status: "done"`. If yes and the batch has 2 or more completed claims:
+After advancing a task to "done" (Step 3e), check if ALL tasks in that batch now have `status: "done"`. If yes and the batch has 2 or more completed claims:
 
 1. **Collect all note paths** from completed batch tasks. For each claim task with `status: "done"`, read the task file's `## Create` section to find the created note path.
 
@@ -355,154 +328,7 @@ Check backward link gaps. Output RALPH HANDOFF block when done.",
 
 ---
 
-## Step 6: Parallel Mode (--parallel)
-
-**When `--parallel` flag is present, SKIP Step 4 entirely and use this section instead.**
-
-**Incompatible flags:** `--parallel` cannot be combined with `--type`. Parallel mode processes claims end-to-end (all phases). If `--type` is also set, report an error:
-```
-ERROR: --parallel and --type are incompatible. Parallel processes full note pipelines, not individual types.
-Use serial mode for per-type filtering: /ralph N --type note
-```
-
-### Parallel Architecture
-
-**Two-phase design:** Workers receive sibling claim info upfront so they can link proactively. Phase B validates and catches any gaps.
-
-```
-Ralph Lead (you) — orchestration only
-|
-+-- PHASE A: PARALLEL CLAIM PROCESSING (concurrent)
-|   +-- worker-001: all 4 phases for claim 001 (with sibling awareness)
-|   +-- worker-002: all 4 phases for claim 002 (with sibling awareness)
-|   +-- worker-003: all 4 phases for claim 003 (with sibling awareness)
-|   +-- ...up to 5 concurrent workers
-|
-+-- [semantic search index sync]
-|
-+-- PHASE B: CROSS-CONNECT VALIDATION (one subagent, one pass)
-|   +-- validates sibling links, adds any that workers missed
-|
-+-- CLEANUP + FINAL REPORT
-```
-
-**Why two phases?** Workers have sibling awareness (claim titles in spawn prompt) and link proactively during reflect/reweave. But timing means some sibling notes may not exist yet during a worker's reflect phase. Phase B runs a single cross-connect pass after all notes exist.
-
-### 6a. Identify Parallelizable Claims
-
-From the filtered queue, find pending claims. A claim is parallelizable when its `status == "pending"`. Cap at 5 concurrent workers (or N, whichever is smaller).
-
-Report:
-```
-=== Parallel Mode ===
-Parallelizable claims: {count}
-Max concurrent workers: {min(count, N, 5)}
-```
-
-### 6b. Spawn Claim Workers
-
-For each parallelizable claim (up to N requested, max 5 concurrent):
-
-Build the worker prompt with sibling awareness:
-
-```
-You are a claim worker processing claim "{TARGET}" from batch "{BATCH}".
-
-Claim ID: {CLAIM_ID}
-Task file: ops/queue/{FILE}
-Current phase: {CURRENT_PHASE}
-Completed phases: {COMPLETED_PHASES}
-
-SIBLING CLAIMS IN THIS BATCH (link to these where genuine connections exist):
-{for each other claim in the batch:}
-- "{SIBLING_TARGET}" (task file: ops/queue/{SIBLING_FILE})
-{end for}
-
-During REFLECT and REWEAVE, check if your claim genuinely connects to any sibling.
-If a sibling {DOMAIN:note} exists in {DOMAIN:notes}/, link to it inline where the
-connection is real. If it does not exist yet (still being created), skip —
-cross-connect will catch it after.
-
-Read the task file for full context. Execute phases from current_phase onwards.
-If completed_phases is not empty, skip those phases (resumption mode).
-
-When complete, update the queue entry to status "done" and report the created
-{DOMAIN:note} title, path, and claim ID. The lead needs this for cross-connect.
-```
-
-Spawn via Agent tool:
-```
-Agent(
-  prompt = {the constructed prompt},
-  description = "claim: {short target}" (5 words max)
-)
-```
-
-**Spawn workers in PARALLEL** — launch all Agent tool calls in a single message, not sequentially.
-
-### 6c. Monitor Workers (Phase A)
-
-Wait for worker completions. As workers complete:
-
-1. **Parse completion message** — extract the created note title and path (needed for Phase B)
-2. **Log any learnings** from the worker's report
-3. **Check for issues** — failures, skipped phases, resource conflicts
-
-**Collect all created notes** — maintain a list of `{note_title, note_path}` from worker completion messages. You need this for the cross-connect validation phase.
-
-**Completion gate:** Phase B CANNOT start until ALL spawned workers have reported back (either success or error). Track completions:
-
-```
-Workers spawned: {total_spawned}
-Workers completed: {completion_count}
-Workers with errors: {error_count}
-
-Phase B ready: {completion_count + error_count == total_spawned}
-```
-
-Do NOT proceed to Phase B while any worker is still running.
-
-### 6d. Cross-Connect Validation (Phase B)
-
-**Light validation pass.** Workers had sibling awareness during Phase A and linked proactively. This phase validates their work and catches gaps.
-
-**Skip if only 1 claim was processed** (no siblings to cross-connect).
-
-Spawn ONE subagent for cross-connect validation:
-
-```
-Agent(
-  prompt = "You are running post-batch cross-connect validation for batch '{BATCH}'.
-
-Notes created in this batch:
-{list of ALL newly created note titles with paths from Phase A}
-
-Verify sibling connections exist between these notes. Add any connections that
-workers missed because sibling notes did not exist yet when a worker's reflect ran.
-Check backward link gaps. Output RALPH HANDOFF block when done.",
-  description = "cross-connect: batch {BATCH}"
-)
-```
-
-Parse the handoff block, capture learnings.
-
-Report after Phase B:
-```
-=== Cross-Connect Validation Complete ===
-Sibling connections validated: {count}
-Missing connections added: {count}
-```
-
-### 6e. Cleanup
-
-After Phase B completes (or after Phase A if cross-connect was skipped):
-
-1. Clean any lock files if created
-2. Skip to Step 7 for the final report, noting parallel mode in the output
-
----
-
-## Step 7: Final Report
+## Step 5: Final Report
 
 After all iterations (or when no unblocked tasks remain):
 
@@ -590,7 +416,6 @@ After each phase, the task file's corresponding section (Create, Reflect, Reweav
 - Skip queue phase advancement (breaks pipeline state)
 - Process tasks that are not in pending status
 - Run if queue file does not exist or is malformed
-- In parallel mode: combine with --type (incompatible)
 
 **Always:**
 - Spawn a subagent via Agent tool for EVERY task (the lead ONLY orchestrates)
