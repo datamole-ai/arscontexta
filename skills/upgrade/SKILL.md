@@ -13,7 +13,7 @@ Read these files to configure domain-specific behavior:
 1. **`ops/derivation-manifest.md`** — vocabulary mapping, platform hints
    - Use `vocabulary.notes` for the notes folder name
    - Use `vocabulary.note` / `vocabulary.note_plural` for note type references
-   - Use `vocabulary.reduce` for the extraction verb
+   - Use `vocabulary.reduce` for the extraction verb (maps to the primary extraction command: /extract, /structure, or /capture)
    - Use `vocabulary.reflect` for the connection-finding verb
    - Use `vocabulary.reweave` for the backward-pass verb
    - Use `vocabulary.verify` for the verification verb
@@ -53,7 +53,7 @@ Generated skills and meta-skills follow fundamentally different upgrade mechanis
 
 | Category | Skills | Upgrade Mechanism |
 |----------|--------|-------------------|
-| **Generated skills** | /{vocabulary.reduce}, /{vocabulary.reflect}, /{vocabulary.reweave}, /{vocabulary.verify}, /ralph, /next, /remember, /{vocabulary.rethink}, /stats, /graph, /tasks, /refactor, /learn, /recommend, /ask | Runtime consultation with knowledge graph |
+| **Generated skills** | /extract, /structure, /capture, /{vocabulary.reflect}, /{vocabulary.reweave}, /{vocabulary.verify}, /ralph, /next, /remember, /{vocabulary.rethink}, /stats, /graph, /tasks, /refactor, /learn, /recommend, /ask | Runtime consultation with knowledge graph |
 | **Meta-skills** | /setup, /architect, /health, /reseed, /add-domain, /help, /tutorial, /upgrade | Plugin release cycle — update the plugin itself |
 
 /upgrade evaluates generated skills. It cannot evaluate itself or other meta-skills — that is the plugin maintainers' responsibility.
@@ -111,7 +111,7 @@ Engine: arscontexta-{version}
 Skills: {count} installed ({modified_count} user-modified)
 
   Skill               Version  Generated From    Modified
-  /{vocabulary.reduce}    1.0  arscontexta-v1.6  no
+  /extract                1.0  arscontexta-v1.6  no
   /{vocabulary.reflect}   1.0  arscontexta-v1.6  yes
   ...
 ```
@@ -144,7 +144,7 @@ For each skill being evaluated:
 1. **Read the current vault skill** — understand its complete approach, quality gates, edge case handling
 
 2. **Read relevant knowledge base documents:**
-   - Research claims about this skill's domain (e.g., for /{vocabulary.reduce}: claims about extraction methodology)
+   - Research claims about this skill's domain (e.g., for /extract: claims about extraction methodology)
    - Guidance docs about processing pipeline best practices
    - Reference docs about the skill's operational patterns
 
@@ -334,7 +334,7 @@ After applying all approved upgrades:
    # Should return nothing — all markers should be resolved
    ```
 
-4. **Pipeline compatibility** — if pipeline skills were upgraded (/{vocabulary.reduce}, /{vocabulary.reflect}, /{vocabulary.reweave}, /{vocabulary.verify}), verify handoff format compatibility with /ralph
+4. **Pipeline compatibility** — if pipeline skills were upgraded (/extract, /structure, /capture, /{vocabulary.reflect}, /{vocabulary.reweave}, /{vocabulary.verify}), verify handoff format compatibility with /ralph
 
 ---
 

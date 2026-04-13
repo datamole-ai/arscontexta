@@ -1,5 +1,6 @@
 ---
 description: One sentence adding context beyond the title (~150 chars)
+granularity: extract
 domain: subject area
 mastery: new | developing | solid | expert
 prerequisites: ["[[concept]]"]

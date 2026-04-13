@@ -17,16 +17,15 @@ Nine tests that verify the derivation engine produces coherent, functional syste
 
 | Dimension | Derived Value | Actual Vault Value | Match? |
 |-----------|--------------|-------------------|--------|
-| Granularity | atomic | atomic (one claim per note, prose-as-title) | YES |
 | Organization | flat | flat (everything in 01_thinking/, no subfolders) | YES |
 | Linking | explicit+implicit | explicit (wiki links) + implicit (qmd semantic search) | YES |
-| Processing | heavy | heavy (6 Rs: Record, Reduce, Recite, Reflect, Review, Rethink) | YES |
 | Nav depth | 3-tier | 3-tier (index → domain MOCs → topic MOCs → notes) evolving toward 4-tier (sub-MOCs like processing-workflow-throughput.md) | YES (with evolution) |
 | Maintenance | condition-based (tight) | continuous during processing + condition-triggered reweave | YES |
 | Schema | moderate | moderate (description + topics required; methodology, adapted_from, classification optional) | YES |
-| Automation | convention | convention trending to automation (hooks exist for validation, auto-commit, session start; skills encode methodology; but instructions remain primary) | YES (with evolution) |
 
-**Result: 8/8 match.** The derived configuration is a near-perfect prediction of what the vault evolved to organically. Two dimensions show evolution beyond the starting preset (nav depth approaching 4-tier, automation trending from convention toward full), which aligns with the seed-evolve-reseed lifecycle claim.
+**Natural pipeline fit:** /extract — research claims are atomic facts surfaced from source material; the extraction pipeline (6 Rs) maps directly to individual claim capture.
+
+**Result: 5/5 match.** The derived configuration is a near-perfect prediction of what the vault evolved to organically. One dimension shows evolution beyond the starting preset (nav depth approaching 4-tier), which aligns with the seed-evolve-reseed lifecycle claim.
 
 **Features correctly enabled:**
 - Kernel (all 15 primitives): YES — vault has all 15 (self space disabled by default for research, but primitive still passes as CONFIGURABLE)
@@ -59,18 +58,16 @@ Nine tests that verify the derivation engine produces coherent, functional syste
 
 | Dimension | Value | Rationale |
 |-----------|-------|-----------|
-| Granularity | moderate | Reflections are naturally compound — a trigger, reaction, and insight form one thought |
 | Organization | flat | Same benefit as research: reflections aren't categories, they're connected experiences |
 | Linking | explicit | Direct connections between reflections (no semantic search initially — volume is low) |
-| Processing | moderate | Pattern detection across reflections requires some processing, but not full extraction pipeline |
 | Nav depth | 2-tier | Hub → topic MOCs (moods, triggers, patterns, growth areas). Volume stays moderate. |
 | Maintenance | condition-based (tight) | Review triggered after each session capture. Therapy's value comes from revisiting, not accumulating. |
 | Schema | moderate | Mood, trigger, and pattern fields make reflections queryable. Not dense — just enough for retrieval. |
-| Automation | convention | Start with instructions. Add hooks when specific friction emerges. |
+
+**Natural pipeline fit:** /capture — reflections are compound journal entries captured whole; atomic extraction would fragment the emotional arc that gives therapy notes their meaning.
 
 **Interaction constraint check:**
-- Moderate granularity + moderate processing: coherent (processing matches granularity demand)
-- Moderate schema + convention automation: coherent (manageable without automated validation)
+- Moderate schema + convention: coherent (manageable without automated validation)
 - Explicit linking + no semantic search: coherent at low volume (<100 notes). WARN: add semantic search if collection grows.
 - 2-tier navigation + flat: coherent at moderate volume
 
@@ -122,7 +119,7 @@ _schema:
 
 **Kernel validation prediction:** 15/15 PASS (or 14 PASS + 1 WARN on semantic search if not configured)
 
-**Coherence assessment:** The configuration is internally consistent. Moderate granularity permits moderate processing without the atomic note's heavy processing demand. Tight condition-based maintenance enables pattern detection — the core therapy value. Schema fields use emotional vocabulary (mood, trigger, pattern), not research jargon. The system would feel natural to use for its purpose.
+**Coherence assessment:** The configuration is internally consistent. Tight condition-based maintenance enables pattern detection — the core therapy value. Schema fields use emotional vocabulary (mood, trigger, pattern), not research jargon. Note that the "moderate granularity" noted in signal extraction describes how the user naturally produces notes (compound reflections rather than atomic claims) — granularity is not a configured dimension; it is observed per-invocation. The system would feel natural to use for its purpose.
 
 ---
 
@@ -146,17 +143,15 @@ _schema:
 
 | Dimension | Value | Rationale (deviation from Research preset) |
 |-----------|-------|-------------------------------------------|
-| Granularity | moderate | Strategies are naturally compound — a matchup involves character, stage, openings, and punishes as one thought. Not atomic. |
 | Organization | flat | Same as research — strategies cross categories (a technique applies across matchups) |
 | Linking | explicit+implicit | Cross-matchup connections need semantic search (vocabulary varies: "frame trap" in one game = "mixup" in another) |
-| Processing | moderate | Analysis matters but not full extraction pipeline. Process after matches, not during. |
 | Nav depth | 3-tier | Hub → game/format → matchup/archetype → specific strategies. Gaming domains have natural sub-structure. |
 | Maintenance | condition-based (tight) | Meta shifts require responsive maintenance. Lax thresholds are too slow for competitive contexts. |
 | Schema | moderate | Character, matchup, meta_state, confidence fields. Dense enough for querying, not overwhelming. |
-| Automation | convention | Start with instructions. Automate match logging when friction emerges. |
+
+**Natural pipeline fit:** /structure — matchup strategies require analysis and organization across multiple facets (character, stage, openings, punishes); /structure's synthesis step surfaces patterns across accumulated notes rather than extracting from a single source.
 
 **Interaction constraint check:**
-- Moderate granularity + moderate processing: coherent
 - 3-tier navigation + moderate volume: coherent (gaming domains generate lots of matchup-specific notes)
 - Tight condition thresholds + temporal dynamics: coherent (meta shifts frequently in competitive games, tight thresholds catch staleness quickly)
 - Explicit+implicit linking + semantic search required: need to configure qmd or equivalent. WARN if not set up.
@@ -221,14 +216,13 @@ _schema:
 
 | Dimension | Research | Relationships | Shared? |
 |-----------|----------|---------------|---------|
-| Granularity | atomic | moderate | separate |
 | Organization | flat | flat | SHARED (same flat principle) |
 | Linking | explicit+implicit | explicit | separate densities |
-| Processing | heavy | light | separate pipelines |
 | Nav depth | 3-tier | 2-tier | separate hierarchies |
 | Maintenance | condition-based (tight) | condition-based (lax) | separate thresholds |
 | Schema | moderate | moderate | separate templates, shared base fields |
-| Automation | convention | convention | SHARED |
+
+**Natural pipeline fit:** /extract for research notes (atomic claims from source material); /capture for relationship notes (observations captured whole, connected manually).
 
 **Composition mechanism:**
 - Separate templates: `thinking-note.md` (research claims) and `person-note.md` (relationship observations)
@@ -248,7 +242,7 @@ _schema:
 
 **This is exactly what our vault does.** The vault already composes Research (01_thinking/) with People (03_twitter/people/). Research claims link to people who inspired them. People MOCs link to research topics they engage with. The composition works because:
 1. Templates differ (thinking-note vs person-moc)
-2. Processing differs (full pipeline vs light capture)
+2. Pipeline fit differs (/extract for research claims, /capture for relationship observations)
 3. The shared graph (wiki links) handles cross-domain naturally
 4. Hub MOC (index.md) provides unified entry point
 
@@ -276,14 +270,13 @@ _schema:
 
 | Dimension | Value | Rationale |
 |-----------|-------|-----------|
-| Granularity | compound | Journal entries are naturally multi-faceted — a day has multiple reflections |
 | Organization | flat | Few enough notes that flat works without friction |
 | Linking | explicit | Wiki links only — no semantic search infrastructure available |
-| Processing | light | Manual review, no pipeline automation |
 | Nav depth | 2-tier | Hub → topic areas. Low volume needs minimal hierarchy |
-| Maintenance | condition-based (lax) | Light processing generates few maintenance targets — lax thresholds match low volume |
+| Maintenance | condition-based (lax) | Low volume generates few maintenance targets — lax thresholds match the pace |
 | Schema | minimal | `description` and `topics` only — no automated validation to catch richer fields |
-| Automation | convention | Everything lives in context file instructions — the only tool available |
+
+**Natural pipeline fit:** /capture — journal entries are multi-faceted whole-day reflections; compound capture is the natural fit for this use case.
 
 **Kernel primitive mapping at convention-only (minimal) implementations:**
 
@@ -331,11 +324,8 @@ _schema:
 **Question:** When given an intentionally incoherent configuration, does the constraint system detect violations and guide toward a valid configuration?
 
 **Input:**
-- Granularity: coarse (long, multi-topic documents)
 - Schema: dense (many required fields, rich enums, strict validation)
 - Navigation: 4-tier (hub → domain → topic → sub-topic → notes)
-- Processing: light (minimal processing, no pipeline)
-- Automation: manual (convention only, no hooks or skills)
 - Organization: flat
 - Linking: explicit only
 - Maintenance: condition-based (very lax)
@@ -344,10 +334,9 @@ _schema:
 
 | # | Violated Rule | Type | Explanation |
 |---|--------------|------|-------------|
-| 1 | `coarse + processing == "heavy"` (inverse: coarse + light is coherent, but coarse + dense schema without processing to populate fields is not) | WARN | Dense schema on coarse notes creates fields that never get filled — who populates 8 required fields on a multi-page document without a processing pipeline? |
-| 2 | `schema == "dense" + automation == "convention"` | WARN | Dense schemas without automated validation create unsustainable maintenance burden — the agent must manually check every field on every save |
-| 3 | `coarse + navigation == "4-tier"` | WARN | Coarse granularity produces few notes (large documents = fewer files). 4-tier navigation for <50 notes is over-engineering — three layers of MOCs pointing to 30 documents |
-| 4 | `processing == "light" + maintenance thresholds very lax` | WARN (compounding) | Light processing generates few connections, and very lax maintenance thresholds mean those few connections are rarely reviewed — the system stagnates |
+| 1 | `schema == "dense" + no validation hooks` | WARN | Dense schemas without automated validation create unsustainable maintenance burden — required fields go unchecked, populating correctly requires discipline the system does not enforce |
+| 2 | `navigation == "4-tier" + organization == "flat" + likely low volume` | WARN | Flat organization implies modest note volume. 4-tier navigation for a small collection is over-engineering — three layers of MOCs pointing to a handful of notes adds overhead without navigation benefit |
+| 3 | `maintenance == "very lax"` (compounding) | WARN | Very lax maintenance thresholds mean connections are rarely reviewed and the system drifts toward stagnation. Compounds with dense schema: fields grow stale without regular triage |
 
 **Constraint system response:**
 
@@ -355,29 +344,25 @@ The constraint system is productive, not just prohibitive. For each violation, i
 
 | Violation | Recommendation | Rationale |
 |-----------|---------------|-----------|
-| Dense schema + no automation | Reduce schema to moderate OR add validation scripts | Dense schema without validation means required fields will be missing on 30%+ of notes within 2 months |
-| Dense schema + coarse granularity | Reduce schema to moderate — coarse notes are self-contained, dense metadata adds overhead without proportional query value | The fields exist but nobody queries them because the note body already contains everything |
-| 4-tier navigation + coarse granularity | Reduce to 2-tier — hub → topic areas. Coarse granularity means fewer notes, fewer notes means simpler navigation suffices | A 4-tier hierarchy for 40 documents means each MOC has 3-5 links — not enough to justify the navigation overhead |
-| Light processing + lax maintenance conditions | Tighten condition thresholds OR increase processing to moderate — one must compensate for the other | Without either regular processing or active maintenance conditions, the system becomes a graveyard of disconnected documents |
+| Dense schema + no validation hooks | Reduce schema to moderate OR add validation scripts | Dense schema without automated validation means required fields will be missing on 30%+ of notes within 2 months |
+| 4-tier navigation + flat organization + low volume | Reduce to 2-tier — hub → topic areas. Flat organization with modest volume means fewer notes, fewer notes means simpler navigation suffices | A 4-tier hierarchy for 40 documents means each MOC has 3-5 links — not enough to justify the navigation overhead |
+| Very lax maintenance thresholds | Tighten condition thresholds to at least lax — very lax leaves the system stagnant | Without active maintenance conditions, disconnected notes accumulate and schema fields go stale |
 
 **Corrected configuration after applying recommendations:**
 
 | Dimension | Original | Corrected | Change Reason |
 |-----------|----------|-----------|---------------|
-| Granularity | coarse | coarse | No change — valid as starting point |
-| Schema | dense | moderate | Reduced to match automation and granularity |
+| Schema | dense | moderate | Reduced to match available validation and expected volume |
 | Navigation | 4-tier | 2-tier | Reduced to match expected note volume |
-| Processing | light | light | No change — user preference respected |
-| Automation | manual | convention | No change — user preference respected |
-| Maintenance | condition-based (very lax) | condition-based (lax) | Thresholds tightened to compensate for light processing |
-| Organization | flat | flat | No change — coherent with coarse granularity |
-| Linking | explicit | explicit | No change — coherent with low volume |
+| Organization | flat | flat | No change — coherent |
+| Linking | explicit only | explicit only | No change — coherent with low volume |
+| Maintenance | condition-based (very lax) | condition-based (lax) | Thresholds tightened to prevent stagnation |
 
 **Post-correction constraint check:** Zero violations. The corrected configuration is internally consistent.
 
 **Kernel validation prediction:** 15/15 (corrected configuration satisfies all primitives)
 
-**Coherence assessment:** The constraint system serves as a design advisor, not a gatekeeper. It detected four issues in the input configuration, explained why each was problematic, recommended specific corrections, and produced a valid configuration. The key insight is that the constraint system is productive — it does not simply reject bad configurations but guides users toward coherent ones. This is essential for the conversational derivation flow, where users may express preferences that are individually reasonable but collectively incoherent. The system respects user preferences when possible (coarse granularity, light processing, and convention automation all survived) while adjusting dimensions that were in tension with the rest (dense schema downgraded, 4-tier navigation reduced, very lax maintenance thresholds tightened). The corrections are minimal — changing only what is necessary to achieve coherence.
+**Coherence assessment:** The constraint system serves as a design advisor, not a gatekeeper. It detected three issues in the input configuration, explained why each was problematic, recommended specific corrections, and produced a valid configuration. The key insight is that the constraint system is productive — it does not simply reject bad configurations but guides users toward coherent ones. This is essential for the conversational derivation flow, where users may express preferences that are individually reasonable but collectively incoherent. The system respects user preferences when possible (flat organization and explicit linking survived unchanged) while adjusting dimensions that were in tension with the rest (dense schema downgraded, 4-tier navigation reduced, very lax maintenance thresholds tightened). The corrections are minimal — changing only what is necessary to achieve coherence.
 
 ---
 
@@ -620,12 +605,12 @@ Observe (create observation/tension)
 
 | Test | Configuration Match | Kernel Passes | Vocabulary Correct | Coherence |
 |------|--------------------|--------------|--------------------|-----------|
-| Self-derivation (Research) | 8/8 dimensions | 15/15 | N/A (is the source) | Full |
+| Self-derivation (Research) | 5/5 dimensions | 15/15 | N/A (is the source) | Full |
 | Cross-domain (Therapy) | Internally consistent | 14-15/15 | Research jargon eliminated | Full |
 | Novel domain (Gaming) | Principled deviation from reference | 15/15 | Domain-native vocabulary | Full |
 | Multi-domain (Research + Relationships) | Per-domain configs composed | 15/15 | Per-domain vocabularies | Full |
 | Minimal platform (Convention-only) | All primitives at convention level | 15/15 | Domain-native (journal) | Full |
-| Constraint violation recovery | 4 violations detected, corrected | 15/15 (post-correction) | N/A (structural test) | Full (after correction) |
+| Constraint violation recovery | 3 violations detected, corrected | 15/15 (post-correction) | N/A (structural test) | Full (after correction) |
 | Vocabulary transformation fidelity | Zero leaked terms | 15/15 | Exhaustive verification | Full |
 | Progressive configuration | Full automation works at all scales | 15/15 (all growth stages) | N/A (infrastructure test) | Full |
 | Operational learning loop | Full cycle validated | 15/15 | N/A (primitive-specific test) | Full |
@@ -646,4 +631,4 @@ Observe (create observation/tension)
 
 7. **Feature disabling is safe and reversible.** The progressive configuration test (Test 8) confirms that disabling optional features does not break the system. Each optional feature has a fallback path. INVARIANT primitives cannot be disabled, ensuring the structural foundation is always present. The system ships complete and users opt down — the reverse of the former tier-based approach.
 
-**Derivation engine confidence: HIGH.** The 15 kernel primitives provide a universal base. The 8 configuration dimensions parameterize the variation space. Interaction constraints prevent incoherent combinations. The 3 presets (Research, Personal Assistant, Experimental) provide pre-validated starting points. The system derives working configurations for research, therapy, competitive gaming, multi-domain composition, minimal platforms, constraint recovery, vocabulary-verified domains, progressive configuration, and self-improving operational loops.
+**Derivation engine confidence: HIGH.** The 15 kernel primitives provide a universal base. The 5 configuration dimensions parameterize the variation space. Interaction constraints prevent incoherent combinations. The 3 presets (Research, Personal Assistant, Experimental) provide pre-validated starting points. The system derives working configurations for research, therapy, competitive gaming, multi-domain composition, minimal platforms, constraint recovery, vocabulary-verified domains, progressive configuration, and self-improving operational loops.

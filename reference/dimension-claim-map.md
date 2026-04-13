@@ -4,19 +4,7 @@ Which research claims inform which configuration dimensions. The derivation engi
 
 ---
 
-## Dimension 1: Granularity (atomic ↔ coarse)
-
-| Claim | What It Says | Informs |
-|-------|-------------|---------|
-| enforcing atomicity can create paralysis when ideas resist decomposition | Atomic pole has real cost — some ideas need compound expression | When to soften atomicity |
-| three capture schools converge through agent-mediated synthesis | Agent processing dissolves capture granularity tradeoffs | Default recommendation |
-| summary coherence tests composability before filing | If can't summarize in 1-3 sentences, it bundles claims | Split signal |
-
-**Default position:** Atomic (composability maximizes reuse). Soften for reference-heavy domains.
-
----
-
-## Dimension 2: Organization (flat ↔ hierarchical)
+## Dimension 1: Organization (flat ↔ hierarchical)
 
 | Claim | What It Says | Informs |
 |-------|-------------|---------|
@@ -29,7 +17,7 @@ Which research claims inform which configuration dimensions. The derivation engi
 
 ---
 
-## Dimension 3: Linking Philosophy (explicit-only ↔ explicit+implicit)
+## Dimension 2: Linking Philosophy (explicit-only ↔ explicit+implicit)
 
 | Claim | What It Says | Informs |
 |-------|-------------|---------|
@@ -43,22 +31,7 @@ Which research claims inform which configuration dimensions. The derivation engi
 
 ---
 
-## Dimension 4: Processing Intensity (heavy ↔ light)
-
-| Claim | What It Says | Informs |
-|-------|-------------|---------|
-| fresh context per task preserves quality better than chaining phases | Session isolation keeps phases in smart zone | Phase architecture |
-| throughput matters more than accumulation | Processing velocity, not note count | Health metric |
-| processing effort should follow retrieval demand | JIT processing over front-loading | When to invest |
-| every knowledge domain shares a four-phase processing skeleton | Capture, process, connect, verify — only process step varies | Pipeline structure |
-| structure without processing provides no value | Structural motions without generation produce nothing | Minimum processing |
-| the generation effect requires active transformation not just storage | Moving files is not processing | Quality gate |
-
-**Default position:** Medium (4-phase skeleton). Heavy for research/synthesis. Light for capture-heavy domains.
-
----
-
-## Dimension 5: Navigation Depth (2-tier ↔ 4-tier)
+## Dimension 3: Navigation Depth (2-tier ↔ 4-tier)
 
 | Claim | What It Says | Informs |
 |-------|-------------|---------|
@@ -71,7 +44,7 @@ Which research claims inform which configuration dimensions. The derivation engi
 
 ---
 
-## Dimension 6: Maintenance Sensitivity (tight thresholds ↔ lax thresholds)
+## Dimension 4: Maintenance Sensitivity (tight thresholds ↔ lax thresholds)
 
 | Claim | What It Says | Informs |
 |-------|-------------|---------|
@@ -86,7 +59,7 @@ Which research claims inform which configuration dimensions. The derivation engi
 
 ---
 
-## Dimension 7: Schema Density (minimal ↔ dense)
+## Dimension 5: Schema Density (minimal ↔ dense)
 
 | Claim | What It Says | Informs |
 |-------|-------------|---------|
@@ -100,30 +73,10 @@ Which research claims inform which configuration dimensions. The derivation engi
 
 ---
 
-## Dimension 8: Automation Level (full ↔ manual)
-
-| Claim | What It Says | Informs |
-|-------|-------------|---------|
-| hook enforcement guarantees quality while instruction enforcement merely suggests it | Convention-to-automation is the sharpest capability gap | When to automate |
-| skills encode methodology so manual execution bypasses quality gates | Skills contain selectivity gates that instructions don't | Automation value |
-| four abstraction layers separate platform-agnostic from platform-dependent | Foundation, convention, automation, orchestration | Layer mapping |
-| the determinism boundary separates hook methodology from skill methodology | Deterministic ops → hooks. Judgment ops → skills. | Automation design |
-| methodology development should follow documentation to skill to hook | Hardening trajectory: understand → encode → enforce | Maturity path |
-| complex systems evolve from simple working systems | Gall's Law: start simple, automate at friction points | Evolution constraint |
-
-**Default position:** Convention (context file instructions). Add automation at friction points.
-
----
-
 ## Cross-Dimension Interactions
 
 | Interaction | Claim | Effect |
 |-------------|-------|--------|
-| Granularity → Linking | configuration dimensions interact | Atomic granularity forces explicit linking |
-| Granularity → Navigation | configuration dimensions interact | Atomic + flat requires deep MOC hierarchy |
-| Granularity → Processing | configuration dimensions interact | Atomic notes need heavy processing to recreate lost context |
-| Automation → Schema | configuration dimensions interact | Full automation enables dense schemas (validation catches errors) |
-| Automation → Processing | configuration dimensions interact | Manual operation pressures toward light processing |
 | Volume → Navigation | small-world topology requires hubs | Large vaults need deeper navigation |
 | Volume → Maintenance | random note resurfacing prevents write-only memory | Large vaults need more frequent maintenance |
 

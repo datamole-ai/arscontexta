@@ -3,7 +3,7 @@ name: seed
 description: Add a source file to the processing queue. Checks for duplicates, creates archive folder, moves source from inbox, creates extract task, and updates queue. Triggers on "/seed", "/seed [file]", "queue this for processing".
 version: "1.0"
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
-argument-hint: "[file] — path to source file to seed for processing"
+argument-hint: "[file] [--extract] [--structure] [--capture] — path to source file to seed for processing"
 ---
 
 ## EXECUTE NOW
@@ -11,6 +11,12 @@ argument-hint: "[file] — path to source file to seed for processing"
 **Target: $ARGUMENTS**
 
 The target MUST be a file path. If no target provided, list {DOMAIN:inbox}/ contents and ask which to seed.
+
+**Granularity flag (optional):**
+- `--extract`: set granularity to extract
+- `--structure`: set granularity to structure (default if no flag given)
+- `--capture`: set granularity to capture
+- If no flag and invoked standalone (not via /pipeline): ask user which granularity to use
 
 ### Step 0: Read Vocabulary
 
@@ -34,7 +40,7 @@ Checked: {locations checked}
 
 Read the file to understand:
 - **Content type**: what kind of material is this? (research article, documentation, transcript, etc.)
-- **Size**: line count (affects chunking decisions in /reduce)
+- **Size**: line count (affects chunking decisions in /extract, /structure, /capture)
 - **Format**: markdown, plain text, structured data
 
 ## Step 2: Duplicate Detection
@@ -143,7 +149,8 @@ Write the task file to `ops/queue/${SOURCE_BASENAME}.md`:
 ```markdown
 ---
 id: {SOURCE_BASENAME}
-type: extract
+type: process
+granularity: {GRANULARITY_FLAG}
 source: {FINAL_SOURCE}
 original_path: {original file path before move}
 archive_folder: {ARCHIVE_DIR}
@@ -169,10 +176,10 @@ Content type: {detected type}
 - Each output type gets appropriate handling
 
 ## Execution Notes
-(filled by /reduce)
+(filled by processing skill)
 
 ## Outputs
-(filled by /reduce)
+(filled by processing skill)
 ```
 
 ## Step 7: Update Queue
@@ -182,7 +189,8 @@ Add the extract task entry to the queue file.
 **For YAML queues (ops/queue.yaml):**
 ```yaml
 - id: {SOURCE_BASENAME}
-  type: extract
+  type: process
+  granularity: "{GRANULARITY_FLAG}"
   status: pending
   source: "{FINAL_SOURCE}"
   file: "{SOURCE_BASENAME}.md"
@@ -194,7 +202,8 @@ Add the extract task entry to the queue file.
 ```json
 {
   "id": "{SOURCE_BASENAME}",
-  "type": "extract",
+  "type": "process",
+  "granularity": "{GRANULARITY_FLAG}",
   "status": "pending",
   "source": "{FINAL_SOURCE}",
   "file": "{SOURCE_BASENAME}.md",
@@ -219,10 +228,10 @@ Content type: {detected type}
 Task file: ops/queue/{SOURCE_BASENAME}.md
 Claims will start at: {NEXT_CLAIM_START}
 Claim files will be: {SOURCE_BASENAME}-{NNN}.md (unique across vault)
-Queue: updated with extract task
+Queue: updated with process task (granularity: {GRANULARITY_FLAG})
 
 Next steps:
-  /ralph 1 --batch {SOURCE_BASENAME}     (extract claims)
+  /ralph 1 --batch {SOURCE_BASENAME} --extract/structure/capture  (extract claims)
   /pipeline will handle this automatically
 ```
 
@@ -275,7 +284,7 @@ When /archive-batch runs later, it moves task files into the existing archive fo
 
 **No queue file:** Create `ops/queue/queue.yaml` (or `.json`) with schema header and this first entry.
 
-**Large source (2500+ lines):** Note in output: "Large source ({N} lines) -- /reduce will chunk automatically."
+**Large source (2500+ lines):** Note in output: "Large source ({N} lines) -- processing skill will chunk automatically."
 
 **Source is a URL or non-file:** Report error: "/seed requires a file path."
 

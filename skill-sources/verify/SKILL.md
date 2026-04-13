@@ -32,6 +32,14 @@ If these files don't exist, use universal defaults.
 | standard | Balanced: cold-read prediction, schema check, link verification, MOC coverage |
 | quick | Basic: schema check, link verification only. Skip cold-read prediction and health analysis |
 
+## Granularity-Aware Verification
+
+After reading the target {vocabulary.note}, check its `granularity` frontmatter field:
+
+- **`extract`**: Full verification — composability test (standalone sense, specificity, clean linking), description cold-read test, schema compliance, link health (no broken links, in at least one {vocabulary.topic_map}).
+- **`structure`**: Scope coherence test (do all sections belong together?), section development test (does each section develop its sub-claim, not just state it?), description cold-read test, schema compliance, link health. Skip single-claim composability test.
+- **`capture`**: Description cold-read test, schema compliance, link health. Skip composability test and scope coherence test. Add: verbatim integrity check — fenced block present and non-empty, no wikilinks or edits inside the fenced block, all connections in footer sections only.
+
 ## EXECUTE NOW
 
 **Target: $ARGUMENTS**

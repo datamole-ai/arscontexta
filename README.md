@@ -118,7 +118,9 @@ or `decisions/`), but the separation is invariant.
 
 | Command | What It Does |
 |---------|-------------|
-| `/reduce` | Extract insights from sources |
+| `/extract` | Extract atomic insights from sources |
+| `/structure` | Extract grouped insights preserving shared context |
+| `/capture` | Quick-capture a thought directly into your graph |
 | `/reflect` | Find connections, update MOCs |
 | `/reweave` | Update older notes with new connections |
 | `/verify` | Combined quality check: description + schema + health |
@@ -145,7 +147,7 @@ meta-cognitive layer:
 | Phase | What Happens | Command |
 |-------|-------------|---------|
 | **Record** | Zero-friction capture into inbox/ | Manual |
-| **Reduce** | Extract insights with domain-native categories | `/reduce` |
+| **Reduce** | Extract insights with domain-native categories | `/extract`, `/structure`, `/capture` |
 | **Reflect** | Find connections, update MOCs | `/reflect` |
 | **Reweave** | Update older notes with new context | `/reweave` |
 | **Verify** | Description + schema + health checks | `/verify` |

@@ -1,6 +1,5 @@
 vocabulary:
   note: reflection
-  reduce: surface
   reflect: find patterns
   verify: check resonance
   reweave: revisit
@@ -26,7 +25,6 @@ templates:
   moc: life-area.md
 
 skills:
-  reduce: /surface
   reflect: /find-patterns
   verify: /check-resonance
   reweave: /revisit

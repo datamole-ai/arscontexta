@@ -47,7 +47,7 @@ pipeline:
 
 **From derivation-manifest.md** (universal defaults if missing):
 - Inbox folder: `inbox/` (could be `journal/`, `encounters/`, etc.)
-- Reduce skill name: `/reduce` (could be `/surface`, `/break-down`, etc.)
+- Processing skill names: `/extract`, `/structure`, `/capture`
 - Domain name and hub MOC name
 
 ---

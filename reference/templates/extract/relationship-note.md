@@ -1,5 +1,6 @@
 ---
 description: One sentence adding context beyond the title (~150 chars)
+granularity: extract
 person: Name
 category: preference | pattern | important-date | interaction | care-task
 last_confirmed: YYYY-MM-DD

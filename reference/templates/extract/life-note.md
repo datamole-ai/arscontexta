@@ -1,5 +1,6 @@
 ---
 description: One sentence adding context beyond the title (~150 chars)
+granularity: extract
 area: health | finance | home | social | career
 priority: low | medium | high | urgent
 deadline: YYYY-MM-DD

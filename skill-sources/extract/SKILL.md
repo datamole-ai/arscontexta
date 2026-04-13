@@ -1,6 +1,6 @@
 ---
-name: reduce
-description: Extract structured knowledge from source material. Comprehensive extraction is the default — every insight that serves the domain gets extracted. For domain-relevant sources, skip rate must be below 10%. Zero extraction from a domain-relevant source is a BUG. Triggers on "/reduce", "/reduce [file]", "extract insights", "mine this", "process this".
+name: extract
+description: Extract atomic claims from source material — one claim per file. Comprehensive extraction is the default — every insight that serves the domain gets extracted. For domain-relevant sources, skip rate must be below 10%. Zero extraction from a domain-relevant source is a BUG. Triggers on "/extract", "/extract [file]", "extract insights", "mine this".
 version: "1.0"
 allowed-tools: Read, Write, Grep, Glob, mcp__qmd__query
 ---
@@ -134,7 +134,7 @@ The handoff Learnings section summarizes what you ALREADY logged during processi
 
 ---
 
-# Reduce
+# Extract
 
 Extract composable {vocabulary.note_plural} from source material into {vocabulary.notes}/.
 
@@ -468,6 +468,7 @@ Bad: "context management strategies" (topic label, not a claim)
 ```markdown
 ---
 description: [~150 chars elaborating the claim, adds info beyond title]
+granularity: extract
 type: [claim | methodology | problem | learning | tension]
 created: YYYY-MM-DD
 [domain-specific fields from derivation-manifest]
@@ -505,6 +506,67 @@ Topics:
 **d. Create the file**
 
 Write to: `{vocabulary.notes}/[title].md`
+
+---
+
+## Atomic Note Quality
+
+### The Prose-as-Title Pattern
+
+Title your notes as complete thoughts that work in sentences. The title IS the concept.
+
+Good titles (specific claims that work as prose when linked):
+- "Mom prefers phone calls on Sunday mornings"
+- "The anxiety usually starts when I skip morning routine"
+- "Spaced repetition works better when I study after exercise"
+
+Bad titles (topic labels, not claims):
+- "Morning routine" (what about it?)
+- "Anxiety" (too vague to link meaningfully)
+
+**The claim test:** Can you complete this sentence?
+> This note argues that [title]
+
+If the title works in that frame, it is a claim. If it does not, it is probably a topic label.
+
+### The Composability Test
+
+Three checks before saving any note:
+
+1. **Standalone sense** — Does the note make sense without reading three other notes first?
+2. **Specificity** — Could someone disagree with this? If not, it is too vague.
+3. **Clean linking** — Would linking to this note drag unrelated content along?
+
+If any check fails, the note needs work before saving.
+
+### When to Split
+
+Split a note when:
+- It makes multiple distinct claims. Each claim becomes its own file.
+- Linking to one part would drag unrelated content from another part.
+- The title is too vague because the note tries to cover too much ground.
+
+The split test: if you find yourself wanting to link to "the second paragraph of [[note]]" rather than to the whole note, it needs splitting.
+
+### Title Rules
+
+- Lowercase with spaces
+- No punctuation that breaks filesystems: . * ? + [ ] ( ) { } | \ ^
+- Use proper grammar
+- Express the concept fully — there is no character limit
+- Each title must be unique across the entire workspace
+
+### Inline Link Patterns
+
+Good patterns:
+- "Since [[Mom prefers phone calls on Sunday mornings]], I should call her this weekend"
+- "The insight is that [[spaced repetition works better when I study after exercise]]"
+
+Bad patterns:
+- "See [[Mom prefers phone calls on Sunday mornings]] for more"
+- "As discussed in [[spaced repetition works better when I study after exercise]]"
+
+If you catch yourself writing "this relates to" or "see also," restructure the sentence so the claim itself does the work.
 
 ---
 
@@ -803,7 +865,7 @@ When the source file contains provenance metadata (source_type, research_prompt,
 
 - Each created {vocabulary.note}'s Source footer links to the source file
 - The source file's YAML contains the research prompt
-- The chain: research query -> inbox file -> /{vocabulary.reduce} -> {vocabulary.notes}
+- The chain: research query -> inbox file -> /extract -> {vocabulary.notes}
 
 If source has `source_type` in frontmatter, this is research-generated content — handle with extra care for attribution.
 
@@ -912,7 +974,7 @@ semantic_neighbor: "[related note title]" | null
 
 Source: [[source filename]] (lines NNN-NNN)
 
-## Reduce Notes
+## Extract Notes
 
 Extracted from [source_task]. This is a [CLOSED/OPEN] claim.
 
@@ -962,7 +1024,7 @@ source_lines: "NNN-NNN"
 
 Source: [[source filename]] (lines NNN-NNN)
 
-## Reduce Notes
+## Extract Notes
 
 Enrichment for [[existing note title]]. Source adds [what it adds].
 
@@ -993,7 +1055,8 @@ After creating task files, update `ops/queue/queue.json`:
 ```json
 {
   "id": "claim-NNN",
-  "type": "claim",
+  "type": "note",
+  "granularity": "extract",
   "status": "pending",
   "target": "[claim title]",
   "classification": "closed|open",
@@ -1024,7 +1087,7 @@ After creating task files, update `ops/queue/queue.json`:
 
 **Critical queue rules:**
 - ONE entry per claim (NOT one per phase) — phase progression is tracked via `current_phase` and `completed_phases`
-- `type` is `"claim"` or `"enrichment"` — these are the task's single queue entries
+- `type` is `"note"` with `"granularity": "extract"` for claims, `"enrichment"` for enrichments — these are the task's single queue entries
 - Every task MUST have `"file"` pointing to its uniquely-named task file
 - Every task MUST have `"batch"` identifying which source batch it belongs to
 - Task IDs use `claim-NNN` or `enrich-EEE` format with the global claim number
@@ -1045,7 +1108,7 @@ After creating task files, update `ops/queue/queue.json`:
 After creating files and updating queue, output:
 
 ```
-=== RALPH HANDOFF: reduce ===
+=== RALPH HANDOFF: extract ===
 Target: [source file]
 
 Work Done:
@@ -1073,7 +1136,7 @@ Queue Updates:
 === END HANDOFF ===
 ```
 
-**Critical:** The handoff mode adds queue management ON TOP of the standard reduce workflow. Do the full extraction workflow first, then create task files, update queue, and output handoff.
+**Critical:** The handoff mode adds queue management ON TOP of the standard extract workflow. Do the full extraction workflow first, then create task files, update queue, and output handoff.
 
 ### Queue Update (Interactive Execution)
 
@@ -1099,7 +1162,7 @@ When processing content, route to the correct skill:
 
 | Task Type | Required Skill | Why |
 |-----------|---------------|-----|
-| New content to process | /{vocabulary.reduce} | Extraction requires quality gates |
+| New content to process | /extract | Extraction requires quality gates |
 | {vocabulary.note} just created | /{vocabulary.cmd_reflect} | New {vocabulary.note_plural} need connections |
 | After connecting | /{vocabulary.cmd_reweave} | Old {vocabulary.note_plural} need updating |
 | Quality check | /{vocabulary.cmd_verify} | Combined verification gate |

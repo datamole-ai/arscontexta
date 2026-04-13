@@ -2,17 +2,14 @@ name: research
 display_name: "Knowledge Research"
 description: "Full automation from day one, all pipeline skills at full depth, all blocks active. The reference implementation."
 dimensions:
-  atomicity: 0.8
   organization: 0.3
   linking: 0.7
-  processing: 0.8
   session: 0.7
   maintenance: 0.6
   search: 0.8
-  automation: 0.8
 blocks:
   always:
-    - atomic-notes
+    - note-granularity
     - wiki-links
     - mocs
     - processing-pipeline

@@ -27,6 +27,14 @@ If these files don't exist, use universal defaults.
 | standard | Full validation — all checks enabled |
 | quick | Basic schema validation only — required fields, YAML validity, enum values |
 
+## Template Selection by Granularity
+
+Read the target {vocabulary.note}'s `granularity` field to select the correct template for schema validation:
+- `extract` → read schema from `ops/templates/extract/`
+- `structure` → read schema from `ops/templates/structure/`
+- `capture` → read schema from `ops/templates/capture/`
+- If `granularity` field is missing → fall back to `ops/templates/extract/` (backward compatibility)
+
 ## EXECUTE NOW
 
 **Target: $ARGUMENTS**

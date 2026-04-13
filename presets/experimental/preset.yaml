@@ -2,16 +2,14 @@ name: experimental
 display_name: "Experimental / Build Your Own"
 description: "In-depth onboarding with thinking notes surfaced for every design decision. The user co-designs the system."
 dimensions:
-  atomicity: null  # user-chosen
   organization: null
   linking: null
-  processing: null
   session: null
   maintenance: null
   search: null
-  automation: null
 blocks:
   always:
+    - note-granularity
     - wiki-links
     - processing-pipeline
     - schema
@@ -23,7 +21,6 @@ blocks:
     - helper-functions
     - graph-analysis
   conditional:
-    - atomic-notes
     - mocs
     - semantic-search
     - personality

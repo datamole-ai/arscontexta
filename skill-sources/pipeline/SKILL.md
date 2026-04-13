@@ -1,9 +1,9 @@
 ---
 name: pipeline
-description: End-to-end source processing -- seed, reduce, process all claims through reflect/reweave/verify, archive. The full pipeline in one command. Triggers on "/pipeline", "/pipeline [file]", "process this end to end", "full pipeline".
+description: End-to-end source processing -- seed, extract/structure/capture, process all notes through reflect/reweave/verify, archive. The full pipeline in one command. Triggers on "/pipeline", "/pipeline [file]", "process this end to end", "full pipeline".
 version: "1.0"
-allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Task
-argument-hint: "[file] — path to source file to process end-to-end"
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Agent
+argument-hint: "[file] [--extract] [--structure] [--capture] — path to source file to process end-to-end"
 ---
 
 ## EXECUTE NOW
@@ -14,6 +14,12 @@ Parse immediately:
 - Source file path: the file to process (required)
 - `--handoff`: output RALPH HANDOFF block at end (for chaining)
 - If target is empty: list files in {DOMAIN:inbox}/ and ask which to process
+
+**Granularity flag:**
+- `--extract`: use /extract for Phase 2
+- `--structure`: use /structure for Phase 2 (default if no flag given)
+- `--capture`: use /capture for Phase 2
+- If no flag: present three options and ask user before proceeding
 
 ### Step 0: Read Vocabulary
 
@@ -31,13 +37,13 @@ The pipeline chains four phases. Each phase uses skill invocation or /ralph for 
 Source file
     |
     v
-Phase 1: /seed — create extract task, move source to archive
+Phase 1: /seed --[granularity] — create process task, move source to archive
     |
     v
-Phase 2: /reduce (via /ralph) — extract claims from source
+Phase 2: /extract OR /structure OR /capture (via /ralph) — based on granularity
     |
     v
-Phase 3: /ralph (all claims) — create -> reflect -> reweave -> verify
+Phase 3: /ralph (all notes) — reflect -> reweave -> verify
     |
     v
 Phase 4: /archive-batch — move task files, generate summary
@@ -52,17 +58,17 @@ The pipeline is the convenience wrapper. /ralph is the engine. /seed is the entr
 
 ## Phase 1: Seed
 
-Invoke /seed on the target file to create the extract task, check for duplicates, and move the source to its archive folder.
+Invoke /seed on the target file with the granularity flag to create the process task, check for duplicates, and move the source to its archive folder.
 
 **How to invoke:**
 
-Use the Skill tool if available, otherwise execute the /seed workflow directly:
+Use the Skill tool if available, otherwise execute the /seed workflow directly with the granularity flag (e.g., `/seed --extract {file}`, `/seed --structure {file}`, `/seed --capture {file}`):
 - Validate source exists
 - Check for prior processing (duplicate detection)
 - Create archive folder
 - Move source from {DOMAIN:inbox} to archive
-- Create extract task file
-- Add extract task to queue
+- Create process task file with granularity set
+- Add process task to queue
 
 **Capture from seed output:**
 - **Batch ID**: the source basename (used for --batch filtering in subsequent steps)
@@ -75,35 +81,40 @@ Report: `$ Seeded: {source-name}`
 
 ---
 
-## Phase 2: Extract (Reduce)
+## Phase 2: Process Source (Granularity-Routed)
 
-Process the extract task via /ralph. This spawns a subagent that runs /reduce, extracting claims from the source and creating task entries in the queue.
+Process the source via /ralph. This spawns a subagent that runs the appropriate skill based on granularity, extracting notes from the source and creating task entries in the queue.
+
+Read `granularity` from the queue task entry. Invoke the matching skill:
+- granularity == "extract" → /extract (via /ralph)
+- granularity == "structure" → /structure (via /ralph)
+- granularity == "capture" → /capture (via /ralph)
 
 **How to invoke:**
 
 ```
-/ralph 1 --batch {batch_id} --type extract
+/ralph 1 --batch {batch_id} --type process
 ```
 
-Or via Task tool:
+Or via Agent tool:
 ```
-Task(
-  prompt = "Run /ralph 1 --batch {batch_id} --type extract",
-  description = "extract: {batch_id}"
+Agent(
+  prompt = "Run /ralph 1 --batch {batch_id} --type process",
+  description = "process: {batch_id}"
 )
 ```
 
-After completion, read the queue to count extracted claims and enrichments:
+After completion, read the queue to count extracted notes and enrichments:
 
-Check how many pending tasks exist for this batch. The reduce phase creates 1 queue entry per claim and 1 per enrichment.
+Check how many pending tasks exist for this batch. The process phase creates 1 queue entry per note and 1 per enrichment.
 
 Report:
 ```
-$ Extracted: {N} {DOMAIN:note_plural}, {M} enrichments
+$ Processed: {N} {DOMAIN:note_plural}, {M} enrichments
   Processing {total_tasks} tasks through the pipeline...
 ```
 
-**If zero claims extracted:** Report the issue. For TFT sources, zero extraction is a bug — the source almost certainly contains extractable content. Ask the user whether to retry with different scope or skip.
+**If zero notes extracted:** Report the issue. For TFT sources, zero extraction is a bug — the source almost certainly contains extractable content. Ask the user whether to retry with different scope or skip.
 
 ---
 
@@ -117,9 +128,9 @@ Count total pending tasks for this batch from the queue. Then process all of the
 /ralph {remaining_count} --batch {batch_id}
 ```
 
-Or via Task tool:
+Or via Agent tool:
 ```
-Task(
+Agent(
   prompt = "Run /ralph {remaining_count} --batch {batch_id}",
   description = "process: {batch_id} ({remaining_count} tasks)"
 )
@@ -259,7 +270,7 @@ Queue Updates:
 
 **Seed failure:** If /seed fails (file not found, duplicate detected and user declines), stop the pipeline entirely.
 
-**Extract failure:** If /reduce extracts zero claims, report and stop. Do not proceed to an empty processing phase.
+**Extract failure:** If Phase 2 extracts zero notes, report and stop. Do not proceed to an empty processing phase.
 
 **Processing failure:** If /ralph fails mid-batch, the queue preserves state. Individual claims resume from their failed phase on next /ralph invocation.
 
@@ -274,8 +285,8 @@ The pipeline is designed to be interrupted and resumed at any point:
 | Interrupted At | How to Resume |
 |----------------|---------------|
 | Before seed | Run /pipeline again (starts fresh) |
-| After seed, before reduce | /ralph 1 --batch {id} --type extract |
-| After reduce, during claims | /ralph --batch {id} (picks up from failed phase) |
+| After seed, before process | /ralph 1 --batch {id} --type process |
+| After process, during notes | /ralph --batch {id} (picks up from failed phase) |
 | After all claims, before archive | /archive-batch {id} |
 
 State lives in the queue file. The pipeline reads queue state, not session state. This means you can interrupt, close the session, and resume later.
@@ -288,7 +299,7 @@ State lives in the queue file. The pipeline reads queue state, not session state
 
 **Source already seeded:** /seed detects this and asks the user. If they decline, the pipeline stops cleanly.
 
-**Large source (2500+ lines):** /reduce handles chunking automatically. The pipeline does not need special handling.
+**Large source (2500+ lines):** /extract, /structure, and /capture handle chunking automatically. The pipeline does not need special handling.
 
 **No ops/derivation-manifest.md:** Use universal vocabulary for all output.
 

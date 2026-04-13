@@ -11,7 +11,7 @@ version: "1.0"
 
 Parse immediately:
 - If target contains `--compact`: force compact mode regardless of vault state
-- If target contains a skill name (e.g., "help reduce" or "help reflect"): show detailed help for that specific skill
+- If target contains a skill name (e.g., "help extract" or "help reflect"): show detailed help for that specific skill
 - If target is empty: determine mode from vault state
 
 **Execute these steps:**
@@ -54,12 +54,12 @@ Read `ops/derivation-manifest.md` (or fall back to `ops/derivation.md` Vocabular
 
 For display, show domain name with universal in parentheses when they differ:
 ```
-  /{domain:reduce} (reduce)   Extract patterns from journal entries
+  /{domain:extract} (extract)   Extract atomic insights from sources
 ```
 
 If domain name equals universal name, show just the name:
 ```
-  /reduce   Extract insights from source material
+  /extract   Extract atomic insights from source material
 ```
 
 ## Step 3: Determine Mode
@@ -83,7 +83,7 @@ Extract `name:` and `description:` from each frontmatter. Do NOT hardcode the co
 | Category | Commands | When to Show |
 |----------|----------|-------------|
 | Core | /ask, /learn, /next, /help | Always |
-| Processing | /reduce, /reflect, /reweave, /verify | Always (all skills from day one) |
+| Processing | /extract, /structure, /capture, /reflect, /reweave, /verify | Always (all skills from day one) |
 | Maintenance | /health, /rethink, /remember | Always |
 | Evolution | /architect, /reseed, /add-domain, /upgrade | Always |
 | Meta | /tutorial, /graph, /stats | Always |
@@ -126,8 +126,10 @@ Getting started:
                      step by step (5 minutes)
 
 As your graph grows, you will use:
-  /reduce [source]   Extract insights from articles,
+  /extract [source]  Extract atomic insights from articles,
                      notes, or any raw material
+  /structure [src]   Extract grouped insights preserving context
+  /capture [thought] Quick-capture a thought into your graph
   /reflect           Find connections between notes
   /health            Check your system's health
 
@@ -281,7 +283,7 @@ Quick reference. No state analysis. No suggestions. Just the commands.
 
 ### SKILL DETAIL MODE (help [skill-name])
 
-When the user asks for help with a specific skill (e.g., `/help reduce` or `/help reflect`):
+When the user asks for help with a specific skill (e.g., `/help extract` or `/help reflect`):
 
 1. Find the skill's SKILL.md file
 2. Read its frontmatter (name, description) and first section
@@ -329,7 +331,7 @@ Extract the pipeline position (what comes before and after this skill) to show w
 - No ANSI color codes
 - No emoji
 - Monospaced alignment assumed
-- Display short command forms (`/reduce`), not plugin-qualified forms (`/arscontexta:reduce`)
+- Display short command forms (`/extract`, `/structure`, `/capture`), not plugin-qualified forms (`/arscontexta:extract`)
 - Domain-native names in curly braces (e.g., `/{reduce}`) are resolved from derivation-manifest.md
 - When domain name equals universal name, drop the braces
 

@@ -47,7 +47,7 @@ The task stack (`ops/tasks.md`) and the pipeline queue (`ops/queue/queue.yaml` o
 | System | Purpose | Managed By | Updated By |
 |--------|---------|-----------|------------|
 | Task stack | Human priorities — what YOU want to work on | You (via /tasks) | Manual: /tasks add, /tasks done |
-| Pipeline queue | Automated processing state — what the SYSTEM needs to process | Pipeline skills | Automatic: /reduce, /ralph, /reflect |
+| Pipeline queue | Automated processing state — what the SYSTEM needs to process | Pipeline skills | Automatic: /extract, /structure, /capture, /ralph, /reflect |
 
 /tasks shows BOTH so you always have a unified view of all pending work. The task stack is your working memory. The pipeline queue is the system's working memory. Together they answer: "What should I do next?"
 
@@ -299,7 +299,7 @@ Show only the Discoveries section from ops/tasks.md.
    for processing in a future session."]
 ```
 
-Discoveries are captured during pipeline work (e.g., /reduce notes a connection opportunity, /reflect notices a split candidate). They accumulate here until the user decides to convert them to tasks or discard them.
+Discoveries are captured during pipeline work (e.g., /extract notes a connection opportunity, /reflect notices a split candidate). They accumulate here until the user decides to convert them to tasks or discard them.
 
 ---
 
@@ -318,7 +318,7 @@ The task stack (ops/tasks.md) and pipeline queue coexist but serve different aud
 **/next reads the task stack first.** If the stack has items, /next recommends from the stack (user-set priorities override automated recommendations). If the stack is empty, /next evaluates queue state and vault health to suggest actions.
 
 **Skills that generate pipeline work update BOTH:**
-- `/reduce` adds tasks to the queue AND notes discoveries in tasks.md
+- `/extract`, `/structure`, and `/capture` add tasks to the queue AND note discoveries in tasks.md
 - `/seed` adds extract tasks to the queue
 - `/architect` may add implementation tasks to the task stack
 
@@ -341,7 +341,7 @@ The task stack is a simple markdown checklist, always present from day one. Form
 - [x] Earlier task (2026-02-08)
 
 ## Discoveries
-- Interesting connection between [[note A]] and [[note B]] found during /reduce
+- Interesting connection between [[note A]] and [[note B]] found during /extract
 - MOC [[topic]] might need splitting (40+ notes observed during /reflect)
 ```
 

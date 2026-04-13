@@ -129,7 +129,7 @@ if [ "$SESS_COUNT" -ge 5 ]; then
   echo "CONDITION: $SESS_COUNT unprocessed sessions. Consider /remember --mine-sessions."
 fi
 if [ "$INBOX_COUNT" -ge 3 ]; then
-  echo "CONDITION: $INBOX_COUNT items in inbox. Consider /reduce or /pipeline."
+  echo "CONDITION: $INBOX_COUNT items in inbox. Consider /extract or /structure."
 fi
 
 # Workboard reconciliation

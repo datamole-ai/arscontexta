@@ -22,6 +22,20 @@ Read these files to configure domain-specific behavior:
 
 If these files don't exist, use universal defaults.
 
+## Granularity-Aware Reweaving
+
+After reading the target {vocabulary.note}, check its `granularity` frontmatter field:
+
+- **`extract`**: Full reweaving — update older {vocabulary.note_plural} with references to this new claim. Run split test (does the older {vocabulary.note} now contain multiple claims that should separate?). Sharpen claims (does the older {vocabulary.note}'s title need updating given new understanding?). Full backward connections.
+- **`structure`**: Update older {vocabulary.note_plural} with references where relevant. No split test on the structured {vocabulary.note} itself (it is intentionally multi-claim). Older extract {vocabulary.note_plural} that relate may still trigger their own split test. Backward connections.
+- **`capture`**: Skip reweaving entirely. Raw capture does not produce new claims that change understanding of older {vocabulary.note_plural}. If someone later runs /extract on the capture as a source, THAT produces {vocabulary.note_plural} that trigger reweaving. Return immediately with "Capture {vocabulary.note} — reweaving skipped (no new claims to propagate)."
+
+### Early Exit Check
+
+Read the target {vocabulary.note}'s frontmatter. If `granularity: capture`, output:
+"Capture {vocabulary.note} — reweaving skipped (no new claims to propagate)."
+Mark phase complete in task file and return.
+
 **Processing depth adaptation:**
 
 | Depth | Reweave Behavior |
@@ -333,12 +347,17 @@ Apply these changes? (yes/no/modify)
 The simplest action. Newer {vocabulary.note_plural} exist that should be referenced.
 
 **Inline connections (preferred):**
-```markdown
-# before
-The constraint shifts from capture to curation.
 
-# after
+How the link reads depends on the target note's granularity:
+```markdown
+# linking to atomic note (claim) — use as proposition
 The constraint shifts from capture to curation, and since [[throughput matters more than accumulation]], the question becomes who does the selecting.
+
+# linking to structure note (scope) — use as noun phrase
+The constraint shifts from capture to curation, and building on [[how caching strategies affect API latency under load]], we chose write-through.
+
+# linking to capture note (content) — use as reference
+The constraint shifts from capture to curation, as documented in [[quarterly planning meeting discussing Q3 priorities]].
 ```
 
 **Footer connections:**

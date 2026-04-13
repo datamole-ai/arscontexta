@@ -14,7 +14,7 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.inbox` for the inbox folder name
    - Use `vocabulary.note` for the note type name in output
    - Use `vocabulary.topic_map` for MOC references
-   - Use `vocabulary.cmd_reduce` for process/extract command
+   - Use `vocabulary.cmd_reduce` for the primary extraction command (maps to /extract, /structure, or /capture depending on content type)
    - Use `vocabulary.cmd_reflect` for connection-finding command
    - Use `vocabulary.cmd_reweave` for backward-pass command
    - Use `vocabulary.rethink` for rethink command name
@@ -113,7 +113,7 @@ Gather all signals. Run independent checks in parallel where possible. Record ea
 | Signal | How to Check | What to Record |
 |--------|--------------|----------------|
 | **Task stack** | Read `ops/tasks.md` — current priorities and open items | Top items, open count, any deadlines |
-| **Queue state** | Read `ops/queue.yaml` or `ops/queue/queue.json` — pending pipeline tasks | Total pending, by phase (create, reflect, reweave, verify), blocked phases |
+| **Queue state** | Read `ops/queue.yaml` or `ops/queue/queue.json` — pending pipeline tasks | Total pending, by phase (create, reflect, reweave, verify), blocked phases, granularity per process task |
 | **Inbox pressure** | Count `*.md` files in {vocabulary.inbox}/, find oldest by mtime | Count per subdirectory, age of oldest item in days |
 | **Note count** | Count `*.md` in {vocabulary.notes}/ | Total notes for context |
 | **Orphan notes** | For each note, grep for `[[filename]]` across all files — zero hits = orphan | Count, first 5 names |
@@ -207,7 +207,7 @@ If no task stack items, pick the highest-impact session-priority signal:
 |--------|---------------|-------------------|
 | Dangling links / orphans | /health or specific fix command | "You have [N] orphan notes invisible to traversal. Connecting them increases graph density and retrieval quality." |
 | 10+ observations or 5+ tensions | /{DOMAIN:rethink} | "[N] pending observations have accumulated. Pattern detection requires processing this backlog to evolve the system." |
-| Inbox > 5 items | /{DOMAIN:reduce} [specific file] | "Your inbox has [N] items (oldest: [age]). [File X] has the highest connection potential based on [reason]." |
+| Inbox > 5 items | /extract, /structure, or /capture [specific file] | "Your inbox has [N] items (oldest: [age]). [File X] has the highest connection potential based on [reason]." |
 | Unprocessed sessions > 3 | /remember --mine-sessions | "[N] sessions have uncaptured friction patterns. Mining them prevents methodology regressions." |
 
 **When recommending inbox processing:** Choose the specific inbox item that aligns best with current goals or has the most connection potential to existing notes. Recommend a concrete file, not "process some inbox."
@@ -220,7 +220,7 @@ If no session-priority items:
 |--------|---------------|-------------------|
 | Queue backlog > 10 | /ralph [N] | "[N] pipeline tasks are pending. Your newest {DOMAIN:notes} lack connections, which means they can't participate in synthesis." |
 | Stale notes > 10 | /{DOMAIN:reweave} [specific note] | "[N] notes haven't been touched since [date]. [Note X] has the most connections and would benefit most from updating." |
-| Research gaps | /{DOMAIN:reduce} [file aligned with goals] | "Your goals mention [topic] but your graph has few notes there. [Inbox item] addresses this gap." |
+| Research gaps | /extract [file aligned with goals] | "Your goals mention [topic] but your graph has few notes there. [Inbox item] addresses this gap." |
 | Methodology convergence | /{DOMAIN:rethink} | "[N] methodology captures in the [category] area suggest a pattern worth elevating." |
 
 **When recommending reweaving:** Choose the most-connected stale note (highest link density + oldest modification). Reweaving high-connectivity notes has the highest ripple effect.
@@ -294,10 +294,14 @@ next
 
 | Good | Bad |
 |------|-----|
-| `/{DOMAIN:reduce} inbox/article-on-spaced-repetition.md` | "process some inbox items" |
+| `/extract inbox/article-on-spaced-repetition.md` | "process some inbox items" |
 | `/ralph 5` | "work on the queue" |
 | `/{DOMAIN:rethink}` | "review your observations" |
 | `/{DOMAIN:reweave} [[note title here]]` | "update some old notes" |
+
+When displaying queue tasks, include granularity:
+"[type] [granularity] — [target] (phase: [current_phase])"
+Example: "note extract — spaced repetition works better after exercise (phase: reflect)"
 
 **State display rules:**
 - Show only 2-4 decision-relevant signals — not all 14 checks
@@ -338,7 +342,7 @@ next
   State:
     Notes: [N] — early stage vault
 
-  Recommended: Capture or /{DOMAIN:reduce} content
+  Recommended: Capture or /extract, /structure, or /capture content
   Rationale: Your graph has [N] notes. At this stage, adding
   content matters more than maintaining structure. Health checks,
   reweaving, and rethink become valuable after ~10 notes.

@@ -99,7 +99,7 @@ Everything enters through {DOMAIN:inbox/}. Do not think about structure at captu
 - Voice capture transcripts
 - Anything where destination is unclear
 
-**Processing inbox items:** Inbox items get processed into atomic {DOMAIN:notes} through the pipeline. Read the inbox item, extract insights worth keeping, create atomic {DOMAIN:notes} in {DOMAIN:notes/}, link new {DOMAIN:notes} to relevant {DOMAIN:topic maps}, then move or delete the inbox item.
+**Processing inbox items:** Inbox items get processed via /extract, /structure, or /capture based on source material and user intent. Research papers with decomposable claims → /extract. Meeting notes mixing multiple topics → /structure. Verbatim transcripts and reference documents → /capture.
 
 **The core principle:** Capture needs to be FAST (zero friction, do not interrupt flow). Processing needs to be SLOW (careful extraction, quality connections). Separating these two activities is what makes both work. If it is in {DOMAIN:inbox/}, it is unprocessed. Once processed, the value moves to {DOMAIN:notes} and the raw material gets archived or discarded.
 
@@ -123,13 +123,14 @@ The task queue tracks every {DOMAIN:note} being processed through the pipeline. 
   "tasks": [
     {
       "id": "source-name-001",
-      "type": "claim",
+      "type": "note",
+      "granularity": "extract",
       "status": "pending",
       "target": "{DOMAIN:note} title here",
       "batch": "source-name",
       "created": "2026-02-13T10:00:00Z",
       "current_phase": "{DOMAIN:connect}",
-      "completed_phases": ["{DOMAIN:process}", "create"]
+      "completed_phases": ["create"]
     }
   ]
 }
@@ -141,8 +142,8 @@ The task queue tracks every {DOMAIN:note} being processed through the pipeline. 
 
 | Type | Purpose | Phase Sequence |
 |------|---------|---------------|
-| extract | Extract {DOMAIN:notes} from source | (single phase) |
-| claim | Process a new {DOMAIN:note} through all phases | create -> {DOMAIN:connect} -> {DOMAIN:maintain} -> {DOMAIN:verify} |
+| process | Process source through chosen granularity skill (/extract, /structure, or /capture) | (single phase) |
+| note | Process a {DOMAIN:note} through downstream phases | {DOMAIN:connect} -> {DOMAIN:maintain} -> {DOMAIN:verify} |
 | enrichment | Enrich an existing {DOMAIN:note} then process | enrich -> {DOMAIN:connect} -> {DOMAIN:maintain} -> {DOMAIN:verify} |
 
 **Recovery:** If you crash mid-phase, the queue still shows `current_phase` at the failed phase. The task file confirms the corresponding section is empty. Re-running the pipeline picks it up automatically — no manual intervention needed.
@@ -245,7 +246,7 @@ pipeline:
 
 | Platform Capability | Orchestration Mechanism |
 |---------------------|----------------------|
-| Subagent spawning | Task tool with worker agents (preferred — true context isolation) |
+| Subagent spawning | Agent tool with worker agents (preferred — true context isolation) |
 | Background processing | Background agents or scheduled skills |
 | No subagent support | Manual invocation with task file handoff between sessions |
 
@@ -299,14 +300,18 @@ pipeline:
 
 ~~~
 /{DOMAIN:learn} [topic]
-    -> files to inbox with provenance
-    -> [CHAIN] queue for {DOMAIN:process}
-/{DOMAIN:process} [inbox-file]
-    -> extracts {DOMAIN:notes} and enrichments to task queue
-    -> [CHAIN] queues all extracted {DOMAIN:notes} for create
-create [{DOMAIN:note}]
-    -> writes {DOMAIN:note} to {DOMAIN:notes/}
-    -> [CHAIN] queues {DOMAIN:note} for {DOMAIN:connect}
+    -> files to {DOMAIN:inbox} with provenance
+    -> [CHAIN] queue for processing
+User chooses pipeline:
+  /extract [{DOMAIN:inbox}-file]
+      -> extracts atomic {DOMAIN:notes}
+      -> [CHAIN] queues all extracted {DOMAIN:notes} for {DOMAIN:connect}
+  /structure [{DOMAIN:inbox}-file]
+      -> groups related claims into structured {DOMAIN:notes}
+      -> [CHAIN] queues all structured {DOMAIN:notes} for {DOMAIN:connect}
+  /capture [{DOMAIN:inbox}-file]
+      -> preserves source verbatim with frontmatter
+      -> [CHAIN] queues capture {DOMAIN:note} for {DOMAIN:connect}
 /{DOMAIN:connect} [{DOMAIN:note}]
     -> finds connections, updates {DOMAIN:topic maps}
     -> [CHAIN] queues {DOMAIN:note} for {DOMAIN:maintain}
@@ -318,7 +323,7 @@ create [{DOMAIN:note}]
     -> [END] marks task complete
 ~~~
 
-**Queue-driven chaining:** When /{DOMAIN:process} creates {DOMAIN:notes}, each gets a task queue entry with `current_phase: "create"`. The queue drives the pipeline — chaining happens through queue state management, not through {DOMAIN:skills} directly invoking each other.
+**Queue-driven chaining:** When /extract, /structure, or /capture creates {DOMAIN:notes}, each gets a task queue entry with `current_phase: "{DOMAIN:connect}"`. The queue drives the pipeline — chaining happens through queue state management, not through {DOMAIN:skills} directly invoking each other.
 
 ### Full Automation From Day One
 
@@ -326,7 +331,7 @@ Every vault ships with the complete pipeline active from the first session. All 
 
 The philosophy: it is easier to disable features you do not need than to discover and enable features you did not know existed. If a feature exists, it works on day one.
 
-**All skills are available from day one.** /{DOMAIN:process}, /{DOMAIN:connect}, /{DOMAIN:maintain}, /{DOMAIN:verify}, /{DOMAIN:health}, and all other skills are ready to invoke on the first source you process. The full pipeline runs on the first {DOMAIN:note} you create.
+**All skills are available from day one.** /extract, /structure, /capture, /{DOMAIN:connect}, /{DOMAIN:maintain}, /{DOMAIN:verify}, /{DOMAIN:health}, and all other skills are ready to invoke on the first source you process. The full pipeline runs on the first {DOMAIN:note} you create.
 
 ### Session Capture
 
@@ -364,7 +369,7 @@ If a {DOMAIN:skill} exists for a task, use the {DOMAIN:skill}. Do not manually r
 
 | Trigger | Required {DOMAIN:Skill} |
 |---------|------------------------|
-| New content to {DOMAIN:process} | /{DOMAIN:process} |
+| New content to {DOMAIN:process} | /extract, /structure, or /capture |
 | New {DOMAIN:notes} need connections | /{DOMAIN:connect} |
 | Old {DOMAIN:notes} may need updating | /{DOMAIN:maintain} |
 | Quality verification needed | /{DOMAIN:verify} |
@@ -419,7 +424,9 @@ provenance: full  # full | minimal | off
 Requires: yaml-schema, wiki-links, atomic-notes, mocs
 
 ## Skills Referenced
-- {DOMAIN:process} (extract insights from sources)
+- extract (extract atomic notes from sources)
+- structure (group related claims into structured notes)
+- capture (preserve source verbatim with frontmatter)
 - {DOMAIN:connect} (find connections, update topic maps)
 - {DOMAIN:maintain} (backward pass, update old notes)
 - {DOMAIN:verify} (combined quality gate: description, schema, links)

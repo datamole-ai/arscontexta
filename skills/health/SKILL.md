@@ -345,7 +345,7 @@ fi
         - Should be in ops/queue/ not notes/
     1 potential trapped knowledge:
       - ops/observations/interesting-pattern.md has note-like schema
-        Consider promoting to notes/ via /reduce or direct creation
+        Consider promoting to notes/ via /extract or direct creation
     Recommendation: move task-tracking.md to ops/queue/
 ```
 
@@ -385,7 +385,7 @@ echo "Inbox: $INBOX_COUNT | Notes: $NOTES_COUNT | In-progress: $QUEUE_COUNT | Ra
 [6] Processing Throughput ........ WARN
     inbox: 12 | notes: 8 | in-progress: 3 | ratio: 60%
     Inbox items outnumber processed notes — collector's fallacy risk
-    Recommendation: run /reduce on oldest inbox items or /pipeline for end-to-end processing
+    Recommendation: run /extract, /structure, or /capture on oldest inbox items, or /pipeline for end-to-end processing
 ```
 
 ### Category 7: Stale Note Detection (full only)
@@ -511,7 +511,7 @@ After running all applicable diagnostic categories, check these condition-based 
 |-----------|-----------|---------------|
 | Pending observations | >= 10 files in ops/observations/ | Consider running /rethink |
 | Open tensions | >= 5 files in ops/tensions/ | Consider running /rethink |
-| Inbox items | >= 3 items | Consider /reduce or /pipeline |
+| Inbox items | >= 3 items | Consider /extract, /structure, /capture, or /pipeline |
 | Unprocessed sessions | >= 5 files in ops/sessions/ | Consider /remember --mine-sessions |
 | Orphan notes | Any persistent (> 7d) | Run /reflect on orphaned notes |
 | Dangling links | Any | Fix broken references immediately |
@@ -709,7 +709,7 @@ A vault with 0 notes is not unhealthy — it is new. Report:
 ```
 Notes scanned: 0 | Topic maps: 0 | Inbox items: N
 All categories PASS (no notes to check)
-Maintenance Signal: inbox has N items — consider /reduce to start building knowledge
+Maintenance Signal: inbox has N items — consider /extract, /structure, or /capture to start building knowledge
 ```
 
 ### Self Space Disabled
@@ -745,7 +745,7 @@ Health report findings feed into other skills:
 | Description quality issues | /verify or manual rewrite | Fix descriptions to improve retrieval |
 | Schema violations | /validate | Run validation to fix specific schema issues |
 | Boundary violations | Manual restructuring | Move files to correct space |
-| Processing throughput | /reduce or /pipeline | Process inbox items to improve ratio |
+| Processing throughput | /extract, /structure, /capture, or /pipeline | Process inbox items to improve ratio |
 | {vocabulary.topic_map} oversized | Manual split or /architect | Split oversized {vocabulary.topic_maps} into sub-{vocabulary.topic_maps} |
 | Accumulated observations | /rethink | Review and triage observations |
 | Accumulated tensions | /rethink | Resolve or dissolve tensions |

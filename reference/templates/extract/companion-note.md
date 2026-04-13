@@ -1,5 +1,6 @@
 ---
 description: One sentence adding context beyond the title (~150 chars)
+granularity: extract
 type: memory
 status: fresh
 people: []
@@ -10,6 +11,7 @@ _schema:
   applies_to: "memories/*.md"
   required:
     - description
+    - granularity
     - type
   optional:
     - status
@@ -17,6 +19,8 @@ _schema:
     - people
     - context
   enums:
+    granularity:
+      - extract
     type:
       - memory
       - ritual

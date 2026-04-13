@@ -155,7 +155,7 @@ If arscontexta plugin is not loaded, apply the methodology principles documented
 
 Include each enabled feature's corresponding block from `generators/features/`. Compose them in this canonical order (17 blocks total):
 
-1. atomic-notes (if granularity = atomic or moderate)
+1. note-granularity (always)
 2. wiki-links (always)
 3. mocs (if navigation >= 2-tier)
 4. processing-pipeline (always — full automation from day one)
@@ -173,9 +173,9 @@ Include each enabled feature's corresponding block from `generators/features/`. 
 15. helper-functions (always)
 16. graph-analysis (always)
 
-**Always-included blocks (11):** wiki-links, processing-pipeline, schema, maintenance, self-evolution, methodology-knowledge, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis.
+**Always-included blocks (12):** note-granularity, wiki-links, processing-pipeline, schema, maintenance, self-evolution, methodology-knowledge, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis.
 
-**Conditional blocks (6):** atomic-notes (granularity), mocs (navigation depth), semantic-search (qmd opt-in), personality (derivation), multi-domain (multiple domains), self-space (user choice).
+**Conditional blocks (5):** mocs (navigation depth), semantic-search (qmd opt-in), personality (derivation), multi-domain (multiple domains), self-space (user choice).
 
 **Composition rules:**
 - Block boundaries must be invisible in output — compose as cohesive prose

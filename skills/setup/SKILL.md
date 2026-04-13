@@ -70,37 +70,7 @@ Everything is local files. No database, no cloud service, no lock-in.
 Your vault is plain markdown that works in any editor, any tool, forever.
 ```
 
-### Screen 2 — Three Starting Points
-
-Output this text exactly:
-
-```
-There are three starting points. Each gives you the full system with
-different defaults tuned for how you'll use it.
-
-  Research
-    Structured knowledge work. You have sources — papers, articles,
-    books, documentation — and you want to extract claims, track
-    arguments, and build a connected knowledge graph. Atomic notes
-    (one idea per file), heavy processing, dense schema.
-
-  Personal Assistant
-    Personal knowledge management. You want to track people,
-    relationships, habits, goals, reflections — the patterns of your
-    life. The agent learns you over time. Per-entry notes, moderate
-    processing, entity-based navigation.
-
-  Experimental
-    Build your own from first principles. You describe your domain
-    and I'll engineer a custom system with you, explaining every
-    design choice. Takes longer, gives you full control.
-
-All three give you every skill and every capability. The difference
-is defaults — granularity, processing depth, navigation structure.
-You can adjust anything later.
-```
-
-### Screen 3 — What Happens Next
+### Screen 2 — What Happens Next
 
 Output this text exactly:
 
@@ -138,14 +108,11 @@ Dimensions default to opinionated best practices and are NOT interrogated during
 
 | Dimension    | Default Position    |
 | ------------ | ------------------- |
-| Granularity  | Atomic              |
 | Organization | Flat                |
 | Linking      | Explicit + implicit |
-| Processing   | Heavy               |
 | Navigation   | 3-tier              |
 | Maintenance  | Condition-based     |
 | Schema       | Moderate            |
-| Automation   | Full                |
 
 
 The conversation focuses on understanding the user's domain and needs. Users adjust dimensions post-init via `ops/config.yaml`.
@@ -162,7 +129,6 @@ As the user talks, passively extract signals for dimensions. Do not ask about di
 | HIGH     | 1.0    | Explicit statement, domain-specific language, concrete examples   | "I extract claims from papers"                     |
 | MEDIUM   | 0.6    | Implicit tone, general preference, domain defaults                | "I like to organize things"                        |
 | LOW      | 0.3    | Ambiguous phrasing, contradicted by other signals, single mention | "I want to track everything"                       |
-| INFERRED | 0.2    | Cascade from resolved dimensions, not directly stated             | If atomic granularity -> inferred explicit linking |
 
 
 **Dimension resolution threshold:** A dimension is "resolved" when cumulative confidence from all its signals exceeds 1.5. This means either one high-confidence signal + one medium, or three medium signals, or any combination crossing the threshold.
@@ -170,34 +136,34 @@ As the user talks, passively extract signals for dimensions. Do not ask about di
 **Signal pattern table:**
 
 
-| Signal Pattern                           | Dimension Position                              | Confidence |
+| Signal Pattern                           | Dimension / Pipeline Fit                        | Confidence |
 | ---------------------------------------- | ----------------------------------------------- | ---------- |
-| "Claims from papers"                     | Atomic granularity                              | High       |
-| "Track my reflections"                   | Moderate granularity                            | High       |
-| "Log what happened"                      | Coarse granularity                              | High       |
+| "Claims from papers"                     | /extract pipeline fit                           | High       |
+| "Track my reflections"                   | /structure pipeline fit                         | High       |
+| "Log what happened"                      | /capture pipeline fit                           | High       |
 | "Connections between ideas"              | Explicit linking                                | High       |
 | "Across disciplines"                     | Semantic search need                            | High       |
-| "I process a few a week"                 | Light processing                                | High       |
-| "Batch process research"                 | Heavy processing                                | High       |
-| "I read a lot and forget"                | Moderate granularity, light processing          | Medium     |
-| "Small precise insights"                 | Atomic granularity                              | High       |
+| "I process a few a week"                 | /capture or /structure pipeline fit             | High       |
+| "Batch process research"                 | /extract pipeline fit, dense schema             | High       |
+| "I read a lot and forget"                | /structure pipeline fit                         | Medium     |
+| "Small precise insights"                 | /extract pipeline fit                           | High       |
 | "Multiple projects"                      | Multi-domain potential                          | High       |
 | "Track people"                           | Entity tracking module                          | High       |
-| "I want rigor"                           | Heavy processing, dense schema                  | High       |
-| "Low ceremony"                           | Light processing, minimal schema                | High       |
+| "I want rigor"                           | /extract pipeline fit, dense schema             | High       |
+| "Low ceremony"                           | /capture pipeline fit, minimal schema           | High       |
 | "20+ ideas daily"                        | High volume, pipeline needed                    | High       |
-| "Personal journal"                       | Single agent, light processing                  | Medium     |
-| "Academic research"                      | Atomic, heavy, semantic search                  | High       |
-| "Therapy sessions"                       | Moderate processing                             | High       |
+| "Personal journal"                       | /structure or /capture pipeline fit             | Medium     |
+| "Academic research"                      | /extract pipeline fit, semantic search          | High       |
+| "Therapy sessions"                       | /structure pipeline fit                         | High       |
 | "Project decisions"                      | Decision-centric, temporal tracking             | High       |
-| "Creative worldbuilding"                 | Moderate, heavy linking                         | Medium     |
-| "Book notes"                             | Moderate granularity, light processing          | Medium     |
+| "Creative worldbuilding"                 | /structure pipeline fit, heavy linking          | Medium     |
+| "Book notes"                             | /structure pipeline fit                         | Medium     |
 | "Track family/friends"                   | Entity MOCs, emotional context schema           | High       |
 | "I revisit old notes often"              | Heavy maintenance, reweaving needed             | Medium     |
 | "I never go back to old stuff"           | Light maintenance                               | High       |
-| "Too much structure kills flow"          | Light processing, minimal schema                | High       |
+| "Too much structure kills flow"          | /capture pipeline fit, minimal schema           | High       |
 | "I want the system to surprise me"       | Semantic search, dense linking                  | Medium     |
-| "Just keep it simple"                    | Light processing, minimal schema, flat nav      | Medium     |
+| "Just keep it simple"                    | /capture pipeline fit, minimal schema, flat nav | Medium     |
 | "Quick capture, think later"             | Temporal separation, pipeline needed            | Medium     |
 | "Tags not folders"                       | Flat organization, faceted metadata             | High       |
 | "I work across 5+ projects"              | Multi-domain, dense schema                      | High       |
@@ -211,7 +177,7 @@ As the user talks, passively extract signals for dimensions. Do not ask about di
 
 | Anti-Signal                         | What It Seems Like        | What It Actually Means                          | Correct Response                                                      |
 | ----------------------------------- | ------------------------- | ----------------------------------------------- | --------------------------------------------------------------------- |
-| "I want Zettelkasten"               | Atomic + heavy processing | User may want the label, not the discipline     | Ask: "Walk me through your last week of note-taking"                  |
+| "I want Zettelkasten"               | /extract pipeline fit     | User may want the label, not the discipline     | Ask: "Walk me through your last week of note-taking"                  |
 | "Make it like Obsidian"             | Specific tool request     | User wants a navigation feel, not a methodology | Ask: "What do you like about Obsidian?"                               |
 | "I need AI to think for me"         | Full automation           | Cognitive outsourcing risk                      | Probe: "What do you want to decide vs what should the system handle?" |
 | "Everything connects to everything" | Dense linking             | Undifferentiated linking desire                 | Ask for a specific example of two things that connect                 |
@@ -223,7 +189,6 @@ As the user talks, passively extract signals for dimensions. Do not ask about di
 The user's own words take priority over preset vocabulary. Listen for how they name things:
 
 - "My reflections" -> notes are called "reflections"
-- "Capture reactions" -> reduce phase is called "capture"
 - "Track decisions" -> note type is "decision"
 
 Record every domain-native term the user provides. These override preset vocabulary.
@@ -244,29 +209,26 @@ Follow-up questions MUST be natural and conversational:
 
 Do NOT ask:
 
-- "Do you want atomic or moderate granularity?"
-- "How heavy should processing be?"
-- "What level of schema density?"
+- "Do you prefer flat or hierarchical organization?"
+- "How dense should the schema be?"
+- "What level of navigation depth?"
 
 These are configuration questions that create paralysis. Defaults handle them.
 
 **Follow-up question priority (when dimensions are unresolved):**
 
-1. Granularity -- affects the most downstream cascades
-2. Processing -- determines which pipeline approach is generated
-3. Automation -- determines topology and skill complexity
-4. Organization -- affects folder structure and navigation
-5. Linking -- affects connection density
-6. Navigation depth -- affects MOC generation
-7. Schema density -- affects template complexity
-8. Maintenance triggers -- lowest priority, easily adjusted post-deployment
+1. Organization -- affects folder structure and navigation
+2. Linking -- affects connection density
+3. Navigation depth -- affects MOC generation
+4. Schema density -- affects template complexity
+5. Maintenance triggers -- lowest priority, easily adjusted post-deployment
 
 ### Completeness Detection
 
 After each turn, evaluate which completeness condition is met:
 
-1. **All resolved:** All 8 dimensions have cumulative confidence >= 1.5 from signals. Proceed to Phase 3 immediately.
-2. **Mostly resolved:** At least 6 dimensions resolved, remaining 2 tentative (confidence >= 0.6). Proceed with cascade filling tentative dimensions.
+1. **All resolved:** All 5 dimensions have cumulative confidence >= 1.5 from signals. Proceed to Phase 3 immediately.
+2. **Mostly resolved:** At least 4 dimensions resolved, remaining 1 tentative (confidence >= 0.6). Proceed with cascade filling tentative dimensions.
 3. **Turn limit:** After 6 conversation turns, proceed regardless. Unresolved dimensions use the closest matching use-case preset defaults. Tentative dimensions use cascade from resolved dimensions.
 4. **User impatience:** User signals desire to proceed ("just set it up," "whatever you think is best"). Use domain defaults for all unresolved dimensions. Log that defaults were used in derivation rationale.
 
@@ -277,8 +239,8 @@ When two signals point to different positions for the same dimension:
 ```
 1. Is one signal EXPLICIT and the other IMPLICIT?
    YES -> Explicit wins.
-         "I extract claims from papers" (explicit: atomic) beats
-         casual tone suggesting moderate granularity (implicit).
+         "I extract claims from papers" (explicit: /extract pipeline fit) beats
+         casual tone suggesting /structure pipeline fit (implicit).
 
 2. Are both signals the same confidence level?
    YES -> Does one appear LATER in the conversation?
@@ -304,7 +266,7 @@ Internal reasoning the user never sees. Do NOT present derivation internals to t
 
 ### Step 3a: Map Signals to Dimensions
 
-For each of 8 dimensions:
+For each of 5 dimensions:
 
 - Collect all signals extracted during conversation
 - Sum confidence weights
@@ -319,10 +281,7 @@ Once primary dimensions are set, cascade through interaction constraints (alread
 
 Key cascades:
 
-- Atomic granularity -> pressure toward explicit linking, deep navigation, heavier processing
-- Full automation -> pressure toward dense schemas, heavy processing, frequent maintenance
 - High volume (>200 projected notes) -> requires deep navigation, semantic search, automated maintenance
-- Coarse granularity -> permits lightweight linking, shallow navigation, light processing
 
 For cascaded values: confidence = INFERRED (0.2). User signals ALWAYS override cascade pressure.
 
@@ -357,10 +316,9 @@ For each hard constraint, evaluate the derived configuration. If violated, BLOCK
 
 Hard constraints (these produce systems that will fail):
 
-- `atomic + navigation_depth == "2-tier" + volume > 100` -> navigational vertigo
-- `processing == "heavy" + automation == "manual" + no_pipeline_skills` -> unsustainable
+- `linking == "explicit+implicit" + platform_lacks_semantic_search` -> implicit linking requires search tool
 
-Example user-facing explanation: "You want atomic notes for detailed tracking, but at the volume you described, that needs deeper navigation than a simple index. Should I add topic-level organization?"
+Example user-facing explanation: "You want semantic search for cross-vocabulary discovery, but your platform doesn't have a search tool configured. Should we stay with explicit linking for now?"
 
 **Pass 2 -- Soft constraint check:**
 
@@ -372,20 +330,15 @@ For each soft constraint, evaluate the configuration:
 
 Soft constraints:
 
-- `atomic + processing == "light"` -> atomic notes need processing to recreate decomposed context
-- `schema == "dense" + automation == "convention"` -> maintenance burden
 - `linking == "explicit+implicit" + no_semantic_search` -> implicit linking needs search tool
 - `volume > 200 + maintenance_thresholds too lax` -> large vaults need tighter condition thresholds
-- `processing == "heavy" + maintenance_thresholds too lax` -> heavy processing generates targets faster than lax thresholds catch
-- `coarse + processing == "heavy"` -> diminishing returns
 - `flat + navigation_depth == "2-tier" + volume > 50` -> crowded navigation
 
 **Pass 3 -- Compensating mechanism check:**
 
 For remaining soft violations, check if compensating mechanisms exist:
 
-- Atomic + medium processing -> semantic search compensates for missing explicit links
-- Dense schema + convention -> good templates reduce manual validation burden
+- Dense schema + no validation hooks -> good templates reduce manual validation burden
 - High volume + shallow nav -> strong semantic search enables discovery
 
 Note active compensations in derivation rationale. Flag compensated dimensions for monitoring by health command.
@@ -506,8 +459,9 @@ You are executing one step of a multi-step generation pipeline.
 - Archive folder: {domain:archive}
 - Note type: {domain:note}
 - Topic map: {domain:topic_map}
-- Process verbs: {domain:reduce}, {domain:reflect}, {domain:reweave}, {domain:verify}
-- Command names: {cmd_reduce}, {cmd_reflect}, {cmd_reweave}, {cmd_verify}, {cmd_rethink}
+- Process verbs: {domain:reflect}, {domain:reweave}, {domain:verify}
+- Pipeline skills: /extract, /structure, /capture (universal — not domain-renamed)
+- Skill names: {DOMAIN:reflect}, {DOMAIN:reweave}, {DOMAIN:verify}, {DOMAIN:rethink}
 
 ## Instructions
 1. Read ops/derivation.md FIRST -- it is your source of truth for all configuration decisions
@@ -608,14 +562,11 @@ engine_version: "1.0.0"
 ## Configuration Dimensions
 | Dimension | Position | Conversation Signal | Confidence |
 |-----------|----------|--------------------|--------------------|
-| Granularity | [value] | "[what user said]" | [High/Medium/Low/Inferred] |
 | Organization | [value] | "[signal]" | [confidence] |
 | Linking | [value] | "[signal]" | [confidence] |
-| Processing | [value] | "[signal]" | [confidence] |
 | Navigation | [value] | "[signal]" | [confidence] |
 | Maintenance | [value] | "[signal]" | [confidence] |
 | Schema | [value] | "[signal]" | [confidence] |
-| Automation | [value] | "[signal]" | [confidence] |
 
 ## Vocabulary Mapping
 | Universal Term | Domain Term | Category |
@@ -624,7 +575,6 @@ engine_version: "1.0.0"
 | inbox | [domain term] | folder |
 | archive | [domain term] | folder |
 | note (type) | [domain term] | note type |
-| reduce | [domain term] | process phase |
 | reflect | [domain term] | process phase |
 | reweave | [domain term] | process phase |
 | verify | [domain term] | process phase |
@@ -635,7 +585,6 @@ engine_version: "1.0.0"
 
 ## Automation
 - Platform: Claude Code
-- Level: [full (default) / convention / manual]
 
 ## Active Feature Blocks
 [Checked = included, unchecked = excluded with reason]
@@ -894,14 +843,11 @@ Generate the human-editable configuration file:
 # See ops/derivation.md for WHY each choice was made
 
 dimensions:
-  granularity: [atomic | moderate | coarse]
   organization: [flat | hierarchical]
   linking: [explicit | implicit | explicit+implicit]
-  processing: [light | moderate | heavy]
   navigation: [2-tier | 3-tier]
   maintenance: condition-based
   schema: [minimal | moderate | dense]
-  automation: [manual | convention | full]
 
 features:
   semantic-search: [true | false]
@@ -958,7 +904,7 @@ research:
 
 ##### ops/derivation-manifest.md (Runtime Vocabulary for Inherited Skills)
 
-Generate the machine-readable derivation manifest. This is the KEY file that enables runtime vocabulary transformation for all inherited processing skills (/reduce, /reflect, /reweave, /verify, /validate). Skills read this file at invocation time to apply domain-specific vocabulary without needing domain-specific skill copies.
+Generate the machine-readable derivation manifest. This is the KEY file that enables runtime vocabulary transformation for all inherited processing skills (/extract, /structure, /capture, /reflect, /reweave, /verify, /validate). Skills read this file at invocation time to apply domain-specific vocabulary without needing domain-specific skill copies.
 
 ```yaml
 # ops/derivation-manifest.md -- Machine-readable manifest for runtime skill configuration
@@ -970,14 +916,11 @@ generated_at: [ISO 8601 timestamp]
 kernel_version: "1.0"
 
 dimensions:
-  granularity: [atomic | moderate | coarse]
   organization: [flat | hierarchical]
   linking: [explicit | implicit | explicit+implicit]
-  processing: [light | moderate | heavy]
   navigation: [2-tier | 3-tier]
   maintenance: condition-based
   schema: [minimal | moderate | dense]
-  automation: [manual | convention | full]
 
 active_blocks:
   - [list of active feature block IDs]
@@ -1004,8 +947,7 @@ vocabulary:
   topic_map: "[domain term]"    # e.g., "topic map", "theme", "decision register"
   hub: "[domain term]"          # e.g., "hub", "home", "overview"
 
-  # Level 5: Process verbs
-  reduce: "[domain term]"       # e.g., "reduce", "surface", "document"
+  # Level 5: Process verbs (pipeline skills /extract, /structure, /capture are universal — not mapped here)
   reflect: "[domain term]"      # e.g., "reflect", "find patterns", "link decisions"
   reweave: "[domain term]"      # e.g., "reweave", "revisit", "update"
   verify: "[domain term]"       # e.g., "verify", "check resonance", "validate"
@@ -1013,7 +955,6 @@ vocabulary:
   rethink: "[domain term]"      # e.g., "rethink", "reassess", "retrospect"
 
   # Level 6: Command names (as users invoke them)
-  cmd_reduce: "[/domain-verb]"  # e.g., "/reduce", "/surface", "/document"
   cmd_reflect: "[/domain-verb]" # e.g., "/reflect", "/find-patterns", "/link-decisions"
   cmd_reweave: "[/domain-verb]" # e.g., "/reweave", "/revisit", "/update-old"
   cmd_verify: "[/domain-verb]"  # e.g., "/verify", "/check", "/audit"
@@ -1071,13 +1012,39 @@ Create domain-specific templates in `templates/`:
 
 **Always create:**
 
-- Primary note template (domain-named: `claim-note.md`, `reflection-note.md`, `decision-note.md`, etc.)
-- MOC template (domain-named: `topic-map.md`, `theme.md`, `decision-register.md`, etc.)
+- Extract note template (in ops/templates/extract/) — domain-named
+- Structure note template (in ops/templates/structure/) — domain-named
+- Capture template (in ops/templates/capture/) — domain-named
+- MOC template (in ops/templates/) — granularity-agnostic, domain-named
 
 **Conditionally create:**
 
-- Source capture template (if processing >= moderate)
-- Observation template (if self-evolution is active -- always)
+
+**Template subfolder structure:**
+
+```
+ops/templates/
+├── extract/
+│   └── [domain]-note.md
+├── structure/
+│   └── [domain]-note.md
+├── capture/
+│   └── [domain]-capture.md
+└── [domain]-moc.md
+```
+
+Read `${CLAUDE_PLUGIN_ROOT}/reference/templates/` for canonical template structure per granularity. Each subfolder contains reference templates showing invariant fields, constraints, and body patterns.
+
+Read `ops/derivation.md` for:
+- Domain vocabulary (field labels, enum values, note type names)
+- Schema density setting (minimal → few optional fields, dense → more optional fields with domain-specific enums)
+
+For each granularity subfolder:
+- Preserve all invariant fields and constraints from the reference templates
+- Adapt to domain: field labels, enum values, optional fields based on schema density setting
+- Extract templates need the most domain adaptation (type enums, domain-specific optional fields)
+- Structure and capture templates often work close to the base reference — add domain fields only when genuinely needed
+- MOC template is granularity-agnostic, adapt vocabulary only
 
 Each template MUST include a `_schema` block defining required fields, optional fields, enums, and constraints. The template IS the single source of truth for schema.
 
@@ -1156,11 +1123,11 @@ Include a discovery section in the context file documenting what queries exist, 
 
 #### Pipeline Step 5: Skills (Agent 2)
 
-**Agent scope:** .claude/skills/[domain-skill-name]/SKILL.md (17 files)
+**Agent scope:** .claude/skills/[domain-skill-name]/SKILL.md (19 files)
 
 **Agent reads:** ops/derivation.md, ${CLAUDE_PLUGIN_ROOT}/skill-sources/*/SKILL.md
 
-**Agent-specific prompt addition:** Include the DOMAIN substitution map as an explicit key-value lookup table built from the vocabulary mapping in ops/derivation.md. Example: `{DOMAIN:reduce}` → `/distill`, `{DOMAIN:notes}` → `claims`, `{DOMAIN:topic map}` → `MOC`.
+**Agent-specific prompt addition:** Include the DOMAIN substitution map as an explicit key-value lookup table built from the vocabulary mapping in ops/derivation.md. Example: `{DOMAIN:extract}` → `/distill`, `{DOMAIN:notes}` → `claims`, `{DOMAIN:topic map}` → `MOC`.
 
 The following step instructions are passed verbatim to Agent 2 via the agent prompt template.
 
@@ -1172,7 +1139,7 @@ Generate ALL skills. Every vault ships with the complete skill set from day one.
 
 **Skill source templates live at `${CLAUDE_PLUGIN_ROOT}/skill-sources/`.** Each subdirectory contains a `SKILL.md` template that must be read and written to the user's skills directory.
 
-The 17 skill sources to install:
+The 19 skill sources to install:
 
 
 | Source Directory                                     | Skill Name    | Category      | Tier |
@@ -1192,7 +1159,9 @@ The 17 skill sources to install:
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/next/`          | next          | Navigation    | C    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/validate/`      | validate      | Processing    | C    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/remember/`      | remember      | Growth        | C    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/reduce/`        | reduce        | Processing    | C    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/extract/`       | extract       | Processing    | C    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/structure/`     | structure     | Processing    | C    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/capture/`       | capture       | Processing    | C    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/verify/`        | verify        | Processing    | C    |
 
 
@@ -1246,7 +1215,7 @@ These skill sources contain only `{vocabulary.xxx}` patterns in their body. Thos
 
 ##### Tier C — DOMAIN substitution (mechanical string replace)
 
-**Skills:** seed, pipeline, archive-batch, ralph, rethink, next, validate, remember, reduce, verify
+**Skills:** seed, pipeline, archive-batch, ralph, rethink, next, validate, remember, verify, extract, structure, capture
 
 These skill sources contain `{DOMAIN:xxx}` patterns that must be literally substituted at setup time. They may also contain `{vocabulary.xxx}` patterns — leave those intact.
 
@@ -1255,11 +1224,13 @@ These skill sources contain `{DOMAIN:xxx}` patterns that must be literally subst
 3. Edit frontmatter in place:
   - `name:` → domain-native command name from vocabulary mapping
   - `description:` → rewrite trigger phrases with domain vocabulary
-4. Build DOMAIN substitution map from the vocabulary mapping in `ops/derivation.md` (e.g., `{DOMAIN:reduce}` → `/distill`, `{DOMAIN:notes}` → `claims`, `{DOMAIN:topic map}` → `MOC`)
+4. Build DOMAIN substitution map from the vocabulary mapping in `ops/derivation.md` (e.g. `{DOMAIN:notes}` → `claims`, `{DOMAIN:topic map}` → `MOC`)
 5. Find and replace all `{DOMAIN:xxx}` patterns in the target file — use Grep to locate them or sed to replace in one pass, whichever is cleaner
 6. Do NOT touch `{vocabulary.xxx}` patterns — leave them for runtime resolution
 
 **Verification:** After each Tier C skill, confirm zero `{DOMAIN:` strings remain in the output file. If any remain, the substitution map is incomplete — check `ops/derivation.md` vocabulary mapping for the missing entry.
+
+**Exception: /extract, /structure, /capture** — These three skills use Tier C DOMAIN substitution in their body but their `name:` and `description:` fields in frontmatter stay UNCHANGED. Do not domain-rename them. They are universal infrastructure commands. Setup copies the file, substitutes `{DOMAIN:xxx}` patterns in the body only, and installs to `.claude/skills/extract/SKILL.md`, `.claude/skills/structure/SKILL.md`, `.claude/skills/capture/SKILL.md`.
 
 ##### Skill Discoverability Protocol
 
@@ -1310,7 +1281,7 @@ Step 3: Process blocks SEQUENTIALLY. For each selected block:
 Step 4: Compose in canonical block order:
   1. Philosophy (derived from domain)
   2. session-rhythm -- Orient, work, persist, session capture
-  3. atomic-notes -- Note design principles (if active)
+  3. note-granularity -- Three pipelines, one graph (always included)
   4. wiki-links -- Link philosophy and patterns
   5. mocs -- Navigation structure (if active)
   6. processing-pipeline -- Processing approach (always included)
@@ -1331,7 +1302,7 @@ Step 5: Cross-reference elimination.
   - semantic-search excluded -> rephrase "semantic search" to "search your notes" or remove
   - mocs excluded -> simplify "topic MOCs" to "topic organization"
   - self-space excluded -> references to self/identity.md route to ops/ equivalents
-  - atomic-notes excluded -> simplify atomicity references to general note guidance
+  - note-granularity is always included -- no exclusion needed
   - multi-domain excluded -> remove cross-domain references
 
 Step 6: Add required sections that are NOT from feature blocks:
@@ -1354,7 +1325,7 @@ Step 7: Coherence verification.
   - [ ] All mentioned skills exist in the generated skills (or are documented as dormant tiers)
   - [ ] All mentioned file paths exist in the generated folder structure
   - [ ] All mentioned templates exist in the generated templates
-  - [ ] Processing terminology matches selected pipeline approach (light vs heavy)
+  - [ ] Pipeline references use /extract, /structure, /capture correctly
   - [ ] Schema fields mentioned in prose exist in generated templates
 
 Step 8: Apply vocabulary transformation one final time.
@@ -1385,7 +1356,9 @@ Step 9: Write the file.
 ## Recently Created Skills (Pending Activation)
 
 These skills were created during initialization. Restart Claude Code to activate them.
-- /[domain:reduce] -- Extract insights from source material (created [timestamp])
+- /extract -- Extract atomic claims from source material (created [timestamp])
+- /structure -- Group related claims into structured notes (created [timestamp])
+- /capture -- Preserve source material verbatim (created [timestamp])
 - /[domain:reflect] -- Find connections between [domain:notes] (created [timestamp])
 ...
 ```
@@ -1412,7 +1385,7 @@ Generate all 7 manual pages using domain-native vocabulary from the derivation c
 
 **Generation instructions:**
 
-For each page, apply vocabulary transformation: replace universal terms (notes, inbox, topic map, reduce, reflect, reweave) with domain-native equivalents from the derivation conversation. Use concrete domain examples where possible.
+For each page, apply vocabulary transformation: replace universal terms (notes, inbox, topic map, reflect, reweave) with domain-native equivalents from the derivation conversation. Pipeline skills (/extract, /structure, /capture) are universal and not renamed. Use concrete domain examples where possible.
 
 **Page 1: manual.md (Hub MOC)**
 
@@ -1480,7 +1453,7 @@ type: manual
 # Workflows
 
 {Generate content covering:}
-- The full processing pipeline: {DOMAIN:seed} -> {DOMAIN:process} -> {DOMAIN:connect} -> {DOMAIN:maintain} -> {DOMAIN:verify}
+- The full processing pipeline: {DOMAIN:seed} -> /extract or /structure or /capture -> {DOMAIN:connect} -> {DOMAIN:maintain} -> {DOMAIN:verify}
 - Session rhythm: orient (what's happening) -> work (do the thing) -> persist (save state)
 - Maintenance cycle: condition-based triggers, what to do when conditions fire
 - Batch processing with /{DOMAIN:orchestrate}
@@ -1541,7 +1514,7 @@ type: manual
 - Dangling links — wiki links to non-existent {DOMAIN:notes} (check after renames)
 - Stale content — {DOMAIN:notes} not updated in 30+ days with sparse connections (run /{DOMAIN:maintain})
 - Methodology drift — system behavior diverging from methodology spec (run /{DOMAIN:rethink} drift)
-- Inbox overflow — too many items accumulating (run /{DOMAIN:process} or /{DOMAIN:pipeline})
+- Inbox overflow — too many items accumulating (run /extract, /structure, or /capture on inbox items, or /{DOMAIN:pipeline})
 - Pipeline stalls — tasks stuck in queue (check with /{DOMAIN:next})
 - Common mistakes table with corrections
 - Link to [[meta-skills]] for /rethink and /remember
@@ -1748,7 +1721,9 @@ Show available commands in the user's vocabulary. Resolve command names from `op
 ```
 Here's what you can do:
 
-  /arscontexta:[domain:reduce]    -- extract insights from source material
+  /arscontexta:extract            -- extract atomic claims from source material
+  /arscontexta:structure          -- group related claims into structured notes
+  /arscontexta:capture            -- preserve source material verbatim
   /arscontexta:[domain:reflect]   -- find connections between your [domain:notes]
   /arscontexta:health             -- check your knowledge system
   /arscontexta:help               -- see everything available

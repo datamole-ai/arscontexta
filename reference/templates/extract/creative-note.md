@@ -1,5 +1,6 @@
 ---
 description: One sentence adding context beyond the title (~150 chars)
+granularity: extract
 stage: idea | draft | revision | complete
 medium: writing | visual | music | code
 inspiration: ["[[reference]]"]

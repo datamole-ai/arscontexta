@@ -1,7 +1,6 @@
 # Universal → Research domain vocabulary mapping
 vocabulary:
   note: claim
-  reduce: reduce
   reflect: reflect
   verify: verify
   reweave: reweave
@@ -27,7 +26,6 @@ templates:
   moc: topic-map.md
 
 skills:
-  reduce: /reduce
   reflect: /reflect
   verify: /verify
   reweave: /reweave

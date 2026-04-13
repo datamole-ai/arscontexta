@@ -306,7 +306,7 @@ Every answer follows this structure:
 >
 > **Practical steps:**
 > 1. Run /seed to create the extraction task
-> 2. /reduce will automatically detect the source size and plan chunks
+> 2. /extract will automatically detect the source size and plan chunks
 > 3. Each chunk extracts independently with a running duplicate list across chunks
 > 4. The final extraction report covers all chunks combined
 >

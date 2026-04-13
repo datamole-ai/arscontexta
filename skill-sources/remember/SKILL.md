@@ -439,7 +439,7 @@ Choose the most specific applicable category:
 
 | Category | Use When |
 |----------|---------|
-| processing | Friction during /reduce, extraction, claim creation |
+| processing | Friction during /extract, /structure, /capture, or claim creation |
 | capture | Friction during inbox filing, raw material handling |
 | connection | Friction during /reflect, link evaluation, MOC updates |
 | maintenance | Friction during /reweave, health checks, cleanup |

@@ -1,5 +1,6 @@
 ---
 description: One sentence adding context beyond the title (~150 chars)
+granularity: extract
 category: pattern | trigger | coping-strategy | insight | growth-goal
 confidence: observed | hypothesized | verified
 frequency: once | occasional | regular | constant

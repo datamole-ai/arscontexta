@@ -15,10 +15,7 @@ These patterns are living documents that evolve with the heuristics. Run the ini
 | Signal | Dimension | Position | Confidence |
 |--------|-----------|----------|------------|
 | "2-3 books a month" | Volume projection | Low (~25-35 notes/year) | High |
-| "remember my reactions" | Processing | Light — capture reaction, not full extraction | High |
-| "what struck me, what I disagreed with" | Granularity | Moderate — per-book entries with multiple reactions, not atomic claims | High |
 | "how books connect to each other" | Linking | Explicit — thematic connections between books | Medium |
-| No mention of rigorous analysis | Processing | Light (confirms) | Medium |
 | No mention of academic use | Navigation | 2-tier — small collection permits simple browsing | High |
 
 ### Follow-Up Questions
@@ -26,27 +23,26 @@ These patterns are living documents that evolve with the heuristics. Run the ini
 - "When you say 'remember my reactions' — is this mostly for personal enjoyment, or do you reference these notes for writing, discussions, or recommendations?"
 - "How many books do you typically connect? Is it a handful of favorites, or are you looking to track themes across everything you read?"
 
-The follow-ups clarify processing intensity (personal capture vs analytical extraction) and linking density (casual connections vs systematic thematic tracking). In this case, both answers confirm light processing and explicit linking.
+The follow-ups clarify pipeline fit (personal capture vs analytical extraction) and linking density (casual connections vs systematic thematic tracking). In this case, both answers confirm /capture as the natural pipeline and explicit linking.
 
 ### Derived Configuration
 
 | Dimension | Position | Rationale |
 |-----------|----------|-----------|
-| Granularity | Moderate | Per-book notes capturing multiple reactions. Atomic would over-decompose — "Chapter 3's argument about X" is naturally part of the book note, not a separate file. |
 | Organization | Flat | Even at low volume, flat with MOCs is simpler than folders. No reason to create genre folders for 30 notes. |
 | Linking | Explicit | Direct wiki links between books that share themes. No semantic search needed — vocabulary is consistent at this scale. |
-| Processing | Light | Capture reactions, connect to similar books. No extraction pipeline — the value is personal response, not claim decomposition. |
 | Navigation | 2-tier | Hub MOC -> book notes. One hub with "Currently Reading," "Favorites," "By Theme" sections suffices. At 30 notes/year, deeper hierarchy is overhead. |
 | Maintenance | Condition-based | Low volume means lax thresholds are appropriate — review when 5+ unconnected notes accumulate or inbox grows past 3 items |
 | Schema | Minimal | `description`, `author`, `topics`. Rating optional. Dense schema adds capture friction that kills the habit at this volume. |
-| Automation | Convention | Context file instructions only. No hooks, no pipelines. The user's engagement is personal, not systematic. |
+
+**Natural pipeline fit:** `/capture` — reactions and impressions are generated in the moment, not extracted from a source. Per-book entries with multiple reactions suit /structure when the user wants to organize across several impressions at once.
 
 ### Vocabulary Mapping
 
 | Universal Term | Domain Term |
 |---------------|-------------|
 | note | book note |
-| reduce / extract | capture |
+| extract / structure / capture | capture |
 | reflect / connect | find connections |
 | MOC | reading list |
 | description | reaction summary |
@@ -60,10 +56,9 @@ The follow-ups clarify processing intensity (personal capture vs analytical extr
 
 ### Active Feature Blocks
 
-- `atomic-notes.md` — included (moderate granularity still benefits from composability principles)
+- `note-granularity.md` — included (always)
 - `wiki-links.md` — included (always)
 - `mocs.md` — included (2-tier navigation)
-- `light-processing.md` — included (processing = light)
 - `maintenance.md` — included (always)
 - `self-evolution.md` — included (always)
 - `session-rhythm.md` — included (always)
@@ -82,7 +77,7 @@ The follow-ups clarify processing intensity (personal capture vs analytical extr
 
 1. **Lax maintenance thresholds are correct because tighter ones produce more overhead than value at 25-35 notes/year.** Reviewing when a handful of unconnected notes accumulate surfaces connections and triggers new reactions without feeling like chores.
 
-2. **Light processing does NOT mean no processing.** Capture-and-connect still requires the user to articulate reactions ("what struck me") and find thematic links. It is lighter than extraction but heavier than raw filing.
+2. **Using /capture does NOT mean no processing.** Capture-and-connect still requires the user to articulate reactions ("what struck me") and find thematic links. It is lighter than /extract but more intentional than raw filing.
 
 3. **The derivation correctly avoids atomic granularity.** A book note with 3-4 reactions per book is the natural unit. Forcing "one reaction per file" would feel artificial and create tiny orphaned fragments that the user wouldn't revisit.
 
@@ -98,38 +93,34 @@ The follow-ups clarify processing intensity (personal capture vs analytical extr
 |--------|-----------|----------|------------|
 | "people I care about" | Organization | Entity-centric (per-person MOCs) | High |
 | "preferences" | Schema | Moderate — structured fields for preferences | High |
-| "what's going on in their lives" | Processing | Light — capture encounters, not deep analysis | High |
 | "birthdays" | Schema | Date fields, reminder potential | High |
-| "the little things" | Granularity | Moderate — small observations, not full analyses | Medium |
 | "make someone feel seen" | Personality | Warm, emotionally attentive | Medium |
-| No mention of analysis or research | Processing | Light (confirms) | High |
 
 ### Follow-Up Questions
 
 - "How many people are in your close circle? Roughly how often would you be adding something new?"
 - "Would you want reminders — like a nudge before someone's birthday or when it's been a while since you checked in?"
 
-The first question calibrates volume and maintenance trigger thresholds. The second probes automation potential (reminders.md in ops/ is a lightweight automation that doesn't require hooks). Both answers shape the system without requiring the user to understand configuration dimensions.
+The first question calibrates volume and maintenance trigger thresholds. The second probes reminder needs (reminders.md in ops/ is a lightweight capability that doesn't require hooks). Both answers shape the system without requiring the user to understand configuration dimensions.
 
 ### Derived Configuration
 
 | Dimension | Position | Rationale |
 |-----------|----------|-----------|
-| Granularity | Moderate | Per-observation notes — "Sarah mentioned she's nervous about the new job" is one note. Not atomic (no decomposition needed) but not coarse (separate observations are independently useful). |
 | Organization | Flat | Flat with entity MOCs. Each person gets their own MOC file as the primary lookup. No folder-per-person — wiki links handle grouping. |
 | Linking | Explicit | Direct links between people (shared events, mutual friends). No semantic search at expected volume. |
-| Processing | Light | Capture encounters, file under person. No extraction pipeline — the value is in recording, not analyzing. |
 | Navigation | 2-tier | Hub MOC ("relationships") -> per-person MOCs. Simple, person-centric browsing. |
 | Maintenance | Condition-based | Review when contact recency flags trigger or follow-ups accumulate: who needs attention? Which follow-ups are pending? |
 | Schema | Moderate | `person`, `category` (preference/pattern/important-date/interaction/care-task), `last_confirmed`, `follow_up`. Emotional context as schema field because "nervous about new job" is the information that makes the user thoughtful. |
-| Automation | Convention | Context file instructions. Potential for reminder hooks later if the user wants birthday notifications. |
+
+**Natural pipeline fit:** `/capture` — observations about people are moment-to-moment. Each encounter or noticed detail is captured immediately and filed under the person, with no decomposition step needed.
 
 ### Vocabulary Mapping
 
 | Universal Term | Domain Term |
 |---------------|-------------|
 | note | memory |
-| reduce / extract | notice |
+| extract / structure / capture | notice |
 | reflect / connect | trace connections |
 | MOC | person page |
 | description | memory context |
@@ -152,10 +143,9 @@ The first question calibrates volume and maintenance trigger thresholds. The sec
 
 ### Active Feature Blocks
 
-- `atomic-notes.md` — included (moderate granularity)
+- `note-granularity.md` — included (always)
 - `wiki-links.md` — included (always)
 - `mocs.md` — included (entity MOCs are the core navigation)
-- `light-processing.md` — included (processing = light)
 - `maintenance.md` — included (always)
 - `self-evolution.md` — included (always)
 - `session-rhythm.md` — included (always)
@@ -189,9 +179,7 @@ The first question calibrates volume and maintenance trigger thresholds. The sec
 | Signal | Dimension | Position | Confidence |
 |--------|-----------|----------|------------|
 | "5-10 papers a week" | Volume projection | High (~250-500 claims/year) | High |
-| "track claims" | Granularity | Atomic — one claim per note | High |
 | "across disciplines" | Linking | Explicit+implicit — semantic search essential for cross-vocabulary matching | High |
-| "policy papers cite different evidence than engineering ones" | Processing | Heavy — extraction, comparison, contradiction tracking | High |
 | "where they agree and disagree" | Schema | Moderate — classification fields, source tracking | High |
 | Academic/research register | Navigation | 3-tier — high volume needs deep hierarchy | High |
 
@@ -200,27 +188,26 @@ The first question calibrates volume and maintenance trigger thresholds. The sec
 - "Are you working toward a specific output — a literature review, thesis, or policy document? Or is this ongoing sense-making for your own understanding?"
 - "When you find conflicting claims, do you want to track the conflict as its own entity, or just note that papers disagree?"
 
-The first question affects processing intensity (output-directed processing is heavier) and self/ identity (research identity vs general learner). The second probes schema design for tension tracking — if conflicts are entities, they get their own note type with a `contradicts` relationship field. Both the user's high volume and cross-disciplinary focus make the signals unusually clear: this is a heavy-processing research system.
+The first question affects pipeline choice (output-directed research maps most naturally to /extract) and self/ identity (research identity vs general learner). The second probes schema design for tension tracking — if conflicts are entities, they get their own note type with a `contradicts` relationship field. Both the user's high volume and cross-disciplinary focus make the signals unusually clear: this is a research system suited to /extract.
 
 ### Derived Configuration
 
 | Dimension | Position | Rationale |
 |-----------|----------|-----------|
-| Granularity | Atomic | "Track claims" is the direct signal. Each claim from each paper gets its own note. Cross-disciplinary comparison requires decomposition — you can't compare paper-level summaries across disciplines effectively. |
 | Organization | Flat | Flat with MOC overlay. Folder-per-discipline would create silos that prevent the cross-disciplinary connections the user explicitly needs. |
 | Linking | Explicit+implicit | Explicit wiki links for known connections. Semantic search essential because policy and engineering papers use different vocabulary for the same phenomena ("resilience" vs "structural adaptation"). |
-| Processing | Heavy | Full extraction pipeline: reduce papers to claims, reflect to find connections, reweave to update older claims when new evidence arrives. The user's goal requires systematic processing, not casual capture. |
 | Navigation | 3-tier | Hub -> discipline MOCs (policy, engineering, ecology, economics) -> topic MOCs (flood adaptation, heat resilience, migration patterns) -> atomic claims. High volume demands deep navigation. |
 | Maintenance | Condition-based (tight thresholds) | Reweave pass after each processing batch completes. At 5-10 papers/week, lax thresholds would leave too many unconnected claims accumulating. |
 | Schema | Moderate | `description`, `methodology` (which discipline), `source`, `classification` (claim/methodology/tension), `topics`. Dense enough for cross-discipline queries, not so dense as to slow capture. |
-| Automation | Convention | Start with context file instructions. Add processing pipeline hooks when volume creates friction. The user is a researcher — they'll want automation once they see the pattern. |
+
+**Natural pipeline fit:** `/extract` — claims from papers decompose naturally into atomic notes. "Track claims" is the direct signal: each claim from each paper gets its own note, enabling cross-disciplinary comparison that paper-level summaries can't provide.
 
 ### Vocabulary Mapping
 
 | Universal Term | Domain Term |
 |---------------|-------------|
 | note | claim |
-| reduce / extract | extract |
+| extract / structure / capture | extract |
 | reflect / connect | map connections |
 | MOC | topic map |
 | description | claim context |
@@ -234,7 +221,7 @@ The first question affects processing intensity (output-directed processing is h
 
 ### Active Feature Blocks
 
-- `atomic-notes.md` — included (granularity = atomic)
+- `note-granularity.md` — included (always)
 - `wiki-links.md` — included (always)
 - `mocs.md` — included (3-tier navigation)
 - `processing-pipeline.md` — included (processing = heavy)
@@ -248,13 +235,12 @@ The first question affects processing intensity (output-directed processing is h
 
 ### Excluded Feature Blocks
 
-- `light-processing.md` — excluded (processing = heavy)
 - `personality.md` — excluded (no personality signals — academic register suggests neutral default)
 - `multi-domain.md` — excluded (single domain, though sub-disciplines exist)
 
 ### Key Insights
 
-1. **This pattern converges with the Research preset because the signals are unambiguous.** "Claims from papers" + "across disciplines" + high volume = atomic + heavy processing + semantic search. The derivation engine should recognize this convergence and produce configuration nearly identical to the preset.
+1. **This pattern converges with the Research preset because the signals are unambiguous.** "Claims from papers" + "across disciplines" + high volume = /extract pipeline + semantic search. The derivation engine should recognize this convergence and produce configuration nearly identical to the preset.
 
 2. **Semantic search is essential, not optional.** The user explicitly states that different disciplines use different terminology. Without semantic search, a search for "flood resilience" would miss papers about "structural flood adaptation" — and cross-disciplinary synthesis is the user's core need.
 
@@ -271,9 +257,7 @@ The first question affects processing intensity (output-directed processing is h
 | Signal | Dimension | Position | Confidence |
 |--------|-----------|----------|------------|
 | "therapy journey" | Domain | Therapy/Reflection | High |
-| "notice patterns between sessions" | Processing | Moderate — pattern detection, not full extraction | High |
 | "the same feeling keeps coming up" | Linking | Explicit — direct connections between sessions mentioning same patterns | High |
-| "in different situations" | Processing | Moderate — cross-situation analysis | Medium |
 | "clicks weeks later" | Maintenance | Tight thresholds — frequent revisiting to catch delayed insights | High |
 | Personal, vulnerable tone | Personality | Warm, emotionally attentive | High |
 
@@ -282,27 +266,26 @@ The first question affects processing intensity (output-directed processing is h
 - "When you say 'track my therapy journey' — are you writing detailed session reflections, or quick notes about what came up?"
 - "Would you want the system to actively surface patterns, or more just help you organize so you can spot them yourself?"
 
-The first question resolves granularity (detailed reflections suggest moderate, quick notes suggest coarse). The second resolves processing intensity (active pattern surfacing = moderate processing with agent-detected themes, self-organized = light processing with user-driven review). In this case, the user's "notice patterns" language suggests they want active surfacing.
+The first question resolves note scale (detailed reflections suit /structure to organize multiple observations, quick notes suit /capture). The second resolves pipeline fit (active pattern surfacing maps to /structure with agent-detected themes, self-organized review maps to /capture with user-driven connection). In this case, the user's "notice patterns" language suggests they want active surfacing via /structure.
 
 ### Derived Configuration
 
 | Dimension | Position | Rationale |
 |-----------|----------|-----------|
-| Granularity | Moderate | Per-session reflections with multiple observations. Atomic decomposition of therapy sessions feels clinical and fragmenting — "the anxiety I felt during the argument" is naturally part of the session reflection, not a standalone claim. |
 | Organization | Flat | Flat with theme MOCs. Themes (anxiety, relationships, work stress, growth) emerge organically and cross-cut chronology. |
 | Linking | Explicit | Direct connections between reflections that share patterns. At moderate volume, explicit links suffice. Semantic search adds value later if collection grows past 100. |
-| Processing | Moderate | Pattern detection across reflections. Not full extraction (would feel invasive) but more than just capture (patterns need active surfacing). The maintenance output IS the therapy value. |
 | Navigation | 2-tier | Hub ("my themes") -> theme MOCs (anxiety patterns, relationship insights, growth milestones). Volume stays moderate — regular journaling produces ~50 reflections/year. |
 | Maintenance | Condition-based (tight thresholds) | Aligned with session rhythm. Health check after each session capture surfaces "you mentioned anxiety three times recently" — which is precisely the kind of insight the user seeks. |
 | Schema | Moderate | `category` (pattern/trigger/coping-strategy/insight/growth-goal), `confidence` (observed/hypothesized/verified), `frequency` (once/occasional/regular/constant). Rich enough for pattern queries without imposing clinical structure. |
-| Automation | Convention | Context file instructions. Hooks could automate pattern detection later, but starting automated feels presumptuous for intimate content. |
+
+**Natural pipeline fit:** `/structure` — per-session reflections contain multiple observations (pattern, trigger, response) that benefit from organized structure. /capture suits quick in-the-moment notes; /structure suits the more deliberate post-session reflection the user describes.
 
 ### Vocabulary Mapping
 
 | Universal Term | Domain Term |
 |---------------|-------------|
 | note | reflection |
-| reduce / extract | surface |
+| extract / structure / capture | surface |
 | reflect / connect | find patterns |
 | verify | check resonance |
 | MOC | theme |
@@ -339,7 +322,7 @@ The personality profile (warm, neutral, casual, emotionally attentive) produces 
 
 ### Active Feature Blocks
 
-- `atomic-notes.md` — included (moderate granularity)
+- `note-granularity.md` — included (always)
 - `wiki-links.md` — included (always)
 - `mocs.md` — included (2-tier navigation)
 - `processing-pipeline.md` — included (processing = moderate)
@@ -352,7 +335,6 @@ The personality profile (warm, neutral, casual, emotionally attentive) produces 
 
 ### Excluded Feature Blocks
 
-- `light-processing.md` — excluded (processing = moderate)
 - `semantic-search.md` — excluded (linking = explicit at low-moderate volume)
 - `schema.md` — excluded (moderate schema handled by template)
 - `multi-domain.md` — excluded (single domain)
@@ -363,7 +345,7 @@ The personality profile (warm, neutral, casual, emotionally attentive) produces 
 
 2. **Personality is non-negotiable for therapy.** A clinical agent saying "3 new patterns identified in your reflections" would feel like a diagnostic report, not a therapy companion. Warmth and emotional awareness are functional requirements, not nice-to-haves.
 
-3. **Moderate processing is specifically "pattern detection."** Not full extraction (too clinical), not just capture (misses the patterns). The unique process step for therapy is: scan for recurring themes, emotional patterns, and trigger-response chains.
+3. **The /structure pipeline suits therapy because pattern detection is deliberate.** Not atomic extraction (too clinical), not raw capture (misses the patterns). The unique process step for therapy is: scan for recurring themes, emotional patterns, and trigger-response chains across structured session notes.
 
 4. **Ethical guardrails are especially critical.** The agent must never diagnose, must encourage professional support, must respect the user's autonomy in interpreting patterns. The guardrails block includes therapy-specific constraints.
 
@@ -378,8 +360,6 @@ The personality profile (warm, neutral, casual, emotionally attentive) produces 
 | Signal | Dimension | Position | Confidence |
 |--------|-----------|----------|------------|
 | "manage three products" | Organization | Multi-domain — but flat, not folder silos | High |
-| "track decisions" | Granularity | Moderate — per-decision notes with rationale | High |
-| "and their rationale" | Processing | Moderate — capture decision context, not just outcome | High |
 | "why we chose X over Y" | Schema | Dense — alternatives, rationale, stakeholders | High |
 | "what we considered" | Schema | Dense — alternatives field | Medium |
 | "how those decisions connect across products" | Linking | Explicit — cross-product links are the core value | High |
@@ -390,27 +370,26 @@ The personality profile (warm, neutral, casual, emotionally attentive) produces 
 - "How often do decisions get revisited or reversed? Is this more of a living document or a historical record?"
 - "Do other people need to read these, or is this primarily for your own reference?"
 
-The first question calibrates maintenance trigger sensitivity and schema temporal fields. If decisions get reversed, the `superseded_by` field becomes essential and maintenance thresholds need to be tighter. The second affects formality (team-readable implies formal) and schema density (shared context requires more structure for others to parse). In this case, decisions do get revisited (condition-triggered maintenance, `status` field), and it's primarily for personal reference (casual formality acceptable).
+The first question calibrates maintenance trigger sensitivity and schema temporal fields. If decisions get reversed, the `superseded_by` field becomes essential and maintenance thresholds need to be tighter. The second affects formality (team-readable implies formal) and schema density (shared context requires more structure for others to parse). In this case, decisions do get revisited (condition-triggered maintenance, `status` field), and it's primarily for personal reference (casual formality acceptable, /structure pipeline fits well).
 
 ### Derived Configuration
 
 | Dimension | Position | Rationale |
 |-----------|----------|-----------|
-| Granularity | Moderate | Per-decision notes — "We chose Redis over Memcached for session caching" is one decision with supporting rationale. Not atomic (the rationale IS part of the decision), not coarse (each decision stands alone). |
 | Organization | Flat | Flat with product MOCs. Folder-per-product would prevent cross-product decision tracking — exactly the capability the user needs. |
 | Linking | Explicit | Direct wiki links between related decisions. "The session caching decision constrains our CDN choice" is an explicit dependency the user wants tracked. |
-| Processing | Moderate | Capture decision context at decision time (4-phase: capture, document alternatives, connect to related decisions, verify completeness). Not heavy extraction — decisions are generated, not mined. |
 | Navigation | 2-tier | Hub ("decision landscape") -> product MOCs (Product A, Product B, Product C). Cross-product decisions appear in multiple MOCs via Topics footer. |
 | Maintenance | Condition-based | Review when decisions accumulate without cross-referencing or staleness flags trigger: which decisions are stale? Which need revisiting because context changed? Which cross-product implications haven't been traced? |
 | Schema | Dense | `description`, `alternatives` (what was considered), `rationale` (why this choice), `stakeholders`, `status` (active/superseded/reversed), `superseded_by` (link to newer decision), `implications` (what this constrains). Dense because decisions are structured by nature — they have inputs, outputs, and dependencies. |
-| Automation | Convention | Context file instructions. Potential for decision-tracking hooks later (auto-detect when a new decision references an old one). |
+
+**Natural pipeline fit:** `/structure` — decisions are generated with their rationale at the point of decision, not mined from a source. /structure fits: document the decision, its alternatives, and connections to related decisions in one organized note.
 
 ### Vocabulary Mapping
 
 | Universal Term | Domain Term |
 |---------------|-------------|
 | note | decision record |
-| reduce / extract | document |
+| extract / structure / capture | document |
 | reflect / connect | link decisions |
 | verify | review quality |
 | MOC | decision register |
@@ -426,7 +405,7 @@ The first question calibrates maintenance trigger sensitivity and schema tempora
 
 ### Active Feature Blocks
 
-- `atomic-notes.md` — included (moderate granularity)
+- `note-granularity.md` — included (always)
 - `wiki-links.md` — included (always)
 - `mocs.md` — included (2-tier navigation)
 - `processing-pipeline.md` — included (processing = moderate)
@@ -440,7 +419,6 @@ The first question calibrates maintenance trigger sensitivity and schema tempora
 
 ### Excluded Feature Blocks
 
-- `light-processing.md` — excluded (processing = moderate)
 - `semantic-search.md` — excluded (linking = explicit)
 - `personality.md` — excluded (neutral-helpful default, no personality signals)
 
@@ -462,33 +440,30 @@ The first question calibrates maintenance trigger sensitivity and schema tempora
 
 | Dimension | Books | Family | Research | Therapy | PM |
 |-----------|-------|--------|----------|---------|-----|
-| Granularity | moderate | moderate | atomic | moderate | moderate |
+| Schema | minimal | moderate | moderate | moderate | dense |
+| Navigation | 2-tier | 2-tier | 3-tier | 2-tier | 2-tier |
 | Organization | flat | flat | flat | flat | flat |
 | Linking | explicit | explicit | explicit+implicit | explicit | explicit |
-| Processing | light | light | heavy | moderate | moderate |
-| Navigation | 2-tier | 2-tier | 3-tier | 2-tier | 2-tier |
 | Maintenance | condition-based (lax) | condition-based (lax) | condition-based (tight) | condition-based (tight) | condition-based (moderate) |
-| Schema | minimal | moderate | moderate | moderate | dense |
-| Automation | convention | convention | convention | convention | convention |
 
 **Observations:**
 
 1. **Organization is flat across all patterns.** The research strongly favors flat-associative for agent-operated systems. No conversation pattern produced a hierarchical result.
 
-2. **Automation is convention for all patterns.** Following Gall's Law, all systems start at convention. This is the correct conservative default — automation should grow from friction, not from anticipation.
+2. **Schema density follows domain structure.** PM decisions have inherent structure -> dense. Therapy reflections have some structure -> moderate. Book reactions are free-form -> minimal.
 
-3. **Granularity is atomic only for research.** Most domains naturally produce moderate-granularity notes. Atomic granularity is a specific research/academic choice driven by cross-disciplinary claim comparison needs.
+3. **Note scale is per-invocation, chosen via /extract, /structure, or /capture.** Each pattern produces notes at a natural scale (per-book, per-observation, per-claim) determined by how the user works and which skill they invoke — not by a vault-wide setting.
 
-4. **Processing intensity correlates with retrieval complexity.** Heavy processing is needed when the user explicitly needs cross-referencing (research claims across disciplines). Light processing suffices when capture IS the value (books, relationships).
+4. **Linking complexity drives feature block selection.** Explicit-only linking excludes semantic search. Explicit+implicit linking (as in Research) requires it for cross-vocabulary discovery.
 
-5. **Schema density follows domain structure.** PM decisions have inherent structure -> dense. Therapy reflections have some structure -> moderate. Book reactions are free-form -> minimal.
+5. **Maintenance thresholds track domain cadence.** Tight thresholds match high-volume or review-centric domains (Research, Therapy). Lax thresholds are appropriate for low-volume personal domains (Books, Family).
 
 ### Signal Reliability
 
 | Signal Type | Reliability | Example |
 |-------------|-------------|---------|
 | Volume indicators ("5-10 papers/week") | High | Directly maps to volume cascade |
-| Processing words ("track claims," "remember reactions") | High | Verb choice reveals processing intensity |
+| Processing words ("track claims," "remember reactions") | High | Verb choice reveals natural pipeline fit (/extract vs /structure vs /capture) |
 | Connection words ("across disciplines," "connect across products") | High | Explicitly reveals linking needs |
 | Emotional register ("the little things," "clicks weeks later") | Medium | Personality signal, but can be ambiguous |
 | Absence of signals | Medium | No mention of analysis -> light processing (but could be implicit) |

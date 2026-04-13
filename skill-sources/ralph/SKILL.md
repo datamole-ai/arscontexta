@@ -3,7 +3,7 @@ name: ralph
 description: Queue processing with fresh context per phase. Processes N tasks from the queue, spawning isolated subagents to prevent context contamination. Supports serial, parallel, batch filter, and dry run modes. Triggers on "/ralph", "/ralph N", "process queue", "run pipeline tasks".
 version: "1.0"
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Agent
-argument-hint: "N [--parallel] [--batch id] [--type extract] [--dry-run] — N = number of tasks to process"
+argument-hint: "N [--parallel] [--batch id] [--type process] [--dry-run] — N = number of tasks to process"
 ---
 
 ## EXECUTE NOW
@@ -14,7 +14,7 @@ Parse arguments:
 - N (required unless --dry-run): number of tasks to process
 - --parallel: concurrent claim workers (max 5) + cross-connect validation
 - --batch [id]: process only tasks from specific batch
-- --type [type]: process only tasks at a specific phase (extract, create, reflect, reweave, verify, enrich)
+- --type [type]: process only tasks of a specific type (process, note, enrichment)
 - --dry-run: show what would execute without running
 - --handoff: output structured RALPH HANDOFF block at end (for pipeline chaining)
 
@@ -47,18 +47,12 @@ Each phase maps to specific Agent tool parameters. Use these EXACTLY when spawni
 
 | Phase | Skill Invoked | Purpose |
 |-------|---------------|---------|
-| extract | /reduce | Extract claims from source material |
+| process | /extract, /structure, or /capture (based on task.granularity) | Extract notes from source material |
 | create | (inline note creation) | Write the {DOMAIN:note} file |
 | enrich | /enrich | Add content to existing {DOMAIN:note} |
 | reflect | /reflect | Find connections, update {DOMAIN:topic map}s |
 | reweave | /reweave | Update older {DOMAIN:note_plural} with new connections |
 | verify | /verify | Description quality + schema + health checks |
-
-**All phases use the same subagent configuration:**
-- subagent_type: knowledge-worker (if available) or default
-- mode: dontAsk
-
-Subagents inherit the session model. Users running opus get opus quality on processing phases. Users running sonnet get sonnet everywhere. Fresh context per phase already ensures efficiency — every phase gets full capability in the smart zone.
 
 ---
 
@@ -77,21 +71,22 @@ The queue uses `current_phase` and `completed_phases` per task entry:
 
 ```yaml
 phase_order:
-  claim: [create, reflect, reweave, verify]
+  note: [create, reflect, reweave, verify]
   enrichment: [enrich, reflect, reweave, verify]
 
 tasks:
   - id: source-name
-    type: extract
+    type: process
+    granularity: extract
     status: pending
     source: ops/queue/archive/2026-01-30-source/source.md
     file: source-name.md
     created: "2026-01-30T10:00:00Z"
 
-  - id: claim-010
-    type: claim
+  - id: note-010
+    type: note
     status: pending
-    target: "claim title here"
+    target: "note title here"
     batch: source-name
     file: source-name-010.md
     current_phase: reflect
@@ -106,11 +101,17 @@ Build a list of **actionable tasks** — tasks where `status == "pending"`. Orde
 
 Apply filters:
 - If `--batch` specified: keep only tasks where `batch` matches
-- If `--type` specified: keep only tasks where `current_phase` matches (e.g., `--type reflect` finds tasks whose `current_phase` is "reflect")
+- If `--type` specified: keep only tasks where `type` matches (e.g., `--type process` finds process tasks, `--type note` finds note tasks)
 
 The `phase_order` header defines the phase sequence:
-- `claim`: create -> reflect -> reweave -> verify
+- `note`: create -> reflect -> reweave -> verify
 - `enrichment`: enrich -> reflect -> reweave -> verify
+
+**For `type: "process"` tasks:**
+Read `task.granularity` to determine which skill to invoke:
+- `"extract"` → spawn /extract worker
+- `"structure"` → spawn /structure worker
+- `"capture"` → spawn /capture worker
 
 ## Step 3: If --dry-run, Report and Stop
 
@@ -165,16 +166,18 @@ Construct a prompt based on `current_phase`. Every prompt MUST include:
 
 **Phase-specific prompts:**
 
-For **extract** phase (type=extract tasks only):
+For **process** phase (type=process tasks only):
 ```
 Read the task file at ops/queue/{FILE} for context.
 
 You are processing task {ID} from the work queue.
-Phase: extract | Target: {TARGET}
+Phase: process | Target: {TARGET}
+Granularity: {GRANULARITY} (from task.granularity)
 
-Run /reduce --handoff on the source file referenced in the task file.
-After extraction: create per-claim task files, update the queue with new entries
-(1 entry per claim with current_phase/completed_phases), output RALPH HANDOFF.
+Run /{GRANULARITY_SKILL} --handoff on the source file referenced in the task file.
+(granularity "extract" → /extract, "structure" → /structure, "capture" → /capture)
+After processing: create per-note task files, update the queue with new entries
+(1 entry per note with type: note, current_phase/completed_phases), output RALPH HANDOFF.
 ONE PHASE ONLY. Do NOT run reflect or other phases.
 ```
 
@@ -307,7 +310,7 @@ Look up `phase_order` from the queue header to determine the next phase. Find `c
 - Set `current_phase` to null
 - Append the completed phase to `completed_phases`
 
-**For extract tasks ONLY:** Re-read the queue after marking done. The reduce skill writes new task entries (1 entry per claim/enrichment with `current_phase`/`completed_phases`) to the queue during execution. The lead must pick these up for subsequent iterations.
+**For process tasks ONLY:** Re-read the queue after marking done. The processing skill (/extract, /structure, or /capture) writes new task entries (1 entry per note/enrichment with `current_phase`/`completed_phases`) to the queue during execution. The lead must pick these up for subsequent iterations.
 
 ### 4f. Report Progress
 
@@ -358,8 +361,8 @@ Check backward link gaps. Output RALPH HANDOFF block when done.",
 
 **Incompatible flags:** `--parallel` cannot be combined with `--type`. Parallel mode processes claims end-to-end (all phases). If `--type` is also set, report an error:
 ```
-ERROR: --parallel and --type are incompatible. Parallel processes full claim pipelines, not individual phases.
-Use serial mode for per-phase filtering: /ralph N --type reflect
+ERROR: --parallel and --type are incompatible. Parallel processes full note pipelines, not individual types.
+Use serial mode for per-type filtering: /ralph N --type note
 ```
 
 ### Parallel Architecture
@@ -570,8 +573,8 @@ Every task MUST be processed via Agent tool. If the lead detects it executed a t
 ### Gate 2: Handoff Present
 Every subagent SHOULD return a RALPH HANDOFF block. If missing: log warning, mark task done, continue.
 
-### Gate 3: Extract Yield
-For extract tasks: if zero claims extracted, log as an observation. Do NOT retry automatically.
+### Gate 3: Process Yield
+For process tasks: if zero notes extracted, log as an observation. Do NOT retry automatically.
 
 ### Gate 4: Task File Updated
 After each phase, the task file's corresponding section (Create, Reflect, Reweave, Verify) should be filled. If empty after subagent completes, log warning.
@@ -581,7 +584,7 @@ After each phase, the task file's corresponding section (Create, Reflect, Reweav
 ## Critical Constraints
 
 **Never:**
-- Execute tasks inline in the lead session (USE THE TASK TOOL)
+- Execute tasks inline in the lead session (USE THE AGENT TOOL)
 - Process more than one phase per subagent (context contamination)
 - Retry failed tasks automatically without human input
 - Skip queue phase advancement (breaks pipeline state)

@@ -2,3 +2,4 @@
 *.local.md
 .claude/settings.local.json
 docs/superpowers/
+todo.md

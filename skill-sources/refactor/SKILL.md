@@ -71,14 +71,11 @@ Read `ops/config.yaml` and `ops/derivation.md` fully. Extract the position for e
 
 | Dimension | Derivation Value | Config Value | Changed? | Drift Type |
 |-----------|-----------------|--------------|----------|------------|
-| granularity | [val] | [val] | [yes/no] | [aligned/misaligned] |
 | organization | [val] | [val] | [yes/no] | [aligned/misaligned] |
 | linking | [val] | [val] | [yes/no] | [aligned/misaligned] |
-| processing | [val] | [val] | [yes/no] | [aligned/misaligned] |
 | navigation | [val] | [val] | [yes/no] | [aligned/misaligned] |
 | maintenance | [val] | [val] | [yes/no] | [aligned/misaligned] |
 | schema | [val] | [val] | [yes/no] | [aligned/misaligned] |
-| automation | [val] | [val] | [yes/no] | [aligned/misaligned] |
 
 **Step 3: Check feature flags**
 
@@ -115,14 +112,11 @@ For each changed dimension, determine ALL affected artifacts. This is the cascad
 
 | Change | Affected Artifacts | What Changes |
 |--------|-------------------|-------------|
-| **Granularity shift** | Note templates, extraction depth in /reduce, processing skills, context file "Note Design" section | Template body length guidance, extraction granularity settings, composability test thresholds |
 | **Organization shift** | Folder structure, MOC hierarchy, context file "Folder Architecture" section, hub MOC | Directory layout, MOC tier count, navigation references |
 | **Linking shift** | Semantic search config, /reflect connection density expectations, context file "Connection Finding" section | Search tool availability, link threshold values, discovery layer instructions |
-| **Processing shift** | /reduce depth settings, /reflect pass count, pipeline skills, context file "Processing Pipeline" section, config.yaml processing.depth | Extraction thoroughness, connection evaluation depth, chaining mode |
 | **Navigation shift** | MOC tier structure, hub MOC, context file "MOC" section, note Topics footers | Number of MOC tiers, hub content, navigation instructions |
 | **Maintenance shift** | /health threshold values, condition-based trigger settings, context file maintenance instructions | Check frequency conditions, stale note thresholds, reweave trigger conditions |
 | **Schema shift** | Templates (_schema blocks), validation rules, /validate skill, query scripts, context file "YAML" section | Required fields, enum values, validation patterns |
-| **Automation shift** | Hooks (session orient, write validation, inbox processing), skill activation, config.yaml automation section | Which hooks are active, automation level references |
 
 ### Artifact Analysis Format
 
@@ -250,12 +244,9 @@ For each skill affected by the dimension changes:
 
 | Dimension Change | Skills to Regenerate |
 |-----------------|---------------------|
-| Granularity | /reduce, /verify, /validate |
-| Processing | /reduce, /reflect, /reweave, /verify, /ralph, /pipeline |
 | Linking | /reflect, /reweave |
 | Navigation | /reflect (MOC update logic) |
 | Schema | /validate, /verify |
-| Automation | /ralph, /pipeline (chaining mode) |
 | Maintenance | /health |
 
 ### 4c. Update Context File

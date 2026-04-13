@@ -375,7 +375,7 @@ Update `.mcp.json` or equivalent configuration to include the new collection.
 
 ### Step 10: Domain processing skills (if processing >= moderate)
 
-If the new domain needs its own processing skills (because processing intensity or vocabulary differs from existing domain), generate domain-adapted versions of reduce/reflect/verify skills.
+If the new domain needs its own processing skills (because processing intensity or vocabulary differs from existing domain), generate domain-adapted versions of extract/structure/capture/reflect/verify skills.
 
 If the existing skills can handle multi-domain routing by note type, update them instead of creating duplicates.
 

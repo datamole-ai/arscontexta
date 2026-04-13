@@ -1,6 +1,6 @@
 ---
 name: reflect
-description: Find connections between notes and update MOCs. Requires semantic judgment to identify genuine relationships. Use after /reduce creates notes, when exploring connections, or when a topic needs synthesis. Triggers on "/reflect", "/reflect [note]", "find connections", "update MOCs", "connect these notes".
+description: Find connections between notes and update MOCs. Requires semantic judgment to identify genuine relationships. Use after /extract, /structure, or /capture creates notes, when exploring connections, or when a topic needs synthesis. Triggers on "/reflect", "/reflect [note]", "find connections", "update MOCs", "connect these notes".
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, mcp__qmd__query, mcp__qmd__status
 ---
 
@@ -21,6 +21,14 @@ Read these files to configure domain-specific behavior:
    - `processing.chaining`: manual | suggested | automatic
 
 If these files don't exist, use universal defaults.
+
+## Granularity-Aware Processing
+
+After reading the target {vocabulary.note}, check its `granularity` frontmatter field. Adjust connection-finding depth:
+
+- **`extract`**: Full treatment — claim-level semantic search, forward and backward connections, {vocabulary.topic_map} placement with context phrases explaining WHY the {vocabulary.note} belongs.
+- **`structure`**: Forward connections at both topic and section level — the {vocabulary.note} as a whole connects to topics, but individual sections may connect to specific existing {vocabulary.note_plural}. Backward connections to {vocabulary.note_plural} relating to any sub-claim. {vocabulary.topic_map} placement.
+- **`capture`**: Lighter treatment — scan verbatim content for references to existing topics and {vocabulary.note_plural}. Add wikilinks ONLY outside the fenced block (in Relevant Notes and Topics footer sections). **NEVER modify content inside the fenced block.** {vocabulary.topic_map} placement.
 
 **Processing depth adaptation:**
 
@@ -108,29 +116,6 @@ External loop mode for /ralph:
 
 ## Workflow
 
-### Phase 0: Verify Index Freshness
-
-Before using semantic search, verify the index is current. This is self-healing: if {vocabulary.note_plural} were created outside the pipeline (manual edits, other skills), reflect catches the drift before searching.
-
-1. Try `mcp__qmd__status` to get the indexed document count for the target collection
-2. **If MCP unavailable** (tool fails or returns error): fall back to bash:
-   ```bash
-   LOCKDIR="ops/queue/.locks/qmd.lock"
-   while ! mkdir "$LOCKDIR" 2>/dev/null; do sleep 2; done
-   qmd_count=$(qmd status 2>/dev/null | grep -A2 '{vocabulary.notes_collection}' | grep 'documents' | grep -oE '[0-9]+' | head -1)
-   rm -rf "$LOCKDIR"
-   ```
-3. Count actual files:
-   ```bash
-   file_count=$(ls -1 {vocabulary.notes}/*.md 2>/dev/null | wc -l | tr -d ' ')
-   ```
-4. If the counts differ, sync the index:
-   ```bash
-   qmd update && qmd embed
-   ```
-
-Run this check before proceeding. If stale, sync and continue. If current, proceed immediately.
-
 ### Phase 1: Understand What You Are Connecting
 
 Before searching for connections, deeply understand the source material.
@@ -178,17 +163,12 @@ If you know the topic (check the {vocabulary.note}'s Topics footer), start with 
 - query: "[{vocabulary.note}'s core concepts and mechanisms]"
 - limit: 15
 
-**Tier 2 — bash qmd with lock serialization:** If MCP tools fail or are unavailable:
+**Tier 2 — bash qmd:** If MCP tools fail or are unavailable:
 ```bash
-LOCKDIR="ops/queue/.locks/qmd.lock"
-while ! mkdir "$LOCKDIR" 2>/dev/null; do sleep 2; done
 qmd query "[note's core concepts]" --collection {vocabulary.notes_collection} --limit 15 2>/dev/null
-rm -rf "$LOCKDIR"
 ```
 
-The lock prevents multiple parallel workers from loading large models simultaneously.
-
-**Tier 3 — grep only:** If both MCP and bash fail, log "qmd unavailable, grep-only discovery" and rely on {vocabulary.topic_map} + keyword search only. This degrades quality but does not block work.
+**Tier 3 — grep only:** If both MCP and bash fail, rely on {vocabulary.topic_map} + keyword search only. This degrades quality but does not block work.
 
 Evaluate results by relevance — read any result where title or snippet suggests genuine connection. Semantic search finds {vocabulary.note_plural} that share MEANING even when vocabulary differs. A {vocabulary.note} about "iteration cycles" might connect to "learning from friction" despite sharing no words.
 
@@ -305,27 +285,35 @@ Connections live in the prose, not just footers.
 
 **Inline Links as Prose:**
 
-The wiki link IS the argument. The title works as prose when linked.
+The wiki link IS the argument. The title works as prose when linked. How it reads depends on granularity:
 
-Good patterns:
+**Atomic notes (claims)** — the title IS a proposition, link it as one:
 ```markdown
-Since [[other note]], the question becomes how to structure that memory for retrieval.
-
-The insight that [[throughput matters more than accumulation]] suggests curation, not creation, is the real work.
+Since [[throughput matters more than accumulation]], the question becomes who does the selecting.
 
 This works because [[good systems learn from friction]] — each iteration improves the next.
 ```
 
-Bad patterns:
+**Structure notes (scope)** — the title describes territory, link it as a noun phrase:
+```markdown
+Building on [[how caching strategies affect API latency under load]], we chose a write-through approach.
+
+Given [[trade-offs between consistency and availability in distributed systems]], eventual consistency was the pragmatic choice.
+```
+
+**Capture notes (content)** — the title describes an artifact, link it as a reference:
+```markdown
+As documented in [[quarterly planning meeting discussing Q3 priorities]], the hiring freeze extends through August.
+```
+
+Bad patterns (regardless of granularity):
 ```markdown
 This relates to [[other note]].
 
 See also [[throughput matters more than accumulation]].
-
-As discussed in [[good systems learn from friction]], systems improve.
 ```
 
-If you catch yourself writing "this relates to" or "see also", STOP. Restructure so the claim does the work.
+If you catch yourself writing "this relates to" or "see also", STOP. Restructure so the linked title does the work.
 
 **Where to add links:**
 
@@ -494,7 +482,9 @@ If any connection fails this test, remove it.
 For every inline link, read the sentence aloud. Does it flow naturally? Would you say this to a friend explaining the idea?
 
 Bad: "this is related to [[note]]"
-Good: "since [[note]], the implication is..."
+Good (atomic): "since [[claim title]], the implication is..."
+Good (structure): "building on [[scope title]], the approach was..."
+Good (capture): "as documented in [[content title]], the decision was..."
 
 ### Gate 3: Bidirectional Check
 
