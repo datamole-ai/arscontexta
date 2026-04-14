@@ -36,6 +36,8 @@ Shared across domains:
 - **Quality standards** — Same six criteria apply everywhere
 - **Discovery layers** — Same progressive disclosure pattern
 
+**Entity-type directories vs. multi-domain composition:** Entity-type directories separate different kinds of content WITHIN a domain (e.g., projects, contacts, blueprints in an organizational domain). Multi-domain composition separates different KNOWLEDGE DOMAINS (e.g., research + personal life). These are orthogonal and can compose — a multi-domain vault where each domain's note_collection contains entity-type subdirectories.
+
 ### Cross-Domain Patterns
 
 **When working in a specific domain:** Load that domain's section of the context file. Use domain-native vocabulary. Route processing through domain-appropriate skills.

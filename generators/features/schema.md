@@ -59,25 +59,25 @@ YAML + ripgrep = a queryable database. These patterns work across any domain:
 
 ```bash
 # Find all {DOMAIN:notes} of a specific type
-rg '^type: pattern' {DOMAIN:notes}/
+rg '^type: pattern' {DOMAIN:note_collection}/
 
 # Scan all descriptions for a concept
-rg '^description:.*friction' {DOMAIN:notes}/
+rg '^description:.*friction' {DOMAIN:note_collection}/
 
 # Find {DOMAIN:notes} missing required fields
-rg -L '^description:' {DOMAIN:notes}/*.md
+rg -L '^description:' {DOMAIN:note_collection}/*.md
 
 # Find {DOMAIN:notes} by {DOMAIN:topic map}
-rg '^topics:.*\[\[methodology\]\]' {DOMAIN:notes}/
+rg '^topics:.*\[\[methodology\]\]' {DOMAIN:note_collection}/
 
 # Cross-field queries — find pending tensions
-rg -l '^type: tension' {DOMAIN:notes}/ | xargs rg '^status: pending'
+rg -l '^type: tension' {DOMAIN:note_collection}/ | xargs rg '^status: pending'
 
 # Count {DOMAIN:notes} by type
-rg '^type:' {DOMAIN:notes}/ --no-filename | sort | uniq -c | sort -rn
+rg '^type:' {DOMAIN:note_collection}/ --no-filename | sort | uniq -c | sort -rn
 
 # Find {DOMAIN:notes} with specific relationship types
-rg 'extends' {DOMAIN:notes}/ --glob '*' | grep 'Relevant Notes'
+rg 'extends' {DOMAIN:note_collection}/ --glob '*' | grep 'Relevant Notes'
 
 # Find backlinks to a specific {DOMAIN:note}
 rg '\[\[{DOMAIN:note} title\]\]' --glob '*.md'

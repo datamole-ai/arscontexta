@@ -9,7 +9,8 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash, mcp__qmd__query, mcp__qmd__s
 Read these files to configure domain-specific behavior:
 
 1. **`ops/derivation-manifest.md`** — vocabulary mapping, platform hints
-   - Use `vocabulary.notes` for the notes folder name
+   - Use `vocabulary.note_collection` for the note collection directory
+   - If `entity_directories` section exists in manifest, read it for entity-type routing
    - Use `vocabulary.note` / `vocabulary.note_plural` for note type references
    - Use `vocabulary.reflect` for the process verb in output
    - Use `vocabulary.topic_map` / `vocabulary.topic_map_plural` for MOC references
@@ -167,7 +168,7 @@ Using only search misses curated structure. Using only {vocabulary.topic_map} mi
 
 For specific terms and exact matches:
 ```bash
-grep -r "term" {vocabulary.notes}/ --include="*.md"
+grep -r "term" {vocabulary.note_collection}/ --include="*.md"
 ```
 
 Use grep when:
@@ -338,7 +339,7 @@ When you edit an older {vocabulary.note} to add a reverse link, you MAY flag it 
 
 **Check incoming links:**
 ```bash
-grep -r '\[\[note name\]\]' {vocabulary.notes}/*.md | wc -l
+find {vocabulary.note_collection}/ -name "*.md" -type f -exec grep -l '\[\[note name\]\]' {} + | wc -l
 ```
 
 If >= 5, skip reweave flagging.
@@ -360,7 +361,7 @@ If >= 5, skip reweave flagging.
 After updating Core Ideas, count the links:
 
 ```bash
-grep -c '^\- \[\[' "{vocabulary.notes}/[moc-name].md"
+find {vocabulary.note_collection}/ -name "[moc-name].md" -type f -exec grep -c '^\- \[\[' {} +
 ```
 
 If approaching the split threshold (configurable, default ~40): note in output "{vocabulary.topic_map} approaching split threshold (N links)"
@@ -485,7 +486,7 @@ Verify every wiki link target exists. Never create links to non-existent files.
 
 ```bash
 # Check that a link target exists
-ls {vocabulary.notes}/"target name.md" 2>/dev/null
+find {vocabulary.note_collection}/ -name "target name.md" -type f 2>/dev/null
 ```
 
 ## Handling Edge Cases
@@ -659,8 +660,8 @@ Work Done:
 - Synthesis opportunities: [count or NONE]
 
 Files Modified:
-- {vocabulary.notes}/[note name].md (inline links added)
-- {vocabulary.notes}/[moc-name].md (Core Ideas updated)
+- {vocabulary.note_collection}/[note name].md (inline links added)
+- {vocabulary.note_collection}/[moc-name].md (Core Ideas updated)
 - [task file path] ({vocabulary.reflect} section)
 
 Learnings:

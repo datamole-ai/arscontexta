@@ -27,7 +27,7 @@ Three modes serve different needs. Choose based on what you are looking for:
 | Duplicate detection before creating a {DOMAIN:note} | Semantic | Catches same-idea-different-words that keywords miss |
 | Finding connections for a new {DOMAIN:note} | Hybrid | Maximum quality — runs once per {DOMAIN:note}, time justified |
 | Testing description findability | Semantic | Tests what agents actually search with |
-| Quick field lookup | Keyword | `rg '^type: pattern' {DOMAIN:notes}/` is instant and precise |
+| Quick field lookup | Keyword | `rg '^type: pattern' {DOMAIN:note_collection}/` is instant and precise |
 | Exploring what exists on a topic | Hybrid | Finds meaning across vocabularies |
 
 ### Keyword Search Patterns
@@ -36,19 +36,19 @@ Keyword search (ripgrep) is your workhorse for structured queries:
 
 ```bash
 # Find {DOMAIN:notes} by type
-rg '^type: pattern' {DOMAIN:notes}/
+rg '^type: pattern' {DOMAIN:note_collection}/
 
 # Scan all descriptions
-rg '^description:' {DOMAIN:notes}/
+rg '^description:' {DOMAIN:note_collection}/
 
 # Find {DOMAIN:notes} missing required fields
-rg -L '^description:' {DOMAIN:notes}/*.md
+rg -L '^description:' {DOMAIN:note_collection}/*.md
 
 # Find all mentions of a {DOMAIN:note}
 rg '\[\[{DOMAIN:note} title\]\]' --glob '*.md'
 
 # Find {DOMAIN:notes} by {DOMAIN:topic map}
-rg '^topics:.*\[\[methodology\]\]' {DOMAIN:notes}/
+rg '^topics:.*\[\[methodology\]\]' {DOMAIN:note_collection}/
 ```
 
 Keyword search is fast, works everywhere, requires no external tools, and is precise for known vocabulary.
@@ -86,7 +86,7 @@ Semantic search is valuable but not required. The system works without it. When 
 
 1. **Keyword search (rg)** — Always available. Precise for known vocabulary.
 2. **{DOMAIN:Topic map} traversal** — Browse the relevant {DOMAIN:topic map} to see what exists in a topic area.
-3. **Description scanning** — `rg '^description:' {DOMAIN:notes}/` loads all descriptions for manual review.
+3. **Description scanning** — `rg '^description:' {DOMAIN:note_collection}/` loads all descriptions for manual review.
 4. **Heading outlines** — `grep -n "^#" "{DOMAIN:note}.md"` shows a {DOMAIN:note}'s structure before reading fully.
 
 Never let a search failure block work. The multi-layer discovery approach means you always have a way to find what you need.

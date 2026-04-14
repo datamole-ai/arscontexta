@@ -11,7 +11,8 @@ argument-hint: "[operation] [target] — operations: health, triangles, bridges,
 Read these files to configure domain-specific behavior:
 
 1. **`ops/derivation-manifest.md`** — vocabulary mapping, platform hints
-   - Use `vocabulary.notes` for the notes folder name
+   - Use `vocabulary.note_collection` for the note collection directory
+   - If `entity_directories` section exists in manifest, read it for entity-type routing
    - Use `vocabulary.note` / `vocabulary.note_plural` for note type references
    - Use `vocabulary.topic_map` / `vocabulary.topic_map_plural` for MOC references
    - Use `vocabulary.cmd_reflect` for connection-finding command name
@@ -56,13 +57,13 @@ Full graph health report: density, orphans, dangling links, coverage.
 
 ```bash
 # Count total notes (excluding MOCs)
-NOTES_DIR="{vocabulary.notes}"
-TOTAL=$(ls -1 "$NOTES_DIR"/*.md 2>/dev/null | wc -l | tr -d ' ')
-MOC_COUNT=$(grep -rl '^type: moc' "$NOTES_DIR"/*.md 2>/dev/null | wc -l | tr -d ' ')
+NOTES_DIR="{vocabulary.note_collection}"
+TOTAL=$(find "$NOTES_DIR"/ -name "*.md" -type f | wc -l | tr -d ' ')
+MOC_COUNT=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l '^type: moc' {} + 2>/dev/null | wc -l | tr -d ' ')
 NOTE_COUNT=$((TOTAL - MOC_COUNT))
 
 # Count all wiki links
-LINK_COUNT=$(grep -ohP '\[\[[^\]]+\]\]' "$NOTES_DIR"/*.md 2>/dev/null | wc -l | tr -d ' ')
+LINK_COUNT=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -ohP '\[\[[^\]]+\]\]' {} + 2>/dev/null | wc -l | tr -d ' ')
 
 # Calculate link density
 # Density = actual_links / possible_links
@@ -70,26 +71,26 @@ LINK_COUNT=$(grep -ohP '\[\[[^\]]+\]\]' "$NOTES_DIR"/*.md 2>/dev/null | wc -l | 
 echo "Density: $LINK_COUNT / ($NOTE_COUNT * ($NOTE_COUNT - 1))"
 
 # Find orphan notes (zero incoming links)
-for f in "$NOTES_DIR"/*.md; do
+for f in $(find "$NOTES_DIR"/ -name "*.md" -type f); do
   NAME=$(basename "$f" .md)
   INCOMING=$(grep -rl "\[\[$NAME\]\]" "$NOTES_DIR"/ 2>/dev/null | grep -v "$f" | wc -l | tr -d ' ')
   [[ "$INCOMING" -eq 0 ]] && echo "ORPHAN: $NAME"
 done
 
 # Find dangling links (links to non-existent files)
-grep -ohP '\[\[([^\]]+)\]\]' "$NOTES_DIR"/*.md 2>/dev/null | sort -u | while read -r link; do
+find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -ohP '\[\[([^\]]+)\]\]' {} + 2>/dev/null | sort -u | while read -r link; do
   NAME=$(echo "$link" | sed 's/\[\[//;s/\]\]//')
-  [[ ! -f "$NOTES_DIR/$NAME.md" ]] && echo "DANGLING: $NAME"
+  ! find "$NOTES_DIR"/ -name "$NAME.md" -type f | grep -q . && echo "DANGLING: $NAME"
 done
 
 # MOC coverage: % of notes appearing in at least one MOC's Core Ideas
 COVERED=0
-for f in "$NOTES_DIR"/*.md; do
+for f in $(find "$NOTES_DIR"/ -name "*.md" -type f); do
   NAME=$(basename "$f" .md)
   # Skip MOCs themselves
   grep -q '^type: moc' "$f" 2>/dev/null && continue
   # Check if any MOC links to this note
-  if grep -rl '^type: moc' "$NOTES_DIR"/*.md 2>/dev/null | xargs grep -l "\[\[$NAME\]\]" >/dev/null 2>&1; then
+  if find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l '^type: moc' {} + 2>/dev/null | xargs grep -l "\[\[$NAME\]\]" >/dev/null 2>&1; then
     COVERED=$((COVERED + 1))
   fi
 done
@@ -142,7 +143,7 @@ Find synthesis opportunities — open triadic closures where A links to B and A 
 
 ```bash
 # For each note, extract outgoing wiki links
-for f in "$NOTES_DIR"/*.md; do
+for f in $(find "$NOTES_DIR"/ -name "*.md" -type f); do
   NAME=$(basename "$f" .md)
   LINKS=$(grep -oP '\[\[([^\]]+)\]\]' "$f" 2>/dev/null | sed 's/\[\[//;s/\]\]//' | sort -u)
   echo "FROM:$NAME"
@@ -202,7 +203,7 @@ Identify structurally critical {vocabulary.note_plural} whose removal would disc
 
 **Step 1: Build adjacency list**
 
-Build a bidirectional adjacency list from all wiki links in {vocabulary.notes}/.
+Build a bidirectional adjacency list from all wiki links in {vocabulary.note_collection}/.
 
 If `ops/scripts/graph/find-bridges.sh` exists, use it directly.
 
@@ -292,14 +293,14 @@ Rank {vocabulary.note_plural} by influence — most-linked-to (authorities) and 
 
 ```bash
 # Authority score: incoming links per note
-for f in "$NOTES_DIR"/*.md; do
+for f in $(find "$NOTES_DIR"/ -name "*.md" -type f); do
   NAME=$(basename "$f" .md)
   INCOMING=$(grep -rl "\[\[$NAME\]\]" "$NOTES_DIR"/ 2>/dev/null | grep -v "$f" | wc -l | tr -d ' ')
   echo "AUTH:$INCOMING:$NAME"
 done | sort -t: -k2 -rn | head -10
 
 # Hub score: outgoing links per note
-for f in "$NOTES_DIR"/*.md; do
+for f in $(find "$NOTES_DIR"/ -name "*.md" -type f); do
   NAME=$(basename "$f" .md)
   OUTGOING=$(grep -oP '\[\[[^\]]+\]\]' "$f" 2>/dev/null | wc -l | tr -d ' ')
   echo "HUB:$OUTGOING:$NAME"
@@ -427,7 +428,7 @@ Find all notes that link TO this {vocabulary.note} (hop 1).
 
 ```bash
 NAME="[note name]"
-grep -rl "\[\[$NAME\]\]" "$NOTES_DIR"/*.md 2>/dev/null
+find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l "\[\[$NAME\]\]" {} + 2>/dev/null
 ```
 
 If `ops/scripts/graph/recursive-backlinks.sh` exists, use it with the note and depth arguments.
@@ -476,7 +477,7 @@ Supported query patterns:
 **Step 2: Execute query**
 
 ```bash
-rg "^{field}:.*{value}" "$NOTES_DIR"/*.md -l 2>/dev/null
+find "$NOTES_DIR"/ -name "*.md" -type f -exec rg -l "^{field}:.*{value}" {} + 2>/dev/null
 ```
 
 For each matching file, extract the description for context.
@@ -553,11 +554,11 @@ Use universal vocabulary (notes, MOCs, etc.). All operations work identically.
 
 ### Empty Notes Directory
 
-Report: "No {vocabulary.note_plural} found in {vocabulary.notes}/. Start by capturing content to build your knowledge graph."
+Report: "No {vocabulary.note_plural} found in {vocabulary.note_collection}/. Start by capturing content to build your knowledge graph."
 
 ### Note Not Found (for forward/backward/siblings)
 
 If the specified {vocabulary.note} or {vocabulary.topic_map} does not exist:
-1. Search for partial matches: `ls "$NOTES_DIR"/*{query}*.md 2>/dev/null`
+1. Search for partial matches: `find "$NOTES_DIR"/ -name "*{query}*.md" -type f 2>/dev/null`
 2. If matches found: "Did you mean: [[match1]], [[match2]]?"
 3. If no matches: "{vocabulary.note} '[[name]]' not found. Check the name and try again."

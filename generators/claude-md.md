@@ -25,7 +25,7 @@ Notes are your external memory. Wiki-links are your connections. MOCs are your a
 
 **Every note you create must be findable by a future agent who doesn't know it exists.**
 
-This is the foundational retrieval constraint. Before writing anything to {DOMAIN:notes}/, ask:
+This is the foundational retrieval constraint. Before writing anything to {DOMAIN:note_collection}/, ask:
 
 1. **Title as claim** — Does the title work as prose when linked? `since [[title]]` reads naturally?
 2. **Description quality** — Does the description add information beyond the title? Would an agent searching for this concept find it?
@@ -95,14 +95,14 @@ self/
 
 | Content Type | Destination | Examples |
 |-------------|-------------|----------|
-| {DOMAIN:Knowledge} claims, insights | {DOMAIN:Notes}/ | Research findings, patterns, principles |
+| {DOMAIN:Knowledge} claims, insights | {DOMAIN:note_collection}/ | Research findings, patterns, principles |
 | Raw material to process | inbox/ | Articles, voice dumps, links, imported content |
 | Agent identity, methodology, preferences | self/ | Working patterns, learned preferences, goals |
 | Time-bound user commitments | ops/reminders.md | "Remind me to...", follow-ups, deadlines |
 | Processing state, queue, config | ops/ | Queue state, task files, session logs |
 | Friction signals, patterns noticed | ops/observations/ | Search failures, methodology improvements |
 
-When uncertain, ask: "Is this durable knowledge ({DOMAIN:notes}/), agent identity (self/), or temporal coordination (ops/)?" Durable knowledge earns its place in the graph. Agent identity shapes future behavior. Everything else is operational.
+When uncertain, ask: "Is this durable knowledge ({DOMAIN:note_collection}/), agent identity (self/), or temporal coordination (ops/)?" Durable knowledge earns its place in the graph. Agent identity shapes future behavior. Everything else is operational.
 ```
 
 ## Operational Space (always include)
@@ -186,7 +186,7 @@ Include each enabled feature's corresponding block from `generators/features/`. 
 ```markdown
 ## Pipeline Compliance
 
-**NEVER write directly to {DOMAIN:notes}/.** All content routes through the pipeline: {DOMAIN:inbox}/ → /{DOMAIN:process} → {DOMAIN:notes}/. If you find yourself creating a file in {DOMAIN:notes}/ without having run /{DOMAIN:process}, STOP. Route through {DOMAIN:inbox}/ first. The pipeline exists because direct writes skip quality gates.
+**NEVER write directly to {DOMAIN:note_collection}/.** All content routes through the pipeline: {DOMAIN:inbox}/ → /{DOMAIN:process} → {DOMAIN:note_collection}/. If you find yourself creating a file in {DOMAIN:note_collection}/ without having run /{DOMAIN:process}, STOP. Route through {DOMAIN:inbox}/ first. The pipeline exists because direct writes skip quality gates.
 
 Full automation is active from day one. All processing skills, all quality gates, all maintenance mechanisms are available immediately. You do not need to reach a certain vault size before using orchestrated processing.
 
@@ -225,7 +225,7 @@ When two {DOMAIN:notes} contradict each other, or an implementation conflicts wi
 ### Accumulation Triggers
 - **10+ pending observations** → Run /{DOMAIN:rethink} to triage and process
 - **5+ pending tensions** → Run /{DOMAIN:rethink} to resolve conflicts
-- /{DOMAIN:rethink} triages each: PROMOTE (to {DOMAIN:notes}/), IMPLEMENT (update this file), ARCHIVE, or KEEP PENDING
+- /{DOMAIN:rethink} triages each: PROMOTE (to {DOMAIN:note_collection}/), IMPLEMENT (update this file), ARCHIVE, or KEEP PENDING
 ```
 
 ## Task Management (include when processing >= moderate)

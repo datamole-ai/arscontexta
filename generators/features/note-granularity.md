@@ -19,7 +19,7 @@ Every piece of content enters through {DOMAIN:inbox/} and gets processed through
 - `description` field required (adds info beyond the title)
 - Wiki-links connecting to the knowledge graph
 - At least one {DOMAIN:topic map} membership
-- All notes coexist in the same {DOMAIN:notes/} folder
+- All notes coexist in the same {DOMAIN:note_collection}/ folder (or entity-type subdirectories within it for multi-entity domains)
 
 **Choosing a pipeline:** Match the pipeline to the material, not the other way around. Research papers with decomposable claims → /extract. Meeting notes mixing multiple related topics → /structure. Verbatim transcripts where exact wording matters → /capture. When unsure, /structure is a safe middle ground.
 

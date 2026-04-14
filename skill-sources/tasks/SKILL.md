@@ -11,7 +11,7 @@ argument-hint: "[add|done|drop|reorder|status] [description|number] — manage t
 Read these files to configure domain-specific behavior:
 
 1. **`ops/derivation-manifest.md`** — vocabulary mapping
-   - Use `vocabulary.notes` for the notes folder name
+   - Use `vocabulary.note_collection` for the notes folder name
    - Use `vocabulary.note` / `vocabulary.note_plural` for note type references
    - Use `vocabulary.topic_map` for MOC references
    - Use `vocabulary.cmd_reflect` / `vocabulary.cmd_reweave` / `vocabulary.cmd_verify` for phase command names

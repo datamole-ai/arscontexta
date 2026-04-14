@@ -11,7 +11,8 @@ allowed-tools: Read, Grep, Glob, Bash, mcp__qmd__query
 Read these files to configure domain-specific behavior:
 
 1. **`ops/derivation-manifest.md`** — vocabulary mapping, folder names, platform hints
-   - Use `vocabulary.notes` for the notes folder name
+   - Use `vocabulary.note_collection` for the notes folder name
+   - Use `vocabulary.entity_directories` for the list of entity type subdirectories
    - Use `vocabulary.inbox` for the inbox folder name
    - Use `vocabulary.note` for the note type name in output
    - Use `vocabulary.topic_map` for MOC/topic map references
@@ -24,9 +25,9 @@ Read these files to configure domain-specific behavior:
 4. **Templates** — read template files to understand required schema fields for validation
 
 If these files don't exist (pre-init invocation or standalone use), use universal defaults:
-- notes folder: `notes/`
+- note collection: `note_collection/`
 - inbox folder: `inbox/`
-- topic map: topic maps in notes/
+- topic map: topic maps in note_collection/
 
 ---
 
@@ -49,13 +50,13 @@ If these files don't exist (pre-init invocation or standalone use), use universa
 
 ### Category 1: Schema Compliance
 
-**What it checks:** Every {vocabulary.note} in {vocabulary.notes}/ and self/memory/ (if self/ is enabled) has valid YAML frontmatter with required fields.
+**What it checks:** Every {vocabulary.note} in {vocabulary.note_collection}/ and self/memory/ (if self/ is enabled) has valid YAML frontmatter with required fields.
 
 **How to check:**
 
 ```bash
 # Find all note files (exclude topic maps)
-for f in {vocabulary.notes}/*.md; do
+for f in $(find {vocabulary.note_collection}/ -name "*.md" -type f); do
   [[ -f "$f" ]] || continue
   # Check: YAML frontmatter exists
   head -1 "$f" | grep -q '^---$' || echo "FAIL: $f — no YAML frontmatter"
@@ -102,7 +103,7 @@ done
 
 ```bash
 # For each note file, check if ANY other file links to it
-for f in {vocabulary.notes}/*.md; do
+for f in $(find {vocabulary.note_collection}/ -name "*.md" -type f); do
   [[ -f "$f" ]] || continue
   basename=$(basename "$f" .md)
   # Search for [[basename]] in all other files
@@ -220,7 +221,7 @@ For each {vocabulary.note}:
 
 ### Category 5: Three-Space Boundary Check
 
-**What it checks:** Content respects the boundaries between self/, {vocabulary.notes}/, and ops/. Each space has a purpose — conflating them degrades search quality, navigation, and trust.
+**What it checks:** Content respects the boundaries between self/, {vocabulary.note_collection}/, and ops/. Each space has a purpose — conflating them degrades search quality, navigation, and trust.
 
 **Before running this check:** Read `${CLAUDE_PLUGIN_ROOT}/reference/three-spaces.md` for the full boundary specification.
 
@@ -228,37 +229,37 @@ For each {vocabulary.note}:
 
 #### 5a. Ops into Notes (Infrastructure Creep)
 
-Queue state, health metrics, task files, or processing artifacts appearing in {vocabulary.notes}/ directory.
+Queue state, health metrics, task files, or processing artifacts appearing in {vocabulary.note_collection}/ directory.
 
 **Detection:**
 ```bash
 # Check for ops-pattern YAML fields in notes
-rg '^(current_phase|completed_phases|batch|source_task|queue_id):' {vocabulary.notes}/ --glob '*.md'
+rg '^(current_phase|completed_phases|batch|source_task|queue_id):' {vocabulary.note_collection}/ --glob '*.md'
 # Check for task file patterns in notes
-rg '## (Create|Reflect|Reweave|Verify|Enrich)$' {vocabulary.notes}/ --glob '*.md'
+rg '## (Create|Reflect|Reweave|Verify|Enrich)$' {vocabulary.note_collection}/ --glob '*.md'
 ```
 
 | Found | Level |
 |-------|-------|
-| Any ops-pattern content in {vocabulary.notes}/ | WARN |
+| Any ops-pattern content in {vocabulary.note_collection}/ | WARN |
 
 #### 5b. Self into Notes (Identity Pollution)
 
-Agent identity or methodology content mixed into user's knowledge graph. Agent's operational observations appearing in user's {vocabulary.notes}/ space.
+Agent identity or methodology content mixed into user's knowledge graph. Agent's operational observations appearing in user's {vocabulary.note_collection}/ space.
 
 **Detection:**
 ```bash
 # Check for agent-reflection patterns in notes (methodology observations, workflow assessments)
-rg -i '(my methodology|I observed that|agent reflection|session learning|I learned)' {vocabulary.notes}/ --glob '*.md'
+rg -i '(my methodology|I observed that|agent reflection|session learning|I learned)' {vocabulary.note_collection}/ --glob '*.md'
 ```
 
 | Found | Level |
 |-------|-------|
-| Any agent-reflection content in {vocabulary.notes}/ | WARN |
+| Any agent-reflection content in {vocabulary.note_collection}/ | WARN |
 
 #### 5c. Notes into Ops (Trapped Knowledge)
 
-Genuine insights trapped in session logs, observations, or ops files that should be promoted to {vocabulary.notes}/.
+Genuine insights trapped in session logs, observations, or ops files that should be promoted to {vocabulary.note_collection}/.
 
 **Detection:**
 ```bash
@@ -285,7 +286,7 @@ rg -i '(my identity|I am|who I am|my personality)' ops/ --glob '*.md' 2>/dev/nul
 
 #### 5e. Notes into Self
 
-Domain knowledge stored in self/ instead of {vocabulary.notes}/.
+Domain knowledge stored in self/ instead of {vocabulary.note_collection}/.
 
 **Detection:**
 ```bash
@@ -295,14 +296,14 @@ rg '^topics:.*\[\[' self/memory/*.md 2>/dev/null | grep -v 'identity\|methodolog
 
 #### 5f. Self Space Absence Effects (when self/ is disabled)
 
-When self/ is disabled, verify ops/ absorbs self-space content correctly. Check that goals and handoffs are in ops/, not floating in {vocabulary.notes}/.
+When self/ is disabled, verify ops/ absorbs self-space content correctly. Check that goals and handoffs are in ops/, not floating in {vocabulary.note_collection}/.
 
 **Detection:**
 ```bash
-# If self/ doesn't exist, check that goals/handoffs are in ops/
+# If self/ doesn't exist, check that goals/handoffs are in note_collection/
 if [[ ! -d "self/" ]]; then
-  # Check for goals or handoff content in notes/
-  rg -i '(my goals|current goals|handoff|session handoff)' {vocabulary.notes}/ --glob '*.md'
+  # Check for goals or handoff content in note_collection/
+  rg -i '(my goals|current goals|handoff|session handoff)' {vocabulary.note_collection}/ --glob '*.md'
 fi
 ```
 
@@ -337,7 +338,7 @@ fi
 ```bash
 # Count items in each space
 INBOX_COUNT=$(find {vocabulary.inbox}/ -name '*.md' -not -path '*/archive/*' 2>/dev/null | wc -l | tr -d ' ')
-NOTES_COUNT=$(find {vocabulary.notes}/ -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+NOTES_COUNT=$(find {vocabulary.note_collection}/ -name '*.md' -type f 2>/dev/null | wc -l | tr -d ' ')
 QUEUE_COUNT=$(find ops/queue/ -name '*.md' -not -path '*/archive/*' 2>/dev/null | wc -l | tr -d ' ')
 
 # Calculate ratio
@@ -379,7 +380,7 @@ For each {vocabulary.note}:
 3. Flag notes with: modified > 30 days ago AND < 2 incoming links
 
 ```bash
-for f in {vocabulary.notes}/*.md; do
+for f in $(find {vocabulary.note_collection}/ -name "*.md" -type f); do
   [[ -f "$f" ]] || continue
   basename=$(basename "$f" .md)
 
@@ -432,7 +433,7 @@ For each {vocabulary.topic_map} file:
 
 ```bash
 # For each topic map
-for moc in {vocabulary.notes}/*.md; do
+for moc in $(find {vocabulary.note_collection}/ -name "*.md" -type f); do
   [[ -f "$moc" ]] || continue
   # Check if this is a topic map (has type: moc in frontmatter)
   rg -q '^type: moc' "$moc" || continue
@@ -440,7 +441,7 @@ for moc in {vocabulary.notes}/*.md; do
   moc_name=$(basename "$moc" .md)
 
   # Count notes linking to this topic map
-  note_count=$(rg -l "\[\[$moc_name\]\]" {vocabulary.notes}/ --glob '*.md' | grep -v "$moc" | wc -l | tr -d ' ')
+  note_count=$(rg -l "\[\[$moc_name\]\]" {vocabulary.note_collection}/ --glob '*.md' | grep -v "$moc" | wc -l | tr -d ' ')
 
   echo "$moc_name: $note_count notes"
 done
@@ -460,7 +461,7 @@ done
 
 ```bash
 # Check for bare links in topic map Core Ideas (links without context phrases)
-for moc in {vocabulary.notes}/*.md; do
+for moc in $(find {vocabulary.note_collection}/ -name "*.md" -type f); do
   rg -q '^type: moc' "$moc" || continue
   # Look for "- [[note]]" without " — " context
   rg '^\s*- \[\[' "$moc" | grep -v ' — ' | grep -v '^\s*- \[\[.*\]\].*—'

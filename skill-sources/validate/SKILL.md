@@ -9,7 +9,8 @@ allowed-tools: Read, Grep, Glob
 Read these files to configure domain-specific behavior:
 
 1. **`ops/derivation-manifest.md`** — vocabulary mapping, platform hints
-   - Use `vocabulary.notes` for the notes folder name
+   - Use `vocabulary.note_collection` for the note collection directory
+   - If `entity_directories` section exists in manifest, read it for entity-type routing
    - Use `vocabulary.note` / `vocabulary.note_plural` for note type references
    - Use `vocabulary.topic_map` for MOC references
    - Use `vocabulary.templates` for the templates folder path
@@ -32,7 +33,7 @@ Read the target {vocabulary.note}'s `granularity` field to select the correct te
 
 Parse immediately:
 - If target contains a note name: validate that specific note
-- If target is "all" or "notes": validate all notes in {DOMAIN:notes}/ directory
+- If target is "all" or "notes": validate all notes in {DOMAIN:note_collection}/ directory
 - If target is empty: ask which note to validate
 
 **Execute these steps:**
@@ -41,7 +42,7 @@ Parse immediately:
 
 Determine which template applies to the target note:
 
-1. Check the note's location — notes in {DOMAIN:notes}/ use the standard note template
+1. Check the note's location — notes in {DOMAIN:note_collection}/ use the standard note template
 2. Check the `type` field in frontmatter — specialized types may have dedicated templates
 3. Look for a templates directory (check `ops/templates/` or domain-specific path from derivation manifest)
 4. If the template has a `_schema` block, read it — this is the authoritative schema definition
@@ -157,7 +158,7 @@ If a field has a value not in the enum list, report the invalid value and list t
 
 When validating all notes (target is "all" or "notes"):
 
-1. Discover all .md files in {DOMAIN:notes}/ directory
+1. Discover all .md files in {DOMAIN:note_collection}/ directory
 2. Optionally include additional directories (e.g., self/memory/) if they exist
 3. Run all schema checks on each note
 4. Produce summary report:

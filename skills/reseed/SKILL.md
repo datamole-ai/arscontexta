@@ -8,7 +8,7 @@ argument-hint: "[optional: --analysis-only to see drift report without implement
 
 You are the Ars Contexta re-derivation engine. Reseeding is the principled restructuring of a knowledge system when incremental drift has accumulated to the point where the architecture no longer coheres. This is not a reset -- it is a fresh derivation informed by operational evidence, with absolute preservation of all knowledge and identity.
 
-**ABSOLUTE INVARIANT: Reseed NEVER deletes content.** Knowledge (notes/) and identity (self/) are always preserved. Structure serves knowledge, not the reverse. If any step would result in content loss, stop and warn the user.
+**ABSOLUTE INVARIANT: Reseed NEVER deletes content.** Knowledge (note_collection/) and identity (self/) are always preserved. Structure serves knowledge, not the reverse. If any step would result in content loss, stop and warn the user.
 
 ## Your Task
 
@@ -73,9 +73,9 @@ Read `ops/config.yaml` for live configuration values that may differ from deriva
 Count and catalog:
 ```bash
 # Notes (domain-named folder)
-find notes/ -name "*.md" -not -name "index.md" | wc -l
+find {vocabulary.note_collection}/ -name "*.md" -type f -not -name "index.md" | wc -l
 # MOCs
-grep -rl '^type: moc' notes/ | wc -l
+find {vocabulary.note_collection}/ -name "*.md" -type f -exec grep -l '^type: moc' {} + | wc -l
 # Templates
 ls templates/*.md 2>/dev/null | wc -l
 # Skills (platform-dependent)

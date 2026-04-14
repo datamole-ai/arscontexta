@@ -15,9 +15,9 @@ Run these checks when conditions warrant — orphans detected, links broken, sch
 {DOMAIN:Notes} with no incoming links are invisible to traversal. Find them:
 ```bash
 # Find notes not linked from anywhere
-rg -l '.' {DOMAIN:notes/}*.md | while read f; do
+find {DOMAIN:note_collection}/ -name "*.md" -type f | while read f; do
   title=$(basename "$f" .md)
-  rg -q "\[\[$title\]\]" {DOMAIN:notes/} || echo "Orphan: $f"
+  rg -q "\[\[$title\]\]" {DOMAIN:note_collection}/ || echo "Orphan: $f"
 done
 ```
 Every orphan is either a gap (needs connections) or stale (needs archiving).
@@ -26,7 +26,7 @@ Every orphan is either a gap (needs connections) or stale (needs archiving).
 Wiki links pointing to non-existent {DOMAIN:notes} create confusion:
 ```bash
 # Find [[links]] to files that don't exist
-rg -o '\[\[([^\]]+)\]\]' {DOMAIN:notes/} -r '$1' --no-filename | sort -u | while read title; do
+rg -o '\[\[([^\]]+)\]\]' {DOMAIN:note_collection}/ -r '$1' --no-filename | sort -u | while read title; do
   find . -name "$title.md" -not -path "./.git/*" | grep -q . || echo "Dangling: [[$title]]"
 done
 ```
@@ -35,7 +35,7 @@ Either create the missing {DOMAIN:note} or fix the link.
 **3. Schema Validation**
 Check that {DOMAIN:notes} have required YAML fields:
 ```bash
-rg -L '^description:' {DOMAIN:notes/}*.md    # missing descriptions
+find {DOMAIN:note_collection}/ -name "*.md" -type f -exec rg -L '^description:' {} +    # missing descriptions
 ```
 Missing descriptions mean the {DOMAIN:note} can't be filtered during search.
 

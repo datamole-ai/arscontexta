@@ -28,7 +28,7 @@ Parse immediately:
 
 ## Step 1: Gather Vault State
 
-Determine the **notes folder** by checking which domain-named directory exists (notes/, reflections/, concepts/, ideas/, decisions/, memories/, or any custom name from derivation-manifest.md). Then gather counts:
+Determine the **note collection** by reading `vocabulary.note_collection` from derivation-manifest.md (falls back to checking which domain-named directory exists: notes/, reflections/, concepts/, ideas/, decisions/, memories/). Then gather counts:
 
 - **Note count:** `.md` files in the notes folder, excluding MOCs (files with `type: moc` in frontmatter)
 - **Inbox count:** `.md` files in the inbox folder (inbox/, journal/, encounters/, etc.)
@@ -41,7 +41,7 @@ Determine the **notes folder** by checking which domain-named directory exists (
 
 ```bash
 # Quick state gathering
-note_count=$(ls -1 {vocabulary.notes}/*.md 2>/dev/null | wc -l | tr -d ' ')
+note_count=$(find {vocabulary.note_collection}/ -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
 inbox_count=$(ls -1 {vocabulary.inbox}/*.md 2>/dev/null | wc -l | tr -d ' ')
 obs_count=$(ls -1 ops/observations/*.md ops/methodology/*.md 2>/dev/null | wc -l | tr -d ' ')
 tension_count=$(ls -1 ops/tensions/*.md 2>/dev/null | wc -l | tr -d ' ')

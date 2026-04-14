@@ -11,7 +11,8 @@ version: "1.0"
 Read these files to configure domain-specific behavior:
 
 1. **`ops/derivation-manifest.md`** — vocabulary mapping, platform hints
-   - Use `vocabulary.notes` for the notes folder name
+   - Use `vocabulary.note_collection` for the note collection directory
+   - If `entity_directories` section exists in manifest, read it for entity-type routing
    - Use `vocabulary.note` / `vocabulary.note_plural` for note type references
    - Use `vocabulary.reduce` for the extraction verb
    - Use `vocabulary.reflect` for the connection-finding verb
@@ -145,13 +146,13 @@ Transform input into a real {vocabulary.note}:
    ```
 3. Write 2-3 sentences developing the thought
 4. Add Topics footer linking to the hub {vocabulary.topic_map}
-5. Write the file to `{vocabulary.notes}/`
+5. Write the file to `{vocabulary.note_collection}/`
 
 **SEE:**
 
 ```
   Note created:
-    {vocabulary.notes}/[filename].md
+    {vocabulary.note_collection}/[filename].md
 
   Title: [the prose title]
   Description: [the description]
@@ -214,7 +215,7 @@ Create a second {vocabulary.note}. Then search for connections to the first {voc
 If connected:
 ```
   Note created and connected:
-    {vocabulary.notes}/[filename].md
+    {vocabulary.note_collection}/[filename].md
 
   Connection:
     [[note A]] connects to [[note B]]
@@ -228,7 +229,7 @@ If connected:
 If not connected:
 ```
   Note created:
-    {vocabulary.notes}/[filename].md
+    {vocabulary.note_collection}/[filename].md
 
   No genuine connection to your first note.
   That is fine -- forced connections pollute

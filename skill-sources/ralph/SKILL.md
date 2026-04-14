@@ -159,7 +159,7 @@ Read the task file at ops/queue/{FILE} for context.
 You are processing task {ID} from the work queue.
 Phase: create | Target claim: {TARGET}
 
-Create a {DOMAIN:note} for this claim in {DOMAIN:notes}/[claim as sentence].md
+Create a {DOMAIN:note} for this claim in {DOMAIN:note_collection}/[claim as sentence].md
 Follow note design patterns:
 - YAML frontmatter with description (adds info beyond title), topics
 - Body: 150-400 words showing reasoning with connective words

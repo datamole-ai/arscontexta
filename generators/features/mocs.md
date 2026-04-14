@@ -37,7 +37,7 @@ self/
 └── relationships.md — {DOMAIN:topic map}: key people (if relevant)
 ```
 
-These are your foundation. As your {DOMAIN:notes}/ grows, you will create topic {DOMAIN:topic maps} there as well. Start with what you need and let the structure emerge from your content.
+These are your foundation. As your {DOMAIN:note_collection}/ grows, you will create topic {DOMAIN:topic maps} there as well. Start with what you need and let the structure emerge from your content.
 
 ### {DOMAIN:Topic Map} Structure
 

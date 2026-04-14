@@ -11,7 +11,8 @@ argument-hint: "[dimension|--dry-run] — focus on specific dimension or preview
 Read these files to configure domain-specific behavior:
 
 1. **`ops/derivation-manifest.md`** — vocabulary mapping, dimension positions, platform hints
-   - Use `vocabulary.notes` for the notes folder name
+   - Use `vocabulary.note_collection` for the note collection directory
+   - If `entity_directories` section exists in manifest, read it for entity-type routing
    - Use `vocabulary.note` / `vocabulary.note_plural` for note type references
    - Use `vocabulary.topic_map` / `vocabulary.topic_map_plural` for MOC references
    - Use `vocabulary.inbox` for the inbox folder name
@@ -144,7 +145,7 @@ Some changes affect only infrastructure (skills, templates, context file). Other
 | Enum value change | Old notes have invalid values | Update values in affected notes |
 
 For content-impacting changes:
-- Count affected notes: `grep -rl '[old value]' {vocabulary.notes}/*.md | wc -l`
+- Count affected notes: `find {vocabulary.note_collection}/ -name "*.md" -type f -exec grep -l '[old value]' {} + | wc -l`
 - List specific files that need updating
 - Estimate time for content migration
 
@@ -293,7 +294,7 @@ If Phase 2 identified content-impacting changes:
 1. **Schema migration:** Add/remove/rename fields across notes
    ```bash
    # Example: add a new required field to all notes
-   for f in {vocabulary.notes}/*.md; do
+   for f in $(find {vocabulary.note_collection}/ -name "*.md" -type f); do
      grep -q '^new_field:' "$f" || sed -i '' '/^description:/a\
    new_field: [default value]' "$f"
    done

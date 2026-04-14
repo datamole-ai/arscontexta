@@ -10,7 +10,8 @@ allowed-tools: Read, Write, Grep, Glob
 Read these files to configure domain-specific behavior:
 
 1. **`ops/derivation-manifest.md`** — vocabulary mapping
-   - Use `vocabulary.notes` for the notes folder name
+   - Use `vocabulary.note_collection` for the note collection directory
+   - If `entity_directories` section exists in manifest, read it for entity-type routing
    - Use `vocabulary.inbox` for the inbox folder name
    - Use `vocabulary.note` / `vocabulary.note_plural` for note type references
    - Use `vocabulary.topic_map` / `vocabulary.topic_maps` for MOC references
@@ -151,7 +152,7 @@ Topics:
 - At least one {vocabulary.topic_map} link
 - `granularity: capture` in frontmatter
 - `captured` date present
-- File written to `{vocabulary.notes}/[title].md`
+- File written to `{vocabulary.note_collection}/[title].md` (single-entity) or `{vocabulary.note_collection}/[entity_dir]/[title].md` (multi-entity, routed by the note's entity_type matching an entity_directories entry)
 
 ### 7. Create Queue Entry
 
@@ -188,7 +189,7 @@ Work Done:
 - Created queue entry: [id]
 
 Files Modified:
-- {vocabulary.notes}/[note title].md
+- {vocabulary.note_collection}/[note title].md
 - ops/queue/queue.json
 
 Learnings:

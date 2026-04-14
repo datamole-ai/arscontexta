@@ -407,6 +407,28 @@ Preserve all invariant fields and constraints from reference templates. Add doma
 
 Hold the derived schemas and rationales in working memory for Phase 4.
 
+### Step 3g-ii: Entity Directory Resolution
+
+After deriving schemas, resolve entity types to directory names:
+
+1. Count distinct `entity_type` values across all derived schemas
+2. **If 1 entity type:** `vocabulary.note_collection` collapses to the same value as the notes folder transform (e.g., `notes/`, `reflections/`). No `entity_directories` section in the manifest. Current behavior preserved.
+3. **If 2+ entity types:**
+   a. Derive the `note_collection` vocabulary term from conversation signals (listen for how the user names their overall knowledge space) or use `knowledge-base` as default for complex systems
+   b. Map each entity type to a kebab-cased plural directory name (e.g., entity_type `project` → directory `projects/`)
+   c. Record in derivation state for inclusion in `ops/derivation-manifest.md` under `entity_directories`:
+      ```yaml
+      entity_directories:
+        - name: projects
+          entity_type: project
+          description: "Customer/Umbrella/Project hierarchy"
+        - name: contacts
+          entity_type: contact
+          description: "Key stakeholders per customer"
+      ```
+
+Hold entity directory mapping in working memory alongside schemas for Phase 4.
+
 ---
 
 ## PHASE 4: Proposal
@@ -421,6 +443,21 @@ Structure the proposal as:
 
 1. "Here's the system I'd create for you:"
 2. Folder structure with their domain-named directories
+   When multi-entity (2+ entity types derived), show the note_collection parent with entity subdirectories:
+
+   ```
+   knowledge-base/
+   ├── projects/           ← your project knowledge
+   ├── contacts/           ← key stakeholders
+   ├── blueprints/         ← reusable solution patterns
+   └── domain-knowledge/   ← industry context
+   ```
+
+   Explain that each entity type gets its own directory, MOCs live at the collection root for cross-entity navigation, and the processing pipeline routes notes to the correct directory by entity type.
+
+   The user can rename, add, or remove entity directories at this stage. Record any changes in the derivation state.
+
+   When single-entity, show the current flat layout unchanged.
 3. How their notes work -- with a specific example from their domain using their vocabulary
 4. How processing works, described in their words
 5. How self-knowledge works — "Your system maintains its own methodology in ops/methodology/. Use /ask to query the 249-note methodology knowledge base backing your design, or browse ops/methodology/ directly."
@@ -679,6 +716,7 @@ engine_version: "1.0.0"
 ## Vocabulary Mapping
 | Universal Term | Domain Term | Category |
 |---------------|-------------|----------|
+| note_collection | <derived-name> | Parent directory for knowledge content |
 | notes | [domain term] | folder |
 | inbox | [domain term] | folder |
 | archive | [domain term] | folder |
@@ -727,28 +765,58 @@ This file serves three purposes:
 
 ##### Folder Structure
 
-Create the three-space layout with domain-named directories:
+Create the three-space layout with domain-named directories. The note_collection layout depends on how many entity types were derived in Step 3g:
+
+**Single entity type (1 entity_type across all schemas):**
 
 ```
 [workspace]/
-+-- [domain:notes]/          <-- structured knowledge (flat)
-+-- [domain:inbox]/          <-- zero-friction capture (if processing >= moderate)
-+-- [domain:archive]/        <-- processed, inactive
-+-- self/                    <-- agent's persistent mind
-|   +-- identity.md          <-- (created in Pipeline Step 2)
-|   +-- methodology.md       <-- (created in Pipeline Step 2)
-|   +-- goals.md             <-- (created in Pipeline Step 2)
-|   +-- relationships.md     <-- (optional, if domain involves people)
-|   +-- memory/              <-- atomic personal insights
-+-- templates/               <-- note templates (created in Pipeline Step 4)
-+-- ops/                     <-- operational coordination (already exists from Pipeline Step 1)
-|   +-- observations/        <-- atomic friction signals (Primitive 12)
-|   +-- tensions/            <-- contradiction tracking (Primitive 12)
-|   +-- methodology/         <-- vault self-knowledge (Primitive 14)
-|   +-- queue/               <-- unified task queue (pipeline + maintenance)
-|   |   +-- archive/         <-- completed task batches
-|   +-- sessions/            <-- session tracking
++-- [vocabulary:note_collection]/  <-- structured knowledge (flat, note_collection = notes folder)
++-- [domain:inbox]/                <-- zero-friction capture
++-- [domain:archive]/              <-- processed, inactive
++-- self/                          <-- agent's persistent mind
+|   +-- identity.md                <-- (created in Pipeline Step 2)
+|   +-- methodology.md            <-- (created in Pipeline Step 2)
+|   +-- goals.md                  <-- (created in Pipeline Step 2)
+|   +-- relationships.md          <-- (optional, if domain involves people)
+|   +-- memory/                   <-- atomic personal insights
++-- templates/                    <-- note templates (created in Pipeline Step 4)
++-- ops/                          <-- operational coordination (already exists from Pipeline Step 1)
+|   +-- observations/             <-- atomic friction signals (Primitive 12)
+|   +-- tensions/                 <-- contradiction tracking (Primitive 12)
+|   +-- methodology/              <-- vault self-knowledge (Primitive 14)
+|   +-- queue/                    <-- unified task queue (pipeline + maintenance)
+|   |   +-- archive/              <-- completed task batches
+|   +-- sessions/                 <-- session tracking
 ```
+
+**Multiple entity types (2+ entity_types derived):**
+
+```
+[workspace]/
++-- [vocabulary:note_collection]/  <-- parent directory for all entity types
+|   +-- [entity_dir_1]/           <-- entity type directory (flat within)
+|   +-- [entity_dir_2]/           <-- entity type directory (flat within)
+|   +-- [entity_dir_n]/           <-- entity type directory (flat within)
++-- [domain:inbox]/                <-- unified capture zone (one inbox for all entity types)
++-- [domain:archive]/              <-- processed, inactive
++-- self/                          <-- agent's persistent mind
+|   +-- identity.md
+|   +-- methodology.md
+|   +-- goals.md
+|   +-- relationships.md          <-- (optional)
+|   +-- memory/
++-- templates/                    <-- note templates (one per entity type per granularity mode)
++-- ops/
+|   +-- observations/
+|   +-- tensions/
+|   +-- methodology/
+|   +-- queue/
+|   |   +-- archive/
+|   +-- sessions/
+```
+
+Hub MOC (`index.md`) lives at the `[vocabulary:note_collection]/` root in both cases. Topic MOCs also live at the collection root — they span entity types by design. Entity directories contain only atomic notes, not MOCs.
 
 The `ops/observations/` and `ops/tensions/` directories are required by Kernel Primitive 12 (Operational Learning Loop). They accumulate friction signals that /{DOMAIN:rethink} reviews when observation or tension counts exceed thresholds.
 
@@ -1061,6 +1129,7 @@ coherence_result: [passed | passed_with_warnings]
 
 vocabulary:
   # Level 1: Folder names
+  note_collection: "<derived note_collection name>"  # e.g., "notes", "knowledge-base", "reflections"
   notes: "[domain term]"        # e.g., "claims", "reflections", "decisions"
   inbox: "[domain term]"        # e.g., "inbox", "captures", "incoming"
   archive: "[domain term]"      # e.g., "archive", "processed", "completed"
@@ -1101,6 +1170,15 @@ vocabulary:
       what_to_find: "[description]"
       output_type: "[note type]"
     # ... 4-8 domain-specific categories
+
+  # Entity directories (only present when 2+ entity types derived in Step 3g-ii)
+  # entity_directories:
+  #   - name: projects
+  #     entity_type: project
+  #     description: "Customer/Umbrella/Project hierarchy"
+  #   - name: contacts
+  #     entity_type: contact
+  #     description: "Key stakeholders per customer"
 
 platform_hints:
   context: fork
@@ -1166,6 +1244,10 @@ ops/templates/
 ```
 
 Read `${CLAUDE_PLUGIN_ROOT}/reference/templates/` for canonical template structure per granularity. Each subfolder contains reference templates showing invariant fields, constraints, and body patterns.
+
+**Multi-entity template generation:** When `entity_directories` is present in the derivation state (2+ entity types), generate one template per entity type per applicable granularity mode. Each template's `_schema` block uses the matching `entity_type` value. Template filenames follow the pattern `[entity_type]-[granularity].md` (e.g., `project-extract.md`, `contact-capture.md`).
+
+For single-entity domains, template generation is unchanged — one template per granularity mode.
 
 Read `ops/schemas.md` for the approved `_schema` blocks. Use these as the authoritative schema definitions for each note type. Do NOT re-derive schemas from scratch — the user has already reviewed and approved these exact field sets, enums, and constraints.
 
@@ -1802,7 +1884,7 @@ The main agent executes this step directly -- it is straightforward scaffolding 
 
 Before any qmd configuration, derive and register the collection name:
 
-1. Derive a default collection name from `{vocabulary.notes}` (e.g., if notes folder is "claims", default collection name is "claims")
+1. Derive a default collection name from `{vocabulary.note_collection}` (e.g., if notes folder is "claims", default collection name is "claims")
 2. Run `qmd collections list` to check existing collections on the user's system
 3. If the derived name collides with an existing collection, choose an alternative (e.g., append the vault directory name: "claims-myproject") — report the conflict and chosen name in output
 4. Add `notes_collection` to **both** vocabulary stores:
@@ -1818,7 +1900,7 @@ Before any qmd configuration, derive and register the collection name:
 ###### Configure qmd (installed, version >= 2)
 
 1. Configure the qmd collection for `{vocabulary.notes_collection}` pointing at the generated notes directory:
-   - `qmd collection add . --name {vocabulary.notes_collection} --mask "{vocabulary.notes}/**/*.md"`
+   - `qmd collection add . --name {vocabulary.notes_collection} --mask "{vocabulary.note_collection}/**/*.md"`
 2. Create or merge `.mcp.json` in the vault root with the qmd MCP server contract:
    - `{"mcpServers":{"qmd":{"command":"qmd","args":["mcp"],"autoapprove":["mcp__qmd__query","mcp__qmd__get","mcp__qmd__multi_get","mcp__qmd__status"]}}}`
 3. Run `qmd update && qmd embed` to build the initial index
@@ -1865,7 +1947,7 @@ If qmd is not installed or version < 2:
 
 - Add a "Next Steps" section to the Phase 6 summary with install instructions:
   - `npm install -g @tobilu/qmd` (or `bun install -g @tobilu/qmd`)
-  - `qmd collection add . --name {vocabulary.notes_collection} --mask "**/*.md"`
+  - `qmd collection add . --name {vocabulary.notes_collection} --mask "{vocabulary.note_collection}/**/*.md"`
   - `qmd update && qmd embed`
 - Include the `.mcp.json` qmd MCP contract with `autoapprove` entries so activation is deterministic once qmd is installed
 - The hook script (`qmd-sync.sh`) is already generated and will activate automatically once qmd is installed

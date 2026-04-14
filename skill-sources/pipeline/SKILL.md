@@ -238,7 +238,7 @@ Work Done:
 - Archived batch to {archive_path}
 
 Files Modified:
-- {DOMAIN:notes}/ ({N} new {DOMAIN:note_plural})
+- {DOMAIN:note_collection}/ ({N} new {DOMAIN:note_plural})
 - ops/queue/archive/{date}-{batch_id}/ (archived)
 
 Learnings:

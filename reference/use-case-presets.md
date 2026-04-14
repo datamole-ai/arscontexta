@@ -50,7 +50,7 @@ Named points in the configuration space derived from methodology traditions and 
 | Processing verb | reduce/extract | reduce |
 | Connection verb | reflect/connect | reflect |
 | Navigation unit | MOC | topic map |
-| Collection name | notes/ | notes/ |
+| Note collection | note_collection/ | notes/ |
 | Capture zone | inbox/ | inbox/ |
 
 **Starter MOCs:** `{DOMAIN:domain}-overview`, `methods`, `open-questions`
@@ -113,7 +113,7 @@ Named points in the configuration space derived from methodology traditions and 
 | Processing verb | reduce/extract | surface |
 | Connection verb | reflect/connect | find patterns |
 | Navigation unit | MOC | life area |
-| Collection name | notes/ | reflections/ |
+| Note collection | note_collection/ | reflections/ |
 | Capture zone | inbox/ | journal/ |
 
 **Starter MOCs:** `life-areas`, `people`, `goals`

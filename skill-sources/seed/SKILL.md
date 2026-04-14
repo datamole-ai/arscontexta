@@ -70,9 +70,9 @@ If semantic search is available (qmd MCP tools or CLI), check for content overla
 mcp__qmd__query query="claims from {source filename}" limit=5
 ```
 
-Or via keyword search in the {DOMAIN:notes}/ directory:
+Or via keyword search in the {DOMAIN:note_collection}/ directory:
 ```bash
-grep -rl "{key terms from source title}" {DOMAIN:notes}/ 2>/dev/null | head -5
+grep -rl "{key terms from source title}" {DOMAIN:note_collection}/ 2>/dev/null | head -5
 ```
 
 ### 2c. Report Duplicates
@@ -189,7 +189,7 @@ Content type: {detected type}
 
 ## Acceptance Criteria
 - Extract claims, implementation ideas, tensions, and testable hypotheses
-- Duplicate check against {DOMAIN:notes}/ during extraction
+- Duplicate check against {DOMAIN:note_collection}/ during extraction
 - Near-duplicates create enrichment tasks (do not skip)
 - Each output type gets appropriate handling
 

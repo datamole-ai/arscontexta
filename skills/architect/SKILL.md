@@ -12,7 +12,8 @@ argument-hint: "[optional: specific area to focus on, e.g. 'schema', 'processing
 Read these files to configure domain-specific behavior:
 
 1. **`ops/derivation-manifest.md`** — vocabulary mapping, platform hints
-   - Use `vocabulary.notes` for the notes folder name
+   - Use `vocabulary.note_collection` for the notes folder name
+   - Use `vocabulary.entity_directories` for the list of entity type subdirectories
    - Use `vocabulary.note` / `vocabulary.note_plural` for note type references
    - Use `vocabulary.topic_map` / `vocabulary.topic_map_plural` for MOC references
    - Use `vocabulary.inbox` for the inbox folder name
@@ -77,7 +78,7 @@ Locate the system's key files (paths vary by domain vocabulary):
 | Context file | System methodology and rules | CLAUDE.md, README.md |
 | Self space | Agent identity and memory | self/identity.md, self/methodology.md, self/goals.md |
 | Ops directory | Operational infrastructure | ops/derivation.md, ops/config.yaml, ops/observations/, ops/health/ |
-| Notes directory | Primary knowledge directory | {vocabulary.notes}/ (may be domain-named: reflections/, concepts/, etc.) |
+| Notes directory | Primary knowledge directory | {vocabulary.note_collection}/ (may be domain-named: reflections/, concepts/, etc.) |
 | Queue system | Pipeline state | ops/queue/queue.yaml or ops/queue/queue.json |
 | Templates | Note schemas | ops/templates/ or templates/ |
 | Methodology | Learned patterns | ops/methodology/ |
@@ -143,7 +144,7 @@ For each FAIL/WARN:
 
 | Category | How to Check | FAIL Threshold | WARN Threshold |
 |----------|-------------|---------------|----------------|
-| Schema compliance | `grep -rL '^description:' {vocabulary.notes}/*.md` | N/A | Any note missing required fields |
+| Schema compliance | `find {vocabulary.note_collection}/ -name "*.md" -type f \| xargs grep -rL '^description:'` | N/A | Any note missing required fields |
 | Orphan detection | Notes with zero incoming wiki-links (scan for `[[filename]]` across all notes) | N/A | Any orphan |
 | Link health | Wiki-links pointing to non-existent files | Any dangling link | N/A |
 | Three-space boundaries | Content in wrong space (notes in ops/, operational files in notes/) | N/A | Any violation |
@@ -156,32 +157,35 @@ For each FAIL/WARN:
 
 ```bash
 # Count total notes
-NOTE_COUNT=$(ls -1 {vocabulary.notes}/*.md 2>/dev/null | wc -l | tr -d ' ')
+NOTE_COUNT=$(find {vocabulary.note_collection}/ -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
 
 # Find orphans (notes with no incoming links)
-for f in {vocabulary.notes}/*.md; do
+for f in $(find {vocabulary.note_collection}/ -name "*.md" -type f); do
   NAME=$(basename "$f" .md)
-  LINKS=$(grep -rl "\[\[$NAME\]\]" {vocabulary.notes}/ 2>/dev/null | wc -l | tr -d ' ')
+  LINKS=$(grep -rl "\[\[$NAME\]\]" {vocabulary.note_collection}/ 2>/dev/null | wc -l | tr -d ' ')
   [[ "$LINKS" -eq 0 ]] && echo "ORPHAN: $NAME"
 done
 
 # Find dangling links
-grep -ohP '\[\[([^\]]+)\]\]' {vocabulary.notes}/*.md | sort -u | while read -r link; do
-  NAME=$(echo "$link" | sed 's/\[\[//;s/\]\]//')
-  [[ ! -f "{vocabulary.notes}/$NAME.md" ]] && echo "DANGLING: $NAME"
+rg -oN '\[\[([^\]]+)\]\]' {vocabulary.note_collection}/ --glob '*.md' -r '$1' | sort -u | while read -r link; do
+  found=$(find . -name "$link.md" -not -path "./.git/*" 2>/dev/null | head -1)
+  [[ -z "$found" ]] && echo "DANGLING: $link"
 done
 
 # Count inbox items
-INBOX_COUNT=$(ls -1 {vocabulary.inbox}/ 2>/dev/null | wc -l | tr -d ' ')
+INBOX_COUNT=$(find {vocabulary.inbox}/ -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
 
 # MOC sizes
-grep -rl '^type: moc' {vocabulary.notes}/*.md 2>/dev/null | while read -r moc; do
+find {vocabulary.note_collection}/ -name "*.md" -type f 2>/dev/null | while read -r moc; do
+  grep -q '^type: moc' "$moc" || continue
   COUNT=$(grep -c '^\- \[\[' "$moc" 2>/dev/null)
   echo "MOC: $(basename "$moc" .md) = $COUNT notes"
 done
 
 # Missing descriptions
-grep -rL '^description:' {vocabulary.notes}/*.md 2>/dev/null
+find {vocabulary.note_collection}/ -name "*.md" -type f 2>/dev/null | while read -r f; do
+  grep -q '^description:' "$f" || echo "$f"
+done
 ```
 
 Record all findings as evidence for Phase 6. Every finding must include the specific notes, links, or fields affected — not just counts.
@@ -499,6 +503,20 @@ Then recommend /reseed instead of incremental patches:
   Drift detected in: [list dimensions]
   Evidence: [key observations]
 ```
+
+### Entity Type Management
+
+`/architect add-entity <name>` — Add a new entity type directory to the note_collection:
+1. Create the directory under `{vocabulary.note_collection}/`
+2. Add a template in `templates/`
+3. Update `entity_directories` in `ops/derivation-manifest.md`
+4. Update CLAUDE.md routing table
+
+`/architect remove-entity <name>` — Archive an entity type:
+1. Move contents to `{vocabulary.archive}/[entity-name]/`
+2. Remove from `entity_directories` in manifest
+3. Update CLAUDE.md routing table
+4. Keep the template in `templates/` (marked archived)
 
 ---
 

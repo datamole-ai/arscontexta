@@ -9,7 +9,8 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash, AskUserQuestion
 Read these files to configure domain-specific behavior:
 
 1. **`ops/derivation-manifest.md`** — vocabulary mapping, domain context
-   - Use `vocabulary.notes` for the notes folder name
+   - Use `vocabulary.note_collection` for the note collection directory
+   - If `entity_directories` section exists in manifest, read it for entity-type routing
    - Use `vocabulary.note` for the note type name in output
    - Use `vocabulary.rethink` for the command name in output
    - Use `vocabulary.topic_map` for MOC references
@@ -169,7 +170,7 @@ Assign exactly one disposition per observation or tension:
 
 | Disposition | Meaning | When to Apply | Action |
 |-------------|---------|---------------|--------|
-| PROMOTE | Reusable insight worth keeping as a permanent {DOMAIN:note} | General principle across sessions. Would work as a claim note. Crystallized insight, not operational guidance. | Create {DOMAIN:note} in {vocabulary.notes}/, set observation `status: promoted`, add `promoted_to: [[title]]` |
+| PROMOTE | Reusable insight worth keeping as a permanent {DOMAIN:note} | General principle across sessions. Would work as a claim note. Crystallized insight, not operational guidance. | Create {DOMAIN:note} in {vocabulary.note_collection}/, set observation `status: promoted`, add `promoted_to: [[title]]` |
 | IMPLEMENT | Operational guidance that should change the system | "System should do X differently." Points to a concrete improvement in context file, template, or skill. | Update the specific file, set `status: implemented`, add `implemented_in: [filepath]` |
 | METHODOLOGY | Friction pattern that should inform agent behavior | Behavioral learning. Not a domain insight (PROMOTE) or a system change (IMPLEMENT) — a methodology learning about HOW to operate. | Create or update methodology note in `ops/methodology/`, set `status: implemented`, add `implemented_in: ops/methodology/[file]` |
 | ARCHIVE | Session-specific, no longer relevant | One-session-specific with no lasting value. Already addressed by later work. Superseded by newer evidence. | Set `status: archived` |
@@ -228,7 +229,7 @@ Use AskUserQuestion: "Review the triage above. Approve all, or list items to rec
 After user confirmation, apply all dispositions in order:
 
 **For PROMOTE items:**
-1. Create {DOMAIN:note} with prose-as-title in {vocabulary.notes}/
+1. Create {DOMAIN:note} with prose-as-title in {vocabulary.note_collection}/
 2. Follow standard note schema: YAML frontmatter (description, type, created), body developing the insight, Topics footer linking to relevant {vocabulary.topic_map}(s)
 3. The observation content becomes the seed for the note body — but develop it fully, do not just copy the observation
 4. Update the observation: set `status: promoted`, add `promoted_to: [[note title]]`

@@ -92,7 +92,7 @@ These hold across all generated systems:
 
 | Constant | Implementation | Why It's Universal |
 |----------|---------------|-------------------|
-| Flat folder | No subfolders for organization | Prevents folder reorganization from breaking links |
+| Flat within entity type | No subfolders within entity directories. When multiple entity types are derived, note_collection contains typed subdirectories (e.g., projects/, contacts/). | Entity types are stable structural categories from derivation, not user-reorganizable hierarchy. Link stability holds because filenames remain globally unique across all entity directories. |
 | Prose-sentence titles | Each note makes one claim, titled as a sentence | Enables wiki-link-as-prose pattern |
 | MOC navigation | Hub -> domain -> topic -> notes | Manages attention at scale |
 | Wiki links | `[[note title]]` creates graph edges | Spreading activation without infrastructure |
@@ -109,7 +109,7 @@ These hold across all generated systems:
 
 ### Design Rule
 
-**Durable, composable, worth finding again.** If it won't be queried or linked, it doesn't belong here. Session-specific observations start in ops/ and get promoted when they earn permanence. Raw capture starts in inbox/ and gets processed into notes/ through the processing pipeline.
+**Durable, composable, worth finding again.** If it won't be queried or linked, it doesn't belong here. Session-specific observations start in ops/ and get promoted when they earn permanence. Raw capture starts in inbox/ and gets processed into the note_collection through the processing pipeline. When the collection has entity-type subdirectories, the processing pipeline routes each note to the matching entity directory based on its schema entity_type.
 
 ### What Does NOT Belong in Notes
 
@@ -236,15 +236,17 @@ Each conflation pattern produces specific, predictable failures:
 
 ## Filesystem Layout
 
-### Standard Layout
+### Single-Entity Layout (default)
+
+When the derivation produces one entity type, note_collection collapses to a flat directory:
 
 ```
 project-root/
-├── CLAUDE.md                    # context file (methodology + operational instructions)
+├── CLAUDE.md
 ├── .claude/
-│   ├── hooks/                   # event-driven automation
-│   ├── skills/                  # methodology-as-code
-│   └── settings.json            # platform configuration
+│   ├── hooks/
+│   ├── skills/
+│   └── settings.json
 ├── self/
 │   ├── identity.md
 │   ├── methodology.md
@@ -256,9 +258,9 @@ project-root/
 │   ├── index.md                 # hub MOC
 │   ├── [domain-mocs].md         # domain/topic MOCs
 │   └── [prose-titled-notes].md  # atomic notes
-├── inbox/                       # or domain-specific name (journal/, encounters/, etc.)
+├── inbox/                       # or domain-specific name
 ├── archive/                     # processed sources
-├── templates/                   # note templates
+├── templates/
 └── ops/
     ├── derivation.md
     ├── derivation-manifest.md
@@ -269,6 +271,43 @@ project-root/
     ├── observations/
     └── queue/
 ```
+
+### Multi-Entity Layout
+
+When the derivation produces multiple entity types, note_collection becomes a parent directory with typed subdirectories:
+
+```
+project-root/
+├── CLAUDE.md
+├── .claude/
+│   ├── hooks/
+│   ├── skills/
+│   └── settings.json
+├── self/
+│   ├── identity.md
+│   ├── methodology.md
+│   ├── goals.md
+│   └── ...
+├── knowledge-base/              # note_collection (derived vocabulary term)
+│   ├── index.md                 # hub MOC
+│   ├── [topic-mocs].md          # topic MOCs span entity types
+│   ├── projects/                # entity type directory
+│   │   └── [prose-titled-notes].md
+│   ├── contacts/                # entity type directory
+│   │   └── [prose-titled-notes].md
+│   └── blueprints/              # entity type directory
+│       └── [prose-titled-notes].md
+├── inbox/                       # unified capture zone
+├── archive/                     # processed sources
+├── templates/
+└── ops/
+    ├── derivation.md
+    ├── derivation-manifest.md
+    ├── schemas.md
+    └── ...
+```
+
+Entity directories contain only atomic notes, not MOCs. If an entity type needs its own navigation (e.g., "all projects"), that is a topic MOC at the note_collection root, not an index inside the entity directory.
 
 ---
 

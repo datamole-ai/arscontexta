@@ -9,7 +9,8 @@ allowed-tools: Read, Write, Edit, Grep, Glob, mcp__qmd__query
 Read these files to configure domain-specific behavior:
 
 1. **`ops/derivation-manifest.md`** — vocabulary mapping, platform hints
-   - Use `vocabulary.notes` for the notes folder name
+   - Use `vocabulary.note_collection` for the note collection directory
+   - If `entity_directories` section exists in manifest, read it for entity-type routing
    - Use `vocabulary.note` / `vocabulary.note_plural` for note type references
    - Use `vocabulary.verify` for the process verb in output
    - Use `vocabulary.topic_map` for MOC references
@@ -143,7 +144,7 @@ If prediction score < 3:
 ### Step 2: VALIDATE (schema check)
 
 Read the template that applies to this note type. Determine the template by checking:
-- Note location (e.g., {DOMAIN:notes}/ uses the standard note template)
+- Note location (e.g., {DOMAIN:note_collection}/ uses the standard note template)
 - Type field in frontmatter (if present, may indicate a specialized template)
 
 If the vault has templates with `_schema` blocks, read the `_schema` from the relevant template for authoritative field requirements. If no `_schema` exists, use the checks below as defaults.
@@ -397,7 +398,7 @@ plus 3 deep-only checks for comprehensive audits:
 
 When verifying all notes:
 
-1. Discover all notes in {DOMAIN:notes}/ directory
+1. Discover all notes in {DOMAIN:note_collection}/ directory
 2. For each note, run the full verification pipeline
 3. Produce summary report:
    - Total notes checked
@@ -416,7 +417,7 @@ Run all three checks on a specific note. Full detailed report.
 
 ### /verify --all
 
-Comprehensive audit of all notes in {DOMAIN:notes}/. Summary table + flagged failures.
+Comprehensive audit of all notes in {DOMAIN:note_collection}/. Summary table + flagged failures.
 
 ## RALPH HANDOFF Output
 
@@ -433,7 +434,7 @@ Work Done:
 - Description improved: [yes/no]
 
 Files Modified:
-- {DOMAIN:notes}/[note].md (description improved, if applicable)
+- {DOMAIN:note_collection}/[note].md (description improved, if applicable)
 - [task file path] (Verify section updated, if applicable)
 
 Learnings:

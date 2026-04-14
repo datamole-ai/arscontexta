@@ -9,7 +9,8 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash, mcp__qmd__query mcp__qmd__st
 Read these files to configure domain-specific behavior:
 
 1. **`ops/derivation-manifest.md`** — vocabulary mapping, platform hints
-   - Use `vocabulary.notes` for the notes folder name
+   - Use `vocabulary.note_collection` for the note collection directory
+   - If `entity_directories` section exists in manifest, read it for entity-type routing
    - Use `vocabulary.note` / `vocabulary.note_plural` for note type references
    - Use `vocabulary.reweave` for the process verb in output
    - Use `vocabulary.topic_map` / `vocabulary.topic_map_plural` for MOC references
@@ -130,7 +131,7 @@ Reweave all {vocabulary.note_plural} not updated in N days.
 **How to find candidates:**
 ```bash
 # Find notes not modified in 30 days
-find {vocabulary.notes}/ -name "*.md" -mtime +30 -type f
+find {vocabulary.note_collection}/ -name "*.md" -mtime +30 -type f
 ```
 
 ---
@@ -192,7 +193,7 @@ Evaluate results by relevance — read any result where title or snippet suggest
 - Backlinks — what {vocabulary.note_plural} already reference this one? Do they suggest the target should cite back?
 
 ```bash
-grep -rl '\[\[target note title\]\]' {vocabulary.notes}/ --include="*.md"
+grep -rl '\[\[target note title\]\]' {vocabulary.note_collection}/ --include="*.md"
 ```
 
 **Key question:** What do I know today that I did not know when this {vocabulary.note} was written?
@@ -552,8 +553,8 @@ Work Done:
 - Network effect: M new traversal paths
 
 Files Modified:
-- {vocabulary.notes}/[older note 1].md (inline link added)
-- {vocabulary.notes}/[older note 2].md (footer connection added)
+- {vocabulary.note_collection}/[older note 1].md (inline link added)
+- {vocabulary.note_collection}/[older note 2].md (footer connection added)
 - [task file path] ({vocabulary.reweave} section)
 
 Learnings:

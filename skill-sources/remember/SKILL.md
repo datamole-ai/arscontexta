@@ -10,7 +10,8 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 Read these files to configure domain-specific behavior:
 
 1. **`ops/derivation-manifest.md`** — vocabulary mapping, domain context
-   - Use `vocabulary.notes` for the notes folder name
+   - Use `vocabulary.note_collection` for the note collection directory
+   - If `entity_directories` section exists in manifest, read it for entity-type routing
    - Use `vocabulary.note` for the note type name in output
    - Use `vocabulary.rethink` for rethink command name in threshold alerts
    - Use `vocabulary.topic_map` for MOC references

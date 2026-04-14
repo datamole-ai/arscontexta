@@ -10,7 +10,8 @@ allowed-tools: Read, Grep, Glob, Bash
 Read these files to configure domain-specific behavior:
 
 1. **`ops/derivation-manifest.md`** — vocabulary mapping, domain context
-   - Use `vocabulary.notes` for the notes folder name
+   - Use `vocabulary.note_collection` for the note collection directory
+   - If `entity_directories` section exists in manifest, read it for entity-type routing
    - Use `vocabulary.inbox` for the inbox folder name
    - Use `vocabulary.note` for the note type name in output
    - Use `vocabulary.topic_map` for MOC references
@@ -54,7 +55,7 @@ Before collecting state, evaluate all maintenance conditions and reconcile the q
 
 | Condition | Evaluation Method |
 |-----------|------------------|
-| orphan_notes | For each note in {vocabulary.notes}/, count incoming [[links]]. Zero = orphan. |
+| orphan_notes | For each note in {vocabulary.note_collection}/, count incoming [[links]]. Zero = orphan. |
 | dangling_links | Extract all [[links]], verify targets exist as files. Missing = dangling. |
 | inbox_pressure | Count *.md in {vocabulary.inbox}/. |
 | observation_accumulation | Count status: pending in ops/observations/. |
@@ -114,7 +115,7 @@ Gather all signals. Run independent checks in parallel where possible. Record ea
 | **Task stack** | Read `ops/tasks.md` — current priorities and open items | Top items, open count, any deadlines |
 | **Queue state** | Read `ops/queue.yaml` or `ops/queue/queue.json` — pending pipeline tasks | Total pending, by phase (create, reflect, reweave, verify), blocked phases, granularity per process task |
 | **Inbox pressure** | Count `*.md` files in {vocabulary.inbox}/, find oldest by mtime | Count per subdirectory, age of oldest item in days |
-| **Note count** | Count `*.md` in {vocabulary.notes}/ | Total notes for context |
+| **Note count** | Count `*.md` in {vocabulary.note_collection}/ | Total notes for context |
 | **Orphan notes** | For each note, grep for `[[filename]]` across all files — zero hits = orphan | Count, first 5 names |
 | **Dangling links** | Extract all `[[links]]` from notes/, verify each target file exists | Count, first 5 targets |
 | **Stale notes** | Notes not modified recently AND with low link density (< 2 links) | Count |
@@ -138,7 +139,7 @@ INBOX_COUNT=$(find {vocabulary.inbox}/ -name "*.md" -maxdepth 2 2>/dev/null | wc
 OLDEST_INBOX=$(find {vocabulary.inbox}/ -name "*.md" -maxdepth 2 -exec stat -f "%m %N" {} \; 2>/dev/null | sort -n | head -1)
 
 # Note count
-NOTE_COUNT=$(ls -1 {vocabulary.notes}/*.md 2>/dev/null | wc -l | tr -d ' ')
+NOTE_COUNT=$(find {vocabulary.note_collection}/ -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
 
 # Pending observations
 OBS_COUNT=$(grep -rl '^status: pending' ops/observations/ 2>/dev/null | wc -l | tr -d ' ')

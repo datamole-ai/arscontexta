@@ -41,10 +41,13 @@ When generating a knowledge system for a specific domain, every universal term i
 
 | Universal Folder | Research | Therapy | Learning | Relationships | Creative | PM | Companion |
 |-----------------|----------|---------|----------|---------------|----------|-----|-----------|
+| note_collection/ | notes/ | reflections/ | concepts/ | observations/ | ideas/ | decisions/ | memories/ |
 | notes/ | notes/ | reflections/ | concepts/ | observations/ | ideas/ | decisions/ | memories/ |
 | inbox/ | inbox/ | journal/ | study-inbox/ | encounters/ | inspiration/ | action-items/ | moments/ |
 | archive/ | archive/ | past/ | mastered/ | history/ | completed/ | closed/ | past/ |
 | templates/ | templates/ | templates/ | templates/ | templates/ | templates/ | templates/ | templates/ |
+
+**note_collection collapse behavior:** For single-entity domains, `note_collection` maps to the same value as `notes/` — the single entity directory IS the collection, with no parent wrapper. For multi-entity domains (2+ entity types derived in Step 3g), `note_collection` becomes a distinct parent directory (e.g., `knowledge-base/`) containing typed entity subdirectories. The `notes/` row represents the default/primary entity type within the collection.
 
 ---
 

@@ -11,7 +11,8 @@ argument-hint: "[--share] — optional flag for compact shareable output"
 Read these files to configure domain-specific behavior:
 
 1. **`ops/derivation-manifest.md`** — vocabulary mapping
-   - Use `vocabulary.notes` for the notes folder name
+   - Use `vocabulary.note_collection` for the note collection directory
+   - If `entity_directories` section exists in manifest, read it for entity-type routing
    - Use `vocabulary.note` / `vocabulary.note_plural` for note type references
    - Use `vocabulary.topic_map` / `vocabulary.topic_map_plural` for MOC references
    - Use `vocabulary.inbox` for the inbox folder name
@@ -53,15 +54,15 @@ Gather all metrics. Run these checks in parallel where possible to minimize late
 ### 1a. Knowledge Graph Metrics
 
 ```bash
-NOTES_DIR="{vocabulary.notes}"
+NOTES_DIR="{vocabulary.note_collection}"
 
 # Note count (excluding MOCs)
-TOTAL_FILES=$(ls -1 "$NOTES_DIR"/*.md 2>/dev/null | wc -l | tr -d ' ')
-MOC_COUNT=$(grep -rl '^type: moc' "$NOTES_DIR"/*.md 2>/dev/null | wc -l | tr -d ' ')
+TOTAL_FILES=$(find "$NOTES_DIR"/ -name "*.md" -type f | wc -l | tr -d ' ')
+MOC_COUNT=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l '^type: moc' {} + 2>/dev/null | wc -l | tr -d ' ')
 NOTE_COUNT=$((TOTAL_FILES - MOC_COUNT))
 
 # Connection count (all wiki links across notes/)
-LINK_COUNT=$(grep -ohP '\[\[[^\]]+\]\]' "$NOTES_DIR"/*.md 2>/dev/null | wc -l | tr -d ' ')
+LINK_COUNT=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -ohP '\[\[[^\]]+\]\]' {} + 2>/dev/null | wc -l | tr -d ' ')
 
 # Average connections per note
 if [[ "$NOTE_COUNT" -gt 0 ]]; then
@@ -71,7 +72,7 @@ else
 fi
 
 # Topic count (unique values in topics: fields)
-TOPIC_COUNT=$(grep -ohP '^\s*-\s*"\[\[([^\]]+)\]\]"' "$NOTES_DIR"/*.md 2>/dev/null | sort -u | wc -l | tr -d ' ')
+TOPIC_COUNT=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -ohP '^\s*-\s*"\[\[([^\]]+)\]\]"' {} + 2>/dev/null | sort -u | wc -l | tr -d ' ')
 
 # Link density
 if [[ "$NOTE_COUNT" -gt 1 ]]; then
@@ -87,7 +88,7 @@ fi
 ```bash
 # Orphan count (notes with zero incoming links)
 ORPHAN_COUNT=0
-for f in "$NOTES_DIR"/*.md; do
+for f in $(find "$NOTES_DIR"/ -name "*.md" -type f); do
   NAME=$(basename "$f" .md)
   grep -q '^type: moc' "$f" 2>/dev/null && continue
   INCOMING=$(grep -rl "\[\[$NAME\]\]" "$NOTES_DIR"/ 2>/dev/null | grep -v "$f" | wc -l | tr -d ' ')
@@ -95,14 +96,14 @@ for f in "$NOTES_DIR"/*.md; do
 done
 
 # Dangling link count
-DANGLING_COUNT=$(grep -ohP '\[\[([^\]]+)\]\]' "$NOTES_DIR"/*.md 2>/dev/null | sort -u | while read -r link; do
+DANGLING_COUNT=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -ohP '\[\[([^\]]+)\]\]' {} + 2>/dev/null | sort -u | while read -r link; do
   NAME=$(echo "$link" | sed 's/\[\[//;s/\]\]//')
-  [[ ! -f "$NOTES_DIR/$NAME.md" ]] && echo "$NAME"
+  ! find "$NOTES_DIR"/ -name "$NAME.md" -type f | grep -q . && echo "$NAME"
 done | wc -l | tr -d ' ')
 
 # Schema compliance (% of notes with required fields: description, topics)
-MISSING_DESC=$(grep -rL '^description:' "$NOTES_DIR"/*.md 2>/dev/null | wc -l | tr -d ' ')
-MISSING_TOPICS=$(grep -rL '^topics:' "$NOTES_DIR"/*.md 2>/dev/null | wc -l | tr -d ' ')
+MISSING_DESC=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -L '^description:' {} + 2>/dev/null | wc -l | tr -d ' ')
+MISSING_TOPICS=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -L '^topics:' {} + 2>/dev/null | wc -l | tr -d ' ')
 SCHEMA_ISSUES=$((MISSING_DESC + MISSING_TOPICS))
 if [[ "$TOTAL_FILES" -gt 0 ]]; then
   # Notes with BOTH required fields
@@ -114,10 +115,10 @@ fi
 
 # MOC coverage
 COVERED=0
-for f in "$NOTES_DIR"/*.md; do
+for f in $(find "$NOTES_DIR"/ -name "*.md" -type f); do
   NAME=$(basename "$f" .md)
   grep -q '^type: moc' "$f" 2>/dev/null && continue
-  if grep -rl '^type: moc' "$NOTES_DIR"/*.md 2>/dev/null | xargs grep -l "\[\[$NAME\]\]" >/dev/null 2>&1; then
+  if find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l '^type: moc' {} + 2>/dev/null | xargs grep -l "\[\[$NAME\]\]" >/dev/null 2>&1; then
     COVERED=$((COVERED + 1))
   fi
 done
@@ -164,7 +165,7 @@ fi
 # This week's growth (notes with created: date within last 7 days)
 WEEK_AGO=$(date -v-7d +%Y-%m-%d 2>/dev/null || date -d '7 days ago' +%Y-%m-%d 2>/dev/null)
 if [[ -n "$WEEK_AGO" ]]; then
-  THIS_WEEK_NOTES=$(grep -rl "^created: " "$NOTES_DIR"/*.md 2>/dev/null | while read -r f; do
+  THIS_WEEK_NOTES=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l "^created: " {} + 2>/dev/null | while read -r f; do
     CREATED=$(grep '^created:' "$f" | head -1 | awk '{print $2}')
     [[ "$CREATED" > "$WEEK_AGO" || "$CREATED" == "$WEEK_AGO" ]] && echo "$f"
   done | wc -l | tr -d ' ')
@@ -174,7 +175,7 @@ fi
 
 # This week's connections (approximate — count links in recently created notes)
 if [[ "$THIS_WEEK_NOTES" -gt 0 && -n "$WEEK_AGO" ]]; then
-  THIS_WEEK_LINKS=$(grep -rl "^created: " "$NOTES_DIR"/*.md 2>/dev/null | while read -r f; do
+  THIS_WEEK_LINKS=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l "^created: " {} + 2>/dev/null | while read -r f; do
     CREATED=$(grep '^created:' "$f" | head -1 | awk '{print $2}')
     [[ "$CREATED" > "$WEEK_AGO" || "$CREATED" == "$WEEK_AGO" ]] && grep -oP '\[\[[^\]]+\]\]' "$f" 2>/dev/null
   done | wc -l | tr -d ' ')
@@ -271,7 +272,7 @@ After the stats block, add brief interpretation for any notable findings:
 | OBS_PENDING >= 10 | "[N] pending observations — consider running /{vocabulary.rethink}" |
 | TENSION_PENDING >= 5 | "[N] open tensions — consider running /{vocabulary.rethink}" |
 | DENSITY < 0.02 | "Graph density is low — connections are thin. Run /{vocabulary.cmd_reflect} to strengthen the network" |
-| PROCESSED_PCT < 50 | "More content in inbox than in {vocabulary.notes}/ — consider processing backlog" |
+| PROCESSED_PCT < 50 | "More content in inbox than in {vocabulary.note_collection}/ — consider processing backlog" |
 | THIS_WEEK_NOTES == 0 | "No new {vocabulary.note_plural} this week" |
 
 Only show interpretation notes when conditions are notable. A healthy vault gets just the stats, no warnings.
@@ -355,7 +356,7 @@ Use universal vocabulary (notes, MOCs, etc.). All metrics work identically.
 
 ### Very Large Vault (500+ notes)
 
-The orphan and MOC coverage checks may be slow for large vaults. If {vocabulary.notes}/ has >200 files:
+The orphan and MOC coverage checks may be slow for large vaults. If {vocabulary.note_collection}/ has >200 files:
 1. Run orphan detection with a simpler heuristic (check only for presence in any MOC, not full backlink scan)
 2. Note: "Metrics approximate for large vault. Run /graph health for precise analysis."
 

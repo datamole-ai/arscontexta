@@ -10,7 +10,8 @@ allowed-tools: Read, Write, Grep, Glob, mcp__qmd__query
 Read these files to configure domain-specific behavior:
 
 1. **`ops/derivation-manifest.md`** — vocabulary mapping, extraction categories, platform hints
-   - Use `vocabulary.notes` for the notes folder name
+   - Use `vocabulary.note_collection` for the note collection directory
+   - If `entity_directories` section exists in manifest, read it for entity-type routing
    - Use `vocabulary.inbox` for the inbox folder name
    - Use `vocabulary.note` for the note type name in output
    - Use `vocabulary.note_plural` for the plural form
@@ -24,7 +25,7 @@ Read these files to configure domain-specific behavior:
 2. **`ops/queue/queue.json`** — current task queue
 
 If these files don't exist (pre-init invocation or standalone use), use universal defaults:
-- notes folder: `notes/`
+- note collection: `notes/`
 - inbox folder: `inbox/`
 
 ---
@@ -108,7 +109,7 @@ The handoff Learnings section summarizes what you ALREADY logged during processi
 
 # Structure
 
-Group related claims from source material into structured {vocabulary.note_plural} in {vocabulary.notes}/.
+Group related claims from source material into structured {vocabulary.note_plural} in {vocabulary.note_collection}/.
 
 ## Philosophy
 
@@ -212,8 +213,8 @@ Before reading the source, understand what already exists:
 
 ```bash
 # Get descriptions from existing notes
-for f in {vocabulary.notes}/*.md; do
-  [[ -f "$f" ]] && echo "=== $(basename "$f" .md) ===" && rg "^description:" "$f" -A 0
+for f in $(find {vocabulary.note_collection}/ -name "*.md" -type f); do
+  echo "=== $(basename "$f" .md) ===" && rg "^description:" "$f" -A 0
 done
 ```
 

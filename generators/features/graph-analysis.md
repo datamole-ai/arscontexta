@@ -24,19 +24,19 @@ Query individual YAML fields across {DOMAIN:notes}:
 
 ```bash
 # Find all {DOMAIN:notes} of a specific type
-rg '^type: pattern' {DOMAIN:notes}/
+rg '^type: pattern' {DOMAIN:note_collection}/
 
 # Scan descriptions for a concept
-rg '^description:.*friction' {DOMAIN:notes}/
+rg '^description:.*friction' {DOMAIN:note_collection}/
 
 # Find {DOMAIN:notes} missing required fields
-rg -L '^description:' {DOMAIN:notes}/*.md
+rg -L '^description:' {DOMAIN:note_collection}/
 
 # Find {DOMAIN:notes} by {DOMAIN:topic map}
-rg '^topics:.*\[\[methodology\]\]' {DOMAIN:notes}/
+rg '^topics:.*\[\[methodology\]\]' {DOMAIN:note_collection}/
 
 # Cross-field queries (combine with xargs)
-rg -l '^type: tension' {DOMAIN:notes}/ | xargs rg '^status: pending'
+rg -l '^type: tension' {DOMAIN:note_collection}/ | xargs rg '^status: pending'
 ```
 
 Field-level queries answer: "What properties do my {DOMAIN:notes} have?" They are fast, precise, and require no external tools.
@@ -135,19 +135,19 @@ Use YAML frontmatter as a queryable property layer:
 
 ```bash
 # All {DOMAIN:notes} by methodology tradition
-rg '^methodology:.*Zettelkasten' {DOMAIN:notes}/
+rg '^methodology:.*Zettelkasten' {DOMAIN:note_collection}/
 
 # Unresolved tensions
-rg -l '^type: tension' {DOMAIN:notes}/ | xargs rg '^status: pending'
+rg -l '^type: tension' {DOMAIN:note_collection}/ | xargs rg '^status: pending'
 
 # {DOMAIN:Notes} adapted from human patterns
-rg '^adapted_from: ' {DOMAIN:notes}/ | grep -v 'null'
+rg '^adapted_from: ' {DOMAIN:note_collection}/ | grep -v 'null'
 
 # Combined methodology synthesis {DOMAIN:notes}
-rg '^methodology: \[' {DOMAIN:notes}/ | grep -E '\[.*,.*\]'
+rg '^methodology: \[' {DOMAIN:note_collection}/ | grep -E '\[.*,.*\]'
 
 # {DOMAIN:Notes} without source attribution
-rg -L '^source:' {DOMAIN:notes}/*.md
+rg -L '^source:' {DOMAIN:note_collection}/
 ```
 
 Schema queries are domain-adapted: the specific fields and enum values come from your templates. Every schema field becomes a query dimension. Combining dimensions surfaces cross-cutting insights that browsing alone cannot find.
