@@ -133,7 +133,6 @@ or `decisions/`), but the separation is invariant.
 | `/reflect` | Find connections, update MOCs |
 | `/reweave` | Update older notes with new connections |
 | `/verify` | Combined quality check: description + schema + health |
-| `/validate` | Schema compliance checking |
 | `/ralph` | Queue-based orchestration with fresh context per phase |
 | `/archive-batch` | Archive batch of notes |
 

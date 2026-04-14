@@ -1104,7 +1104,7 @@ processing:
 
 ##### ops/derivation-manifest.md (Runtime Vocabulary for Inherited Skills)
 
-Generate the machine-readable derivation manifest. This is the KEY file that enables runtime vocabulary transformation for all inherited processing skills (/extract, /structure, /capture, /reflect, /reweave, /verify, /validate). Skills read this file at invocation time to apply domain-specific vocabulary without needing domain-specific skill copies.
+Generate the machine-readable derivation manifest. This is the KEY file that enables runtime vocabulary transformation for all inherited processing skills (/extract, /structure, /capture, /reflect, /reweave, /verify). Skills read this file at invocation time to apply domain-specific vocabulary without needing domain-specific skill copies.
 
 ```yaml
 # ops/derivation-manifest.md -- Machine-readable manifest for runtime skill configuration
@@ -1152,7 +1152,6 @@ vocabulary:
   reflect: "[domain term]"      # e.g., "reflect", "find patterns", "link decisions"
   reweave: "[domain term]"      # e.g., "reweave", "revisit", "update"
   verify: "[domain term]"       # e.g., "verify", "check resonance", "validate"
-  validate: "[domain term]"     # e.g., "validate", "check schema", "audit"
   rethink: "[domain term]"      # e.g., "rethink", "reassess", "retrospect"
 
   # Level 6: Command names (as users invoke them)
@@ -1369,7 +1368,6 @@ The 18 skill sources to install:
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/ralph/`         | ralph         | Orchestration | C    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/rethink/`       | rethink       | Evolution     | C    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/next/`          | next          | Navigation    | C    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/validate/`      | validate      | Processing    | C    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/remember/`      | remember      | Growth        | C    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/extract/`       | extract       | Processing    | C    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/structure/`     | structure     | Processing    | C    |
@@ -1427,7 +1425,7 @@ These skill sources contain only `{vocabulary.xxx}` patterns in their body. Thos
 
 ##### Tier C — DOMAIN substitution (mechanical string replace)
 
-**Skills:** seed, pipeline, archive-batch, ralph, rethink, next, validate, remember, verify, extract, structure, capture
+**Skills:** seed, pipeline, archive-batch, ralph, rethink, next, remember, verify, extract, structure, capture
 
 These skill sources contain `{DOMAIN:xxx}` patterns that must be literally substituted at setup time. They may also contain `{vocabulary.xxx}` patterns — leave those intact.
 
@@ -1666,7 +1664,6 @@ What pipeline runs for you. Use directly for fine-grained control.
 - /{DOMAIN:reflect} — find connections, update {DOMAIN:topic map}s
 - /{DOMAIN:reweave} — update older {DOMAIN:note_plural} with new context
 - /{DOMAIN:verify} — description + schema + health check
-- /{DOMAIN:validate} — schema compliance only
 - /{DOMAIN:orchestrate} — queue-based orchestration engine (fresh context per phase)
 - /archive-batch — archive completed batch
 

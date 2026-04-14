@@ -143,24 +143,35 @@ If prediction score < 3:
 
 ### Step 2: VALIDATE (schema check)
 
-Read the template that applies to this note type. Determine the template by checking:
-- Note location (e.g., {DOMAIN:note_collection}/ uses the standard note template)
-- Type field in frontmatter (if present, may indicate a specialized template)
+Determine which template applies from frontmatter fields only (no filename inference). Each template's `_schema` declares an `entity_type` and a unique set of required/optional fields.
 
-If the vault has templates with `_schema` blocks, read the `_schema` from the relevant template for authoritative field requirements. If no `_schema` exists, use the checks below as defaults.
+**Template matching strategy:**
+
+1. Read the note's frontmatter fields
+2. Scan all templates in `ops/templates/` (or path from derivation manifest via `vocabulary.templates`)
+3. Match the template whose `_schema` field set best fits the note's frontmatter — the template whose required and optional fields are present in the note
+4. If multiple templates match, prefer the one with the most specific field overlap (e.g., a note with `classification` and `methodology` matches `research-note` over `extract-note`)
+5. If no template matches, FAIL: "No template found for this note type"
+
+Read the matched template's `_schema` block. This is the authoritative schema — no fallback to defaults.
 
 **Required fields (FAIL if missing):**
 
-| Field | Requirement | Severity |
+Check every field listed in `_schema.required`. Each missing required field is a FAIL.
+
+| Default required | Requirement | Severity |
 |-------|-------------|----------|
 | `description` | Must exist and be non-empty | FAIL |
+| `granularity` | Must exist and match `_schema.constraints.granularity.fixed` | FAIL |
 | Topics footer or `topics` field | Must reference at least one {DOMAIN:topic map} | FAIL |
+
+Additional required fields come from the template's `_schema.required` list.
 
 **Description constraints (WARN if violated):**
 
 | Constraint | Check | Severity |
 |------------|-------|----------|
-| Length | Should be ~50-200 characters | WARN |
+| Length | Must be under `_schema.constraints.description.max_length` (default 200) characters | WARN |
 | Format | Single sentence, no trailing period | WARN |
 | Content | MUST add NEW information beyond title | WARN |
 | Semantic value | Should capture mechanism, not just topic | WARN |
@@ -173,11 +184,16 @@ If the vault has templates with `_schema` blocks, read the `_schema` from the re
 |-------|------|----------|
 | Frontmatter delimiters | Must start with `---` and close with `---` | FAIL |
 | Valid YAML | Must parse without errors | FAIL |
-| No unknown fields | Fields not in the template | WARN |
+| No duplicate keys | Each YAML key appears only once | FAIL |
+| No unknown fields | Fields not in `_schema.required` or `_schema.optional` | WARN |
 
-**Domain-specific field enums (WARN if invalid):**
+**Enum validation (WARN if invalid):**
 
-If the note has fields with enumerated values (type, category, status, etc.), check them against the template's `_schema.enums` block. Each invalid enum value produces a WARN.
+For each field in the note's frontmatter that has a corresponding entry in `_schema.enums`, check the note's value against the allowed list. Each invalid enum value produces a WARN that reports the invalid value and lists the valid options.
+
+**Constraint validation (WARN if violated):**
+
+For each field in the note's frontmatter that has a corresponding entry in `_schema.constraints`, check format and value constraints. Report violations with the specific constraint that was violated and the expected format.
 
 **Relevant notes format (WARN if incorrect):**
 
@@ -367,7 +383,7 @@ checks against the relevant template schema:
 
 **FAIL means fix needed. WARN is informational but worth addressing.**
 
-**template discovery:** The skill reads the template for the note type to get its `_schema` block. If no template exists or no `_schema` block is found, fall back to the default checks above.
+**template discovery:** The skill reads the template for the note type to get its `_schema` block. The `_schema` block is the authoritative schema — if no matching template is found, that is a FAIL.
 
 ## review: per-note health
 

@@ -1,8 +1,41 @@
 ---
-description: One sentence adding context beyond the title (~150 chars, no period)
+_schema:
+  entity_type: "extract-note"
+  granularity: extract
+  required:
+    - description
+    - granularity
+    - topics
+  optional:
+    - type
+    - status
+    - created
+  enums:
+    granularity:
+      - extract
+    type:
+      - insight
+      - pattern
+      - preference
+      - fact
+      - decision
+      - question
+    status:
+      - preliminary
+      - active
+      - archived
+  constraints:
+    description:
+      max_length: 200
+      format: "One sentence adding context beyond the title"
+    granularity:
+      fixed: extract
+    topics:
+      format: "Array of wiki links, at least one"
+
+description: ""
 granularity: extract
-type: insight | pattern | preference | fact | decision | question
-created: YYYY-MM-DD
+topics: []
 ---
 
 # prose-as-title expressing the insight as a complete proposition

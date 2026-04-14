@@ -116,7 +116,7 @@ For each changed dimension, determine ALL affected artifacts. This is the cascad
 | **Linking shift** | Semantic search config, /reflect connection density expectations, context file "Connection Finding" section | Search tool availability, link threshold values, discovery layer instructions |
 | **Navigation shift** | MOC tier structure, hub MOC, context file "MOC" section, note Topics footers | Number of MOC tiers, hub content, navigation instructions |
 | **Maintenance shift** | /health threshold values, condition-based trigger settings, context file maintenance instructions | Check frequency conditions, stale note thresholds, reweave trigger conditions |
-| **Schema shift** | Templates (_schema blocks), validation rules, /validate skill, query scripts, context file "YAML" section | Required fields, enum values, validation patterns |
+| **Schema shift** | Templates (_schema blocks), validation rules, /verify skill, query scripts, context file "YAML" section | Required fields, enum values, validation patterns |
 
 ### Artifact Analysis Format
 
@@ -245,7 +245,7 @@ For each skill affected by the dimension changes:
 |-----------------|---------------------|
 | Linking | /reflect, /reweave |
 | Navigation | /reflect (MOC update logic) |
-| Schema | /validate, /verify |
+| Schema | /verify |
 | Maintenance | /health |
 
 ### 4c. Update Context File

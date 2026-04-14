@@ -1,10 +1,45 @@
 ---
-description: One sentence adding context beyond the title (~150 chars)
+_schema:
+  entity_type: "research-note"
+  granularity: extract
+  required:
+    - description
+    - granularity
+    - topics
+  optional:
+    - methodology
+    - source
+    - classification
+    - created
+  enums:
+    granularity:
+      - extract
+    methodology:
+      - Zettelkasten
+      - Evergreen
+      - Cornell
+      - Memory Arts
+      - Network Science
+      - Cognitive Science
+      - Original
+    classification:
+      - claim
+      - methodology
+      - tension
+  constraints:
+    description:
+      max_length: 200
+      format: "One sentence adding context beyond the title"
+    granularity:
+      fixed: extract
+    source:
+      format: "Wiki link to source file"
+    topics:
+      format: "Array of wiki links, at least one"
+
+description: ""
 granularity: extract
-methodology: Zettelkasten | Evergreen | Cornell | Memory Arts | Network Science | Cognitive Science | Original
-source: "[[source-name]]"
-classification: claim | methodology | tension
-created: YYYY-MM-DD
+topics: []
 ---
 
 # prose-as-title expressing the research claim

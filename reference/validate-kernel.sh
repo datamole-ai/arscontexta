@@ -188,7 +188,7 @@ for d in "templates" "04_meta/templates" "_templates"; do
     [ -d "$VAULT/$d" ] && has_templates=true && break
 done
 find "$VAULT" -name "validate-schema.sh" -o -name "validate.sh" -not -path "*/.git/*" 2>/dev/null | grep -q . && has_validation=true
-find "$VAULT" -path "*/validate/SKILL.md" -o -path "*/verify/SKILL.md" 2>/dev/null | grep -q . && has_validation=true
+find "$VAULT" -path "*/verify/SKILL.md" 2>/dev/null | grep -q . && has_validation=true
 
 if $has_templates && $has_validation; then
     pass "Templates and validation mechanism found"

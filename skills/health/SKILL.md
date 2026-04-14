@@ -680,7 +680,7 @@ Health report findings feed into other skills:
 | Orphan notes | /reflect | Run reflect to find connections for orphaned notes |
 | Stale notes | /reweave | Run reweave to update old notes with new connections |
 | Description quality issues | /verify or manual rewrite | Fix descriptions to improve retrieval |
-| Schema violations | /validate | Run validation to fix specific schema issues |
+| Schema violations | /verify | Run verification to fix specific schema issues |
 | Boundary violations | Manual restructuring | Move files to correct space |
 | Processing throughput | /extract, /structure, /capture, or /pipeline | Process inbox items to improve ratio |
 | {vocabulary.topic_map} oversized | Manual split or /architect | Split oversized {vocabulary.topic_maps} into sub-{vocabulary.topic_maps} |
