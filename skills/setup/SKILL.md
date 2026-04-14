@@ -1335,7 +1335,7 @@ Include a discovery section in the context file documenting what queries exist, 
 
 #### Pipeline Step 5: Skills (Agent 2)
 
-**Agent scope:** .claude/skills/[domain-skill-name]/SKILL.md (19 files)
+**Agent scope:** .claude/skills/[domain-skill-name]/SKILL.md (20 files)
 
 **Agent reads:** ops/derivation.md, ${CLAUDE_PLUGIN_ROOT}/skill-sources/*/SKILL.md
 
@@ -1351,7 +1351,7 @@ Generate ALL skills. Every vault ships with the complete skill set from day one.
 
 **Skill source templates live at `${CLAUDE_PLUGIN_ROOT}/skill-sources/`.** Each subdirectory contains a `SKILL.md` template that must be read and written to the user's skills directory.
 
-The 18 skill sources to install:
+The 19 skill sources to install:
 
 
 | Source Directory                                     | Skill Name    | Category      | Tier |
@@ -1362,6 +1362,7 @@ The 18 skill sources to install:
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/stats/`         | stats         | Navigation    | B    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/graph/`         | graph         | Navigation    | B    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/refactor/`      | refactor      | Evolution     | B    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/create/`        | create        | Processing    | B    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/seed/`          | seed          | Orchestration | C    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/pipeline/`      | pipeline      | Orchestration | C    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/archive-batch/` | archive-batch | Orchestration | C    |
@@ -1410,7 +1411,7 @@ These skill sources contain zero placeholders of either type.
 
 ##### Tier B — Frontmatter only (runtime vocabulary)
 
-**Skills:** reflect, reweave, stats, graph, refactor
+**Skills:** reflect, reweave, stats, graph, refactor, create
 
 These skill sources contain only `{vocabulary.xxx}` patterns in their body. Those resolve at runtime — NOT setup-time templates.
 

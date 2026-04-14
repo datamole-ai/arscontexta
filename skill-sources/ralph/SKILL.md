@@ -45,7 +45,7 @@ Each phase maps to specific Agent tool parameters. Use these EXACTLY when spawni
 | Phase | Skill Invoked | Purpose |
 |-------|---------------|---------|
 | process | /extract, /structure, or /capture (based on task.granularity) | Extract notes from source material |
-| create | (inline note creation) | Write the {DOMAIN:note} file |
+| create | /create | Write the {DOMAIN:note} file with schema validation |
 | enrich | (inline enrichment) | Add content to existing {DOMAIN:note} |
 | reflect | /reflect | Find connections, update {DOMAIN:topic map}s |
 | reweave | /reweave | Update older {DOMAIN:note_plural} with new connections |
@@ -154,17 +154,12 @@ ONE PHASE ONLY. Do NOT run reflect or other phases.
 
 For **create** phase:
 ```
-Read the task file at ops/queue/{FILE} for context.
+Read the /create skill and the task file at ops/queue/{FILE}.
 
 You are processing task {ID} from the work queue.
 Phase: create | Target claim: {TARGET}
 
-Create a {DOMAIN:note} for this claim in {DOMAIN:note_collection}/[claim as sentence].md
-Follow note design patterns:
-- YAML frontmatter with description (adds info beyond title), topics
-- Body: 150-400 words showing reasoning with connective words
-- Footer: Source (wiki link), Relevant Notes (with context), Topics
-Update the task file's ## Create section.
+Follow the /create skill instructions for this task file.
 ONE PHASE ONLY. Do NOT run reflect.
 ```
 
