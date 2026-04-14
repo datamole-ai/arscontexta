@@ -576,7 +576,7 @@ Phase 5 is a 9-step sequential pipeline. Steps 1-3, 8, and 9 are executed by the
 | 3 | Main agent | ops/config.yaml, ops/derivation-manifest.md | Ops configuration |
 | 4 | Agent 1 | templates/, ops/queries/ | Templates & query scripts |
 | 5 | Agent 2 | .claude/skills/*/SKILL.md (17 skills) | Skills (tiered generation) |
-| 6 | Agent 3 | CLAUDE.md | Context file |
+| 6 | Agent 3 | CLAUDE.md, ops/features/*.md | Context file + feature references |
 | 7 | Agent 4 | manual/ (7 pages), [domain:notes]/index.md | Manual & hub MOC |
 | 8 | Main agent | Semantic search setup (conditional) | Semantic search |
 | 9 | Main agent | git init/commit | Version control |
@@ -645,7 +645,7 @@ Verification:
 
 **Agent-specific additions to the template:**
 - **Agent 2 (skills):** Include the DOMAIN substitution map as an explicit key-value lookup table
-- **Agent 3 (CLAUDE.md):** Include the list of active feature blocks and their file paths under `${CLAUDE_PLUGIN_ROOT}/generators/features/`
+- **Agent 3 (CLAUDE.md + ops/features/):** Include the list of active feature blocks and their file paths under `${CLAUDE_PLUGIN_ROOT}/generators/features/`
 
 ### Orchestration Protocol
 
@@ -782,6 +782,7 @@ Create the three-space layout with domain-named directories. The note_collection
 |   +-- memory/                   <-- atomic personal insights
 +-- templates/                    <-- note templates (created in Pipeline Step 4)
 +-- ops/                          <-- operational coordination (already exists from Pipeline Step 1)
+|   +-- features/                 <-- feature reference files (progressive disclosure)
 |   +-- observations/             <-- atomic friction signals (Primitive 12)
 |   +-- tensions/                 <-- contradiction tracking (Primitive 12)
 |   +-- methodology/              <-- vault self-knowledge (Primitive 14)
@@ -808,6 +809,7 @@ Create the three-space layout with domain-named directories. The note_collection
 |   +-- memory/
 +-- templates/                    <-- note templates (one per entity type per granularity mode)
 +-- ops/
+|   +-- features/                 <-- feature reference files (progressive disclosure)
 |   +-- observations/
 |   +-- tensions/
 |   +-- methodology/
@@ -1454,9 +1456,9 @@ After creating ALL skill files:
 
 ---
 
-#### Pipeline Step 6: Context File (Agent 3)
+#### Pipeline Step 6: Context File + Feature References (Agent 3)
 
-**Agent scope:** CLAUDE.md
+**Agent scope:** CLAUDE.md, ops/features/*.md
 
 **Agent reads:** ops/derivation.md, ${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md, ${CLAUDE_PLUGIN_ROOT}/generators/features/*.md, generated templates (for reference verification), generated skills (for reference verification and "Recently Created Skills" section)
 
@@ -1477,43 +1479,45 @@ Generate `CLAUDE.md` using `${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md` templ
 **Context file composition algorithm:**
 
 ```
-Step 1: Read generator template.
+Step 1: Read generator template from ${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md.
 
 Step 2: Select feature blocks from ${CLAUDE_PLUGIN_ROOT}/generators/features/.
-  Always-included blocks (11): wiki-links, processing-pipeline, schema, maintenance, self-evolution, methodology-knowledge, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis
+  Always-included blocks (12): note-granularity, wiki-links, processing-pipeline, schema, maintenance, self-evolution, methodology-knowledge, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis
   Conditional blocks: based on derived dimensions (see Active Feature Blocks in derivation.md)
 
-Step 3: Process blocks SEQUENTIALLY. For each selected block:
+Step 3: Write reference files. For each selected block:
   a. Read the block file
-  b. Apply vocabulary transformation (Section 9 algorithm -- LLM-based contextual replacement, NOT string find-replace)
-  c. Compose into the growing context file
+  b. Apply vocabulary transformation (LLM-based contextual replacement, NOT string find-replace)
+  c. Write domain-adapted content to ops/features/<name>.md as a standalone document
   d. Release the block from context before reading the next
 
-Step 4: Compose in canonical block order:
-  1. Philosophy (derived from domain)
-  2. session-rhythm -- Orient, work, persist
-  3. note-granularity -- Three pipelines, one graph (always included)
-  4. wiki-links -- Link philosophy and patterns
-  5. mocs -- Navigation structure (if active)
-  6. processing-pipeline -- Processing approach (always included)
-  7. semantic-search -- Discovery layers (if active)
-  8. schema -- Metadata and query patterns (always included)
-  9. maintenance -- Health checks and reweaving
-  10. self-evolution -- System evolution approach
-  10b. methodology-knowledge -- Querying and consulting self-knowledge
-  12. templates -- Template usage
-  13. multi-domain -- Cross-domain rules (if active)
-  14. self-space -- Agent identity and memory (if active)
-  15. ethical-guardrails -- Behavioral constraints
-  16. helper-functions -- Utility scripts (always included)
-  17. graph-analysis -- Graph intelligence and query patterns (always included)
+Step 4: Compose CLAUDE.md with:
+  a. Base template sections (Philosophy, Discovery-first, Where Things Go, Infrastructure Routing, Pipeline Compliance, Self-Improvement, Common Pitfalls, System Evolution, Recently Created Skills)
+  b. Feature summaries in canonical order, following the semantic composition rules in the generator template:
+     1. note-granularity (always)
+     2. wiki-links (always)
+     3. mocs (if active)
+     4. processing-pipeline (always)
+     5. semantic-search (if active)
+     6. schema (always)
+     7. maintenance (always)
+     8. self-evolution (always)
+     8b. methodology-knowledge (always)
+     9. session-rhythm (always)
+     10. templates (always)
+     11. multi-domain (if active)
+     12. ethical-guardrails (always)
+     13. self-space (if active)
+     14. helper-functions (always)
+     15. graph-analysis (always)
+
+  For each feature: write a dense summary following the semantic composition rules (progressive disclosure awareness, terse density, preserve key semantics, routing over explaining, no redundancy with skills). Link to ops/features/<name>.md. Very short blocks may be inlined directly.
 
 Step 5: Cross-reference elimination.
-  If a block is excluded, scan remaining blocks for references to excluded concepts and remove or rephrase:
+  If a block is excluded, scan remaining summaries and reference files for references to excluded concepts and remove or rephrase:
   - semantic-search excluded -> rephrase "semantic search" to "search your notes" or remove
   - mocs excluded -> simplify "topic MOCs" to "topic organization"
   - self-space excluded -> references to self/identity.md route to ops/ equivalents
-  - note-granularity is always included -- no exclusion needed
   - multi-domain excluded -> remove cross-domain references
 
 Step 6: Add required sections that are NOT from feature blocks:
@@ -1521,13 +1525,13 @@ Step 6: Add required sections that are NOT from feature blocks:
   b. Discovery-first design section (kernel primitive 11)
   c. Memory type routing table (where content goes: notes/, self/, ops/, inbox/, reminders.md)
   d. Infrastructure routing table (routes methodology questions to arscontexta plugin skills)
-  e. Self-improvement loop (manual friction capture instructions)
+  e. Self-improvement loop (brief: capture friction, don't derail, escalate patterns)
   f. Common Pitfalls (3-4 HIGH-risk failure modes from vulnerability matrix, in domain vocabulary)
   g. System Evolution section (architect, reseed, friction-driven growth)
-  h. Self-extension blueprints (how to build new skills, hooks)
-  i. Derivation Rationale summary (which dimensions, which signals, which tradition)
-  j. Pipeline Compliance (NEVER write directly to notes/, route through inbox)
-  k. Condition-based maintenance documentation (what signals trigger which actions)
+  h. Derivation Rationale summary (which dimensions, which signals, which tradition)
+  i. Pipeline Compliance (NEVER write directly to notes/, route through inbox)
+  j. Operational Learning Loop (brief principle only — detail in ops/features/self-evolution.md)
+  k. Session Rhythm (one-line reference to ops/features/session-rhythm.md — orient hook handles session start)
 
 Step 7: Coherence verification.
   - [ ] No orphaned references to excluded blocks
@@ -1538,15 +1542,15 @@ Step 7: Coherence verification.
   - [ ] All mentioned templates exist in the generated templates
   - [ ] Pipeline references use /extract, /structure, /capture correctly
   - [ ] Schema fields mentioned in prose exist in generated templates
+  - [ ] Every ops/features/ reference link points to a file that was actually written
+  - [ ] Summaries follow semantic composition rules (orientation not instruction, terse density, no skill duplication)
 
 Step 8: Apply vocabulary transformation one final time.
-  Read the completed context file. Replace every remaining universal term with its domain-native equivalent.
+  Read the completed CLAUDE.md. Replace every remaining universal term with its domain-native equivalent.
   The vocabulary test: would a domain user ever see a term from a different discipline?
 
-Step 9: Write the file.
-  Target operational density: each section should have enough detail that the agent can follow instructions without asking questions.
-  "Process your notes" is insufficient.
-  "Read the source fully, extract insights that serve the domain, check for duplicates" is sufficient.
+Step 9: Write all files.
+  Write CLAUDE.md. Verify all ops/features/*.md files were written in Step 3.
 ```
 
 **Structural Marker Protection:** Vocabulary transformation must NEVER touch structural markers. Field names in YAML (`description:`, `topics:`, `relevant_notes:`, `type:`, `status:`, `_schema:`) are structural and stay universal. Domain vocabulary applies to VALUES, prose content, and user-facing labels -- never to YAML field names or structural syntax.
@@ -1556,10 +1560,11 @@ Step 9: Write the file.
 - Tell the agent to ALWAYS read self/ at session start
 - Explain prose-as-title with examples from the user's domain
 - Include domain-specific schema in the YAML section
-- Provide self-extension blueprints
 - Include derivation rationale (which dimensions, which signals)
 - Feel cohesive, not like assembled blocks
 - Use domain-native vocabulary throughout
+- Feature summaries provide orientation, not instruction — detail lives in ops/features/
+- Every ops/features/ file is self-contained and domain-adapted
 
 **Skill Discoverability:** Since this agent runs after skill generation (Pipeline Step 5), include a "Recently Created Skills (Pending Activation)" section in the generated CLAUDE.md listing all skill files found in `.claude/skills/` with their domain-native names:
 
@@ -1979,7 +1984,7 @@ Run all 15 primitive checks against the generated system. Use `${CLAUDE_PLUGIN_R
 7. **schema-enforcement** -- Templates exist as single source of truth, validation mechanism present?
 8. **semantic-search** -- Configured or documented for future activation?
 9. **self-space** -- self/ exists with identity.md, methodology.md, goals.md?
-10. **session-rhythm** -- Context file documents orient/work/persist cycle?
+10. **session-rhythm** -- Context file references ops/features/session-rhythm.md for orient/work/persist cycle?
 11. **discovery-first** -- Context file contains Discovery-First Design section, notes optimized for findability?
 12. **operational-learning-loop** -- ops/observations/ and ops/tensions/ exist, review trigger documented in context file, /{DOMAIN:rethink} command exists?
 13. **task-stack** -- ops/tasks.md exists? Queue file (ops/queue/queue.json) exists with schema_version >= 3 and maintenance_conditions section? Context file references both in session-orient phase? /{DOMAIN:next} command exists with condition reconciliation?

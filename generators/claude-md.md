@@ -40,24 +40,7 @@ If any answer is "no," fix it before saving. Discovery-first is not a polish ste
 ```markdown
 ## Session Rhythm
 
-Every session follows: **Orient → Work → Persist**
-
-### Orient
-Read identity and goals at session start. Check condition-based triggers for maintenance items that need attention. Remember who you are, what you're working on.
-- If self/ is enabled: `self/identity.md`, `self/methodology.md`, `self/goals.md`
-- If self/ is disabled: ops/ for current threads, context file for identity
-- `ops/reminders.md` — time-bound commitments (surface overdue items)
-- Workboard reconciliation — surfaces condition-based maintenance triggers automatically
-
-### Work
-Do the actual task. Surface connections as you go. If you discover something worth keeping, write it down immediately — it won't exist next session otherwise.
-
-### Persist
-Before session ends:
-- Write any new insights as atomic notes
-- Update relevant MOCs
-- Update goals (self/goals.md if enabled, ops/ if disabled)
-- Capture anything learned about methodology
+Session orient is handled by hook. Full orient → work → persist rhythm documented in `ops/features/session-rhythm.md`.
 ```
 
 ## Self Space (conditional — on for personal assistant, off for research)
@@ -115,6 +98,7 @@ ops/
 ├── derivation.md      — why this system was configured this way
 ├── config.yaml        — live configuration (edit to adjust dimensions)
 ├── reminders.md       — time-bound commitments
+├── features/          — detailed feature references (read on demand)
 ├── observations/      — friction signals, patterns noticed
 ├── methodology/    — vault self-knowledge (why configured this way, learned behaviors)
 ├── sessions/          — session logs (archive after 30 days)
@@ -148,24 +132,71 @@ When users ask about system structure, schema, or methodology:
 
 ```
 
-## Feature Blocks
+## Feature Blocks — Progressive Disclosure
 
-Include each enabled feature's corresponding block from `generators/features/`. Compose them in this canonical order (16 blocks total):
+The generation agent produces TWO outputs per feature block:
+
+1. **A reference file** in `ops/features/<name>.md` — the full feature block content, domain-adapted with resolved vocabulary. Each file must be a standalone reference document: an agent reading it should understand the feature without needing the CLAUDE.md summary for context.
+
+2. **A dense summary** in CLAUDE.md — orientation, not instruction. Links to the reference file.
+
+### Which blocks to split vs inline
+
+Very short blocks where the summary would be nearly as long as the original (e.g., note-granularity at ~30 lines, ethical-guardrails at ~58 lines) may be inlined directly into CLAUDE.md rather than split. Use judgment: the split only saves context when the reference file is substantially longer than its summary.
+
+### Reference file generation
+
+For each enabled feature block:
+1. Read the block file from `${CLAUDE_PLUGIN_ROOT}/generators/features/`
+2. Apply vocabulary transformation (LLM-based contextual replacement, NOT string find-replace)
+3. Write to `ops/features/<name>.md` as a standalone document
+
+### Summary composition rules
+
+These semantic rules govern how all CLAUDE.md content is written — both feature summaries and base template sections. No numerical line limits.
+
+1. **Progressive disclosure awareness** — Write with the knowledge that full detail exists in the linked reference. The summary's job is orientation, not instruction. The agent reading CLAUDE.md should know *what* a feature does and *when* it matters, not *how* to execute it.
+
+2. **Terse density** — Every sentence must carry meaning that wouldn't be obvious from the feature name alone. "Processing pipeline processes things" is zero-information. "Four phases run in fresh context via subagents; quality gates enforce description quality, schema compliance, and link health" is dense.
+
+3. **Preserve key semantics** — Certain concepts are load-bearing and must survive summarization: the discovery-first constraint, the "never write directly to notes/" rule, the fresh-context-per-phase principle. If a concept shapes how the agent behaves in *other* contexts (not just within that feature), it belongs in the summary.
+
+4. **Routing over explaining** — When a feature maps cleanly to a skill, the summary should route ("use /extract, /structure, or /capture") rather than re-explain what the skill does.
+
+5. **No redundancy with skills** — If a skill's SKILL.md already contains the operational instructions, the summary must not duplicate them. State the principle, link the reference, route to the skill.
+
+6. **Domain-native vocabulary throughout** — Same vocabulary transformation as today, applied to both the summary and the reference file.
+
+### Summary format
+
+Each feature summary follows this shape:
+
+```markdown
+### [Feature Name]
+[Dense summary: what it does, when it matters, key principles that affect behavior elsewhere]
+→ ops/features/[name].md
+```
+
+For inlined blocks (too short to split), omit the reference link and include the full content directly.
+
+### Canonical block order (unchanged)
+
+Compose feature summaries in this order:
 
 1. note-granularity (always)
 2. wiki-links (always)
 3. mocs (if navigation >= 2-tier)
-4. processing-pipeline (always — full automation from day one)
-5. semantic-search (if qmd opted in during onboarding)
-6. schema (always — schema enforcement is an invariant)
+4. processing-pipeline (always)
+5. semantic-search (if qmd opted in)
+6. schema (always)
 7. maintenance (always)
 8. self-evolution (always)
 8b. methodology-knowledge (always)
 9. session-rhythm (always)
 10. templates (always)
-11. multi-domain (if multiple domains detected)
+11. multi-domain (if multiple domains)
 12. ethical-guardrails (always)
-13. self-space (optional — off for research, on for personal assistant)
+13. self-space (optional)
 14. helper-functions (always)
 15. graph-analysis (always)
 
@@ -173,13 +204,13 @@ Include each enabled feature's corresponding block from `generators/features/`. 
 
 **Conditional blocks (4):** mocs (navigation depth), semantic-search (qmd opt-in), multi-domain (multiple domains), self-space (user choice).
 
-**Composition rules:**
-- Block boundaries must be invisible in output — compose as cohesive prose
-- Apply vocabulary transformation to ALL blocks before composition
-- Cross-reference elimination: if a block is excluded, remove/rephrase references to it in remaining blocks
-- If self-space is excluded, references to self/ in other blocks route to ops/ equivalents
-- If semantic-search is excluded, references to "semantic search" become "search your notes"
-- Coherence verification: no orphaned references, consistent vocabulary
+### Cross-reference elimination (unchanged)
+
+If a block is excluded, remove/rephrase references to it in remaining summaries and reference files:
+- semantic-search excluded → rephrase "semantic search" to "search your notes" or remove
+- mocs excluded → simplify "topic MOCs" to "topic organization"
+- self-space excluded → references to self/ route to ops/ equivalents
+- multi-domain excluded → remove cross-domain references
 
 ## Pipeline Enforcement (always include)
 
@@ -198,15 +229,10 @@ Full automation is active from day one. All processing skills, all quality gates
 ## Self-Improvement
 
 When friction occurs (search fails, content placed wrong, user corrects you, workflow breaks):
-1. Use /{DOMAIN:remember} to capture it as an observation in ops/observations/
+1. Capture it as an observation in ops/observations/
 2. Continue your current work — don't derail
 3. If the same friction occurs 3+ times, propose updating this context file
 4. If user explicitly says "remember this" or "always do X", update this context file immediately
-
-When creating anything new, think:
-- Will future agents find this? (discovery-first)
-- What maintenance does this need? (sustainability)
-- What could go wrong? (failure mode awareness)
 ```
 
 ## Operational Learning Loop (always include)
@@ -214,55 +240,7 @@ When creating anything new, think:
 ```markdown
 ## Operational Learning Loop
 
-Your system captures and processes friction signals through two channels:
-
-### Observations (ops/observations/)
-When you notice friction, surprises, process gaps, or methodology insights during work, capture them immediately as atomic notes in ops/observations/. Each observation has a prose-sentence title and category (friction | surprise | process-gap | methodology).
-
-### Tensions (ops/tensions/)
-When two {DOMAIN:notes} contradict each other, or an implementation conflicts with methodology, capture the tension in ops/tensions/. Each tension names the conflicting notes and tracks resolution status (pending | resolved | dissolved).
-
-### Accumulation Triggers
-- **10+ pending observations** → Run /{DOMAIN:rethink} to triage and process
-- **5+ pending tensions** → Run /{DOMAIN:rethink} to resolve conflicts
-- /{DOMAIN:rethink} triages each: PROMOTE (to {DOMAIN:note_collection}/), IMPLEMENT (update this file), ARCHIVE, or KEEP PENDING
-```
-
-## Task Management (include when processing >= moderate)
-
-```markdown
-## Task Management
-
-### Processing Queue (ops/queue/)
-Pipeline tasks are tracked in a JSON queue. Each {DOMAIN:note} gets one queue entry that progresses through phases (create → {DOMAIN:connect} → reweave → verify). Fresh context per phase ensures quality.
-
-### Maintenance Queue
-Maintenance work lives alongside pipeline work in the same queue. /next evaluates conditions against vault state on each invocation: fired conditions create `type: "maintenance"` queue entries, satisfied conditions auto-close them. Priority derives from consequence speed (session > multi-session > slow). One queue, one command.
-```
-
-## Self-Extension Blueprints (always include)
-
-```markdown
-## Self-Extension
-
-You can extend this system yourself. Here's how:
-
-### Building New Skills
-Create `.claude/skills/skill-name/SKILL.md` with:
-- YAML frontmatter (name, description, allowed-tools)
-- Instructions for what the skill does
-- Quality gates and output format
-
-### Building Hooks
-Core hooks (orient, validate, commit) are provided by the arscontexta plugin. To add custom vault-level hooks, create scripts in `.claude/hooks/` and register them in `.claude/settings.json`:
-- Use additive merge — read existing settings, append to event arrays, never overwrite
-- See the qmd-sync hook as an example
-
-### Extending Schema
-Add domain-specific YAML fields to your templates. The base fields (description, type, created) are universal. Add fields that make YOUR notes queryable for YOUR use case.
-
-### Growing MOCs
-When a MOC exceeds ~35 notes, split it. Create sub-MOCs that link back to the parent. The hierarchy emerges from your content, not from planning.
+Friction signals (observations, tensions) accumulate in ops/observations/ and ops/tensions/. When patterns emerge, /{DOMAIN:rethink} triages them. Detail in `ops/features/self-evolution.md`.
 ```
 
 ## Recently Created Skills (always include)
