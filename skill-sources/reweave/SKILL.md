@@ -70,9 +70,9 @@ Parse immediately:
    - Rewrite prose if understanding is deeper now
 6. **Make the changes** — edit the {vocabulary.note} with new connections (inline links with context), improved prose, sharper claim if needed
 7. **Update {vocabulary.topic_map_plural}** — if the {vocabulary.note}'s topic membership changed, update relevant {vocabulary.topic_map_plural}
-8. **If task file exists:** update the {vocabulary.reweave} section
-9. **Report** — structured summary of what changed and why
-10. Output RALPH HANDOFF block
+8. **If task file path is in context (pipeline):** update the `## {vocabulary.reweave}` section of the task file with older-note deltas, claim status (unchanged / sharpened / challenged / split), and the network-effect summary — no chat output.
+9. **If no task file path is in context (standalone):** print a structured summary of what changed and why as chat output.
+10. Output HANDOFF block
 
 **START NOW.** Reference below explains methodology — use to guide, not as output.
 
@@ -538,14 +538,14 @@ The network compounds through evolution, not just accumulation.
 
 ---
 
-## RALPH HANDOFF Output
+## HANDOFF Output
 
 Always output this structured format at the END of the session. This enables /pipeline to parse results and update the task queue.
 
 **Format:**
 
 ```
-=== RALPH HANDOFF: {vocabulary.reweave} ===
+=== HANDOFF: {vocabulary.reweave} ===
 Target: [[note name]]
 
 Work Done:

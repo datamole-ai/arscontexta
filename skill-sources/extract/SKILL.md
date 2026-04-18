@@ -108,9 +108,9 @@ Parse immediately:
    - Tier 3 fallback if qmd is unavailable: use keyword grep duplicate checks
    - If duplicate exists: evaluate for enrichment or skip
    - Classify as OPEN (needs more investigation) or CLOSED (standalone, ready)
-5. Output extraction report with titles, classifications, extraction rationale
-6. Wait for user approval before creating files
-7. Create per-claim task files, update queue, output RALPH HANDOFF block
+5. If task file path is in context (pipeline): append the category summary (counts + skipped items with reasons) to the source task file's `## Outputs` section, no chat output. If no task file path is in context (standalone): print the category summary as chat output (see "Present Findings" below). Per-claim rationale is captured in step 7 when per-claim task files are created.
+6. If no task file path is in context (standalone invocation): wait for user approval before creating files. When invoked from /pipeline, skip and proceed.
+7. Create per-claim task files, update queue, output HANDOFF block
 
 **START NOW.** Reference below explains methodology — use to guide, not as output.
 
@@ -384,7 +384,9 @@ Classification affects downstream handling but does NOT affect whether to extrac
 
 ### 6. Present Findings
 
-Report what you found by category. **Include counts:**
+**Mode-dependent output.** When invoked from `/pipeline` (task file path in context): append the category structure below to the source task file's `## Outputs` section — no chat output. When invoked standalone (no task file path): print the category structure below as chat output and wait for user approval before proceeding to step 7.
+
+Category structure (same format for both modes):
 
 ```
 Extraction scan complete.
@@ -422,7 +424,7 @@ SKIPPED (truly nothing to add):
 - [description] — why nothing extractable
 ```
 
-**Wait for user approval before creating files.** Never auto-extract.
+**Standalone invocation only: wait for user approval before creating files.** Never auto-extract when standalone. When invoked from `/pipeline` (task file path in context), skip approval and proceed to step 7 — the batch summary at archive time is where a human reviews the batch's outputs.
 
 ### 7. Extract (With User Approval)
 
@@ -863,7 +865,7 @@ Would linking to this {vocabulary.note} drag unrelated content along? If yes, th
 
 ## Critical
 
-Never auto-extract. Always present findings and wait for user approval.
+Never auto-extract when invoked standalone. Always present findings and wait for user approval before creating files. When invoked from `/pipeline` (task file path in context), the approval gate is skipped — per-claim rationale and category summary are written to the task file instead; batch-level review happens at archive time.
 
 **When in doubt, extract.** For domain-relevant sources, err toward capturing. Implementation ideas, tensions, validations, open questions, and near-duplicates all have value — they become different output types, not rejections.
 
@@ -1045,7 +1047,7 @@ After creating task files, update `ops/queue/queue.json`:
 After creating files and updating queue, output:
 
 ```
-=== RALPH HANDOFF: extract ===
+=== HANDOFF: extract ===
 Target: [source file]
 
 Work Done:
@@ -1073,7 +1075,7 @@ Queue Updates:
 === END HANDOFF ===
 ```
 
-**Critical:** Do the full extraction workflow first, then create task files, update queue, and output the RALPH HANDOFF block.
+**Critical:** Do the full extraction workflow first, then create task files, update queue, and output the HANDOFF block.
 
 ---
 

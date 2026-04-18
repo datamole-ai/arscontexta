@@ -50,9 +50,9 @@ Parse immediately:
 5. Evaluate each candidate: does a genuine connection exist? Can you articulate WHY?
 6. Add inline wiki-links where connections pass the articulation test
 7. Update relevant {vocabulary.topic_map}(s) with this {vocabulary.note}
-8. If task file in context: update the {vocabulary.reflect} section
-9. Report what was connected and why
-10. Output RALPH HANDOFF block
+8. If task file path is in context (pipeline): update the `## {vocabulary.reflect}` section of the task file with the Discovery Trace, per-connection detail, {vocabulary.topic_map} updates, synthesis opportunities, and flagged items — no chat output.
+9. If no task file path is in context (standalone): report what was connected and why as chat output (see "Output Format" below).
+10. Output HANDOFF block
 
 **START NOW.** Reference below explains methodology — use to guide, not as output.
 
@@ -557,7 +557,9 @@ If you find {vocabulary.note_plural} with no connections:
 
 ## Output Format
 
-After reflecting, report:
+**Mode-dependent output.** When invoked standalone (no task file path in context): emit the structure below as chat output. When invoked from `/pipeline` (task file path in context): write the same structure to the task file's `## {vocabulary.reflect}` section instead of printing (see "Task File Update" below).
+
+Structure:
 
 ```markdown
 ## Reflection Complete
@@ -644,14 +646,14 @@ The graph is not just storage. It is an external thinking structure. Build it wi
 
 ---
 
-## RALPH HANDOFF Output
+## HANDOFF Output
 
 Always output this structured format at the END of the session. This enables /pipeline to parse results and update the task queue.
 
 **Format:**
 
 ```
-=== RALPH HANDOFF: {vocabulary.reflect} ===
+=== HANDOFF: {vocabulary.reflect} ===
 Target: [[note name]]
 
 Work Done:
@@ -679,11 +681,10 @@ Queue Updates:
 
 ### Task File Update
 
-When a task file path is in context (pipeline execution), update it. After completing the workflow, update the `## {vocabulary.reflect}` section of that task file with:
-- Connections added and why
-- {vocabulary.topic_map} updates made
-- Articulation test results
-- Discovery trace summary
-
-**Critical:** The handoff block is OUTPUT, not a replacement for the workflow. Do the full reflect workflow first, update task file, then format results as handoff.
+When a task file path is in context (pipeline execution), update the `## {vocabulary.reflect}` section of that task file with the full Reflection Complete structure:
+- Discovery Trace: {vocabulary.topic_map} exploration, semantic search queries with scores, keyword search, agent notes
+- Connections Added: per-note inline/footer/topic-map links with relationship types and WHY
+- {vocabulary.topic_map} Updates: new entries, section changes, gaps filled, agent notes
+- Synthesis Opportunities: higher-order insights that could be composed
+- Flagged for Attention: orphans, broad notes to split, tensions needing resolution
 

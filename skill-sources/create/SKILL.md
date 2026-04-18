@@ -67,7 +67,7 @@ Parse the task file path from arguments. If no path provided, report an error â€
 3. Select template and fill frontmatter (Step 2)
 4. Write note body and footer (Step 3)
 5. Validate against template schema (Step 4)
-6. Update task file and output RALPH HANDOFF (Step 5)
+6. Update task file and output HANDOFF (Step 5)
 
 **START NOW.**
 
@@ -318,12 +318,12 @@ Validated: {PASS | list of WARN items}
 
 This gives downstream phases (reflect, reweave, verify) the exact path and context they need.
 
-### 5b. Output RALPH HANDOFF Block
+### 5b. Output HANDOFF Block
 
 After updating the task file, output the handoff block. This is how /pipeline captures your work.
 
 ```
-=== RALPH HANDOFF: create ===
+=== HANDOFF: create ===
 Target: {claim from task file frontmatter}
 
 Work Done:
@@ -380,5 +380,5 @@ The `## Create` section in the task file is filled with the note path, template 
 - Validate against the template schema after writing
 - Fix FAIL-severity issues before proceeding
 - Update the task file's `## Create` section
-- Output the RALPH HANDOFF block as the last action
+- Output the HANDOFF block as the last action
 - Use domain-native vocabulary from the manifest in all output

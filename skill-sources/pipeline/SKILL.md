@@ -162,7 +162,7 @@ Pass the `task.file` as argument to the skill.
 
 When the subagent returns:
 
-1. **Look for RALPH HANDOFF block** — search for `=== RALPH HANDOFF` and `=== END HANDOFF ===` markers
+1. **Look for HANDOFF block** — search for `=== HANDOFF:` and `=== END HANDOFF ===` markers
 2. **Parse handoff block:** Parse the Work Done, Learnings, and Queue Updates sections
 3. **Capture learnings:** If Learnings section has non-NONE entries, note them for the final report
 

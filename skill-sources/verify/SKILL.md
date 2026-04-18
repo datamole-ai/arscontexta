@@ -286,7 +286,9 @@ If you have Edit tool access, apply fixes for clear-cut issues:
 
 ### Step 5: Compile Results
 
-Combine all checks into a unified report:
+**Mode-dependent output.** Combine all checks into the unified structure below. When invoked from `/pipeline` (task file path in context): write the structure to the task file's `## {vocabulary.verify}` section as part of Step 6 — no chat output. When invoked standalone (no task file path): print the structure as chat output.
+
+Structure (same format for both modes):
 
 ```
 === VERIFY: [note title] ===
@@ -323,10 +325,10 @@ Recommended Actions:
 
 ### Step 6: Update task file and capture observations
 
-- If a task file is in context (pipeline execution): update the `## Verify` section with results
+- If a task file path is in context (pipeline execution): update the `## {vocabulary.verify}` section of the task file with the full per-subcheck structure compiled in Step 5 — RECITE / VALIDATE / REVIEW lines with per-line PASS/WARN/FAIL status, Actions Taken, Recommended Actions, and overall verdict. This is the audit trail.
 - Reflect on the process: friction? surprises? methodology insights? process gaps?
 - If any observations worth capturing: create atomic note in the observations directory per the observation capture pattern
-- Output RALPH HANDOFF block (see below)
+- Output HANDOFF block (see below)
 
 **START NOW.** The reference material below explains philosophy and methodology — use to guide reasoning, not as output to repeat.
 
@@ -436,12 +438,12 @@ Run all three checks on a specific note. Full detailed report.
 
 Comprehensive audit of all notes in {DOMAIN:note_collection}/. Summary table + flagged failures.
 
-## RALPH HANDOFF Output
+## HANDOFF Output
 
 Always output this structured format at the END of the session:
 
 ```
-=== RALPH HANDOFF: verify ===
+=== HANDOFF: verify ===
 Target: [[note name]]
 
 Work Done:

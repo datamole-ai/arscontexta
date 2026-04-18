@@ -177,12 +177,12 @@ No enrichment tasks — capture does not analyze content deeply enough to spot e
 
 ---
 
-## RALPH HANDOFF Output
+## HANDOFF Output
 
-After creating the queue entry, always output the RALPH HANDOFF block:
+After creating the queue entry, always output the HANDOFF block:
 
 ```
-=== RALPH HANDOFF: capture ===
+=== HANDOFF: capture ===
 Target: [source file]
 
 Work Done:

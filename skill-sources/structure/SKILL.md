@@ -89,9 +89,9 @@ Parse immediately:
    - Tier 2 (CLI fallback): `qmd vsearch "[cluster scope as sentence]" --collection {vocabulary.notes_collection} -n 5`
    - Tier 3 fallback if qmd is unavailable: use keyword grep duplicate checks
    - If existing note covers same scope: evaluate for enrichment or merge
-5. Output grouping report with proposed structure notes, sub-claims listed, and rationale
-6. Wait for user approval before writing files
-7. Create per-note task files, update queue, output RALPH HANDOFF block
+5. If task file path is in context (pipeline): append the grouping summary (proposed titles, cluster membership, enrichments) to the source task file's `## Outputs` section, no chat output. If no task file path is in context (standalone): print the grouping report as chat output (see "Present Findings" below). Per-note rationale is captured in step 7 when per-note task files are created.
+6. If no task file path is in context (standalone invocation): wait for user approval before writing files. When invoked from /pipeline, skip and proceed.
+7. Create per-note task files, update queue, output HANDOFF block
 
 **START NOW.** Reference below explains methodology — use to guide, not as output.
 
@@ -264,7 +264,9 @@ If qmd CLI is unavailable, fall back to keyword grep duplicate checks.
 
 ### 5. Present Findings
 
-Report grouped clusters with proposed titles and listed sub-claims:
+**Mode-dependent output.** When invoked from `/pipeline` (task file path in context): append the grouping structure below to the source task file's `## Outputs` section — no chat output. When invoked standalone (no task file path): print the grouping structure below as chat output and wait for user approval before proceeding to step 6.
+
+Grouping structure (same format for both modes):
 
 ```
 ## Proposed Structure Notes
@@ -283,7 +285,7 @@ Rationale: [why these belong together]
 - [[existing note]] — [what new detail to add]
 ```
 
-Wait for user approval before writing.
+Standalone invocation only: wait for user approval before writing. When invoked from `/pipeline`, skip approval and proceed — per-note task files get written without interruption.
 
 ### 6. Write Notes
 
@@ -550,7 +552,7 @@ After creating task files, update `ops/queue/queue.json`:
 After creating files and updating queue, output:
 
 ```
-=== RALPH HANDOFF: structure ===
+=== HANDOFF: structure ===
 Target: [source file]
 
 Work Done:
@@ -600,7 +602,7 @@ After structuring completes, the created {vocabulary.note_plural} proceed throug
 
 ## Critical
 
-Never auto-structure. Always present findings and wait for user approval.
+Never auto-structure when invoked standalone. Always present findings and wait for user approval before writing files. When invoked from `/pipeline` (task file path in context), the approval gate is skipped — per-note rationale and grouping summary are written to the task file instead; batch-level review happens at archive time.
 
 **When in doubt about grouping: group.** The user chose /structure. Split only when keeping together would actively confuse or mislead.
 
