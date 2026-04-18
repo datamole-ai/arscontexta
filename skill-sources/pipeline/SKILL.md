@@ -2,8 +2,8 @@
 name: pipeline
 description: End-to-end source processing -- seed, extract/structure/capture, process all notes through reflect/reweave/verify, archive. The full pipeline in one command. Triggers on "/pipeline", "/pipeline [file]", "process this end to end", "full pipeline".
 version: "1.0"
-allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Agent
-argument-hint: "[file] [--extract] [--structure] [--capture] — path to source file to process end-to-end"
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash
+argument-hint: " [file path] [--extract] [--structure] [--capture]
 ---
 
 ## EXECUTE NOW
@@ -30,7 +30,7 @@ Read `ops/derivation-manifest.md` (or fall back to `ops/derivation.md`) for doma
 
 ## Pipeline Overview
 
-The pipeline orchestrates four phases. Each phase uses skill invocation or /ralph for subagent-based processing. State lives in the queue file — the pipeline is stateless orchestration on top of stateful queue entries.
+The pipeline orchestrates three phases. Each phase uses skill invocation. State lives in the queue file — the pipeline is stateless orchestration on top of stateful queue entries.
 
 ```
 Source file
@@ -39,13 +39,10 @@ Source file
 Phase 1: /seed --[granularity] — create process task, move source to archive
     |
     v
-Phase 2: /extract OR /structure OR /capture (via /ralph) — based on granularity
+Phase 2: Granularity-based processing
     |
     v
-Phase 3: /ralph (all notes) — reflect -> reweave -> verify
-    |
-    v
-Phase 4: /archive-batch — move task files, generate summary
+Phase 3: /archive-batch — move task files, generate summary
     |
     v
 Complete
@@ -57,144 +54,195 @@ The pipeline is the convenience wrapper. /ralph is the engine. /seed is the entr
 
 ## Phase 1: Seed
 
-Invoke /seed on the target file with the granularity flag to create the process task, check for duplicates, and move the source to its archive folder.
-
-**How to invoke:**
-
-Use the Skill tool if available, otherwise execute the /seed workflow directly with the granularity flag (e.g., `/seed --extract {file}`, `/seed --structure {file}`, `/seed --capture {file}`):
-- Validate source exists
-- Check for prior processing (duplicate detection)
-- Create archive folder
-- Move source from {DOMAIN:inbox} to archive
-- Create process task file with granularity set
-- Add process task to queue
+Use Skill tool to invoke /seed on the target file with the granularity flag to create the process task, check for duplicates, and move the source to its archive folder.
 
 **Capture from seed output:**
-- **Batch ID**: the source basename (used for --batch filtering in subsequent steps)
+- **Batch ID**: the source basename
 - **Archive folder path**: where the source was moved
 - **next_claim_start**: the claim numbering start
 
 Report: `$ Seeded: {source-name}`
 
-**If seed reports the file was already processed:** Ask the user whether to proceed or skip. Do NOT auto-skip — the user may want to re-process with different scope.
-
 ---
 
-## Phase 2: Process Source (Granularity-Routed)
+## Phase 2: Process Source (Granularity-Routed) and claims
 
-Process the source via /ralph. This spawns a subagent that runs the appropriate skill based on granularity, extracting notes from the source and creating task entries in the queue.
+Process the source via the appropriate skill based on granularity, extracting notes from the source and creating task entries in the queue.
 
-Read `granularity` from the queue task entry. Invoke the matching skill:
-- granularity == "extract" → /extract (via /ralph)
-- granularity == "structure" → /structure (via /ralph)
-- granularity == "capture" → /capture (via /ralph)
+### Phase 2 configuration
 
-**How to invoke:**
+| Phase | Skill Invoked | Purpose |
+|-------|---------------|---------|
+| process | /extract, /structure, or /capture (based on task.granularity) | Extract notes from source material |
+| create | /create | Write the {DOMAIN:note} file with schema validation |
+| enrich | (inline enrichment) | Add content to existing {DOMAIN:note} |
+| reflect | /reflect | Find connections, update {DOMAIN:topic map}s |
+| reweave | /reweave | Update older {DOMAIN:note_plural} with new connections |
+| verify | /verify | Description quality + schema + health checks |
 
+### Phase 2.1 Queue State
+
+Read the queue file. `ops/queue/queue.json`
+
+Parse the queue. Identify ALL pending tasks.
+
+### Queue Schema
+
+```yaml
+phase_order:
+  note: [create, reflect, reweave, verify]
+  enrichment: [enrich, reflect, reweave, verify]
+
+tasks:
+  - id: source-name
+    type: process
+    granularity: extract
+    status: pending
+    source: ops/queue/archive/2026-01-30-source/source.md
+    file: source-name.md
+    created: "2026-01-30T10:00:00Z"
+
+  - id: note-010
+    type: note
+    status: pending
+    target: "note title here"
+    batch: source-name
+    file: source-name-010.md
+    current_phase: reflect
+    completed_phases: [create]
 ```
-/ralph 1 --batch {batch_id} --type process
-```
 
-Or via Agent tool:
-```
-Agent(
-  prompt = "Run /ralph 1 --batch {batch_id} --type process",
-  description = "process: {batch_id}"
-)
-```
+If the queue file does not exist or is empty, report: "Queue is empty. Use /pipeline to add sources."
 
-After completion, read the queue to count extracted notes and enrichments:
+### Phase 2.2 Filter Tasks
 
-Check how many pending tasks exist for this batch. The process phase creates 1 queue entry per note and 1 per enrichment.
+Build a list of **actionable tasks** — tasks where `status == "pending"`. Order by position in the tasks array (first = highest priority).
+
+The `phase_order` header defines the phase sequence:
+- `note`: create -> reflect -> reweave -> verify
+- `enrichment`: enrich -> reflect -> reweave -> verify
+
+**For `type: "process"` tasks:**
+Read `task.granularity` to determine which skill to invoke:
+- `"extract"` → invoke /extract skill
+- `"structure"` → invoke /structure skill
+- `"capture"` → invoke /capture skill
+
+### Phase 2.3 Loop
+
+Process the filtered tasks in a loop. For each iteration:
+
+### Phase 2.3.1 Select Next Task
+
+Pick the first pending task from the filtered list. Read its queue metadata.
 
 Report:
 ```
-$ Processed: {N} {DOMAIN:note_plural}, {M} enrichments
-  Processing {total_tasks} tasks through the pipeline...
+=== Processing task {i}/{N}: {id} — phase: {current_phase} ===
+Target: {target}
+File: {file}
 ```
 
-**If zero notes extracted:** Report the issue. For TFT sources, zero extraction is a bug — the source almost certainly contains extractable content. Ask the user whether to retry with different scope or skip.
+### Phase 2.3.2 Invoke Skill
+
+| Current Phase | Skill to invoke |
+|-------|-----------------|
+| process | /extract, /structure, /capture based on granularity|
+| create | /create |
+| enrich | /enrich |
+| reflect | /{vocabulary.reflect} |
+| reweave | /{vocabulary.reweave} |
+| verify | /{vocabulary.verify} |
+
+Use Skill tool to invoke the appropriate skill based on the task's `current_phase` and `granularity`.
+
+Pass the `task.file` as argument to the skill.
+
+### Phase 2.3.3 Evaluate Return
+
+When the subagent returns:
+
+1. **Look for RALPH HANDOFF block** — search for `=== RALPH HANDOFF` and `=== END HANDOFF ===` markers
+2. **Parse handoff block:** Parse the Work Done, Learnings, and Queue Updates sections
+3. **Capture learnings:** If Learnings section has non-NONE entries, note them for the final report
+
+### Phase 2.3.4 Update Queue (Phase Progression)
+
+After evaluating the return, advance the task to the next phase.
+
+**Phase progression logic:**
+
+Look up `phase_order` from the queue header to determine the next phase. Find `current_phase` in the array. If there is a next phase, advance. If it is the last phase, mark done.
+
+**If NOT the last phase** — advance to next:
+- Set `current_phase` to the next phase in the sequence
+- Append the completed phase to `completed_phases`
+
+**If the last phase** (verify) — mark task done:
+- Set `status: done`
+- Set `completed` to current UTC timestamp
+- Set `current_phase` to null
+- Append the completed phase to `completed_phases`
+
+**For process tasks ONLY:** Re-read the queue after marking done. The processing skill (/extract, /structure, or /capture) writes new task entries (1 entry per note/enrichment with `current_phase`/`completed_phases`) to the queue during execution. The lead must pick these up for subsequent iterations.
+
+### Phase 2.3.6 Report Progress
+
+```
+=== Task {id} complete ({i}/{N}) ===
+Phase: {current_phase} -> {next_phase or "done"}
+```
+
+If learnings were captured, show a brief summary.
+If more unblocked tasks exist, show the next one.
+
+### Phase 2.3.7 Re-filter Tasks
+
+Before the next iteration, re-read the queue and re-filter tasks. Phase advancement may have changed eligibility.
 
 ---
 
-## Phase 3: Process All Claims
+## Phase 2.4: Post-Batch Cross-Connect
 
-Count total pending tasks for this batch from the queue. Then process all of them through the full phase sequence.
+After advancing a task to "done" (Phase 2.3.4), check if ALL tasks in that batch now have `status: "done"`. If yes and the batch has 2 or more completed claims:
 
-**How to invoke:**
+1. **Collect all note paths** from completed batch tasks. For each claim task with `status: "done"`, read the task file's `## Create` section to find the created note path.
 
-```
-/ralph {remaining_count} --batch {batch_id}
-```
+2. **Do cross-connect validation**:
 
-Or via Agent tool:
-```
-Agent(
-  prompt = "Run /ralph {remaining_count} --batch {batch_id}",
-  description = "process: {batch_id} ({remaining_count} tasks)"
-)
-```
+Notes created in this batch:
+{list of ALL note titles + paths from completed batch tasks}
 
-This processes every claim through: create -> reflect -> reweave -> verify. And every enrichment through: enrich -> reflect -> reweave -> verify.
+Verify sibling connections exist between batch notes. Add any that were missed
+because sibling notes did not exist yet when the earlier claim's reflect ran.
+Check backward link gaps.
 
-Each phase runs in an isolated subagent with fresh context. /ralph handles all the orchestration: subagent spawning, handoff parsing, queue advancement, learnings capture.
-
-**Progress reporting:**
-
-The /ralph invocation reports progress per task. The pipeline relays this:
-```
-$ Processing {DOMAIN:note} 1/{total}: {title}
-  $ create... done
-  $ reflect... done (3 connections found)
-  $ reweave... done (2 {DOMAIN:note_plural} updated)
-  $ verify... done (PASS)
-```
-
-**For large batches (20+ claims):** /ralph handles context isolation automatically via subagents. The pipeline does NOT need to chunk — /ralph processes N tasks sequentially with fresh context per phase.
+**Skip if:** batch has only 1 claim (no siblings) or tasks from the batch are still pending.
 
 ---
 
-## Phase 4: Verify Completion
+## Phase 3: Verify Completion
 
-After /ralph finishes, verify all tasks for this batch are done.
+After Phase 2 finishes, verify all tasks for this batch are done.
 
 Check the queue: count tasks for this batch that are NOT done.
 
 **If tasks remain pending:**
 - Report which tasks are incomplete and at which phase
 - Show the specific task IDs and their current_phase
-- Suggest: "Run `/ralph --batch {batch_id}` to continue from where it stopped"
 - Do NOT proceed to archive
 
-**If all tasks are done:** Proceed to Phase 5.
+**If all tasks are done:** Proceed to Phase 4.
 
 ---
 
-## Phase 5: Archive Batch
+## Phase 4: Archive Batch
 
-When all tasks for the batch are complete, archive the batch.
-
-**How to invoke:**
-
-```
-/archive-batch {batch_id}
-```
-
-Or execute directly:
-1. Move all task files from `ops/queue/` to `ops/queue/archive/{date}-{batch_id}/`
-2. Generate a batch summary file: `{batch_id}-summary.md`
-3. Remove completed entries from the queue (or mark as archived)
-
-The summary should include:
-- Source file name and original location
-- Number of claims extracted
-- Number of enrichments
-- List of created {DOMAIN:note_plural} with titles
-- Any notable learnings from the batch
+When all tasks for the batch are complete, archive the batch by using Skill tool to invoke /archive-batch.
 
 ---
 
-## Phase 6: Final Report
+## Phase 5: Final Report
 
 ```
 --=={ pipeline }==--
@@ -223,19 +271,6 @@ Summary: {batch_id}-summary.md
 - [[claim title 1]]
 - [[claim title 2]]
 - ...
-```
-
-Also output the RALPH HANDOFF block:
-
-```
-=== RALPH HANDOFF: pipeline ===
-Target: {source_file}
-
-Work Done:
-- Seeded source: {batch_id}
-- Extracted {N} {DOMAIN:note_plural} and {M} enrichments
-- Processed all claims through 4-phase pipeline
-- Archived batch to {archive_path}
 
 Files Modified:
 - {DOMAIN:note_collection}/ ({N} new {DOMAIN:note_plural})
@@ -259,8 +294,7 @@ Queue Updates:
 **Phase failure at any stage:**
 1. Report the failure with context (which phase, which task, what error)
 2. Show the current queue state for this batch
-3. Suggest remediation: "Run `/ralph --batch {batch_id}` to continue from where it stopped"
-4. Do NOT attempt to continue automatically past failures
+3. Do NOT attempt to continue automatically past failures
 
 **The pipeline is resumable.** Queue state persists across sessions:
 - /seed detects prior processing and asks whether to proceed
@@ -271,46 +305,7 @@ Queue Updates:
 
 **Extract failure:** If Phase 2 extracts zero notes, report and stop. Do not proceed to an empty processing phase.
 
-**Processing failure:** If /ralph fails mid-batch, the queue preserves state. Individual claims resume from their failed phase on next /ralph invocation.
-
-**Archive failure:** If archiving fails, the claims are still created and connected. Only the organizational cleanup is missing — re-run /archive-batch manually.
-
----
-
-## Resumability
-
-The pipeline is designed to be interrupted and resumed at any point:
-
-| Interrupted At | How to Resume |
-|----------------|---------------|
-| Before seed | Run /pipeline again (starts fresh) |
-| After seed, before process | /ralph 1 --batch {id} --type process |
-| After process, during notes | /ralph --batch {id} (picks up from failed phase) |
-| After all claims, before archive | /archive-batch {id} |
-
-State lives in the queue file. The pipeline reads queue state, not session state. This means you can interrupt, close the session, and resume later.
-
----
-
-## Edge Cases
-
-**No target file:** List {DOMAIN:inbox}/ candidates, suggest the best one based on age and relevance.
-
-**Source already seeded:** /seed detects this and asks the user. If they decline, the pipeline stops cleanly.
-
-**Large source (2500+ lines):** /extract, /structure, and /capture handle chunking automatically. The pipeline does not need special handling.
-
-**No ops/derivation-manifest.md:** Use universal vocabulary for all output.
-
----
-
 ## Critical Constraints
-
-**never:**
-- Skip the seed phase (duplicate detection is important)
-- Continue past a failed phase automatically
-- Process claims inline instead of via /ralph subagents
-- Archive a batch with incomplete tasks
 
 **always:**
 - Report progress at each phase boundary
