@@ -2,6 +2,7 @@
 name: archive-batch
 description: Archive a completed processing batch. Verifies all tasks are done, moves task files to archive folder, generates batch summary, removes queue entries. Triggers on "/archive-batch", "/archive-batch [batch_id]", "archive this batch".
 version: "1.0"
+context: fork
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 argument-hint: "{batch_id} — batch to archive (required)"
 ---

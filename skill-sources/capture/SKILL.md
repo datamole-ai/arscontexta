@@ -2,6 +2,7 @@
 name: capture
 description: Preserve source material verbatim with structured frontmatter and graph connections. No transformation of content — the source is captured exactly as-is in a fenced block. Triggers on "/capture", "/capture [file]", "capture this", "save this raw".
 version: "1.0"
+context: fork
 allowed-tools: Read, Write, Grep, Glob
 ---
 

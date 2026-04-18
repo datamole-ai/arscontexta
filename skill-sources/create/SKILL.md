@@ -2,6 +2,7 @@
 name: create
 description: Create a note in the correct location with template-driven schema validation. Reads derivation manifest for vocabulary and entity routing, selects the appropriate template, fills frontmatter from _schema blocks, writes the note body, and validates before committing. Used by /ralph as a subagent skill for the create phase.
 version: "1.0"
+context: fork
 allowed-tools: Read, Write, Edit, Grep, Glob
 ---
 

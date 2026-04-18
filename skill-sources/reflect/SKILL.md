@@ -1,6 +1,7 @@
 ---
 name: reflect
 description: Find connections between notes and update MOCs. Requires semantic judgment to identify genuine relationships. Use after /extract, /structure, or /capture creates notes, when exploring connections, or when a topic needs synthesis. Triggers on "/reflect", "/reflect [note]", "find connections", "update MOCs", "connect these notes".
+context: fork
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, mcp__qmd__query, mcp__qmd__status
 ---
 

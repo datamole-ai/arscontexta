@@ -2,6 +2,7 @@
 name: extract
 description: Extract atomic claims from source material — one claim per file. Comprehensive extraction is the default — every insight that serves the domain gets extracted. For domain-relevant sources, skip rate must be below 10%. Zero extraction from a domain-relevant source is a BUG. Triggers on "/extract", "/extract [file]", "extract insights", "mine this".
 version: "1.0"
+context: fork
 allowed-tools: Read, Write, Grep, Glob, mcp__qmd__query
 ---
 

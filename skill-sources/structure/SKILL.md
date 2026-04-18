@@ -2,6 +2,7 @@
 name: structure
 description: Group claims from source material into structured notes, defaulting to generous grouping. Each note covers one coherent topic with multiple related claims organized in sections. Triggers on "/structure", "/structure [file]", "group these", "structure this".
 version: "1.0"
+context: fork
 allowed-tools: Read, Write, Grep, Glob, mcp__qmd__query
 ---
 
