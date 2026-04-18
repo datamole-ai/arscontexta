@@ -208,9 +208,9 @@ The pipeline's quality depends on each phase getting your best attention. Your c
 **The orchestration pattern:**
 
 ~~~
-Orchestrator reads queue -> picks next task -> spawns worker for one phase
-  Worker: fresh context, reads task file, executes phase, writes results to task file
-  Worker returns -> Orchestrator reads results -> advances queue -> spawns next phase
+Orchestrator reads queue -> picks next task -> invokes phase skill for one phase
+  Phase skill (forked context): reads task file, executes phase, writes results to task file
+  Phase skill returns -> Orchestrator reads results -> advances queue -> invokes next phase skill
 ~~~
 
 **Why fresh context matters:**
@@ -227,9 +227,9 @@ If all four phases run in one session, the verify phase runs on degraded attenti
 - State transfers through persistent files, not accumulated conversation
 - This makes crashes recoverable and processing auditable
 
-**Processing is orchestrated by default.** /ralph spawns a fresh subagent per phase. /pipeline orchestrates the full sequence. The queue drives what happens next.
+**Processing is orchestrated by default.** /pipeline orchestrates the full sequence. The queue drives what happens next.
 
-**Orchestration uses the Agent tool** to spawn fresh worker agents per phase, providing true context isolation. The task queue IS the orchestration — {DOMAIN:skills} read from it, write to it, and the queue state drives what happens next. When you say "process this source through the full pipeline," follow the pattern: read queue, pick task, execute phase, advance queue, repeat.
+**Orchestration uses the Skill tool** with `context: fork` on each invoked skill, giving each phase a fresh forked context window and true context isolation. The task queue IS the orchestration — {DOMAIN:skills} read from it, write to it, and the queue state drives what happens next. When you say "process this source through the full pipeline," follow the pattern: read queue, pick task, execute phase, advance queue, repeat.
 
 ### Full Automation From Day One
 

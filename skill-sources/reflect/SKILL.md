@@ -646,7 +646,7 @@ The graph is not just storage. It is an external thinking structure. Build it wi
 
 ## RALPH HANDOFF Output
 
-Always output this structured format at the END of the session. This enables external loops (/ralph) to parse results and update the task queue.
+Always output this structured format at the END of the session. This enables /pipeline to parse results and update the task queue.
 
 **Format:**
 
@@ -679,7 +679,7 @@ Queue Updates:
 
 ### Task File Update
 
-When a task file path is in context (pipeline execution via /ralph), update it. After completing the workflow, update the `## {vocabulary.reflect}` section of that task file with:
+When a task file path is in context (pipeline execution), update it. After completing the workflow, update the `## {vocabulary.reflect}` section of that task file with:
 - Connections added and why
 - {vocabulary.topic_map} updates made
 - Articulation test results

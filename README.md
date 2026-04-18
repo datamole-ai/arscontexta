@@ -130,10 +130,11 @@ or `decisions/`), but the separation is invariant.
 | `/extract` | Extract atomic insights from sources |
 | `/structure` | Extract grouped insights preserving shared context |
 | `/capture` | Verbatim capture — preserves source without transformation |
+| `/create` | Create a new note |
+| `/enrich` | Enrich an existing note |
 | `/reflect` | Find connections, update MOCs |
 | `/reweave` | Update older notes with new connections |
 | `/verify` | Combined quality check: description + schema + health |
-| `/ralph` | Queue-based orchestration with fresh context per phase |
 | `/archive-batch` | Archive batch of notes |
 
 #### Operational
@@ -169,22 +170,6 @@ meta-cognitive layer:
 | **Reweave** | Update older notes with new context | `/reweave` |
 | **Verify** | Description + schema + health checks | `/verify` |
 | **Rethink** | Challenge system assumptions | `/rethink` |
-
-### Fresh Context Per Phase
-
-Each phase runs in its own context window via subagent spawning. LLM attention
-degrades as context fills. By spawning a fresh subagent per phase, every phase
-operates in the "smart zone."
-
-```
-/ralph 5
-  |-- Read queue, find next unblocked task
-  |-- Spawn subagent (fresh context)
-  |   +-- Runs skill, updates task file, returns handoff
-  |-- Parse handoff, capture learnings
-  |-- Advance phase in queue
-  +-- Repeat for 5 tasks
-```
 
 ---
 

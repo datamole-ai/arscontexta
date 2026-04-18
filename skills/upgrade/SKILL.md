@@ -54,7 +54,7 @@ Generated skills and meta-skills follow fundamentally different upgrade mechanis
 
 | Category | Skills | Upgrade Mechanism |
 |----------|--------|-------------------|
-| **Generated skills** | /extract, /structure, /capture, /{vocabulary.reflect}, /{vocabulary.reweave}, /{vocabulary.verify}, /ralph, /next, /remember, /{vocabulary.rethink}, /stats, /graph, /tasks, /refactor, /recommend, /ask | Runtime consultation with knowledge graph |
+| **Generated skills** | /extract, /structure, /capture, /{vocabulary.reflect}, /{vocabulary.reweave}, /{vocabulary.verify}, /next, /remember, /{vocabulary.rethink}, /stats, /graph, /tasks, /refactor, /recommend, /ask | Runtime consultation with knowledge graph |
 | **Meta-skills** | /setup, /architect, /health, /reseed, /add-domain, /help, /tutorial, /upgrade | Plugin release cycle — update the plugin itself |
 
 /upgrade evaluates generated skills. It cannot evaluate itself or other meta-skills — that is the plugin maintainers' responsibility.
@@ -335,7 +335,7 @@ After applying all approved upgrades:
    # Should return nothing — all markers should be resolved
    ```
 
-4. **Pipeline compatibility** — if pipeline skills were upgraded (/extract, /structure, /capture, /{vocabulary.reflect}, /{vocabulary.reweave}, /{vocabulary.verify}), verify handoff format compatibility with /ralph
+4. **Pipeline compatibility** — if pipeline skills were upgraded (/extract, /structure, /capture, /{vocabulary.reflect}, /{vocabulary.reweave}, /{vocabulary.verify}), verify handoff format compatibility with /pipeline
 
 ---
 

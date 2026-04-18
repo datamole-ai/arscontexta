@@ -65,7 +65,7 @@ Incomplete:
   - {id}: status={status}, current_phase={current_phase}
   - ...
 
-Run /ralph --batch {batch_id} to continue processing.
+Run /pipeline to continue processing this batch.
 ```
 Stop. Do not archive.
 

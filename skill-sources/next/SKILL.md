@@ -157,7 +157,7 @@ Evaluate every signal against consequence speed — how fast does inaction degra
 | Speed | Signals | Threshold | Why This Priority |
 |-------|---------|-----------|-------------------|
 | **Session** | Inbox > 5 items, orphan notes (any), dangling links (any), 10+ pending observations, 5+ pending tensions | Immediate — these degrade work quality right now | Orphans are invisible to traversal. Dangling links confuse navigation. Inbox pressure means lost ideas. Observation/tension thresholds mean the system is accumulating unprocessed friction. |
-| **Multi-session** | Pipeline queue backlog > 10, research gaps identified in goals, stale notes > 10, inbox items aging > 7 days, methodology captures > 5 in same category | Soon — these compound over days | Unfinished pipeline batches block downstream connections. Stale notes represent decaying knowledge. Aging inbox means capture is outpacing processing. |
+| **Multi-session** | Research gaps identified in goals, stale notes > 10, inbox items aging > 7 days, methodology captures > 5 in same category | Soon — these compound over days | Stale notes represent decaying knowledge. Aging inbox means capture is outpacing processing. |
 | **Slow** | Health check not run in 14+ days, {DOMAIN:topic map} oversized (>40 notes), link density below 2.0 average, low note count relative to time | Background — annoying but not blocking | These are maintenance tasks. Important for long-term health but not urgent. |
 
 **Threshold rule:** 10+ pending observations OR 5+ pending tensions is ALWAYS session-priority. Recommend {DOMAIN:rethink} in this case.
@@ -165,7 +165,6 @@ Evaluate every signal against consequence speed — how fast does inaction degra
 **Signal interaction rules:**
 - Task stack items ALWAYS override automated recommendations (user-set priorities beat system-detected urgency)
 - Multiple session-priority signals: pick the one with highest impact (most items affected)
-- If inbox pressure AND queue backlog: recommend reducing inbox first (pipeline needs input before it can process)
 
 ---
 
@@ -213,7 +212,6 @@ If no session-priority items:
 
 | Signal | Recommendation | Rationale Template |
 |--------|---------------|-------------------|
-| Queue backlog > 10 | /ralph [N] | "[N] pipeline tasks are pending. Your newest {DOMAIN:notes} lack connections, which means they can't participate in synthesis." |
 | Stale notes > 10 | /{DOMAIN:reweave} [specific note] | "[N] notes haven't been touched since [date]. [Note X] has the most connections and would benefit most from updating." |
 | Research gaps | /extract [file aligned with goals] | "Your goals mention [topic] but your graph has few notes there. [Inbox item] addresses this gap." |
 | Methodology convergence | /{DOMAIN:rethink} | "[N] methodology captures in the [category] area suggest a pattern worth elevating." |
@@ -290,7 +288,6 @@ next
 | Good | Bad |
 |------|-----|
 | `/extract inbox/article-on-spaced-repetition.md` | "process some inbox items" |
-| `/ralph 5` | "work on the queue" |
 | `/{DOMAIN:rethink}` | "review your observations" |
 | `/{DOMAIN:reweave} [[note title here]]` | "update some old notes" |
 

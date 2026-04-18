@@ -251,7 +251,6 @@ Claim files will be: {SOURCE_BASENAME}-{NNN}.md (unique across vault)
 Queue: updated with process task (granularity: {GRANULARITY_FLAG})
 
 Next steps:
-  /ralph 1 --batch {SOURCE_BASENAME} --extract/structure/capture  (extract claims)
   /pipeline will handle this automatically
 ```
 

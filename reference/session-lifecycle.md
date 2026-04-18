@@ -63,7 +63,7 @@ Questions the engine must answer when generating session configuration:
 
 **Derivation Implication:** Generated systems with processing pipelines should include a processing session template in the context file. This template specifies: (1) read queue state, (2) identify next task, (3) load task-specific context, (4) execute phase, (5) update task file, (6) advance queue. Skip heavy orientation — processing sessions are mechanical, not exploratory.
 
-**Source:** Vault /ralph orchestration pattern. Each subagent spawned by /ralph follows this minimal-orientation processing session pattern.
+**Source:** Vault /pipeline orchestration pattern. Each skill invoked by /pipeline (via the Skill tool with `context: fork`) runs in a forked context following this minimal-orientation processing session pattern.
 
 ---
 
@@ -105,7 +105,7 @@ Questions the engine must answer when generating session configuration:
 
 **Derivation Implication:** Generated context files should include session-type-specific context loading guidance. Rather than a single "orient" section, provide type-specific orientation checklists with approximate context costs. This helps agents make informed decisions about how much to load.
 
-**Source:** Vault operational experience. Pipeline phases running inside /ralph subagents use minimal orientation (task file + skill instructions) to maximize smart-zone availability for the actual work.
+**Source:** Vault operational experience. Pipeline phases invoked via /pipeline use minimal orientation (task file + skill instructions) to maximize smart-zone availability for the actual work.
 
 ---
 
@@ -165,7 +165,7 @@ Hooks automate session rhythm. A SessionStart hook injects the file tree and loa
 
 #### Context contamination occurs when one task's context degrades another task's quality
 
-**Summary:** When an agent chains multiple tasks in a single session, the context from task A contaminates the reasoning for task B. Processing a dense research paper fills context with source-specific vocabulary and concepts. If the agent then immediately switches to writing a new note about a different topic, the source vocabulary bleeds into the new note's phrasing. Fresh context per task — the principle behind /ralph's subagent isolation — prevents this contamination by giving each task a clean context window.
+**Summary:** When an agent chains multiple tasks in a single session, the context from task A contaminates the reasoning for task B. Processing a dense research paper fills context with source-specific vocabulary and concepts. If the agent then immediately switches to writing a new note about a different topic, the source vocabulary bleeds into the new note's phrasing. Fresh context per task — the principle behind /pipeline's per-skill context forking — prevents this contamination by giving each task a clean context window.
 
 **Derivation Implication:** Generated context files should include a "one task per session" discipline section for systems with processing = heavy. For lighter systems where context contamination is less severe, the guidance can be softer: "If you are switching between very different tasks, consider whether the previous task's context might influence your current work." The pipeline architecture (fresh context per phase) is the structural solution; session discipline is the behavioral solution.
 

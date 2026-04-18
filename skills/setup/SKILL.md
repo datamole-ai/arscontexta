@@ -1368,7 +1368,6 @@ The 19 skill sources to install:
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/seed/`          | seed          | Orchestration | C    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/pipeline/`      | pipeline      | Orchestration | C    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/archive-batch/` | archive-batch | Orchestration | C    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/ralph/`         | ralph         | Orchestration | C    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/rethink/`       | rethink       | Evolution     | C    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/next/`          | next          | Navigation    | C    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/remember/`      | remember      | Growth        | C    |
@@ -1428,7 +1427,7 @@ These skill sources contain only `{vocabulary.xxx}` patterns in their body. Thos
 
 ##### Tier C — DOMAIN substitution (mechanical string replace)
 
-**Skills:** seed, pipeline, archive-batch, ralph, rethink, next, remember, verify, extract, structure, capture
+**Skills:** seed, pipeline, archive-batch, rethink, next, remember, verify, extract, structure, capture
 
 These skill sources contain `{DOMAIN:xxx}` patterns that must be literally substituted at setup time. They may also contain `{vocabulary.xxx}` patterns — leave those intact.
 

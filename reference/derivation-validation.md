@@ -29,7 +29,7 @@ Nine tests that verify the derivation engine produces coherent, functional syste
 **Features correctly enabled:**
 - Kernel (all 14 primitives): YES — vault has all 14 (self space disabled by default for research, but primitive still passes as CONFIGURABLE)
 - inbox-processing: YES (processing = heavy ≥ moderate) — vault has 00_inbox/
-- processing-pipeline: YES (processing = heavy) — vault has /ralph, /pipeline, full 6R pipeline
+- processing-pipeline: YES (processing = heavy) — vault has /pipeline, full 6R pipeline
 - semantic-search: YES (linking = explicit+implicit) — vault has qmd with 4 collections
 - hooks-blueprint: YES (automation ≥ convention) — vault has .claude/hooks/ with 10+ hooks
 - validation-hooks: PARTIAL — vault has PostToolUse validation hooks (automation trending beyond convention)
@@ -342,7 +342,6 @@ Scan the entire generated output for research-domain terms that should have been
 | source material | session notes | Input vocabulary matches domain |
 | extraction | surfacing | Processing verb matches domain |
 | queue.json | Not present | No pipeline queue in moderate-processing therapy system |
-| /ralph | Not present | No orchestration in convention-automation therapy system |
 | subagent | Not present | No subagent infrastructure at this automation level |
 
 **Expected result:** Zero leaked terms across all generated files.

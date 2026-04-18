@@ -48,7 +48,7 @@ Phase 3: /archive-batch — move task files, generate summary
 Complete
 ```
 
-The pipeline is the convenience wrapper. /ralph is the engine. /seed is the entry point.
+/pipeline is the orchestrator. /seed is the entry point for Phase 1; /pipeline drives Phase 2 and invokes /archive-batch for Phase 3.
 
 ---
 
@@ -298,7 +298,7 @@ Queue Updates:
 
 **The pipeline is resumable.** Queue state persists across sessions:
 - /seed detects prior processing and asks whether to proceed
-- /ralph picks up from the last completed phase (queue is the source of truth)
+- /pipeline picks up from the last completed phase (queue is the source of truth)
 - /archive-batch verifies completeness before archiving
 
 **Seed failure:** If /seed fails (file not found, duplicate detected and user declines), stop the pipeline entirely.

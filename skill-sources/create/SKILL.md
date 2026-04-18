@@ -1,6 +1,6 @@
 ---
 name: create
-description: Create a note in the correct location with template-driven schema validation. Reads derivation manifest for vocabulary and entity routing, selects the appropriate template, fills frontmatter from _schema blocks, writes the note body, and validates before committing. Used by /ralph as a subagent skill for the create phase.
+description: Create a note in the correct location with template-driven schema validation. Reads derivation manifest for vocabulary and entity routing, selects the appropriate template, fills frontmatter from _schema blocks, writes the note body, and validates before committing. Used by /pipeline as a subagent skill for the create phase.
 version: "1.0"
 context: fork
 allowed-tools: Read, Write, Edit, Grep, Glob
@@ -320,7 +320,7 @@ This gives downstream phases (reflect, reweave, verify) the exact path and conte
 
 ### 5b. Output RALPH HANDOFF Block
 
-After updating the task file, output the handoff block. This is how ralph captures your work.
+After updating the task file, output the handoff block. This is how /pipeline captures your work.
 
 ```
 === RALPH HANDOFF: create ===
@@ -339,7 +339,7 @@ Learnings:
 - [Process gap]: {description} | NONE
 
 Queue Updates:
-- (none — ralph handles phase advancement)
+- (none — /pipeline handles phase advancement)
 === END HANDOFF ===
 ```
 

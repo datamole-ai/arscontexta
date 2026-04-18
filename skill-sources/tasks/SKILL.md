@@ -47,7 +47,7 @@ The task stack (`ops/tasks.md`) and the pipeline queue (`ops/queue/queue.yaml` o
 | System | Purpose | Managed By | Updated By |
 |--------|---------|-----------|------------|
 | Task stack | Human priorities — what YOU want to work on | You (via /tasks) | Manual: /tasks add, /tasks done |
-| Pipeline queue | Automated processing state — what the SYSTEM needs to process | Pipeline skills | Automatic: /extract, /structure, /capture, /ralph, /reflect |
+| Pipeline queue | Automated processing state — what the SYSTEM needs to process | Pipeline skills | Automatic: /pipeline |
 
 /tasks shows BOTH so you always have a unified view of all pending work. The task stack is your working memory. The pipeline queue is the system's working memory. Together they answer: "What should I do next?"
 
@@ -148,7 +148,6 @@ fi
 | Condition | Note |
 |-----------|------|
 | Task stack empty | "No tasks on stack. Use `/tasks add [description]` to add one, or `/next` for suggestions." |
-| Pipeline has pending tasks | "Pipeline has {N} pending tasks. Run /ralph to process them." |
 | Archivable batches exist | "Batch '{name}' is ready to archive. Run /archive-batch {name}." |
 | Both empty | "All clear. Use `/next` to find what to work on." |
 
@@ -312,7 +311,7 @@ The task stack (ops/tasks.md) and pipeline queue coexist but serve different aud
 | File | ops/tasks.md | ops/queue/queue.yaml (or .json) |
 | Format | Markdown checklist | YAML/JSON with phase tracking |
 | Managed by | User via /tasks | Pipeline skills automatically |
-| Read by | /next (priority #1) | /ralph (phase routing) |
+| Read by | /next (priority #1) | /pipeline (phase routing) |
 | Purpose | Human priorities | Automated processing state |
 
 **/next reads the task stack first.** If the stack has items, /next recommends from the stack (user-set priorities override automated recommendations). If the stack is empty, /next evaluates queue state and vault health to suggest actions.

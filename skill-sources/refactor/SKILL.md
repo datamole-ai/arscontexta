@@ -87,7 +87,6 @@ Also compare feature flags between derivation and config:
 | semantic_search | [on/off] | [on/off] | [yes/no] |
 | processing_pipeline | [on/off] | [on/off] | [yes/no] |
 | self_space | [on/off] | [on/off] | [yes/no] |
-| parallel_workers | [on/off] | [on/off] | [yes/no] |
 
 **Step 4: Early exit if no changes**
 
@@ -426,7 +425,6 @@ Handle each feature flag change specifically:
 |------|-----------|-----------|
 | semantic_search | Remove search references from skills, update context file | Add search config, update skills with search integration |
 | self_space | Archive self/ contents, remove self/ references | Create self/ structure, generate identity files |
-| parallel_workers | Update /ralph to serial-only mode | Verify tmux available, update /ralph for parallel mode |
 
 ### No ops/derivation-manifest.md
 
