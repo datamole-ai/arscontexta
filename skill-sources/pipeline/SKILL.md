@@ -15,14 +15,15 @@ Parse immediately:
 - If target is empty: list files in {DOMAIN:inbox}/ and ask which to process
 
 **Granularity flag:**
-- `--extract`: use /extract for Phase 2
-- `--structure`: use /structure for Phase 2 (default if no flag given)
-- `--capture`: use /capture for Phase 2
+- one of: --extract, --structure, --capture
 - If no flag: present three options and ask user before proceeding
 
 ### Step 0: Read Vocabulary
 
-Read `ops/derivation-manifest.md` (or fall back to `ops/derivation.md`) for domain vocabulary mapping. All output must use domain-native terms. If neither file exists, use universal terms.
+All output must use domain-native terms.
+Derivation manifest for vocabulary mapping:
+!`cat ops/derivation-manifest.md`
+
 
 **START NOW.** Run the full pipeline.
 
@@ -54,7 +55,7 @@ Complete
 
 ## Phase 1: Seed
 
-Use Skill tool to invoke /seed on the target file with the granularity flag to create the process task, check for duplicates, and move the source to its archive folder.
+Use Skill tool to invoke /seed on the target file with the granularity flag to create the process task.
 
 **Capture from seed output:**
 - **Batch ID**: the source basename
@@ -112,7 +113,7 @@ tasks:
     completed_phases: [create]
 ```
 
-If the queue file does not exist or is empty, report: "Queue is empty. Use /pipeline to add sources."
+If the queue file is empty, report: "Queue is empty. Use /pipeline to add sources."
 
 ### Phase 2.2 Filter Tasks
 
@@ -121,12 +122,6 @@ Build a list of **actionable tasks** — tasks where `status == "pending"`. Orde
 The `phase_order` header defines the phase sequence:
 - `note`: create -> reflect -> reweave -> verify
 - `enrichment`: enrich -> reflect -> reweave -> verify
-
-**For `type: "process"` tasks:**
-Read `task.granularity` to determine which skill to invoke:
-- `"extract"` → invoke /extract skill
-- `"structure"` → invoke /structure skill
-- `"capture"` → invoke /capture skill
 
 ### Phase 2.3 Loop
 
@@ -172,7 +167,7 @@ After evaluating the return, advance the task to the next phase.
 
 **Phase progression logic:**
 
-Look up `phase_order` from the queue header to determine the next phase. Find `current_phase` in the array. If there is a next phase, advance. If it is the last phase, mark done.
+Look up `phase_order` from the queue header to determine the next phase. Find `current_phase` in the array.
 
 **If NOT the last phase** — advance to next:
 - Set `current_phase` to the next phase in the sequence
