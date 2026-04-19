@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Combined verification — recite (description quality via cold-read prediction) + validate (schema compliance) + review (health checks). Use as a quality gate after creating notes or as periodic maintenance. Triggers on "/verify", "/verify [note]", "verify note quality", "check note health".
+description: Internal pipeline skill — runs recite + validate + review quality gate on a note. Invoked by /pipeline as a subagent; do not invoke directly.
 context: fork
 allowed-tools: Read, Write, Edit, Grep, Glob, mcp__qmd__query
 ---
@@ -30,10 +30,9 @@ After reading the target {vocabulary.note}, check its `granularity` frontmatter 
 
 **Target: $ARGUMENTS**
 
-Parse immediately:
-- If target contains a note name: verify that specific note
-- If target is "all" or "recent": verify recently created/modified notes
-- If target is empty: ask which note to verify
+Parse the {vocabulary.note} path from arguments. If no argument is provided, report
+`ERROR: verify requires {vocabulary.note} path from /pipeline` and stop. This skill is
+not user-invocable.
 
 ## Anti-Shortcut Warning
 
@@ -286,9 +285,9 @@ If you have Edit tool access, apply fixes for clear-cut issues:
 
 ### Step 5: Compile Results
 
-**Mode-dependent output.** Combine all checks into the unified structure below. When invoked from `/pipeline` (task file path in context): write the structure to the task file's `## {vocabulary.verify}` section as part of Step 6 — no chat output. When invoked standalone (no task file path): print the structure as chat output.
+Combine all checks into the unified structure below. In Step 6 it will be written to the task file's `## {vocabulary.verify}` section. No chat output.
 
-Structure (same format for both modes):
+Structure:
 
 ```
 === VERIFY: [note title] ===
@@ -412,31 +411,6 @@ plus 3 deep-only checks for comprehensive audits:
 | Dangling links | Review fails link resolution | Remove link, create the target note, or fix the spelling |
 | Sparse note | < 2 outgoing links | Route to /reflect for connection finding |
 | Schema drift | Enum values not in template | Update note to use valid values, or propose enum addition |
-
-## batch mode (--all)
-
-When verifying all notes:
-
-1. Discover all notes in {DOMAIN:note_collection}/ directory
-2. For each note, run the full verification pipeline
-3. Produce summary report:
-   - Total notes checked
-   - PASS / WARN / FAIL counts per category
-   - Top issues grouped by check type
-   - Notes needing immediate attention (FAIL items)
-   - Pattern analysis across failures
-
-**Performance note:** In batch mode, the recite cold-read test runs honestly for each note. Do not "warm up" by reading multiple notes first — each prediction must be genuinely cold.
-
-## standalone invocation
-
-### /verify [note]
-
-Run all three checks on a specific note. Full detailed report.
-
-### /verify --all
-
-Comprehensive audit of all notes in {DOMAIN:note_collection}/. Summary table + flagged failures.
 
 ## HANDOFF Output
 

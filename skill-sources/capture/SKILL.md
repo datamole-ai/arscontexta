@@ -1,6 +1,6 @@
 ---
 name: capture
-description: Preserve source material verbatim with structured frontmatter and graph connections. No transformation of content — the source is captured exactly as-is in a fenced block. Triggers on "/capture", "/capture [file]", "capture this", "save this raw".
+description: Internal pipeline skill — preserves source material verbatim with frontmatter and graph connections. Invoked by /pipeline as a subagent; do not invoke directly.
 version: "1.0"
 context: fork
 allowed-tools: Read, Write, Grep, Glob
@@ -52,9 +52,9 @@ Capture is a terminal state — the {vocabulary.note} stays as-is. If claims nee
 
 **Target: $ARGUMENTS**
 
-Parse immediately:
-- Source file path: the file to capture (required)
-- If target is empty: list files in {DOMAIN:inbox}/ and ask which to capture
+Parse the source file path from arguments. If no argument is provided, report
+`ERROR: capture requires source file path from /pipeline` and stop. This skill
+is not user-invocable.
 
 ### Step 0: Read Vocabulary
 

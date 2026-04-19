@@ -1,6 +1,6 @@
 ---
 name: reflect
-description: Find connections between notes and update MOCs. Requires semantic judgment to identify genuine relationships. Use after /extract, /structure, or /capture creates notes, when exploring connections, or when a topic needs synthesis. Triggers on "/reflect", "/reflect [note]", "find connections", "update MOCs", "connect these notes".
+description: Internal pipeline skill — finds connections for a newly created note and updates topic maps. Invoked by /pipeline as a subagent; do not invoke directly.
 context: fork
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, mcp__qmd__query, mcp__qmd__status
 ---
@@ -34,10 +34,9 @@ After reading the target {vocabulary.note}, check its `granularity` frontmatter 
 
 **Target: $ARGUMENTS**
 
-Parse immediately:
-- If target contains `[[note name]]` or note name: find connections for that {vocabulary.note}
-- If target is empty: check for recently created {vocabulary.note_plural} or ask which {vocabulary.note}
-- If target is "recent" or "new": find connections for all {vocabulary.note_plural} created today
+Parse the {vocabulary.note} path from arguments. If no argument is provided, report
+`ERROR: reflect requires {vocabulary.note} path from /pipeline` and stop. This skill is
+not user-invocable.
 
 **Execute these steps:**
 
@@ -50,9 +49,8 @@ Parse immediately:
 5. Evaluate each candidate: does a genuine connection exist? Can you articulate WHY?
 6. Add inline wiki-links where connections pass the articulation test
 7. Update relevant {vocabulary.topic_map}(s) with this {vocabulary.note}
-8. If task file path is in context (pipeline): update the `## {vocabulary.reflect}` section of the task file with the Discovery Trace, per-connection detail, {vocabulary.topic_map} updates, synthesis opportunities, and flagged items — no chat output.
-9. If no task file path is in context (standalone): report what was connected and why as chat output (see "Output Format" below).
-10. Output HANDOFF block
+8. Update the `## {vocabulary.reflect}` section of the task file with the Discovery Trace, per-connection detail, {vocabulary.topic_map} updates, synthesis opportunities, and flagged items. No chat output.
+9. Output HANDOFF block
 
 **START NOW.** Reference below explains methodology — use to guide, not as output.
 
@@ -75,28 +73,6 @@ This is not keyword matching. This is semantic judgment — understanding what {
 Every connection must pass the articulation test: can you say WHY these {vocabulary.note_plural} connect? "Related" is not a relationship. "Extends X by adding Y" or "contradicts X because Z" is a relationship.
 
 Bad connections pollute the graph. They create noise that makes real connections harder to find. When uncertain, do not connect.
-
-## Invocation Patterns
-
-### /reflect (no argument)
-
-Check for recent additions:
-1. Look for {vocabulary.note_plural} modified in the last session
-2. If none obvious, ask user what {vocabulary.note_plural} to connect
-
-### /reflect [note]
-
-Focus on connecting a specific {vocabulary.note}:
-1. Read the target {vocabulary.note}
-2. Discover related content
-3. Add connections and update {vocabulary.topic_map_plural}
-
-### /reflect [topic area]
-
-Synthesize an area:
-1. Read the relevant {vocabulary.topic_map}
-2. Identify {vocabulary.note_plural} that should connect
-3. Weave connections, update synthesis
 
 ## Workflow
 
@@ -557,7 +533,7 @@ If you find {vocabulary.note_plural} with no connections:
 
 ## Output Format
 
-**Mode-dependent output.** When invoked standalone (no task file path in context): emit the structure below as chat output. When invoked from `/pipeline` (task file path in context): write the same structure to the task file's `## {vocabulary.reflect}` section instead of printing (see "Task File Update" below).
+Write the structure below to the task file's `## {vocabulary.reflect}` section. No chat output.
 
 Structure:
 

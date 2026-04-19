@@ -1,6 +1,6 @@
 ---
 name: reweave
-description: Update old notes with new connections. The backward pass that /reflect doesn't do. Revisit existing notes that predate newer related content, add connections, sharpen claims, consider splits. Triggers on "/reweave", "/reweave [note]", "update old notes", "backward connections", "revisit notes".
+description: Internal pipeline skill — updates older notes with connections to a newly created note. Invoked by /pipeline as a subagent; do not invoke directly.
 context: fork
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, mcp__qmd__query mcp__qmd__status
 ---
@@ -50,17 +50,15 @@ Mark phase complete in task file and return.
 
 **Target: $ARGUMENTS**
 
-Parse immediately:
-- If target contains `[[note name]]` or note name: reweave that specific {vocabulary.note}
-- If target is empty: find {vocabulary.note_plural} that most need reweaving (oldest, sparsest, most outdated)
-- If target is "recent" or "--since Nd": reweave {vocabulary.note_plural} not touched in N days
-- If target is "sparse": find {vocabulary.note_plural} with fewest connections
+Parse the {vocabulary.note} path from arguments. If no argument is provided, report
+`ERROR: reweave requires {vocabulary.note} path from /pipeline` and stop. This skill is
+not user-invocable.
 
 **Execute these steps:**
 
 1. **Read the target {vocabulary.note} fully** — understand its current claim, connections, and age
 2. **Ask the reweave question:** "If I wrote this {vocabulary.note} today, with everything I now know, what would be different?"
-3. **If a task file exists** (pipeline execution): read it to see what /reflect discovered. The Reflect section shows which connections were just added and which {vocabulary.topic_map_plural} were updated — this is your starting context for the backward pass.
+3. **Read the task file** to see what /reflect discovered. The Reflect section shows which connections were just added and which {vocabulary.topic_map_plural} were updated — this is your starting context for the backward pass.
 4. **Search for newer related {vocabulary.note_plural}** — use dual discovery (semantic search + {vocabulary.topic_map} browsing) to find {vocabulary.note_plural} created AFTER the target that should connect
 5. **Evaluate what needs changing:**
    - Add connections to newer {vocabulary.note_plural} that did not exist when this was written
@@ -70,9 +68,8 @@ Parse immediately:
    - Rewrite prose if understanding is deeper now
 6. **Make the changes** — edit the {vocabulary.note} with new connections (inline links with context), improved prose, sharper claim if needed
 7. **Update {vocabulary.topic_map_plural}** — if the {vocabulary.note}'s topic membership changed, update relevant {vocabulary.topic_map_plural}
-8. **If task file path is in context (pipeline):** update the `## {vocabulary.reweave}` section of the task file with older-note deltas, claim status (unchanged / sharpened / challenged / split), and the network-effect summary — no chat output.
-9. **If no task file path is in context (standalone):** print a structured summary of what changed and why as chat output.
-10. Output HANDOFF block
+8. **Update the task file** — write older-note deltas, claim status (unchanged / sharpened / challenged / split), and the network-effect summary to the `## {vocabulary.reweave}` section. No chat output.
+9. Output HANDOFF block
 
 **START NOW.** Reference below explains methodology — use to guide, not as output.
 
@@ -110,32 +107,6 @@ Reweaving is not just "add backward links." It is completely reconsidering the {
 | **Update examples** | Better illustrations exist now |
 
 Reweaving is NOT just Phase 4 of /reflect applied backward. It is a full reconsideration.
-
-## Invocation Patterns
-
-### /reweave [[note]]
-
-Fully reconsider a specific {vocabulary.note} against current knowledge.
-
-### /reweave (no argument)
-
-Scan for candidates needing reweaving, present ranked list.
-
-### /reweave --sparse
-
-Process {vocabulary.note_plural} flagged as sparse by /health.
-
-### /reweave --since Nd
-
-Reweave all {vocabulary.note_plural} not updated in N days.
-
-**How to find candidates:**
-```bash
-# Find notes not modified in 30 days
-find {vocabulary.note_collection}/ -name "*.md" -mtime +30 -type f
-```
-
----
 
 ## Workflow
 

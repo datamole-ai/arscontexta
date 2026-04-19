@@ -1,6 +1,6 @@
 ---
 name: structure
-description: Group claims from source material into structured notes, defaulting to generous grouping. Each note covers one coherent topic with multiple related claims organized in sections. Triggers on "/structure", "/structure [file]", "group these", "structure this".
+description: Internal pipeline skill — groups claims from source material into structured notes. Invoked by /pipeline as a subagent; do not invoke directly.
 version: "1.0"
 context: fork
 allowed-tools: Read, Write, Grep, Glob, mcp__qmd__query
@@ -74,10 +74,9 @@ If YES -> split into separate structure notes
 
 **Target: $ARGUMENTS**
 
-Parse immediately:
-- If target contains a file path: group claims from that file into structure notes
-- If target is empty: scan {vocabulary.inbox}/ for unprocessed items, pick one
-- If target is "inbox" or "all": process all inbox items sequentially
+Parse the source file path from arguments. If no argument is provided, report
+`ERROR: structure requires source file path from /pipeline` and stop. This skill
+is not user-invocable.
 
 **Execute these steps:**
 
@@ -89,9 +88,8 @@ Parse immediately:
    - Tier 2 (CLI fallback): `qmd vsearch "[cluster scope as sentence]" --collection {vocabulary.notes_collection} -n 5`
    - Tier 3 fallback if qmd is unavailable: use keyword grep duplicate checks
    - If existing note covers same scope: evaluate for enrichment or merge
-5. If task file path is in context (pipeline): append the grouping summary (proposed titles, cluster membership, enrichments) to the source task file's `## Outputs` section, no chat output. If no task file path is in context (standalone): print the grouping report as chat output (see "Present Findings" below). Per-note rationale is captured in step 7 when per-note task files are created.
-6. If no task file path is in context (standalone invocation): wait for user approval before writing files. When invoked from /pipeline, skip and proceed.
-7. Create per-note task files, update queue, output HANDOFF block
+5. Append the grouping summary (proposed titles, cluster membership, enrichments) to the source task file's `## Outputs` section. No chat output.
+6. Create per-note task files, update queue, output HANDOFF block
 
 **START NOW.** Reference below explains methodology — use to guide, not as output.
 
@@ -264,9 +262,9 @@ If qmd CLI is unavailable, fall back to keyword grep duplicate checks.
 
 ### 5. Present Findings
 
-**Mode-dependent output.** When invoked from `/pipeline` (task file path in context): append the grouping structure below to the source task file's `## Outputs` section — no chat output. When invoked standalone (no task file path): print the grouping structure below as chat output and wait for user approval before proceeding to step 6.
+Append the grouping structure below to the source task file's `## Outputs` section. No chat output.
 
-Grouping structure (same format for both modes):
+Grouping structure:
 
 ```
 ## Proposed Structure Notes
@@ -284,8 +282,6 @@ Rationale: [why these belong together]
 ### Enrichments
 - [[existing note]] — [what new detail to add]
 ```
-
-Standalone invocation only: wait for user approval before writing. When invoked from `/pipeline`, skip approval and proceed — per-note task files get written without interruption.
 
 ### 6. Write Notes
 
@@ -602,9 +598,7 @@ After structuring completes, the created {vocabulary.note_plural} proceed throug
 
 ## Critical
 
-Never auto-structure when invoked standalone. Always present findings and wait for user approval before writing files. When invoked from `/pipeline` (task file path in context), the approval gate is skipped — per-note rationale and grouping summary are written to the task file instead; batch-level review happens at archive time.
-
-**When in doubt about grouping: group.** The user chose /structure. Split only when keeping together would actively confuse or mislead.
+**When in doubt about grouping: group.** Split only when keeping together would actively confuse or mislead.
 
 **The principle:** find the best groupings that preserve shared context. Default to keeping related claims together.
 

@@ -1,6 +1,6 @@
 ---
 name: extract
-description: Extract atomic claims from source material — one claim per file. Comprehensive extraction is the default — every insight that serves the domain gets extracted. For domain-relevant sources, skip rate must be below 10%. Zero extraction from a domain-relevant source is a BUG. Triggers on "/extract", "/extract [file]", "extract insights", "mine this".
+description: Internal pipeline skill — extracts atomic claims from source material. Invoked by /pipeline as a subagent; do not invoke directly.
 version: "1.0"
 context: fork
 allowed-tools: Read, Write, Grep, Glob, mcp__qmd__query
@@ -26,9 +26,6 @@ Read these files to configure domain-specific behavior:
 
 2. **`ops/queue/queue.json`** — current task queue
 
-If these files don't exist (pre-init invocation or standalone use), use universal defaults:
-- note collection: `notes/`
-- inbox folder: `inbox/`
 
 ---
 
@@ -92,10 +89,9 @@ If NO -> verify it is truly off-topic before skipping
 
 **Target: $ARGUMENTS**
 
-Parse immediately:
-- If target contains a file path: extract insights from that file
-- If target is empty: scan {vocabulary.inbox}/ for unprocessed items, pick one
-- If target is "inbox" or "all": process all inbox items sequentially
+Parse the source file path from arguments. If no argument is provided, report
+`ERROR: extract requires source file path from /pipeline` and stop. This skill
+is not user-invocable.
 
 **Execute these steps:**
 
@@ -108,9 +104,8 @@ Parse immediately:
    - Tier 3 fallback if qmd is unavailable: use keyword grep duplicate checks
    - If duplicate exists: evaluate for enrichment or skip
    - Classify as OPEN (needs more investigation) or CLOSED (standalone, ready)
-5. If task file path is in context (pipeline): append the category summary (counts + skipped items with reasons) to the source task file's `## Outputs` section, no chat output. If no task file path is in context (standalone): print the category summary as chat output (see "Present Findings" below). Per-claim rationale is captured in step 7 when per-claim task files are created.
-6. If no task file path is in context (standalone invocation): wait for user approval before creating files. When invoked from /pipeline, skip and proceed.
-7. Create per-claim task files, update queue, output HANDOFF block
+5. Append the category summary (counts + skipped items with reasons) to the source task file's `## Outputs` section. No chat output.
+6. Create per-claim task files, update queue, output HANDOFF block
 
 **START NOW.** Reference below explains methodology — use to guide, not as output.
 
@@ -384,9 +379,9 @@ Classification affects downstream handling but does NOT affect whether to extrac
 
 ### 6. Present Findings
 
-**Mode-dependent output.** When invoked from `/pipeline` (task file path in context): append the category structure below to the source task file's `## Outputs` section — no chat output. When invoked standalone (no task file path): print the category structure below as chat output and wait for user approval before proceeding to step 7.
+Append the category structure below to the source task file's `## Outputs` section. No chat output.
 
-Category structure (same format for both modes):
+Category structure:
 
 ```
 Extraction scan complete.
@@ -423,8 +418,6 @@ ENRICHMENT TASKS (update existing {vocabulary.note_plural}):
 SKIPPED (truly nothing to add):
 - [description] — why nothing extractable
 ```
-
-**Standalone invocation only: wait for user approval before creating files.** Never auto-extract when standalone. When invoked from `/pipeline` (task file path in context), skip approval and proceed to step 7 — the batch summary at archive time is where a human reviews the batch's outputs.
 
 ### 7. Extract (With User Approval)
 
@@ -864,8 +857,6 @@ Would linking to this {vocabulary.note} drag unrelated content along? If yes, th
 ---
 
 ## Critical
-
-Never auto-extract when invoked standalone. Always present findings and wait for user approval before creating files. When invoked from `/pipeline` (task file path in context), the approval gate is skipped — per-claim rationale and category summary are written to the task file instead; batch-level review happens at archive time.
 
 **When in doubt, extract.** For domain-relevant sources, err toward capturing. Implementation ideas, tensions, validations, open questions, and near-duplicates all have value — they become different output types, not rejections.
 
