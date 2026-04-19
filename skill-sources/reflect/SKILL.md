@@ -2,23 +2,14 @@
 name: reflect
 description: Internal pipeline skill — finds connections for a newly created note and updates topic maps. Invoked by /pipeline as a subagent; do not invoke directly.
 context: fork
-allowed-tools: Read, Write, Edit, Grep, Glob, Bash, mcp__qmd__query, mcp__qmd__status
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash, mcp__qmd__query
 ---
 
-## Runtime Configuration (Step 0 — before any processing)
+### Vocabulary
 
-Read these files to configure domain-specific behavior:
-
-1. **`ops/derivation-manifest.md`** — vocabulary mapping, platform hints
-   - Use `vocabulary.note_collection` for the note collection directory
-   - If `entity_directories` section exists in manifest, read it for entity-type routing
-   - Use `vocabulary.note` / `vocabulary.note_plural` for note type references
-   - Use `vocabulary.reflect` for the process verb in output
-   - Use `vocabulary.topic_map` / `vocabulary.topic_map_plural` for MOC references
-   - Use `vocabulary.cmd_reweave` for the next-phase suggestion
-   - Use `vocabulary.inbox` for the inbox folder name
-
-If these files don't exist, use universal defaults.
+All output must use domain-native terms.
+Derivation manifest for vocabulary mapping:
+!`cat ops/derivation-manifest.md`
 
 ## Granularity-Aware Processing
 
@@ -34,23 +25,7 @@ After reading the target {vocabulary.note}, check its `granularity` frontmatter 
 
 **Target: $ARGUMENTS**
 
-Parse the {vocabulary.note} path from arguments. If no argument is provided, report
-`ERROR: reflect requires {vocabulary.note} path from /pipeline` and stop. This skill is
-not user-invocable.
-
-**Execute these steps:**
-
-1. Read the target {vocabulary.note} fully — understand its claim and context
-2. **Throughout discovery:** Capture which {vocabulary.topic_map_plural} you read, which queries you ran (with scores), which candidates you evaluated. This becomes the Discovery Trace — proving methodology was followed, not reconstructed.
-3. Run Phase 0 (index freshness check)
-4. Use dual discovery in parallel:
-   - Browse relevant {vocabulary.topic_map}(s) for related {vocabulary.note_plural}
-   - Run semantic search for conceptually related {vocabulary.note_plural}
-5. Evaluate each candidate: does a genuine connection exist? Can you articulate WHY?
-6. Add inline wiki-links where connections pass the articulation test
-7. Update relevant {vocabulary.topic_map}(s) with this {vocabulary.note}
-8. Update the `## {vocabulary.reflect}` section of the task file with the Discovery Trace, per-connection detail, {vocabulary.topic_map} updates, synthesis opportunities, and flagged items. No chat output.
-9. Output HANDOFF block
+Parse the {vocabulary.note} path from arguments. If no argument is provided, end immediately with: report `ERROR: reflect requires {vocabulary.note} path`
 
 **START NOW.** Reference below explains methodology — use to guide, not as output.
 
@@ -93,7 +68,7 @@ For each {vocabulary.note} you are connecting:
 - The scope (when does this apply? When not?)
 - The tensions (what might contradict this?)
 
-**If a task file exists** (pipeline execution): read the task file to see what the extraction phase discovered. The reduce notes, semantic neighbor field, and classification provide critical context about why this {vocabulary.note} was extracted and what it relates to.
+Read the task file to see what the extraction phase discovered. The reduce notes, semantic neighbor field, and classification provide critical context about why this {vocabulary.note} was extracted and what it relates to.
 
 ### Phase 2: Discovery (Find Candidates)
 
@@ -117,27 +92,11 @@ If you know the topic (check the {vocabulary.note}'s Topics footer), start with 
 
 **Path 2: Semantic Search** — find what {vocabulary.topic_map_plural} might miss
 
-**Three-tier fallback for semantic search:**
-
-**Tier 1 — MCP tools (preferred):** Use `mcp__qmd__query` (hybrid search with expansion + reranking):
+Use `mcp__qmd__query` (hybrid search with expansion + reranking):
 - query: "[{vocabulary.note}'s core concepts and mechanisms]"
 - limit: 15
 
-**Tier 2 — bash qmd:** If MCP tools fail or are unavailable:
-```bash
-qmd query "[note's core concepts]" --collection {vocabulary.notes_collection} --limit 15 2>/dev/null
-```
-
-**Tier 3 — grep only:** If both MCP and bash fail, rely on {vocabulary.topic_map} + keyword search only. This degrades quality but does not block work.
-
 Evaluate results by relevance — read any result where title or snippet suggests genuine connection. Semantic search finds {vocabulary.note_plural} that share MEANING even when vocabulary differs. A {vocabulary.note} about "iteration cycles" might connect to "learning from friction" despite sharing no words.
-
-**Why both paths:**
-
-{vocabulary.topic_map} = what is already curated as relevant
-semantic search = neighbors that have not been curated yet
-
-Using only search misses curated structure. Using only {vocabulary.topic_map} misses semantic neighbors outside the topic. Both together catch what either alone would miss.
 
 **Secondary discovery (after primary):**
 
@@ -154,20 +113,9 @@ Use grep when:
 - Finding all uses of a named concept
 - The vocabulary is stable and predictable
 
-**Choosing between semantic and keyword:**
-
-| Situation | Better Tool | Why |
-|-----------|-------------|-----|
-| Exploring unfamiliar territory | semantic | vocabulary might not match meaning |
-| Finding synonyms or related framings | semantic | same concept, different words |
-| Known terminology | keyword | exact match, no ambiguity |
-| Verifying coverage | keyword | ensures nothing missed |
-| Cross-domain connections | semantic | concepts bridge domains, words do not |
-| Specific phrase lookup | keyword | faster, more precise |
-
 **Step 4: Description Scan**
 
-Use ripgrep to scan {vocabulary.note} descriptions for edge cases:
+Use ripgrep to scan {vocabulary.note} frontmatter descriptions for edge cases:
 - Does this extend the source {vocabulary.note}?
 - Does this contradict or create tension?
 - Does this provide evidence or examples?
@@ -225,20 +173,6 @@ Ask: **"If an agent follows this link, what do they gain?"**
 
 The vault is built for agent traversal. Every connection should help an agent DECIDE or UNDERSTAND something. Connections that exist only because they feel "interesting" without operational value are noise.
 
-**Synthesis Opportunity Detection:**
-
-While evaluating connections, watch for synthesis opportunities — two or more {vocabulary.note_plural} that together imply a higher-order claim not yet captured.
-
-Signs of a synthesis opportunity:
-- Two {vocabulary.note_plural} make complementary arguments that combine into something neither says alone
-- A pattern appears across three or more {vocabulary.note_plural} that has not been named
-- A tension between two {vocabulary.note_plural} suggests a resolution claim
-
-When you detect a synthesis opportunity:
-1. Note it in the output report
-2. Do NOT create the synthesis {vocabulary.note} during reflect — flag it for future work
-3. Describe what the synthesis would argue and which {vocabulary.note_plural} contribute
-
 ### Phase 4: Add Inline Connections
 
 Connections live in the prose, not just footers.
@@ -272,8 +206,6 @@ This relates to [[other note]].
 
 See also [[throughput matters more than accumulation]].
 ```
-
-If you catch yourself writing "this relates to" or "see also", STOP. Restructure so the linked title does the work.
 
 **Where to add links:**
 
@@ -428,43 +360,6 @@ Agent Notes:
 
 The test: would this help a future agent navigate more effectively?
 
-## Quality Gates
-
-### Gate 1: Articulation Test
-
-For every connection added, can you complete:
-> [[A]] connects to [[B]] because [specific reason]
-
-If any connection fails this test, remove it.
-
-### Gate 2: Prose Test
-
-For every inline link, read the sentence aloud. Does it flow naturally? Would you say this to a friend explaining the idea?
-
-Bad: "this is related to [[note]]"
-Good (atomic): "since [[claim title]], the implication is..."
-Good (structure): "building on [[scope title]], the approach was..."
-Good (capture): "as documented in [[content title]], the decision was..."
-
-### Gate 3: Bidirectional Check
-
-For every A -> B link, explicitly decide: should B -> A exist?
-Document your reasoning if the relationship is asymmetric.
-
-### Gate 4: {vocabulary.topic_map} Coherence
-
-After updating a {vocabulary.topic_map}, read the opening synthesis. Does it still hold? Do new {vocabulary.note_plural} extend or challenge it?
-
-If the synthesis is now wrong or incomplete, update it.
-
-### Gate 5: Link Verification
-
-Verify every wiki link target exists. Never create links to non-existent files.
-
-```bash
-# Check that a link target exists
-find {vocabulary.note_collection}/ -name "target name.md" -type f 2>/dev/null
-```
 
 ## Handling Edge Cases
 
@@ -474,46 +369,6 @@ Sometimes a {vocabulary.note} genuinely does not connect yet. That is fine.
 
 1. Ensure it is linked to at least one {vocabulary.topic_map} via Topics footer
 2. Note in {vocabulary.topic_map} Gaps that this area needs development
-3. Do not force connections that are not there
-
-### Too Many Connections (Split Detection)
-
-If a {vocabulary.note} connects to 5+ {vocabulary.note_plural} across different domains, it might be too broad.
-
-**Split detection criteria:**
-
-1. **Domain spread:** Connections span 3+ distinct {vocabulary.topic_map_plural}/topic areas
-2. **Multiple claims:** The {vocabulary.note} makes more than one assertion that could stand alone
-3. **Linking drag:** You would want to link to part of the {vocabulary.note} but not all of it
-
-**How to evaluate:**
-
-Ask: "If I link to this {vocabulary.note} from context X, does irrelevant content Y come along?"
-
-If yes, the {vocabulary.note} bundles multiple ideas that should be separate.
-
-**Split detection output:**
-
-```markdown
-### Split Candidate: [[broad note]]
-
-**Indicators:**
-- Connects to 7 {vocabulary.note_plural} across 3 domains
-- Makes distinct claims about: (1) capture workflows, (2) synthesis patterns, (3) tool selection
-- Linking from [[note A]] would drag in unrelated content about tool selection
-
-**Proposed split:**
-- [[capture workflows matter less than synthesis]] — the first claim
-- [[tool selection follows from workflow needs]] — the third claim
-- Keep original {vocabulary.note} focused on synthesis patterns
-
-**Action:** Flag for human decision, do not auto-split
-```
-
-**When NOT to split:**
-- {vocabulary.note} is genuinely about one thing that touches many areas
-- Connections are all variations of the same relationship
-- Splitting would create {vocabulary.note_plural} too thin to stand alone
 
 ### Conflicting Notes
 
@@ -548,7 +403,7 @@ Structure:
 - Read [[moc-name]] — found candidates: [[note A]], [[note B]], [[note C]]
 - Followed link from [[note A]] to [[note D]]
 
-**Semantic search:** (via MCP | bash fallback | grep-only)
+**Semantic search:**
 - query "[core concept from note]" — top hits:
   - [[note E]] (0.74) — evaluated: strong match, mechanism overlap
   - [[note F]] (0.61) — evaluated: weak, only surface vocabulary
@@ -582,43 +437,6 @@ Structure:
 - [[broad note]] — might benefit from splitting
 - Tension between [[X]] and [[Y]] needs resolution
 ```
-
-## What Success Looks Like
-
-Successful reflection:
-- Every connection passes the articulation test
-- Inline links read as natural prose
-- {vocabulary.topic_map_plural} gain synthesis, not just entries
-- Agent notes reveal non-obvious paths
-- The knowledge graph becomes more traversable
-- Future agents will navigate more effectively
-
-The test: if someone follows the links you added, do they find genuinely useful context? Does the path illuminate understanding?
-
-## Critical Constraints
-
-**Never:**
-- Create wiki links to non-existent files
-- Add "related" connections without specific reasoning
-- Force connections that are not there
-- Auto-generate without semantic judgment
-- Skip the articulation test
-
-**Always:**
-- Verify link targets exist
-- Explain WHY connections exist
-- Consider bidirectionality
-- Update relevant {vocabulary.topic_map_plural}
-- Add agent notes when navigation insights emerge
-- Capture discovery trace as you work
-
-## The Network Grows Through Judgment
-
-This skill is about building a knowledge graph that compounds in value. Every connection you add is a traversal path that future thinking can follow. Every connection you do not add keeps the graph clean.
-
-Quality beats quantity. One genuine connection is worth more than ten vague ones.
-
-The graph is not just storage. It is an external thinking structure. Build it with care.
 
 ---
 
@@ -655,12 +473,14 @@ Queue Updates:
 === END HANDOFF ===
 ```
 
-### Task File Update
+---
 
-When a task file path is in context (pipeline execution), update the `## {vocabulary.reflect}` section of that task file with the full Reflection Complete structure:
-- Discovery Trace: {vocabulary.topic_map} exploration, semantic search queries with scores, keyword search, agent notes
-- Connections Added: per-note inline/footer/topic-map links with relationship types and WHY
-- {vocabulary.topic_map} Updates: new entries, section changes, gaps filled, agent notes
-- Synthesis Opportunities: higher-order insights that could be composed
-- Flagged for Attention: orphans, broad notes to split, tensions needing resolution
+## Critical Constraints
 
+**Always:**
+- Verify link targets exist
+- Explain WHY connections exist
+- Consider bidirectionality
+- Update relevant {vocabulary.topic_map_plural}
+- Add agent notes when navigation insights emerge
+- Capture discovery trace as you work
