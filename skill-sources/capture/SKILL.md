@@ -6,18 +6,18 @@ context: fork
 allowed-tools: Read, Write, Grep, Glob
 ---
 
-## Runtime Configuration (Step 0 — before any processing)
+## Runtime Configuration
 
-Read these files to configure domain-specific behavior:
+### Vocabulary
 
-1. **`ops/derivation-manifest.md`** — vocabulary mapping
-   - Use `vocabulary.note_collection` for the note collection directory
-   - If `entity_directories` section exists in manifest, read it for entity-type routing
-   - Use `vocabulary.inbox` for the inbox folder name
-   - Use `vocabulary.note` / `vocabulary.note_plural` for note type references
-   - Use `vocabulary.topic_map` / `vocabulary.topic_maps` for MOC references
+All output must use domain-native terms.
+Derivation manifest for vocabulary mapping:
+!`cat ops/derivation-manifest.md`
 
-2. **`ops/queue/queue.json`** — current task queue
+### Task Queue
+
+Read the current task queue:
+!`cat ops/queue/queue.json`
 
 ---
 
@@ -36,29 +36,14 @@ All graph participation happens OUTSIDE the fenced block:
 - Relevant Notes footer provides connections
 - Topics footer provides {vocabulary.topic_map} membership
 
-### When to Use Capture
-
-- Meeting transcripts
-- Reference documents where exact wording matters
-- Articles or content to preserve as-is
-- Source material that may be processed later via /extract or /structure
-- Any content where transformation would lose value
-
-Capture is a terminal state — the {vocabulary.note} stays as-is. If claims need extracting later, run /extract on the capture {vocabulary.note} as a source. That produces NEW {vocabulary.note_plural}; the capture itself remains unchanged.
-
 ---
 
 ## EXECUTE NOW
 
 **Target: $ARGUMENTS**
 
-Parse the source file path from arguments. If no argument is provided, report
-`ERROR: capture requires source file path from /pipeline` and stop. This skill
-is not user-invocable.
-
-### Step 0: Read Vocabulary
-
-Read `ops/derivation-manifest.md` (or fall back to `ops/derivation.md`) for domain vocabulary mapping. All output must use domain-native terms. If neither file exists, use universal terms.
+Parse the source file path from arguments. If no argument is provided, end immediately with: report
+`ERROR: capture requires source file path from /pipeline`.
 
 **START NOW.** Capture the source.
 
@@ -130,9 +115,7 @@ topics: [array of {vocabulary.topic_map} wiki links]
 ```markdown
 # [prose-as-title]
 
-` ` `
-[VERBATIM CONTENT — exactly as received, no modifications]
-` ` `
+(VERBATIM CONTENT — exactly as received, no modifications)
 
 ---
 
@@ -142,8 +125,6 @@ Relevant Notes:
 Topics:
 - [[relevant {vocabulary.topic_map}]]
 ```
-
-(Note: the backticks above should be three consecutive backticks with no spaces — written with spaces here to avoid breaking the markdown nesting)
 
 ### 6. Quality Check Before Writing
 
