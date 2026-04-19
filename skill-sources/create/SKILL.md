@@ -6,23 +6,28 @@ context: fork
 allowed-tools: Read, Write, Edit, Grep, Glob
 ---
 
-## Runtime Configuration (Step 0 — before any processing)
+## Runtime Configuration
 
-Read these files to configure domain-specific behavior:
+### Vocabulary
 
-1. **`ops/derivation-manifest.md`** — vocabulary mapping, entity directory routing
-   - Use `vocabulary.note_collection` for the note collection directory
-   - If `entity_directories` section exists in manifest, read it for entity-type routing
-   - Use `vocabulary.note` for the note type name in output
-   - Use `vocabulary.note_plural` for the plural form
-   - Use `vocabulary.topic_map` for MOC/topic map references
-   - Use `vocabulary.topic_maps` for plural form
+All output must use domain-native terms.
+Derivation manifest for vocabulary mapping:
+!`cat ops/derivation-manifest.md`
 
-2. **`ops/config.yaml`** — live configuration settings
+### Configuration
 
-3. **`ops/templates/`** — scan available templates and read their `_schema` blocks. Hold these in memory for template selection in Step 3.
+!`cat ops/config.yaml`
 
-4. **The task file** at the provided path — parse frontmatter (`claim`, `classification`, `granularity`, `source_task`, `semantic_neighbor`) and the content sections (structured notes, sub-claims, rationale).
+
+### Templates
+
+!`tree -L 3 ops/templates/`
+
+Read the template's `_schema` block. These are used in Step 3.
+
+### Task File
+
+Read **The task file** at the provided path — parse frontmatter (`claim`, `classification`, `granularity`, `source_task`, `semantic_neighbor`) and the content sections (structured notes, sub-claims, rationale).
 
 ---
 
@@ -58,16 +63,7 @@ A single {vocabulary.note} file:
 
 **Target: $ARGUMENTS**
 
-Parse the task file path from arguments. If no path provided, report an error — this skill requires a task file.
-
-**Execute these steps in order:**
-
-1. Read runtime configuration (Step 0 above)
-2. Determine note placement (Step 1)
-3. Select template and fill frontmatter (Step 2)
-4. Write note body and footer (Step 3)
-5. Validate against template schema (Step 4)
-6. Update task file and output HANDOFF (Step 5)
+Parse the task file path from arguments. If no path provided, end immediately with: "ERROR: create requires task file path from /pipeline"
 
 **START NOW.**
 
@@ -90,7 +86,11 @@ Determine where the note file will be written. Three decisions in order.
 
 ### 1a. Base Directory
 
-Read `vocabulary.note_collection` from the derivation manifest. This is the root directory for all notes (e.g., `notes/`, `claims/`, `reflections/`).
+`vocabulary.note_collection`/ is the root directory for all notes.
+
+`vocabulary.note_collection`/ structure:
+
+!`tree -L 3 -d vocabulary.note_collection/`
 
 ### 1b. Entity Directory Routing
 
@@ -143,12 +143,11 @@ If a collision is found, adjust the title to be more specific. Do NOT append num
 
 ### 2a. Select Template
 
-Read all templates in `ops/templates/`. For each template, examine the `_schema` block — specifically `entity_type`, `granularity`, `required` fields, and the `notes` description.
+Read all templates. For each template, examine the `_schema` block — specifically `entity_type`, `granularity`, `required` fields, and the `notes` description.
 
 **Selection logic:**
 - If only one template exists, use it
-- If multiple templates exist, select the one whose `_schema.entity_type` or `_schema.granularity` best aligns with the task file's content and `granularity` field
-- Consider the template's `_schema.notes` description — it explains when the template applies
+- If multiple templates exist, select the one that best aligns with the task file's content
 
 Once selected, parse the `_schema` block fully:
 - `required` — fields that MUST appear in the output frontmatter
@@ -233,13 +232,7 @@ Writing principles:
 - Use inline wiki-links as prose where genuine connections exist: "Since [[other note]], the question becomes..." or "This contradicts [[existing claim]] because..."
 - Reference the source material's evidence and reasoning — do not invent unsupported claims
 - If the task file's `classification` is "open", acknowledge what remains unresolved
-
-### 3c. Body — Template-Driven Structure
-
-Follow the selected template's section pattern:
-- If the template defines `## Section` headings, use them
-- If the template is a single-body template (no section headings), write a continuous body
-- For structure-granularity notes with sub-claims in the task file: each sub-claim gets its own `##` section, developed individually but sharing context
+- Be careful with the reasoning. If the reasoning is not provided in the task file, do not make it up.
 
 ### 3d. Footer
 
@@ -306,7 +299,7 @@ No FAIL-state notes get written to the vault.
 
 ### 5a. Update Task File
 
-Edit the task file (the file you read in Step 0) to fill the `## Create` section:
+Edit the task file to fill the `## Create` section:
 
 ```markdown
 ## Create
@@ -337,48 +330,17 @@ Learnings:
 - [Surprise]: {description} | NONE
 - [Methodology]: {description} | NONE
 - [Process gap]: {description} | NONE
-
-Queue Updates:
-- (none — /pipeline handles phase advancement)
 === END HANDOFF ===
 ```
 
 ---
 
-## Quality Gates
-
-### Gate 1: Placement Correct
-The note file exists at the expected path — base directory, entity subdirectory (if applicable), prose-as-title filename.
-
-### Gate 2: Schema Valid
-All FAIL-severity validation checks pass. No required fields missing, no invalid enum values, no constraint violations.
-
-### Gate 3: Body Developed
-The note body develops the claim with reasoning — it does not merely restate the title or description. Connective words are present. The body is not a single sentence.
-
-### Gate 4: Graph Connected
-The footer has at least: one source link, one topic link. Relevant notes section is present (even if empty for notes with no semantic neighbor).
-
-### Gate 5: Task File Updated
-The `## Create` section in the task file is filled with the note path, template used, description, and validation result.
-
----
-
 ## Critical Constraints
 
-**Never:**
-- Write a note without reading the template's `_schema` block first
-- Invent new enum values not listed in `_schema.enums`
-- Include the `_schema` block in the output note's frontmatter
-- Skip validation — even if the note "looks right"
-- Write to a directory that doesn't exist (verify the path first)
-- Append numbers or suffixes to resolve filename collisions (refine the title instead)
-
 **Always:**
-- Read the derivation manifest before any note creation
+- Use domain-native vocabulary from the manifest in all output
 - Route through entity directories when `entity_directories` exists
 - Validate against the template schema after writing
 - Fix FAIL-severity issues before proceeding
 - Update the task file's `## Create` section
 - Output the HANDOFF block as the last action
-- Use domain-native vocabulary from the manifest in all output
