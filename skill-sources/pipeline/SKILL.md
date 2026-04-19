@@ -18,7 +18,7 @@ Parse immediately:
 - one of: --extract, --structure, --capture
 - If no flag: present three options and ask user before proceeding
 
-### Step 0: Read Vocabulary
+### Vocabulary
 
 All output must use domain-native terms.
 Derivation manifest for vocabulary mapping:
