@@ -226,11 +226,11 @@ For each cluster, check if existing notes already cover the topic:
 mcp__qmd__query  query="[cluster scope as sentence]"  collection="{vocabulary.notes_collection}"  limit=5
 ```
 
-If MCP is unavailable, run:
+If MCP is unavailable (e.g. running inside a subagent that does not inherit MCP access), use the CLI:
 ```bash
 qmd vsearch "[cluster scope as sentence]" --collection {vocabulary.notes_collection} -n 5
 ```
-If qmd CLI is unavailable, fall back to keyword grep duplicate checks.
+If qmd itself is not installed, stop and tell the user to install it — semantic search is an invariant kernel primitive and duplicate detection cannot safely run on keyword grep alone.
 
 **Enrichment check:** If an existing note covers similar scope, does the source add new claims or detail? If YES, create enrichment task rather than new note.
 

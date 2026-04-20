@@ -115,14 +115,14 @@ primitives:
 
   - id: semantic-search
     name: Semantic search capability
-    description: Meaning-based discovery across vocabularies. Complements structural navigation.
-    layer: automation
+    description: Meaning-based discovery across vocabularies. Complements structural navigation. Processing skills (reflect, verify, structure, seed, reweave) call it directly — the system is designed around its presence.
+    layer: convention
     requires: wiki-links
-    enforcement: configurable
-    implementation: "Embedding tool (qmd, MCP server)"
+    enforcement: invariant
+    implementation: "Embedding tool (qmd >= 2, registered as MCP server). Always generated. If qmd is absent at generation time, the vault is scaffolded with full semantic-search wiring and the user is told to install qmd; skills degrade (not disable) until it is present."
     validation:
-      check: "Given a note, the mechanism returns related notes that share no significant keywords"
-    cognitive_grounding: "Vocabulary divergence — same concept, different words. Structural graph traversal misses these connections."
+      check: ".mcp.json declares the qmd MCP server with autoapprove entries. ops/config.yaml does not expose semantic-search as a toggle. Context file and processing skills reference mcp__qmd__query."
+    cognitive_grounding: "Vocabulary divergence — same concept, different words. Structural graph traversal misses these connections. Treating semantic search as optional produced split-brain skills (one path assuming it, one path assuming keyword-only); making it invariant collapses that ambiguity."
 
   - id: unique-addresses
     name: Filesystem graph database
@@ -215,5 +215,5 @@ primitives:
 
 # Layer mapping:
 # foundation: markdown-yaml, wiki-links, unique-addresses
-# convention: moc-hierarchy, tree-injection, description-field, topics-footer, schema-enforcement, self-space, session-rhythm, discovery-first, operational-learning-loop, processing-queue, methodology-folder
-# automation: semantic-search
+# convention: moc-hierarchy, tree-injection, description-field, topics-footer, schema-enforcement, self-space, session-rhythm, semantic-search, discovery-first, operational-learning-loop, processing-queue, methodology-folder
+# automation: (none)

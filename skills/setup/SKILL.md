@@ -316,7 +316,7 @@ Phase 5 is a 9-step sequential pipeline. Steps 1-3, 8, and 9 are executed by the
 | 5 | Agent 2 | .claude/skills/*/SKILL.md (17 skills) | Skills (tiered generation) |
 | 6 | Agent 3 | CLAUDE.md, ops/features/*.md | Context file + feature references |
 | 7 | Agent 4 | manual/ (7 pages), [domain:notes]/index.md | Manual & hub MOC |
-| 8 | Main agent | Semantic search setup (conditional) | Semantic search |
+| 8 | Main agent | Semantic search setup| Semantic search |
 | 9 | Main agent | git init/commit | Version control |
 
 ### Agent Prompt Template
@@ -396,7 +396,7 @@ After writing the foundation files (Pipeline Step 1), the main agent:
 5. After each agent completes, parses its GENERATION HANDOFF block (see below)
 6. Marks the agent's task as completed
 7. If any agent reports failure or its handoff contains Issues other than NONE, STOPS the sequence and surfaces the error to the user -- does not continue spawning
-8. Executes Step 8 directly (semantic search setup, conditional)
+8. Executes Step 8 directly (semantic search setup)
 9. Executes Step 9 directly (git init/commit)
 
 **Handoff parsing:** When a subagent returns, the main agent:
@@ -827,7 +827,6 @@ dimensions:
   schema: [minimal | moderate | dense]
 
 features:
-  semantic-search: [true | false]
   processing-pipeline: [true | false]
   sleep-processing: [true | false]
 
@@ -1138,7 +1137,7 @@ Step 4: Compose CLAUDE.md with:
      2. wiki-links (always)
      3. mocs (if active)
      4. processing-pipeline (always)
-     5. semantic-search (if active)
+     5. semantic-search (always)
      6. schema (always)
      7. maintenance (always)
      8. self-evolution (always)
@@ -1155,7 +1154,6 @@ Step 4: Compose CLAUDE.md with:
 
 Step 5: Cross-reference elimination.
   If a block is excluded, scan remaining summaries and reference files for references to excluded concepts and remove or rephrase:
-  - semantic-search excluded -> rephrase "semantic search" to "search your notes" or remove
   - mocs excluded -> simplify "topic MOCs" to "topic organization"
   - self-space excluded -> references to self/identity.md route to ops/ equivalents
   - multi-domain excluded -> remove cross-domain references
@@ -1501,21 +1499,18 @@ Welcome to your [domain] system.
 
 ---
 
-#### Pipeline Step 8: Semantic Search (Main Agent, conditional)
+#### Pipeline Step 8: Semantic Search (Main Agent)
 
 **Scope:** .mcp.json, .claude/hooks/qmd-sync.sh, .claude/settings.json (additive merge)
 
 **Reads:** ops/derivation.md, ops/config.yaml, ops/derivation-manifest.md
 
-**Condition:** Check if semantic-search feature is active (linking includes implicit). If inactive, skip entirely.
 
-The main agent executes this step directly -- it is straightforward scaffolding with conditional checks.
+The main agent executes this step directly -- it is straightforward scaffolding.
 
 ---
 
 ##### Semantic Search Setup
-
-**Only if semantic-search feature is active (linking includes implicit).**
 
 ###### Add `notes_collection` to vocabulary
 
@@ -1616,7 +1611,7 @@ Run all 15 primitive checks against the generated system. Use `${CLAUDE_PLUGIN_R
 5. **description-field** -- Every note has a description field that differs from the title? (>95%)
 6. **topics-footer** -- `tags` array and body-level `Topics:` footer present on every non-MOC note? (>95%)
 7. **schema-enforcement** -- `ops/templates/note.md` exists as the single source of truth; every note carries the six required fields (title, content_type, granularity, description, created_at, tags).
-8. **semantic-search** -- Configured or documented for future activation?
+8. **semantic-search** -- `.mcp.json` registers the qmd MCP server with autoapprove entries, `.claude/hooks/qmd-sync.sh` exists and is wired into SessionStart, context file references `mcp__qmd__query`.
 9. **self-space** -- self/ exists with identity.md, methodology.md, goals.md?
 10. **session-rhythm** -- Context file references ops/features/session-rhythm.md for orient/work/persist cycle?
 11. **discovery-first** -- Context file contains Discovery-First Design section, notes optimized for findability?
@@ -1724,7 +1719,7 @@ Next steps:
   1. Quit and restart Claude Code (required — skills won't work until you do)
   2. Read your CLAUDE.md -- it's your complete methodology
   3. Try /arscontexta:help to see all available commands
-  4. [If qmd not installed: "Install qmd for semantic search: npm install -g @tobilu/qmd (or bun install -g @tobilu/qmd), then run qmd collection add, qmd update, qmd embed"]
+  4. [If qmd not installed: "REQUIRED — install qmd to activate semantic search: npm install -g @tobilu/qmd (or bun install -g @tobilu/qmd), then run qmd collection add, qmd update, qmd embed"]
   5. Try /arscontexta:tutorial for a guided walkthrough
 
 ```
@@ -1733,7 +1728,7 @@ Next steps:
 
 Include these based on system state:
 
-- If qmd not installed and semantic-search is active: npm/bun install instructions + qmd collection add/update/embed + `.mcp.json` contract
+- If qmd not installed: npm/bun install instructions + qmd collection add/update/embed + `.mcp.json` contract
 - If any kernel checks failed: specific remediation instructions
 
 ---

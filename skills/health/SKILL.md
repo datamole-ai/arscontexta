@@ -656,12 +656,6 @@ When self/ does not exist:
 - But DO check that ops/ correctly absorbs self-space content (5f)
 - Note in the report: "self/ is disabled — boundary checks adapted accordingly"
 
-### No Semantic Search
-
-When qmd/MCP tools are unavailable:
-- Skip any checks that depend on semantic search
-- Note in the report: "Semantic search unavailable — some checks skipped"
-- All file-based checks (schema, orphans, links, boundaries) still run
 
 ### Large Vaults (500+ notes)
 

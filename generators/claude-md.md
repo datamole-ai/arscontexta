@@ -181,7 +181,7 @@ Compose feature summaries in this order:
 2. wiki-links (always)
 3. mocs (if navigation >= 2-tier)
 4. processing-pipeline (always)
-5. semantic-search (if qmd opted in)
+5. semantic-search (always)
 6. schema (always)
 7. maintenance (always)
 8. self-evolution (always)
@@ -194,14 +194,13 @@ Compose feature summaries in this order:
 14. helper-functions (always)
 15. graph-analysis (always)
 
-**Always-included blocks (12):** note-granularity, wiki-links, processing-pipeline, schema, maintenance, self-evolution, methodology-knowledge, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis.
+**Always-included blocks (13):** note-granularity, wiki-links, processing-pipeline, semantic-search, schema, maintenance, self-evolution, methodology-knowledge, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis.
 
-**Conditional blocks (4):** mocs (navigation depth), semantic-search (qmd opt-in), multi-domain (multiple domains), self-space (user choice).
+**Conditional blocks (3):** mocs (navigation depth), multi-domain (multiple domains), self-space (user choice).
 
 ### Cross-reference elimination (unchanged)
 
 If a block is excluded, remove/rephrase references to it in remaining summaries and reference files:
-- semantic-search excluded → rephrase "semantic search" to "search your notes" or remove
 - mocs excluded → simplify "topic MOCs" to "topic organization"
 - self-space excluded → references to self/ route to ops/ equivalents
 - multi-domain excluded → remove cross-domain references
@@ -278,7 +277,7 @@ This system was seeded with a [use-case] configuration. It will evolve through u
 
 ### Signs of Friction (act on these)
 - Notes accumulating without connections → increase your connection-finding frequency
-- Can't find what you know exists → add semantic search or more MOC structure
+- Can't find what you know exists → check qmd index freshness (semantic search is always on) or add more MOC structure
 - Schema fields nobody queries → remove them (schemas serve retrieval, not bureaucracy)
 - Processing feels perfunctory → simplify the cycle or automate the mechanical parts
 

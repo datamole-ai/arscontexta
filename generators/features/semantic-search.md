@@ -79,21 +79,3 @@ Semantic search indexes can go stale as {DOMAIN:notes} change. New {DOMAIN:notes
 3. Regenerate embeddings for new content
 
 Run index updates after batch processing or whenever search results feel stale.
-
-### Fallback When Search Is Unavailable
-
-Semantic search is valuable but not required. The system works without it. When semantic search is unavailable:
-
-1. **Keyword search (rg)** — Always available. Precise for known vocabulary.
-2. **{DOMAIN:Topic map} traversal** — Browse the relevant {DOMAIN:topic map} to see what exists in a topic area.
-3. **Description scanning** — `rg '^description:' {DOMAIN:note_collection}/` loads all descriptions for manual review.
-4. **Heading outlines** — `grep -n "^#" "{DOMAIN:note}.md"` shows a {DOMAIN:note}'s structure before reading fully.
-
-Never let a search failure block work. The multi-layer discovery approach means you always have a way to find what you need.
-```
-
-## Dependencies
-None — works standalone, but benefits from notes having good descriptions.
-
-## Conditional
-Only include when semantic search (qmd or equivalent) is opted in during onboarding. When excluded, the system relies on keyword search, MOC traversal, and progressive disclosure.

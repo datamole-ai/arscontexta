@@ -84,7 +84,6 @@ Also compare feature flags between derivation and config:
 
 | Feature | Derivation | Config | Changed? |
 |---------|-----------|--------|----------|
-| semantic_search | [on/off] | [on/off] | [yes/no] |
 | processing_pipeline | [on/off] | [on/off] | [yes/no] |
 | self_space | [on/off] | [on/off] | [yes/no] |
 
@@ -111,7 +110,7 @@ For each changed dimension, determine ALL affected artifacts. This is the cascad
 | Change | Affected Artifacts | What Changes |
 |--------|-------------------|-------------|
 | **Organization shift** | Folder structure, MOC hierarchy, context file "Folder Architecture" section, hub MOC | Directory layout, MOC tier count, navigation references |
-| **Linking shift** | Semantic search config, /reflect connection density expectations, context file "Connection Finding" section | Search tool availability, link threshold values, discovery layer instructions |
+| **Linking shift** | /reflect connection density expectations, context file "Connection Finding" section | Link threshold values, discovery layer instructions |
 | **Navigation shift** | MOC tier structure, hub MOC, context file "MOC" section, note Topics footers | Number of MOC tiers, hub content, navigation instructions |
 | **Maintenance shift** | /health threshold values, condition-based trigger settings, context file maintenance instructions | Check frequency conditions, stale note thresholds, reweave trigger conditions |
 | **Schema shift** | Templates (_schema blocks), validation rules, /verify skill, query scripts, context file "YAML" section | Required fields, enum values, validation patterns |
@@ -152,7 +151,7 @@ For content-impacting changes:
 Read `${CLAUDE_PLUGIN_ROOT}/reference/interaction-constraints.md` and check:
 
 1. **Hard blocks:** Would the new configuration create a combination that WILL fail?
-   - Example: explicit+implicit linking without a semantic-search tool configured
+   - Example: attempting to disable a kernel invariant (e.g. semantic search, schema enforcement, wiki links) via config edits
    - If a hard block is detected: WARN the user and recommend against the change
 
 2. **Soft warns:** What friction points does the new configuration create?
@@ -413,16 +412,14 @@ For large migrations:
 
 ### Feature Flag Changes
 
-Feature flag changes (semantic_search, self_space, etc.) may require:
+Feature flag changes (self_space, etc.) may require:
 - Creating new directories (self/ for self_space on)
-- Installing tools (qmd for semantic_search on)
 - Removing hooks (for automation off)
 
 Handle each feature flag change specifically:
 
 | Flag | On -> Off | Off -> On |
 |------|-----------|-----------|
-| semantic_search | Remove search references from skills, update context file | Add search config, update skills with search integration |
 | self_space | Archive self/ contents, remove self/ references | Create self/ structure, generate identity files |
 
 ### No ops/derivation-manifest.md

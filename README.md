@@ -11,6 +11,25 @@ No templates. No configuration. Just conversation.
 
 ---
 
+## Prerequisites
+
+Install these before running `/arscontexta:setup`. All four are expected — the generated system assumes they are present and its skills call them directly.
+
+| Dependency | Purpose |
+|-----------|---------|
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Plugin host |
+| `tree` | Workspace structure injection |
+| `ripgrep` (`rg`) | YAML queries, schema validation |
+| [qmd](https://github.com/tobi/qmd) v2+ | Semantic search (invariant kernel primitive — see below) |
+
+```bash
+npm install -g @tobilu/qmd
+# or
+bun install -g @tobilu/qmd
+```
+
+---
+
 ## Installation
 
 1. Add the marketplace to Claude Code:
@@ -190,23 +209,20 @@ Every kernel primitive includes `cognitive_grounding` linking to specific resear
 
 ---
 
-## Semantic Search (optional)
+## Semantic Search
 
-[qmd](https://github.com/tobi/qmd) adds concept matching across vocabularies.
-Not required -- the system works fully with ripgrep + MOC traversal.
+[qmd](https://github.com/tobi/qmd) provides concept matching across vocabularies and is part of the kernel — every generated vault expects it. `/arscontexta:setup` configures the collection, `.mcp.json`, and a SessionStart sync hook automatically when qmd is installed.
 
-`/setup` should perform this configuration automatically when semantic search is active.
-The commands below are manual fallback/setup verification.
+If you skipped the Prerequisites step, install qmd and run the manual setup below to activate search:
 
 ```bash
-# Install qmd
 npm install -g @tobilu/qmd
 # or
 bun install -g @tobilu/qmd
 
 cd your-vault/
 qmd collection add . --name <notes_directory_name> --mask "<notes_directory_name>/**/*.md"
-qmd embed
+qmd update && qmd embed
 ```
 
 Create or merge `.mcp.json` in the vault root:
@@ -229,17 +245,6 @@ Create or merge `.mcp.json` in the vault root:
 ```
 
 Keep qmd MCP configuration and tool preapproval in `.mcp.json`.
-
----
-
-## Prerequisites
-
-| Dependency | Required | Purpose |
-|-----------|----------|---------|
-| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) v1.0.33+ | Yes | Plugin host |
-| `tree` | Yes | Workspace structure injection |
-| `ripgrep` (`rg`) | Yes | YAML queries, schema validation |
-| [qmd](https://github.com/tobi/qmd) | Optional | Semantic search |
 
 ---
 

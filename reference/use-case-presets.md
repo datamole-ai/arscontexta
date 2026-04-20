@@ -31,14 +31,14 @@ Named points in the configuration space derived from methodology traditions and 
 
 | Category | Blocks |
 |----------|--------|
-| Always | atomic-notes, wiki-links, mocs, processing-pipeline, schema, maintenance, self-evolution, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis |
-| Conditional | semantic-search (if qmd opted in), multi-domain (if needed) |
+| Always | atomic-notes, wiki-links, mocs, processing-pipeline, semantic-search, schema, maintenance, self-evolution, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis |
+| Conditional | multi-domain (if needed) |
 | Optional | (none) |
 | Disabled | self-space (goals route to ops/) |
 
 **Key settings:**
 - `self_space: false`
-- `qmd: true` (opted in during onboarding)
+- `qmd: true` (invariant — semantic search is a kernel primitive)
 
 **Processing categories:** claims, evidence, methodology-comparisons, contradictions, open-questions, design-patterns, design-dimensions
 
@@ -87,21 +87,21 @@ Named points in the configuration space derived from methodology traditions and 
 | Processing | 0.7 | Full pipeline with personal processing categories |
 | Session | 0.3 | Continuous context across sessions |
 | Maintenance | 0.4 | Condition-based check-ins |
-| Search | 0.3 | Keyword primary, semantic optional |
+| Search | 0.3 | Keyword primary, semantic always-on (kernel invariant) |
 | Automation | 0.6 | Semi-automated with personal touch |
 
 **Block configuration:**
 
 | Category | Blocks |
 |----------|--------|
-| Always | atomic-notes, wiki-links, mocs, processing-pipeline, schema, maintenance, self-evolution, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis, self-space |
-| Conditional | semantic-search (if qmd opted in), multi-domain (if needed) |
+| Always | atomic-notes, wiki-links, mocs, processing-pipeline, semantic-search, schema, maintenance, self-evolution, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis, self-space |
+| Conditional | multi-domain (if needed) |
 | Optional | (none) |
 | Disabled | (none) |
 
 **Key settings:**
 - `self_space: true`
-- `qmd: "user_choice"` (choice during onboarding)
+- `qmd: true` (invariant — semantic search is a kernel primitive)
 
 **Processing categories:** reflections, relationship-dynamics, goals, habits, gratitude, lessons
 
@@ -156,14 +156,14 @@ Named points in the configuration space derived from methodology traditions and 
 
 | Category | Blocks |
 |----------|--------|
-| Always | wiki-links, processing-pipeline, schema, maintenance, self-evolution, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis |
-| Conditional | atomic-notes, mocs, semantic-search, self-space, multi-domain |
+| Always | wiki-links, processing-pipeline, semantic-search, schema, maintenance, self-evolution, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis |
+| Conditional | atomic-notes, mocs, self-space, multi-domain |
 | Optional | (none) |
 | Disabled | (none) |
 
 **Key settings:**
 - `self_space: "user_choice"`
-- `qmd: "user_choice"`
+- `qmd: true` (invariant — semantic search is a kernel primitive)
 
 **Processing categories:** User-defined during init, guided by examples from research and personal-assistant presets
 

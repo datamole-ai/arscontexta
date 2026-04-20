@@ -69,7 +69,7 @@ Questions the engine must answer when generating evolution-ready systems:
 
 **Summary:** The most common evolution failure is adding complexity before it is needed. Adding semantic search to a 15-note vault, creating MOC sub-hierarchies for 20 notes, building automation hooks before the manual process is understood, generating full processing pipelines for a system that processes one item per week. Each premature addition adds maintenance burden (keeping hooks working, maintaining search indices, navigating unnecessary hierarchy) without corresponding value. The system becomes harder to use than it needs to be, and the user spends more time maintaining infrastructure than doing knowledge work.
 
-**Derivation Implication:** The derivation engine should generate systems at the lowest viable complexity tier and include explicit upgrade triggers: "Add semantic search when you have 50+ notes and can't find things by keyword." "Add processing pipeline when inbox items regularly sit for 3+ days." "Create sub-MOCs when a MOC has 35+ entries." These triggers are concrete, measurable, and grounded in the system's actual state rather than speculative future needs.
+**Derivation Implication:** The derivation engine should generate systems at the lowest viable complexity tier and include explicit upgrade triggers: "Add processing pipeline when inbox items regularly sit for 3+ days." "Create sub-MOCs when a MOC has 35+ entries." (Semantic search is not in this upgrade list — it is a kernel invariant, wired from day one.) These triggers are concrete, measurable, and grounded in the system's actual state rather than speculative future needs.
 
 **Source:** Research claims: "productivity porn risk in meta-system building" and "behavioral anti-patterns matter more than tool selection." Vault operational observation: every premature addition eventually required removal or simplification.
 
@@ -103,7 +103,7 @@ Questions the engine must answer when generating evolution-ready systems:
 
 **Summary:** v1.6 reverses the progressive complexity approach. Instead of starting simple and adding features when friction demands, every vault ships with full automation: all processing skills, all hooks, all maintenance mechanisms, methodology folder, processing queue. The philosophy is that it is easier to remove features than to discover and add them. The overhead of unused features is near-zero (hooks that never fire, skills that are never invoked, directories that stay empty), while the cost of discovering and adding features when friction emerges was higher than anticipated. Users who want less complexity disable features by editing `ops/config.yaml`.
 
-**Derivation Implication:** The derivation engine generates the maximum viable system for the chosen preset. All 3 presets (Research, Personal Assistant, Experimental) include full automation by default. Users toggle optional features (semantic search, self space) by editing `ops/config.yaml` without regenerating. INVARIANT primitives cannot be disabled.
+**Derivation Implication:** The derivation engine generates the maximum viable system for the chosen preset. All 3 presets (Research, Personal Assistant, Experimental) include full automation by default. Users can toggle optional features (e.g. self space) by editing `ops/config.yaml` without regenerating. INVARIANT primitives — including semantic search — cannot be disabled; they are not exposed in `ops/config.yaml`.
 
 **Source:** v1.6 human feedback: the progressive tier system created friction in discovery. Users did not know what features existed until they needed them and could not find them.
 
@@ -155,7 +155,7 @@ Questions the engine must answer when generating evolution-ready systems:
 
 **Summary:** Adding a hook, creating a template, or enabling semantic search is installation, not adoption. Adoption means the feature is being used regularly and providing value. An installed-but-unused validation hook is pure maintenance cost. An installed-but-unused semantic search index wastes memory and requires maintenance without contributing to retrieval. The evolution lifecycle should distinguish between features that are actively providing value and features that were installed but never integrated into the agent's actual workflow.
 
-**Derivation Implication:** Generated systems should include periodic feature usage review in their maintenance cycle. "Review which features you actually use: Are validation hooks catching real errors? Is semantic search finding connections that keyword search misses? Are session logs being read in subsequent sessions? Features that provide no measurable value should be removed to reduce maintenance burden."
+**Derivation Implication:** Generated systems should include periodic feature usage review in their maintenance cycle. "Review which features you actually use: Are validation hooks catching real errors? Are session logs being read in subsequent sessions? Features that provide no measurable value should be removed to reduce maintenance burden." Kernel primitives (including semantic search) are not candidates for this review — they stay on regardless of measured usage.
 
 **Source:** Software engineering principle: dead code is negative value (maintenance cost without benefit). Applied to knowledge systems: unused features are configuration debt.
 

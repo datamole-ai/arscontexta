@@ -13,7 +13,7 @@ Seven validation milestones for the Ars Contexta v1.6 plugin. Each milestone tes
 - The vault must have at least 3 notes created (to exercise link and MOC checks)
 - `validate-kernel.sh` accessible at `./reference/validate-kernel.sh`
 
-**Pass criteria:** 14/14 checks pass (PASS status). WARN is acceptable for semantic search (primitive 8) if the platform does not support qmd and for self space (primitive 9) if disabled via configuration, but all other primitives must be PASS.
+**Pass criteria:** 14/14 checks pass (PASS status). WARN is acceptable only for semantic search (primitive 8) when the `.mcp.json` qmd wiring is present but qmd itself is not yet installed on the user's machine, and for self space (primitive 9) if disabled via configuration. All other primitives — including the presence of the qmd MCP wiring — must be PASS. A FAIL on semantic search means the wiring was never generated and must be fixed, not waived.
 
 **Verification steps:**
 
@@ -22,7 +22,7 @@ Seven validation milestones for the Ars Contexta v1.6 plugin. Each milestone tes
 ./reference/validate-kernel.sh /path/to/generated-vault
 
 # Expected: 15 PASS lines, 0 FAIL lines
-# Acceptable: 14 PASS + 1 WARN (semantic search when qmd not configured, or self space when disabled)
+# Acceptable: 14 PASS + 1 WARN (semantic search when qmd executable is not installed but wiring is present, or self space when disabled)
 ```
 
 **Expected output on success:**
@@ -629,7 +629,7 @@ fi
 - validate-kernel.sh accessible
 
 **Pass criteria:** For each preset:
-1. Kernel validation passes (14/14, or 13/14 with WARN for semantic search if qmd not configured, or self space if disabled)
+1. Kernel validation passes (14/14, or 13/14 with WARN for semantic search if qmd executable is not installed but wiring is present, or self space if disabled)
 2. Vocabulary is domain-native (zero cross-domain term leakage)
 3. Interaction constraints are satisfied (no hard constraint violations)
 4. Active feature blocks match the preset's `active_blocks` list (17 blocks available)
@@ -746,7 +746,7 @@ done
 **Expected output on success:**
 
 Each preset should produce:
-- Kernel: 14/14 PASS, or 13/14 PASS + 1 WARN (semantic search if qmd not configured, or self space if disabled)
+- Kernel: 14/14 PASS, or 13/14 PASS + 1 WARN (semantic search if qmd executable is not installed but wiring is present, or self space if disabled)
 - Vocabulary: domain-native terms present, zero cross-domain leakage
 - Constraints: all coherence checks PASS
 - Features: all active blocks (from 16 available) produce output in context file

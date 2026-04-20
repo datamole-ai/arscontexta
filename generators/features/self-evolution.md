@@ -20,8 +20,6 @@ Every feature in this system is a module you can toggle. The question is never "
 6. Monitor — did the friction decrease?
 
 **Examples of friction that triggers adoption:**
-- Can't find related {DOMAIN:notes} → activate semantic search
-- Keep creating duplicate {DOMAIN:notes} → activate duplicate checking in processing
 - {DOMAIN:Topic maps} are too large to navigate → split into sub-{DOMAIN:topic maps}
 - Important {DOMAIN:notes} have no connections → activate reweaving maintenance
 - Same mistakes keep happening → activate validation hooks

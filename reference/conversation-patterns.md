@@ -67,9 +67,9 @@ The follow-ups clarify pipeline fit (personal capture vs analytical extraction) 
 ### Excluded Feature Blocks
 
 - `processing-pipeline.md` — excluded (processing = light)
-- `semantic-search.md` — excluded (linking = explicit only)
 - `schema.md` — excluded (schema = minimal)
 - `multi-domain.md` — excluded (single domain)
+- `semantic-search.md` — **always included** — even when linking = explicit only, duplicate detection and description-findability still use qmd
 
 ### Key Insights
 
@@ -144,9 +144,9 @@ The first question calibrates maintenance trigger thresholds. The second probes 
 ### Excluded Feature Blocks
 
 - `processing-pipeline.md` — excluded (processing = light)
-- `semantic-search.md` — excluded (linking = explicit)
 - `schema.md` — excluded (moderate schema is handled by template, not a dedicated feature block)
 - `multi-domain.md` — excluded (single domain)
+- `semantic-search.md` — **always included**
 
 ### Key Insights
 
@@ -212,7 +212,7 @@ The first question affects pipeline choice (output-directed research maps most n
 - `wiki-links.md` — included (always)
 - `mocs.md` — included (3-tier navigation)
 - `processing-pipeline.md` — included (processing = heavy)
-- `semantic-search.md` — included (linking = explicit+implicit)
+- `semantic-search.md` — included (always)
 - `schema.md` — included (schema = moderate)
 - `maintenance.md` — included (always)
 - `self-evolution.md` — included (always)
@@ -299,9 +299,9 @@ The first question resolves note scale (detailed reflections suit /structure to 
 
 ### Excluded Feature Blocks
 
-- `semantic-search.md` — excluded (linking = explicit suits the register)
 - `schema.md` — excluded (moderate schema handled by template)
 - `multi-domain.md` — excluded (single domain)
+- `semantic-search.md` — **always included**
 
 ### Key Insights
 
@@ -383,7 +383,7 @@ The first question calibrates maintenance trigger sensitivity and schema tempora
 
 ### Excluded Feature Blocks
 
-- `semantic-search.md` — excluded (linking = explicit)
+- `semantic-search.md` — **always included**
 
 ### Key Insights
 
@@ -417,7 +417,6 @@ The first question calibrates maintenance trigger sensitivity and schema tempora
 
 3. **Note scale is per-invocation, chosen via /structure or /capture.** Each pattern produces notes at a natural scale (per-book, per-observation, per-claim) determined by how the user works and which skill they invoke — not by a vault-wide setting.
 
-4. **Linking complexity drives feature block selection.** Explicit-only linking excludes semantic search. Explicit+implicit linking (as in Research) requires it for cross-vocabulary discovery.
 
 ### Signal Reliability
 
@@ -454,13 +453,6 @@ The self/ directory provides agent persistent memory (identity, methodology, goa
 
 Example phrasing: "Your research vault focuses on the knowledge graph — the notes and connections are the value. Some users also want a self/ space where the agent develops persistent identity and remembers its own methodology across sessions. For research, this is usually not needed. Would you like it enabled?"
 
-**2. qmd Semantic Search:**
-
-Whether to enable qmd for meaning-based discovery across vocabularies.
-
-Example phrasing: "Semantic search lets the system find connections even when different terms describe the same concept — like matching 'strict scrutiny' with 'heightened review.' It is especially valuable for cross-disciplinary work. Would you like to enable it?"
-
-For Pattern 3 (Climate Research), qmd is strongly recommended due to cross-disciplinary vocabulary. For Patterns 1 (Books) and 2 (Family), qmd is optional — enable if vocabulary breadth grows. For Pattern 4 (Therapy), qmd is optional — could help with pattern matching across vocabulary.
 
 These decisions appear in the conversation AFTER dimension derivation but BEFORE generation. The user always makes the final call.
 

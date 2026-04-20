@@ -247,9 +247,8 @@ else
     warn "No session rhythm pattern found"
 fi
 
-# --- Primitive 10: Semantic search (CONFIGURABLE) ---
-echo "10. Semantic search capability (configurable)"
-has_search=false
+# --- Primitive 10: Semantic search (INVARIANT) ---
+echo "10. Semantic search capability (invariant)"
 has_search_mcp=false
 has_search_cli=false
 has_search_docs=false
@@ -260,20 +259,16 @@ for ctx in "$VAULT/CLAUDE.md"; do
     [ -f "$ctx" ] && grep -qi "semantic search\|qmd\|vector_search\|deep_search" "$ctx" 2>/dev/null && has_search_docs=true
 done
 
-if $has_search_mcp || $has_search_cli; then
-    has_search=true
-fi
-
-if $has_search; then
-    details=""
-    $has_search_mcp && details="${details}.mcp.json qmd server, "
-    $has_search_cli && details="${details}qmd executable, "
-    details=$(echo "$details" | sed 's/, $//')
-    pass "Semantic search capability found (${details})"
-elif $has_search_docs; then
-    warn "Semantic search mentioned in docs but no qmd executable or .mcp.json qmd server config detected"
+if $has_search_mcp && $has_search_docs; then
+    if $has_search_cli; then
+        pass "Semantic search wired and executable present (.mcp.json qmd server, qmd CLI, context docs)"
+    else
+        warn "Semantic search is wired (.mcp.json + context docs) but qmd is not installed — install qmd >= 2 so skills can actually query"
+    fi
+elif $has_search_mcp || $has_search_docs; then
+    fail "Semantic search is partially wired — .mcp.json qmd server AND context-file references are both required"
 else
-    pass "Semantic search not enabled (configurable)"
+    fail "Semantic search missing — .mcp.json must register the qmd MCP server and the context file must reference it"
 fi
 
 # --- Primitive 10A: Filesystem graph database (unique-addresses) ---

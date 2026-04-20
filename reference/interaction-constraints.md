@@ -20,7 +20,7 @@ Each cell describes the pressure that the row dimension's pole creates on the co
 |-----------|-------------|---------|-----------|-------------|--------|
 | **Flat organization** | — | requires explicit links | requires MOC overlay | neutral | neutral |
 | **Hierarchical org** | — | folder membership as linking | folder browsing sufficient | neutral | neutral |
-| **Explicit+implicit linking** | neutral | — | neutral | neutral | requires semantic search tool |
+| **Explicit+implicit linking** | neutral | — | neutral | neutral | neutral (semantic search is always enabled — a kernel invariant, not a linking-dependent option) |
 
 ---
 
@@ -32,8 +32,7 @@ When the user selects dimension values, check these rules. WARN on soft violatio
 
 These produce friction but can work with compensating mechanisms:
 
-1. `linking == "explicit+implicit" + no_semantic_search`
-   → "Implicit linking (semantic search) is enabled but no search tool is configured. The system will work with explicit links only."
+_No soft constraints currently apply to the linking dimension — semantic search is invariant, so implicit linking no longer depends on an optional tool._
 
 
 ### Kernel Primitive Constraints
@@ -59,8 +58,8 @@ These constraints apply to the 14 kernel primitives and their INVARIANT/CONFIGUR
 6. `self_space == false + preset == "personal_assistant"`
    → WARN: "Self space is ON by default for Personal Assistant presets. Agent identity and persistent memory are central to the experience. Disable only if the agent's sense of self is not needed."
 
-7. `semantic_search == false + linking == "explicit+implicit"`
-   → WARN: "Implicit linking works best with semantic search. Without qmd, it falls back to keyword overlap and MOC traversal."
+7. `semantic_search == false` (Primitive 10)
+   → BLOCK: "Semantic search is INVARIANT. Processing skills (/reflect, /verify, /structure, /seed, /reweave) call mcp__qmd__query directly. It cannot be disabled at the config level; if qmd is not installed, the wiring is still generated and the install is surfaced as a required next step."
 
 **Condition-based maintenance constraints:**
 
