@@ -34,8 +34,6 @@ No templates. No configuration. Just conversation.
 
 6. Restart Claude Code again to activate generated hooks and skills
 
-7. Run `/arscontexta:help` to see everything available
-
 ---
 
 ## What It Does
@@ -104,15 +102,7 @@ or `decisions/`), but the separation is invariant.
 | Command | What It Does |
 |---------|-------------|
 | `/arscontexta:setup` | Conversational onboarding -- generates your full system |
-| `/arscontexta:help` | Contextual guidance and command discovery |
-| `/arscontexta:tutorial` | Interactive walkthrough (learn by doing) |
-| `/arscontexta:ask` | Query the research graph for methodology answers |
 | `/arscontexta:health` | Run diagnostic checks on your vault |
-| `/arscontexta:recommend` | Get architecture advice for your use case |
-| `/arscontexta:architect` | Research-backed evolution guidance |
-| `/arscontexta:add-domain` | Add a new knowledge domain to an existing system |
-| `/arscontexta:reseed` | Re-derive from first principles when drift accumulates |
-| `/arscontexta:upgrade` | Apply plugin knowledge base updates to your system |
 
 ### Generated (available after setup)
 
@@ -154,7 +144,6 @@ or `decisions/`), but the separation is invariant.
 | `/remember` | Mine session learnings |
 | `/refactor` | Structural improvements |
 
-Note: `/ask` and `/architect` are plugin-level commands (listed above) and are not generated during setup.
 ---
 
 ## Processing Pipeline
@@ -205,8 +194,6 @@ Every kernel primitive includes `cognitive_grounding` linking to specific resear
 - **MOC hierarchy** -- context-switching cost research (Leroy 2009)
 - **Description field** -- progressive disclosure principles
 - **Wiki links** -- spreading activation theory
-
-Query directly: `/arscontexta:ask "Why does my system use atomic notes?"`
 
 ---
 
@@ -270,17 +257,9 @@ arscontexta/
 |-- .claude-plugin/
 |   |-- plugin.json              # Plugin manifest
 |   +-- marketplace.json         # Marketplace listing
-|-- skills/                      # 10 plugin-level commands
+|-- skills/                      # Plugin-level commands
 |   |-- setup/                   # Conversational onboarding
-|   |-- help/                    # Contextual guidance
-|   |-- tutorial/                # Interactive walkthrough
-|   |-- ask/                     # Query the research graph
-|   |-- health/                  # Diagnostic checks
-|   |-- recommend/               # Architecture advice
-|   |-- architect/               # Evolution guidance
-|   |-- reseed/                  # Re-derive from first principles
-|   |-- upgrade/                 # Apply knowledge base updates
-|   +-- add-domain/              # Multi-domain extension
+|   +-- health/                  # Diagnostic checks
 |-- skill-sources/               # 16 generated command templates
 |   |-- reduce/                  # Extract insights
 |   |-- reflect/                 # Find connections

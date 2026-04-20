@@ -105,7 +105,7 @@ ops/
 └── health/            — health report history
 ```
 
-**derivation.md** — The complete justification chain for every configuration choice. Read by /architect.
+**derivation.md** — The complete justification chain for every configuration choice.
 **config.yaml** — Human-editable dimension and feature settings. Changes take effect next session.
 **reminders.md** — User-delegated time-bound actions. Check at session orient. Remove when done.
 **observations/** — Friction signals captured during work. Review when patterns accumulate.
@@ -120,14 +120,8 @@ When users ask about system structure, schema, or methodology:
 
 | Pattern | Route To | Fallback |
 |---------|----------|----------|
-| "How should I organize/structure..." | /arscontexta:architect | Apply methodology below |
-| "Can I add/change the schema..." | /arscontexta:architect | Edit templates directly |
-| "Research best practices for..." | /arscontexta:ask | Read bundled references |
-| "What does my system know about..." | Check ops/methodology/ directly | /arscontexta:ask for research backing |
-| "I want to add a new area/domain..." | /arscontexta:add-domain | Manual folder + template creation |
+| "What does my system know about..." | Check ops/methodology/ directly | Read bundled references |
 | "What should I work on..." | /next | Reconcile queue + recommend |
-| "Help / what can I do..." | /arscontexta:help | Show available commands |
-| "Walk me through..." | /arscontexta:tutorial | Interactive learning |
 | "Challenge assumptions..." | /rethink | Triage observations/tensions |
 
 ```
