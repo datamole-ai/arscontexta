@@ -36,7 +36,7 @@ Your system maintains its own self-knowledge as linked notes in `ops/methodology
 - **Friction captures** — Observations from /{DOMAIN:remember}
 - **Configuration state** — Active features, thresholds, processing preferences
 
-The methodology folder is referenced by meta-skills (/{DOMAIN:rethink}, /architect) when reasoning about system evolution. It is the substrate for self-awareness — without it, the system cannot explain why it works the way it does.
+The methodology folder is referenced by meta-skills (/{DOMAIN:rethink}, /{DOMAIN:remember}) when reasoning about system evolution. It is the substrate for self-awareness — without it, the system cannot explain why it works the way it does.
 
 ### Rule Zero: Methodology as Canonical Specification
 
@@ -53,7 +53,7 @@ Your methodology folder is more than a log — it is the canonical specification
 
 Think of ops/methodology/ as your system's constitution. Individual session decisions are statutes — they can change frequently. But the methodology specification is the foundational document that all decisions should align with. When they don't, that's drift, and drift is the signal for improvement.
 
-### The Seed-Evolve-Reseed Lifecycle
+### The Seed-Evolve Lifecycle
 
 Your knowledge system follows a natural lifecycle:
 
@@ -62,11 +62,6 @@ The initial setup gives you: atomic {DOMAIN:notes}, {DOMAIN:topic maps}, wiki li
 
 **2. Evolve** — Adapt based on experience
 As you use the system, friction reveals where it falls short. You add modules, adjust schemas, split {DOMAIN:topic maps}, create new templates. The system becomes more yours.
-
-**3. Reseed** — Reassess when accumulated drift warrants it
-After significant evolution, the system may have accumulated complexity that no longer serves you. Reseed by asking: "If I started fresh today, knowing what I know, what would I keep?" This doesn't mean deleting everything — it means reconsidering which modules are earning their place.
-
-The lifecycle is not linear. You might seed, evolve for months, reseed with lessons learned, and evolve again. Each cycle produces a system better adapted to your actual needs.
 
 ### Observation Capture Protocol
 
@@ -99,24 +94,6 @@ When observations accumulate (roughly 5-10 pending), review them as a batch:
 - Should any become {DOMAIN:notes}? Some observations crystallize into genuine insights.
 - Should any trigger system changes? Update ops/context.md, adjust templates, add or remove modules.
 - Archive observations that have been processed or are no longer relevant.
-
-### Architect Advice Patterns
-
-When the system reaches a complexity threshold, use the architect conversation to get guidance:
-
-**When to ask the architect:**
-- You're unsure which module addresses your friction
-- Two modules seem to conflict
-- You want to simplify but aren't sure what to remove
-- A new domain requires adapting the system significantly
-
-**How to ask:**
-Describe the friction or question, then ask for a recommendation. Include:
-- What you've tried
-- What worked and what didn't
-- What constraints matter (speed, simplicity, thoroughness)
-
-The architect draws on the full knowledge system specification to suggest modules, configurations, or structural changes. It's not prescriptive — it surfaces options and trade-offs so you can decide.
 
 ### Complexity Curve Monitoring
 
@@ -154,7 +131,7 @@ Track what changed and why in `ops/changelog.md`:
 **Outcome:** What improved (fill in after living with the change)
 ```
 
-This creates an evolution history. When you reseed, you can review the changelog to understand which changes stuck and which were reversed — valuable signal for what your system actually needs.
+This creates an evolution history. Reviewing the changelog shows which changes stuck and which were reversed — valuable signal for what your system actually needs.
 
 ### Operational Learning Loop
 

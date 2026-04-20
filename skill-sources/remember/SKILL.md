@@ -285,7 +285,7 @@ The methodology folder is more than a friction capture log. It is the system's a
 - Future /rethink sessions will compare system behavior against what methodology notes declare. Vague notes create unmeasurable specs.
 
 **What this means for the system:**
-- ops/methodology/ is consulted by meta-skills (/ask, /architect, /rethink) as the source of truth for how the system works.
+- ops/methodology/ is consulted by meta-skills (/rethink, /refactor) as the source of truth for how the system works.
 - Drift detection compares methodology note assertions against actual config.yaml and context file state.
 - When methodology notes are stale (older than config changes), the system surfaces this as a maintenance condition.
 

@@ -319,7 +319,7 @@ The task stack (ops/tasks.md) and pipeline queue coexist but serve different aud
 **Skills that generate pipeline work update BOTH:**
 - `/extract`, `/structure`, and `/capture` add tasks to the queue AND note discoveries in tasks.md
 - `/seed` adds extract tasks to the queue
-- `/architect` may add implementation tasks to the task stack
+- `/refactor` may add implementation tasks to the task stack
 
 ---
 

@@ -13,8 +13,8 @@ Your vault knows why it was built the way it was. The `ops/methodology/` folder 
 |---------|-----------|---------|
 | Derivation rationale | /setup | Why each dimension was configured this way |
 | Behavioral patterns | /{DOMAIN:remember} | Learned corrections and operational guidance |
-| Configuration state | /{DOMAIN:rethink}, /architect | Active features, threshold adjustments |
-| Evolution history | /{DOMAIN:rethink}, /architect, /reseed | What changed and why |
+| Configuration state | /{DOMAIN:rethink} | Active features, threshold adjustments |
+| Evolution history | /{DOMAIN:rethink} | What changed and why |
 
 ### How to Query Your Methodology
 
@@ -51,19 +51,9 @@ cat ops/methodology/derivation-rationale.md
 
 ### The Research Foundation
 
-Your system's design choices are backed by a knowledge base of 249 interconnected methodology notes — research claims, guidance documents, and domain examples — covering knowledge systems, cognitive science, and agent cognition. Access it through:
+Your system's design choices are backed by a knowledge base of 249 interconnected methodology notes — research claims, guidance documents, and domain examples — covering knowledge systems, cognitive science, and agent cognition. Read the bundled research notes directly under the plugin's `methodology/` directory when you need theoretical backing for a design choice.
 
-```
-/ask "why does my system use atomic notes?"
-/ask "what are the trade-offs of condition-based maintenance?"
-/ask "how should I handle sources that span multiple domains?"
-```
-
-The /ask command consults two knowledge layers:
-- **Local methodology** (ops/methodology/) — "How does MY system work?" questions
-- **Research graph** (249 bundled methodology notes) — "Why is this a good idea in general?" questions
-
-When you need to understand a design choice: check ops/methodology/ for the specific rationale, then /ask for the theoretical backing.
+When you need to understand a design choice: check ops/methodology/ for the specific rationale, then consult the bundled research notes for the theoretical backing.
 ```
 
 ## Dependencies

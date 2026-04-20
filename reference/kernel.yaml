@@ -195,7 +195,7 @@ primitives:
     enforcement: invariant
     validation:
       check: "ops/methodology/ directory exists with methodology.md MOC. At least one derivation-rationale note exists. Context file references ops/methodology/ for meta-skill context. /remember writes to ops/methodology/. Meta-skills read from it."
-    cognitive_grounding: "Without self-knowledge, meta-skills operate blind. /ask cannot explain config choices. /architect cannot reason about changes. /remember has nowhere to capture corrections."
+    cognitive_grounding: "Without self-knowledge, meta-skills operate blind. /rethink cannot reason about changes. /remember has nowhere to capture corrections."
 
 # Dependency graph (DAG):
 # markdown-yaml → description-field

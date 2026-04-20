@@ -269,7 +269,7 @@ Check MOC coverage:
 
 **What:** ops/methodology/ contains linked notes explaining why the vault is configured the way it is, what processing pipeline it uses, and how it has evolved.
 
-**Why:** Without self-knowledge, meta-skills operate blind. /ask cannot explain config choices. /architect cannot reason about changes. /remember has nowhere to capture corrections. The methodology folder is the vault's memory of its own design decisions.
+**Why:** Without self-knowledge, meta-skills operate blind. /rethink cannot reason about changes. /remember has nowhere to capture corrections. The methodology folder is the vault's memory of its own design decisions.
 
 **How to implement:**
 - `ops/methodology/` directory with `methodology.md` MOC
@@ -277,7 +277,7 @@ Check MOC coverage:
 - At least one derivation-rationale note exists at generation time (capturing why the vault was configured this way)
 - Context file references ops/methodology/ for meta-skill context
 - `/remember` writes to ops/methodology/ when the agent captures operational corrections
-- Meta-skills (/ask, /architect, /rethink) read from it
+- Meta-skills (/rethink, /remember) read from it
 
 **Quality gate:** Can the agent explain WHY the vault is configured the way it is? If it can answer "why do we use flat folders?" or "why is self/ disabled?" by reading ops/methodology/, the self-knowledge layer is functional.
 

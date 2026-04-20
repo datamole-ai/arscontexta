@@ -6,7 +6,7 @@ Every generated system divides its workspace into three spaces: self, notes, and
 
 ## Self Space — The Agent's Persistent Mind (Configurable)
 
-**Enforcement:** Configurable. Off by default for research vaults, on by default for personal assistant vaults. Toggled via /architect.
+**Enforcement:** Configurable. Off by default for research vaults, on by default for personal assistant vaults. Toggled by editing `ops/config.yaml`.
 
 **Durability:** Permanent. Content accumulates slowly and is rarely deleted.
 
@@ -49,14 +49,7 @@ The key insight is that self/ serves two distinct purposes: (1) agent identity/p
 
 ### Toggle Mechanism
 
-Self space is toggled via `/architect`:
-
-```
-/architect enable self    # Creates self/ with identity.md, methodology.md, goals.md
-/architect disable self   # Migrates goals to ops/goals.md, archives self/
-```
-
-The toggle preserves content — disabling self/ moves goals to ops/ rather than deleting them. Enabling self/ creates the directory and scaffolds the core files.
+Self space is toggled by editing `ops/config.yaml` and restarting. Enabling self/ creates the directory and scaffolds the core files; disabling migrates goals to `ops/goals.md` and archives self/. The toggle preserves content — disabling does not delete goals.
 
 ### Design Rule
 
@@ -134,14 +127,13 @@ These hold across all generated systems:
 
 | Directory | Contents | Lifecycle |
 |-----------|----------|-----------|
-| `derivation.md` | The original derivation rationale — dimension positions, tradition mapping, vocabulary choices, rationale for each decision | Semi-permanent — updated only during reseed |
-| `derivation-manifest.md` | Version tracking — arscontexta version, research snapshot date, feature blocks enabled, coherence validation results | Semi-permanent — updated during reseed |
+| `derivation.md` | The original derivation rationale — dimension positions, tradition mapping, vocabulary choices, rationale for each decision | Semi-permanent — rarely updated |
+| `derivation-manifest.md` | Version tracking — arscontexta version, research snapshot date, feature blocks enabled, coherence validation results | Semi-permanent |
 | `reminders.md` | User-delegated time-bound actions — flat markdown, checked at orient, items removed on completion | Active rotation — items added and removed regularly |
 | `sessions/` | Session logs — what happened today, handoff notes for next session | Rolling archive — logs older than 30 days can be archived without knowledge loss |
 | `health/` | Schema validation results, orphan lists, link health metrics — point-in-time snapshots | Superseding — yesterday's report is superseded by today's |
 | `observations/` | Operational learnings captured during work — pre-promotion holding area | Graduating — observations get promoted to notes/ or self/ when they earn permanence |
 | `queue/` | Processing queue state — what needs extraction, connection, verification | Flowing — items move through and complete |
-| `user-overrides.md` | User customizations that reseed must preserve as immutable | Semi-permanent — grows as user modifies generated content |
 
 ### Reminders Specification
 
@@ -265,7 +257,6 @@ project-root/
     ├── derivation.md
     ├── derivation-manifest.md
     ├── reminders.md
-    ├── user-overrides.md
     ├── sessions/
     ├── health/
     ├── observations/

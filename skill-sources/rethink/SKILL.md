@@ -324,7 +324,7 @@ Analyze remaining pending evidence (post-triage) plus promoted/implemented histo
 | Recurring themes | 3+ observations about the same area or concept | Systemic issue requiring structural response | Something is fundamentally misaligned in that area |
 | Contradiction clusters | Multiple tensions pointing at the same architectural assumption | Assumption may be wrong | The system has a flawed foundation in that area |
 | Friction accumulation | Multiple observations about the same workflow step | Workflow needs redesign | A specific process is consistently painful |
-| Drift signals | Observations suggesting vocabulary, structure, or threshold sensitivity no longer fits | /architect or /reseed territory | The system's configuration may have outgrown the user's actual needs |
+| Drift signals | Observations suggesting vocabulary, structure, or threshold sensitivity no longer fits | Config changes required (edit `ops/config.yaml`, then run /refactor) | The system's configuration may have outgrown the user's actual needs |
 | Methodology convergence | Multiple /remember captures in ops/methodology/ pointing at the same behavioral pattern | Methodology note needs elevation to context file | A methodology learning has been validated enough to become a system-level rule |
 
 ### Detection Method
@@ -433,7 +433,7 @@ Every proposal MUST have:
 | 2 observations, same area | Methodology note update |
 | 3+ observations, clear pattern | Skill or template change |
 | 5+ observations + tensions | Context file section change |
-| Pervasive pattern across areas | Architectural change (recommend /architect consultation) |
+| Pervasive pattern across areas | Architectural change (edit `ops/config.yaml`, then /refactor) |
 
 Do not propose architectural changes based on thin evidence. The threshold scales with the blast radius.
 
@@ -553,7 +553,7 @@ After rethink completes, capture the session itself. Create or append to `ops/re
 **Changes applied:** [list of files modified]
 ```
 
-This creates an evolution history. When /architect or /reseed runs, it can review the rethink log to understand how the system has evolved and what patterns have driven changes.
+This creates an evolution history. The rethink log shows how the system has evolved and what patterns have driven changes.
 
 ---
 
@@ -579,11 +579,11 @@ Report clean state:
   Run /{DOMAIN:rethink} again when signals accumulate.
 ```
 
-### Evidence Suggests /reseed
+### Evidence Suggests Configuration Review
 
 If 3+ drift signals are detected (vocabulary mismatch, structural misalignment, threshold disconnect between what the system expects and what the user actually does):
 - Report the drift pattern
-- Recommend /reseed over patching: "Drift signals suggest the system's fundamental configuration may need re-derivation, not incremental patching. Consider running /architect for a configuration review."
+- Recommend a configuration review: "Drift signals suggest the system's fundamental configuration may need re-derivation, not incremental patching. Review `ops/config.yaml` against current needs, adjust, and run /refactor to propagate."
 - Do not attempt to patch drift signals — they indicate the system's premises need re-evaluation, not its implementation
 
 ### < 5 Total Items

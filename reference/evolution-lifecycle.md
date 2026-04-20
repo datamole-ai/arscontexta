@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Document how generated knowledge systems evolve after initial scaffolding. A generated system is a seed, not a finished product. The derivation engine produces a starting configuration that the user and agent then grow, adapt, and eventually reseed. This document codifies the evolution patterns so the derivation engine can generate systems that are designed to evolve well — with the right seams for growth, observation capture mechanisms for learning, and reseed triggers for when accumulated drift justifies re-derivation.
+Document how generated knowledge systems evolve after initial scaffolding. A generated system is a seed, not a finished product. The derivation engine produces a starting configuration that the user and agent then grow and adapt. This document codifies the evolution patterns so the derivation engine can generate systems that are designed to evolve well — with the right seams for growth and observation capture mechanisms for learning.
 
 This document answers: what happens after init? How do systems grow from simple to complex? When should friction trigger module activation vs system redesign? And how does the system feed observations back into its own improvement?
 
@@ -16,18 +16,16 @@ Questions the engine must answer when generating evolution-ready systems:
 2. **What friction observation mechanism should be included?** All systems need a way to capture operational friction. The mechanism ranges from a simple section in the context file to a full observation capture pipeline.
 3. **What self-extension blueprints should be included?** Blueprints teach the agent to build its own hooks, skills, and schema extensions. The included blueprints determine how self-sufficient the system can become.
 4. **What is the expected evolution timeline?** Frequently used systems evolve faster than occasionally used systems. The evolution guidance in the generated context file should match expected usage intensity.
-5. **What reseed triggers should be documented?** When should the user re-run derivation? After how much accumulated drift? For which kinds of structural changes?
-6. **How should user overrides survive reseed?** If the user has customized the generated system, reseed must preserve those customizations. The mechanism for tracking overrides must be generated from the start.
 
 ---
 
 ## Curated Claims
 
-### Seed-Evolve-Reseed Lifecycle
+### Seed-Evolve Lifecycle
 
 #### Complex systems that work evolve from simple systems that work
 
-**Summary:** John Gall's Law states that a complex system designed from scratch never works and cannot be patched up to make it work. You have to start over with a working simple system. This is the foundational principle for knowledge system evolution: the derivation engine generates a simple working system (the seed), the user and agent grow it through use (evolve), and when accumulated changes create incoherence, the system is re-derived from updated understanding (reseed). Attempting to generate a complex system from the start — with all hooks, all skills, all schema fields, all automation — produces a system that is overwhelming, fragile, and likely to be abandoned.
+**Summary:** John Gall's Law states that a complex system designed from scratch never works and cannot be patched up to make it work. You have to start over with a working simple system. This is the foundational principle for knowledge system evolution: the derivation engine generates a simple working system (the seed), and the user and agent grow it through use. Attempting to generate a complex system from the start — with all hooks, all skills, all schema fields, all automation — produces a system that is overwhelming, fragile, and likely to be abandoned.
 
 **Derivation Implication:** The derivation engine must resist the temptation to generate everything the user might eventually need. Generate the minimum viable system that is functional for the stated use case. Include self-extension blueprints (instructions for adding components) rather than the components themselves. The system should feel "small enough to understand" on day one and grow to match the user's actual needs over weeks and months.
 
@@ -42,16 +40,6 @@ Questions the engine must answer when generating evolution-ready systems:
 **Derivation Implication:** The generated context file should include a section acknowledging its provisional nature. Something like: "This system was generated based on our conversation. As you use it, you will discover what works and what creates friction. The observations section below is where friction gets captured and processed into improvements." This frames evolution as expected, not as failure.
 
 **Source:** Lean startup methodology: "minimum viable product" is a hypothesis about what customers want, validated through use. Applied to knowledge systems: the generated system is an MVP validated through operational use.
-
----
-
-#### Reseed replaces drift with principled re-derivation
-
-**Summary:** As a system evolves through accumulated small changes, coherence degrades. Schema fields get added without considering interaction constraints. MOC structures grow organically without checking against the hierarchy rules. The context file accumulates patches and amendments that contradict each other. At some point, the system has drifted far enough from any coherent configuration that patching is less effective than re-deriving. Reseed takes the user's current understanding (informed by months of use) and re-runs derivation to produce a fresh, coherent system that incorporates operational learnings.
-
-**Derivation Implication:** Generated systems must include reseed guidance: what triggers it, how to preserve user customizations, and how the re-derivation conversation differs from initial derivation (the user now has experience with the system and can answer questions concretely rather than abstractly). The ops/derivation.md file preserves the original derivation rationale so reseed can see what was originally intended and how the system diverged.
-
-**Source:** Vault operational experience. The vault itself has undergone multiple evolution cycles where accumulated changes required consolidation. The system-changelog.md pattern tracks drift over time.
 
 ---
 
@@ -71,7 +59,7 @@ Questions the engine must answer when generating evolution-ready systems:
 
 **Summary:** Users often don't articulate friction until it has accumulated to the point of abandonment. The observation capture mechanism acts as a friction sensor: operational observations about "this felt slow" or "I couldn't find X" accumulate and become visible through periodic review. When 5+ observations cluster around the same friction point, that is a threshold signal that a module or system change is warranted. This detection mechanism bridges the gap between felt friction (user notices something is hard) and articulated friction (user explicitly says "I need a better way to do X").
 
-**Derivation Implication:** Every generated system ships with atomic observation notes in ops/observations/ with a condition-triggered review process. Full automation is the default — PostToolUse hooks log friction automatically, and session-start hooks check pending observation counts against thresholds. The observation mechanism should be positioned as low-ceremony — "notice something? write it down" — because high-ceremony observation capture becomes friction itself. Users who want lighter implementations can opt down via /architect.
+**Derivation Implication:** Every generated system ships with atomic observation notes in ops/observations/ with a condition-triggered review process. Full automation is the default — PostToolUse hooks log friction automatically, and session-start hooks check pending observation counts against thresholds. The observation mechanism should be positioned as low-ceremony — "notice something? write it down" — because high-ceremony observation capture becomes friction itself. Users who want lighter implementations can opt down by editing `ops/config.yaml`.
 
 **Source:** Vault ops/observations/ pattern and /rethink skill. The vault's reconciliation system uses threshold counts (5+ observations trigger review) to surface systemic friction patterns.
 
@@ -84,38 +72,6 @@ Questions the engine must answer when generating evolution-ready systems:
 **Derivation Implication:** The derivation engine should generate systems at the lowest viable complexity tier and include explicit upgrade triggers: "Add semantic search when you have 50+ notes and can't find things by keyword." "Add processing pipeline when inbox items regularly sit for 3+ days." "Create sub-MOCs when a MOC has 35+ entries." These triggers are concrete, measurable, and grounded in the system's actual state rather than speculative future needs.
 
 **Source:** Research claims: "productivity porn risk in meta-system building" and "behavioral anti-patterns matter more than tool selection." Vault operational observation: every premature addition eventually required removal or simplification.
-
----
-
-### Reseed Triggers
-
-#### Reseed when accumulated drift exceeds coherent patching capacity
-
-**Summary:** There is no universal time-based trigger for reseed. The trigger is coherence degradation: when the system's current state cannot be described by any single consistent set of dimension values. Symptoms include: the context file contradicts itself in different sections, schema fields exist that nobody queries, MOC structures follow different conventions in different areas, hooks enforce rules that the context file no longer documents, and the agent frequently encounters friction that the system was supposed to prevent. When patching one inconsistency creates another, the system has exceeded its coherent patching capacity.
-
-**Derivation Implication:** The generated context file should include a "Reseed Indicators" section listing specific symptoms of coherence degradation. These should be concrete and observable: "If your context file has grown by more than 50% since generation through patches and amendments, consider reseeding." "If you have schema fields that no query uses, the schema has drifted from actual needs."
-
-**Source:** Software engineering concept of technical debt threshold. Applied to knowledge systems: configuration debt accumulates through organic changes and is repaid through reseed.
-
----
-
-#### Partial reseed targets specific modules without full re-derivation
-
-**Summary:** Not all coherence degradation requires full re-derivation. If the schema has drifted but the folder structure, session rhythm, and processing pipeline are fine, only the schema-related sections need reseed. Partial reseed regenerates specific modules (context file sections, templates, hook configurations) while preserving the rest. This is less disruptive than full reseed and more effective than patching when a specific subsystem has degraded beyond incremental repair.
-
-**Derivation Implication:** Generated systems should be modular enough that individual sections can be regenerated independently. The ops/derivation.md file should track which sections were generated from which derivation decisions, enabling targeted re-derivation. The user-overrides.md file should clearly delineate which customizations apply to which system modules.
-
-**Source:** Microservices architecture principle: replace individual services rather than rewriting the entire system. Applied to knowledge systems: regenerate individual modules rather than reseeding everything.
-
----
-
-#### User overrides must survive reseed as immutable constraints
-
-**Summary:** When a user customizes their generated system — changing vocabulary, adding schema fields, modifying session workflow, adding custom hooks — those customizations represent learned preferences that the derivation engine could not predict. Reseed must treat these customizations as immutable constraints: the new derivation incorporates them as given inputs rather than re-deriving them from conversation signals. Without override preservation, reseed destroys accumulated learning and forces the user to re-customize, creating a strong disincentive against reseeding.
-
-**Derivation Implication:** Every generated system must include ops/user-overrides.md as a tracking file for user customizations. The context file should instruct the agent to log customizations to this file whenever the user modifies generated content. The reseed process reads user-overrides.md first and treats its contents as hard constraints for the new derivation.
-
-**Source:** Vault operational pattern. The distinction between generated content and user customizations is analogous to the distinction between managed configuration and user configuration in software deployment (e.g., systemd overrides, Kubernetes customizations).
 
 ---
 
@@ -145,9 +101,9 @@ Questions the engine must answer when generating evolution-ready systems:
 
 #### Every vault ships complete — users opt down, not up
 
-**Summary:** v1.6 reverses the progressive complexity approach. Instead of starting simple and adding features when friction demands, every vault ships with full automation: all processing skills, all hooks, all maintenance mechanisms, methodology folder, task stack. The philosophy is that it is easier to remove features than to discover and add them. The overhead of unused features is near-zero (hooks that never fire, skills that are never invoked, directories that stay empty), while the cost of discovering and adding features when friction emerges was higher than anticipated. Users who want less complexity disable features via /architect.
+**Summary:** v1.6 reverses the progressive complexity approach. Instead of starting simple and adding features when friction demands, every vault ships with full automation: all processing skills, all hooks, all maintenance mechanisms, methodology folder, task stack. The philosophy is that it is easier to remove features than to discover and add them. The overhead of unused features is near-zero (hooks that never fire, skills that are never invoked, directories that stay empty), while the cost of discovering and adding features when friction emerges was higher than anticipated. Users who want less complexity disable features by editing `ops/config.yaml`.
 
-**Derivation Implication:** The derivation engine generates the maximum viable system for the chosen preset. All 3 presets (Research, Personal Assistant, Experimental) include full automation by default. /architect allows users to toggle optional features (semantic search, self space) without regenerating. INVARIANT primitives cannot be disabled.
+**Derivation Implication:** The derivation engine generates the maximum viable system for the chosen preset. All 3 presets (Research, Personal Assistant, Experimental) include full automation by default. Users toggle optional features (semantic search, self space) by editing `ops/config.yaml` without regenerating. INVARIANT primitives cannot be disabled.
 
 **Source:** v1.6 human feedback: the progressive tier system created friction in discovery. Users did not know what features existed until they needed them and could not find them.
 
@@ -175,9 +131,9 @@ Questions the engine must answer when generating evolution-ready systems:
 
 #### Feature disabling is safe because INVARIANT primitives cannot be removed
 
-**Summary:** Users can disable optional features (semantic search, self space, processing pipeline) via /architect. INVARIANT primitives (wiki links, schema enforcement, methodology folder) cannot be disabled. This creates a safe disabling guarantee: the structural foundation is always present regardless of which optional features the user removes. Re-enabling any feature restores full functionality. When self space is disabled, its content routes to ops/ (goals to ops/goals.md, methodology to ops/methodology/).
+**Summary:** Users can disable optional features (semantic search, self space, processing pipeline) by editing `ops/config.yaml`. INVARIANT primitives (wiki links, schema enforcement, methodology folder) cannot be disabled. This creates a safe disabling guarantee: the structural foundation is always present regardless of which optional features the user removes. Re-enabling any feature restores full functionality. When self space is disabled, its content routes to ops/ (goals to ops/goals.md, methodology to ops/methodology/).
 
-**Derivation Implication:** Generated systems should clearly distinguish INVARIANT from CONFIGURABLE primitives in the context file. /architect should prevent disabling INVARIANT primitives and warn about consequences when disabling optional features. The fallback paths for each optional feature should be documented.
+**Derivation Implication:** Generated systems should clearly distinguish INVARIANT from CONFIGURABLE primitives in the context file. The config schema should prevent disabling INVARIANT primitives and document consequences of disabling optional features. The fallback paths for each optional feature should be documented.
 
 **Source:** v1.6 specification. The INVARIANT/CONFIGURABLE distinction ensures evolution safety — users cannot accidentally break the structural foundation.
 
@@ -209,9 +165,9 @@ Questions the engine must answer when generating evolution-ready systems:
 
 #### The kernel is invariant across all evolution
 
-**Summary:** The 14 kernel primitives (markdown-yaml, wiki-links, moc-hierarchy, tree-injection, description-field, topics-footer, schema-enforcement, semantic-search, self-space, session-rhythm, unique-addresses, discovery-first, operational-learning-loop, task-stack, methodology-folder) are the structural foundation. INVARIANT primitives (wiki links, schema enforcement, methodology folder) cannot be disabled. CONFIGURABLE primitives (self space, semantic search) can be toggled via /architect. Evolution adds on top of the kernel; it never removes or contradicts kernel primitives. A system that evolves away from prose-sentence titles, or stops requiring topics footers, or abandons self/ loading at session start has evolved into incoherence. The kernel is the stable core that makes everything above it interoperable.
+**Summary:** The 14 kernel primitives (markdown-yaml, wiki-links, moc-hierarchy, tree-injection, description-field, topics-footer, schema-enforcement, semantic-search, self-space, session-rhythm, unique-addresses, discovery-first, operational-learning-loop, task-stack, methodology-folder) are the structural foundation. INVARIANT primitives (wiki links, schema enforcement, methodology folder) cannot be disabled. CONFIGURABLE primitives (self space, semantic search) can be toggled by editing `ops/config.yaml`. Evolution adds on top of the kernel; it never removes or contradicts kernel primitives. A system that evolves away from prose-sentence titles, or stops requiring topics footers, or abandons self/ loading at session start has evolved into incoherence. The kernel is the stable core that makes everything above it interoperable.
 
-**Derivation Implication:** The generated context file should mark kernel primitives as invariant (not subject to user override or evolution drift). The reseed process should validate that all 14 kernel primitives remain intact. Evolution guidance should explicitly state: "You can add schema fields, create new MOC types, build new skills, and modify session workflow — but these 14 primitives are foundational and must not be removed."
+**Derivation Implication:** The generated context file should mark kernel primitives as invariant (not subject to user override or evolution drift). `/health` should validate that all 14 kernel primitives remain intact. Evolution guidance should explicitly state: "You can add schema fields, create new MOC types, build new skills, and modify session workflow — but these 14 primitives are foundational and must not be removed."
 
 **Source:** kernel.yaml specification. The kernel was distilled from the vault's operational experience — these are the primitives that remained constant while everything else evolved.
 
@@ -270,7 +226,6 @@ Methodology notes that make behavioral assertions contradicted by the context fi
 
 **Excluded from this reference:**
 
-- Specific reseed conversation scripts (the exact questions to ask during re-derivation) — these belong in the init/architect command documentation, not in the evolution patterns reference.
 - Multi-user system evolution (how systems shared between multiple users evolve differently) — composition concern outside single-system scope.
 - Version control and rollback mechanisms for system evolution — infrastructure concern outside derivation scope.
 - Migration tooling (scripts to transform a system from one tier to another) — implementation detail, not derivation reference.
@@ -284,4 +239,4 @@ Methodology notes that make behavioral assertions contradicted by the context fi
 - Sources reviewed: 20
 - Claims included: 21
 - Claims excluded: 5
-- Cross-references: `kernel.yaml` (15 invariant primitives), `three-spaces.md` (ops/derivation.md and ops/user-overrides.md), `interaction-constraints.md` (coherence rules that reseed must re-validate), `failure-modes.md` (productivity porn, over-automation), `components.md` (self-extension principle and hook/skill blueprints), `methodology.md` (Gall's Law, self-extension principle)
+- Cross-references: `kernel.yaml` (15 invariant primitives), `three-spaces.md` (ops/derivation.md), `interaction-constraints.md` (coherence rules), `failure-modes.md` (productivity porn, over-automation), `components.md` (self-extension principle and hook/skill blueprints), `methodology.md` (Gall's Law, self-extension principle)

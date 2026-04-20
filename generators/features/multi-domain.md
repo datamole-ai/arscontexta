@@ -44,7 +44,7 @@ Shared across domains:
 
 **When connections span domains:** Link normally with wiki links. The connection-finding phase searches all domains by default. Cross-domain links are especially valuable — they reveal structural parallels and transferable insights.
 
-**When adding a new domain:** Use /add-domain to extend the system. The existing domain(s) remain untouched. The hub MOC gains a new domain entry. New templates, vocabulary, and processing configuration are generated alongside existing ones.
+**When adding a new domain:** Extend the system manually — add a new domain entry to the hub MOC and create matching templates, vocabulary, and processing configuration alongside existing ones. The existing domain(s) remain untouched.
 
 ### Namespace Conventions
 

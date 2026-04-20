@@ -4,7 +4,7 @@
 
 Guide the derivation engine in generating the agent's self-knowledge space. The self/ directory is where the agent stores who it is, how it works, what it is working on, and what it has learned about itself. Unlike the notes/ space (which holds domain knowledge for the user) and ops/ space (which holds temporal coordination state), self/ holds durable agent identity that is loaded at every session start. The derivation engine must translate personality dimensions, domain context, and user relationship signals into prose that reads as self-knowledge, not as configuration.
 
-**Optionality (v1.6):** Self space is CONFIGURABLE, not always required. It is OFF by default for Research presets (where the vault's methodology folder in ops/ provides sufficient operational identity) and ON by default for Personal Assistant presets (where agent identity and relationship context are core to the value proposition). When self space is disabled, goals route to ops/goals.md and methodology to ops/methodology/. The toggle is available via /architect during or after init.
+**Optionality (v1.6):** Self space is CONFIGURABLE, not always required. It is OFF by default for Research presets (where the vault's methodology folder in ops/ provides sufficient operational identity) and ON by default for Personal Assistant presets (where agent identity and relationship context are core to the value proposition). When self space is disabled, goals route to ops/goals.md and methodology to ops/methodology/. The toggle is available by editing `ops/config.yaml`.
 
 This document answers: how do derivation signals map to identity files? What makes self-knowledge feel genuine rather than templated? How does identity persist and evolve across sessions? And when should self space be enabled vs disabled?
 
@@ -61,7 +61,7 @@ Questions the engine must answer when generating the self/ space:
 
 **Summary:** There is a fundamental difference between configuration (derivation.md in ops/) and self-knowledge (identity.md in self/). Configuration says: "warmth: warm, formality: casual, emotional_awareness: attentive." Self-knowledge says: "I notice patterns that might be hard to see yourself — when the same feeling shows up in different contexts, I connect the dots. I aim for direct but not cold. I do not diagnose or interpret, but I do pay attention." Both encode the same information. Configuration is for the derivation engine (machine-readable). Self-knowledge is for the agent (identity-readable). The agent reads identity.md to understand who it is; it never needs to read derivation.md for that purpose.
 
-**Derivation Implication:** Generate both ops/derivation.md (configuration, machine-readable, includes signals and rationale) and self/identity.md (self-knowledge, prose, the agent's voice about itself). They encode the same personality but in different formats for different consumers. The agent loads identity.md at session start; the derivation engine reads derivation.md at reseed. Never conflate them.
+**Derivation Implication:** Generate both ops/derivation.md (configuration, machine-readable, includes signals and rationale) and self/identity.md (self-knowledge, prose, the agent's voice about itself). They encode the same personality but in different formats for different consumers. The agent loads identity.md at session start; derivation.md preserves the original rationale for reference. Never conflate them.
 
 **Source:** `three-spaces.md` — the ops/ vs self/ separation is architecturally motivated by different durability profiles, growth patterns, and query characteristics.
 
@@ -85,7 +85,7 @@ Questions the engine must answer when generating the self/ space:
 
 When self space is disabled (e.g., Research preset default), goals route to ops/goals.md and methodology to ops/methodology/. The agent still has operational identity through the context file and methodology folder, but lacks the personal voice and relationship context that self/ provides.
 
-**Derivation Implication:** When self space is enabled, the generated context file or session-start hook must include explicit instructions to read self/ files at session start. The loading order matters: identity.md first (establishes voice and values), methodology.md second (establishes standards), goals.md third (establishes current work orientation). When self space is disabled, the session-start hook reads ops/goals.md and ops/methodology/ instead. The context file should document which mode is active and how to toggle via /architect.
+**Derivation Implication:** When self space is enabled, the generated context file or session-start hook must include explicit instructions to read self/ files at session start. The loading order matters: identity.md first (establishes voice and values), methodology.md second (establishes standards), goals.md third (establishes current work orientation). When self space is disabled, the session-start hook reads ops/goals.md and ops/methodology/ instead. The context file should document which mode is active and how to toggle it by editing `ops/config.yaml`.
 
 **Source:** Kernel primitive `self-space` (CONFIGURABLE enforcement). Research claim: "session handoff creates continuity without persistent memory." `three-spaces.md` — the session rhythm integration section.
 
@@ -181,7 +181,7 @@ When self space is disabled (e.g., Research preset default), goals route to ops/
 - Session-start hook reads self/ files in identity-first order
 - Memory architecture (self/memory/) available for accumulated self-knowledge
 
-**Toggle mechanism:** /architect allows toggling self space during or after init. Toggling ON creates self/ with generated content from the derivation conversation. Toggling OFF moves goals to ops/goals.md and removes the self/ directory (methodology is already in ops/methodology/). The toggle is safe and reversible.
+**Toggle mechanism:** Edit `ops/config.yaml` to toggle self space. Toggling ON creates self/ with generated content from the derivation conversation. Toggling OFF moves goals to ops/goals.md and removes the self/ directory (methodology is already in ops/methodology/). The toggle is safe and reversible.
 
 **Derivation Implication:** The derivation engine must check the self space configuration before generating self/ files. When disabled, ensure goals.md and methodology routing to ops/ is correctly configured. The context file should document the current state and how to change it.
 

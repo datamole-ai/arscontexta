@@ -56,7 +56,7 @@ Changing a dimension is not just editing a value in config.yaml. Each dimension 
 
 /refactor makes these cascades visible and manages them. Without it, dimension changes create drift: config says one thing, artifacts say another. With it, every change is planned, approved, and validated.
 
-**The relationship to /architect:** /architect RECOMMENDS changes. /refactor IMPLEMENTS them. /architect analyzes health and friction to propose dimension shifts. When those proposals are approved, /refactor ensures every affected artifact is updated consistently.
+**How /refactor relates to config changes:** Edits to `ops/config.yaml` declare intent. /refactor implements the cascade — ensuring every affected artifact (skills, templates, context file sections, hooks, MOC structure) is updated consistently with the new configuration.
 
 ---
 
@@ -97,8 +97,7 @@ If no changes detected:
   No configuration drift detected between config.yaml and derivation.md.
   All dimensions and features match the original derivation.
 
-  If you want to explore changes, run /architect for recommendations
-  or edit ops/config.yaml directly, then run /refactor again.
+  To explore changes, edit ops/config.yaml directly, then run /refactor again.
 ```
 
 ---
@@ -280,7 +279,7 @@ After all changes are applied:
    - New dimension positions
    - Rationale for each change
    - Date of change
-   - Reference to /architect recommendation (if applicable)
+   - Reference to the observation or tension that motivated the change (if applicable)
 
 2. Update `ops/derivation-manifest.md` to sync machine-readable config
 

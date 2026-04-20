@@ -43,7 +43,7 @@ These constraints apply to the 14 kernel primitives and their INVARIANT/CONFIGUR
 **INVARIANT primitives (always present, cannot be disabled):**
 
 1. `methodology_folder == false` (Primitive 14)
-   → BLOCK: "The methodology folder is INVARIANT. Meta-skills (/ask, /architect, /rethink) require ops/methodology/ to reason about system state."
+   → BLOCK: "The methodology folder is INVARIANT. Meta-skills (/rethink, /remember) require ops/methodology/ to reason about system state."
 
 3. `schema_enforcement == false` (Primitive 7)
    → BLOCK: "Schema enforcement is INVARIANT. Without validation, metadata drift corrupts retrieval within weeks."
@@ -80,7 +80,7 @@ Some dimension mismatches can be compensated rather than blocked:
 |----------|----------------------|---------------|
 | Dense schema + no validation hooks | Good templates reduce manual validation burden | Moderate — helps at capture, not at maintenance |
 
-Interaction constraints split into hard (violating them produces failure) and soft (violating them produces friction that compensating mechanisms can overcome). Hard constraints are enforced at derivation time; soft constraints are surfaced as warnings and either auto-resolved via cascade or recorded in the derivation rationale for later reseeding.
+Interaction constraints split into hard (violating them produces failure) and soft (violating them produces friction that compensating mechanisms can overcome). Hard constraints are enforced at derivation time; soft constraints are surfaced as warnings and either auto-resolved via cascade or recorded in the derivation rationale.
 
 ---
 
@@ -92,6 +92,6 @@ When generating a system:
 2. **Allow user customization** — but check each change against interaction constraints
 3. **Cascade recommendations** — granularity is per-invocation and does not require cascade recommendations; apply cascade logic only to the 5 remaining dimensions (organization, linking, navigation, maintenance, schema)
 4. **Document justification** — include interaction constraint reasoning in the derivation rationale section of the generated context file
-5. **Flag unresolved tensions** — if user overrides a warning, note it in the generated system for future reseeding
+5. **Flag unresolved tensions** — if user overrides a warning, note it in the generated system
 
-The derivation rationale should include which constraints were active and how they were resolved. This enables principled reseeding when friction patterns emerge later.
+The derivation rationale should include which constraints were active and how they were resolved.
