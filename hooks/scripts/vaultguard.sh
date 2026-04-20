@@ -13,11 +13,9 @@ if [ -f "$MARKER" ]; then
   # Migrate old cat-face format to YAML config
   if grep -q '(\^\.\^)' "$MARKER" 2>/dev/null; then
     cat > "$MARKER" << 'EOF'
-# Ars Contexta vault marker + config
+# Ars Contexta vault marker
 # This file identifies the directory as an Ars Contexta vault.
 # Do not delete — hooks only run when this file exists.
-
-git: true
 EOF
   fi
   exit 0
@@ -26,11 +24,9 @@ fi
 # Fallback: legacy vault detection + auto-migrate
 if [ -f ops/config.yaml ] || [ -f .claude/hooks/session-orient.sh ]; then
   cat > "$MARKER" << 'EOF'
-# Ars Contexta vault marker + config
+# Ars Contexta vault marker
 # This file identifies the directory as an Ars Contexta vault.
 # Do not delete — hooks only run when this file exists.
-
-git: true
 EOF
   exit 0
 fi

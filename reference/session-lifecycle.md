@@ -123,11 +123,11 @@ Questions the engine must answer when generating session configuration:
 
 #### Session boundaries create natural points for automated behavior
 
-**Summary:** The beginning and end of a session are the two moments where automated behavior adds the most value. At session start: load orientation files, inject file tree, evaluate condition-based triggers against vault state, display health warnings. At session end: validate that notes were saved, check for broken links introduced during the session, auto-commit changes, push to remote. These are deterministic operations (verification, not judgment) that hooks can handle without corrupting quality.
+**Summary:** The beginning and end of a session are the two moments where automated behavior adds the most value. At session start: load orientation files, inject file tree, evaluate condition-based triggers against vault state, display health warnings. At processing boundaries (end of each /pipeline batch): validate that notes were saved, check for broken links introduced during the session, commit the batch's artifacts, push to remote. These are deterministic operations (verification, not judgment) that hooks or dedicated skill phases can handle without corrupting quality.
 
 **Derivation Implication:** Generate session-start hooks that automate the deterministic parts of orient and persist. The context file should explain what the hooks do so the agent understands the automated behavior.
 
-**Source:** Vault hook infrastructure. The session-start hook (tree injection + condition evaluation) and auto-commit hook are proven patterns that eliminate routine tasks without requiring judgment.
+**Source:** Vault hook infrastructure plus pipeline-skill orchestration. The session-start hook (tree injection + condition evaluation) and the /pipeline end-of-batch commit are proven patterns that eliminate routine tasks without requiring judgment.
 
 ---
 
@@ -157,7 +157,7 @@ Hooks automate session rhythm. A SessionStart hook injects the file tree and loa
 
 **Derivation Implication:** Generate hook configurations in `.claude/hooks/` that automate: (1) tree injection at session start, (2) self/ file loading at session start, (3) note validation on Write, (4) session-end reminders. The context file should document what hooks exist and what they do, so the agent understands the automated behavior and doesn't duplicate it.
 
-**Source:** Vault `.claude/hooks/` implementation. Proven hook patterns: session-start tree injection, PostToolUse validation, auto-commit.
+**Source:** Vault `.claude/hooks/` implementation. Proven hook patterns: session-start tree injection, PostToolUse validation. Batch-level persistence lives in the /pipeline skill as its final phase rather than in a hook.
 
 ---
 
@@ -177,7 +177,7 @@ Hooks automate session rhythm. A SessionStart hook injects the file tree and loa
 
 **Summary:** The orient and work phases are naturally motivated — the agent needs orientation to function, and work is the session's purpose. The persist phase has no natural motivation: the agent's session is ending, the user may have moved on, and the "save your progress" step feels like overhead. But skipping persist means the next session starts without handoff, goals.md is outdated, observations are lost, and newly created notes may not be committed.
 
-**Derivation Implication:** Generated systems should make the persist phase as prominent and explicit as possible. For persist actions (goals.md update, observation capture, git commit): generate reminders or automation. The vault's auto-commit hook is an example of automating the most commonly skipped persist action (committing changes to git).
+**Derivation Implication:** Generated systems should make the persist phase as prominent and explicit as possible. For persist actions (goals.md update, observation capture, git commit): generate reminders or automation. The vault's /pipeline skill is an example of automating the most commonly skipped persist action (committing changes to git) for batch work; session-level work outside /pipeline still requires an explicit commit.
 
 **Source:** Vault operational observation. Multiple sessions ended without goals.md updates, producing orientation gaps in subsequent sessions.
 

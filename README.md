@@ -48,7 +48,7 @@ a persistent thinking system derived from how you actually work.
 - **A processing pipeline** -- skills that extract insights, find connections, update
   old notes with new context, and verify quality.
 - **Automation** -- hooks that enforce structure on every write, detect maintenance
-  needs, capture session state, and auto-commit.
+  needs, and capture session state. `/pipeline` produces a single commit at the end of each batch.
 - **Navigation** -- Maps of Content (MOCs) at hub, domain, and topic levels.
 - **Templates** -- note templates with `_schema` blocks as single source of truth.
 - **A user manual** -- 7 pages of domain-native documentation generated alongside.
@@ -161,13 +161,9 @@ meta-cognitive layer:
 
 ## Hooks
 
-Four hooks automate quality enforcement:
-
 | Hook | Event | What It Does |
 |------|-------|-------------|
 | **Session Orient** | `SessionStart` | Injects workspace tree, loads identity, surfaces maintenance signals |
-| **Write Validate** | `PostToolUse` (Write) | Schema enforcement on every note write |
-| **Auto Commit** | `PostToolUse` (Write, async) | Git auto-commit, non-blocking |
 
 ---
 

@@ -56,7 +56,7 @@ If a task requires reading more source material than fits in 60% of context, bre
 Before ending a session, externalize what happened:
 
 1. **Update goals** — If self space is enabled, update self/goals.md with current state. If self space is off, update ops/ with current threads. Did you learn something about your methodology? Capture it.
-2. **Commit changes** — Every change must be committed. Nothing persists without this. Use clear commit messages that describe what changed and why.
+2. **Commit changes** — Every change must be committed. Nothing persists without this. `/pipeline` produces a single `Pipeline: {batch_id}` commit at the end of Phase 5; manual work, ad-hoc edits, and standalone `/archive-batch` runs require an explicit `git commit` with a clear message describing what changed and why.
 3. **Log what happened** — If the session produced observations or tensions, capture them as atomic notes in ops/observations/ or ops/tensions/. This is future-you's memory of what current-you learned.
 4. **Leave a handoff** — If work continues in the next session, leave a clear note about where you stopped and what's next. This can be in ops/reminders.md or a comment in the relevant task file.
 

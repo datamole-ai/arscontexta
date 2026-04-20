@@ -43,13 +43,16 @@ Phase 1: /seed --[granularity] — create process task, move source to archive
 Phase 2: Granularity-based processing
     |
     v
-Phase 3: /archive-batch — move task files, generate summary
+Phase 4: /archive-batch — move task files, generate summary
+    |
+    v
+Phase 5: Commit — single batch commit if in a git repo
     |
     v
 Complete
 ```
 
-/pipeline is the orchestrator. /seed is the entry point for Phase 1; /pipeline drives Phase 2 and invokes /archive-batch for Phase 3.
+/pipeline is the orchestrator. /seed is the entry point for Phase 1; /pipeline drives Phase 2, invokes /archive-batch for Phase 4, and produces the batch commit as Phase 5.
 
 ---
 
@@ -237,7 +240,15 @@ When all tasks for the batch are complete, archive the batch by using Skill tool
 
 ---
 
-## Phase 5: Final Report
+## Phase 5: Commit
+
+After `/archive-batch` returns successfully, commit all batch artifacts in a single commit.
+
+Capture the value for inclusion in Phase 6's final report.
+
+---
+
+## Phase 6: Final Report
 
 ```
 --=={ pipeline }==--

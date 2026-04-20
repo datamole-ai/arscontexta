@@ -16,8 +16,6 @@ else
   SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | sed 's/"session_id":"//;s/"//')
 fi
 
-READ_CONFIG="$GUARD_DIR/read_config.sh"
-
 # Export session ID for later hooks
 if [ -n "$CLAUDE_ENV_FILE" ] && [ -n "$SESSION_ID" ]; then
   echo "export CLAUDE_SESSION_ID='$SESSION_ID'" >> "$CLAUDE_ENV_FILE"
