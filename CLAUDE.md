@@ -13,7 +13,6 @@
 | Architectural invariants (14 primitives) | `reference/kernel.yaml` |
 | Research graph (249 claims) | `methodology/*.md` — indexed via `reference/claim-map.md` |
 | Hook behavior | `hooks/hooks.json` + `hooks/scripts/*.sh` |
-| Starting configurations | `presets/{personal,research,experimental}/` |
 | Plugin manifest / version | `.claude-plugin/plugin.json` |
 | Author scratchpad | `todo.md` |
 
@@ -27,7 +26,6 @@ generators/       claude-md.md + features/ (16)      composed into generated CLA
 hooks/            hooks.json, scripts/*.sh           SessionStart + PostToolUse(Write)
 methodology/      249 claim notes                    wiki-linked research graph
 reference/        canonical design docs              see index below
-presets/          personal/, research/, experimental preset configs + starter content
 docs/             superpowers/{plans,specs}          design specs
 ```
 
