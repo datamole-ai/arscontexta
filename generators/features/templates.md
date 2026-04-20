@@ -3,83 +3,58 @@
 ## Context File Block
 
 ```markdown
-## Templates — Schema as Scaffolding
+## Templates — One Template, Six Fields
 
-Templates define the structure of each {DOMAIN:note} type. They're not rigid forms to fill — they're scaffolding that ensures consistency while leaving room for the content that matters.
+Your vault has exactly one template: `ops/templates/note.md`. Every {DOMAIN:note} regardless of content_type or granularity starts from it.
 
-### How Templates Work
+### What the Template Defines
 
-Each template lives in `ops/templates/` and defines:
-- Required YAML fields (what every {DOMAIN:note} of this type must have)
-- Optional YAML fields (available when relevant)
-- A {DOMAIN:_schema} block that documents field constraints and valid values
-- The body structure (headings, sections, footer pattern)
+- The six required YAML fields (title, content_type, granularity, description, created_at, tags)
+- Any Filter-A survivor fields approved during setup (see `ops/schemas.md` for the exact list)
+- A `_schema` block that documents field constraints and enum values
+- A minimal body structure (H1 for prose-as-title, body prose, `Topics:` footer)
 
-When creating a new {DOMAIN:note}, start from the appropriate template. The template tells you what metadata to include and how to structure the content.
-
-### Schema References
-
-Templates include {DOMAIN:_schema} blocks that define validation rules:
-
-```yaml
-_schema:
-  required: [description, type]
-  optional: [status, created]
-  enums:
-    type: [insight, pattern, preference, fact, decision, question]
-    status: [preliminary, open, active, archived]
-  constraints:
-    description: "max 200 chars, no trailing period"
-```
-
-The schema is documentation AND validation. Skills and hooks can read {DOMAIN:_schema} blocks to check that {DOMAIN:notes} comply. When you see a field with enumerated values, use one of the listed values — don't invent new ones without updating the template first.
+There are NO optional fields. If a field is in the template, every note has it. The one field that can be empty is `tags`, which is an array and may be `[]`.
 
 ### The Template-Note Relationship
 
-Templates define structure. Notes fill that structure with content. The relationship is:
-
 | Template says | Note does |
 |---------------|-----------|
-| `description` is required | Every note has a description |
-| `type` enum: insight, pattern, ... | Note uses one of those values |
-| Body has ## sections | Note follows section order |
-| Footer has Topics | Note links to its {DOMAIN:topic maps} |
+| `content_type` enum: [<vault values>] | Note uses one of those values |
+| `granularity` enum: [extract, structure, capture] | Note uses one of those values |
+| `description` max 200 chars | Every note has a description |
+| Body has an H1 | Note leads with a prose-as-title H1 |
+| Footer has Topics | Note links to its {DOMAIN:topic map}s |
 
-Templates are NOT content. They never contain actual claims or arguments — that's the note's job. Templates define the shape; notes provide the substance.
+Templates define the shape; notes provide the substance. The template is not content.
 
-### When to Create New Templates
+### Body Conventions by Content Type
 
-Create a new template when:
-- A new {DOMAIN:note} type emerges that doesn't fit existing templates
-- You find yourself repeatedly adding the same fields to notes manually
-- A domain grows complex enough to warrant its own schema
+The template does not prescribe body structure per `content_type`. Body conventions (for example, "a decision usually has Context / Decision / Consequences sections") live as lightweight prose guidance in CLAUDE.md — not as template scaffolding. This keeps the template uniform and lets content-type body shapes evolve without schema changes.
 
-Don't create templates speculatively. Wait until you have 3+ {DOMAIN:notes} that share a pattern, then extract the template from what works.
+### Evolving the Schema
 
-### Schema Evolution Rules
+The schema evolves through observation:
 
-Schemas evolve through observation, not decree:
+1. **Observe** a tag or prose pattern recurring across {DOMAIN:notes}.
+2. **Validate** that at least one day-one reader would genuinely use it as a first-class field.
+3. **Promote** via `/refactor` — adds the field to `ops/schemas.md` with its reader, use, and day-one rationale (the same Filter A bar used at setup).
+4. **Backfill** existing notes if the new field has meaningful values for them.
 
-1. **Observe** — Notice that {DOMAIN:notes} are consistently using a field or pattern not in the template
-2. **Validate** — Check that the pattern is genuinely useful (not just one-off)
-3. **Formalize** — Add the field to the template with proper {DOMAIN:_schema} documentation
-4. **Backfill** — Optionally update existing {DOMAIN:notes} to include the new field
+The reverse also works: if a field is never queried, demote it back to `tags` or remove it.
 
-The opposite flow also works: if a field is never used, remove it from the template. Dead fields add noise without value.
+### Adding New `content_type` Values
 
-**Adding new enum values:**
-When a field's valid values need expanding (e.g., a new `type` category), update the template's {DOMAIN:_schema} block first. The template is the single source of truth for what values are valid. Then use the new value in your {DOMAIN:notes}.
+When a new kind of {DOMAIN:note} emerges, extend the `content_type` enum in `ops/schemas.md` and `ops/templates/note.md`. Do NOT invent enum values inline — formalize them first, then use them.
 
-### How to Add New Templates as Domains Grow
+### Why One Template
 
-As your knowledge system expands into new domains, new {DOMAIN:note} types may emerge:
+Three reasons:
 
-1. Write 3-5 {DOMAIN:notes} of the new type without a template (let the pattern emerge naturally)
-2. Review what fields and structures they share
-3. Extract a template to `ops/templates/` capturing the common pattern
-4. Document the {DOMAIN:_schema} with required fields, optional fields, and enums
-5. Reference the new template in ops/context.md so future sessions know it exists
+- **Agent-first.** Agents filter on frontmatter, not directories. One template + frontmatter fields is simpler than per-type templates + path-based routing.
+- **Justify-or-drop.** Per-type templates accumulated speculative fields. One schema with strict Filter A at setup prevents that drift.
+- **Deferrals are visible.** What did not make it into the schema is recorded in `ops/deferred.md` — the alternative was invisible accretion.
 ```
 
 ## Dependencies
-None — templates are foundational infrastructure for all note types.
+None — templates are foundational.

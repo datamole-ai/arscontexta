@@ -3,28 +3,27 @@
 ## Context File Block
 
 ```markdown
-## Note Granularity — Three Pipelines, One Graph
+## Note Granularity — Three Pipelines, One Graph, One Template
 
-Every piece of content enters through {DOMAIN:inbox/} and gets processed through one of three pipelines, chosen per invocation:
+Every {DOMAIN:note} declares its `granularity` in frontmatter: `extract`, `structure`, or `capture`. Content flows through `{DOMAIN:inbox}/` and one of three pipelines routes on the frontmatter value — not on a directory path.
 
-| Pipeline | Command | What It Produces | When To Use |
-|----------|---------|-----------------|-------------|
-| Extract | /extract | One claim per file — atomic, composable, prose-as-title propositions | Decomposable claims, research findings, patterns |
-| Structure | /structure | Related claims grouped in one file — sections per sub-claim | Multi-faceted topics, sequential arguments, shared-context claims |
-| Capture | /capture | Verbatim source in a fenced block — no transformation | Meeting transcripts, reference documents, exact-wording material |
+| Pipeline | Command | Granularity | What It Produces |
+|----------|---------|-------------|-----------------|
+| Extract | /extract | `extract` | One claim per file — atomic, composable, prose-as-title propositions |
+| Structure | /structure | `structure` | Related claims grouped in one file — sections per sub-claim |
+| Capture | /capture | `capture` | Verbatim source in a fenced block — no transformation |
 
 **Shared invariants across all three:**
-- Prose-as-title filenames (specific enough for search and linking)
-- YAML frontmatter with `granularity: extract | structure | capture`
-- `description` field required (adds info beyond the title)
-- Wiki-links connecting to the knowledge graph
-- At least one {DOMAIN:topic map} membership
-- All notes coexist in the same {DOMAIN:note_collection}/ folder (or entity-type subdirectories within it for multi-entity domains)
+- One unified template (`ops/templates/note.md`) — `granularity` is a field, not a directory
+- Every note in the same flat `{DOMAIN:note_collection}/` folder regardless of granularity
+- Every note has the six required fields (title, content_type, granularity, description, created_at, tags)
+- Wiki links connect notes to the graph
+- At least one `{DOMAIN:topic map}` membership
 
-**Choosing a pipeline:** Match the pipeline to the material, not the other way around. Research papers with decomposable claims → /extract. Meeting notes mixing multiple related topics → /structure. Verbatim transcripts where exact wording matters → /capture. When unsure, /structure is a safe middle ground.
+**Choosing a pipeline:** match the pipeline to the source material, not the other way around. Research papers with decomposable claims → /extract. Meeting notes mixing multiple related topics → /structure. Verbatim transcripts where exact wording matters → /capture. When unsure, /structure is a safe middle ground.
 
-**The downstream chain is shared:** All three pipelines feed into the same connection-finding (/{DOMAIN:reflect}), backward-maintenance (/{DOMAIN:reweave}), and verification (/{DOMAIN:verify}) phases. These phases adjust their quality gates based on the `granularity` frontmatter field.
+**The downstream chain is shared.** All three pipelines feed into the same connection-finding (/{DOMAIN:reflect}), backward-maintenance (/{DOMAIN:reweave}), and verification (/{DOMAIN:verify}) phases. These phases select behavior based on the `granularity` field.
 ```
 
 ## Dependencies
-None — this is a foundational feature that replaces atomic-notes.
+None — this is foundational.

@@ -104,11 +104,11 @@ Scan the source content for references to existing {vocabulary.note_plural} or t
 
 ```yaml
 ---
-description: [~150 chars — context beyond the title]
+content_type: [vault content_type value — see ops/schemas.md]
 granularity: capture
-captured: [YYYY-MM-DD]
-source_type: [transcript | article | conversation | document | other]
-topics: [array of {vocabulary.topic_map} wiki links]
+description: [~150 chars — context beyond the title]
+created_at: [YYYY-MM-DD]
+tags: [array of free-form strings — may be []]
 ---
 ```
 
@@ -131,10 +131,9 @@ Topics:
 - Title is specific and descriptive (not a topic label)
 - Description adds information beyond the title
 - Content inside fenced block is IDENTICAL to source (no edits whatsoever)
-- At least one {vocabulary.topic_map} link
-- `granularity: capture` in frontmatter
-- `captured` date present
-- File written to `{vocabulary.note_collection}/[title].md` (single-entity) or `{vocabulary.note_collection}/[entity_dir]/[title].md` (multi-entity, routed by the note's entity_type matching an entity_directories entry)
+- At least one {vocabulary.topic_map} link in the Topics footer
+- All six required fields present in frontmatter: `content_type`, `granularity: capture`, `description`, `created_at`, `tags`
+- File written to flat `{vocabulary.note_collection}/[title].md` — routing is by `granularity` frontmatter, not by subdirectory
 
 ### 7. Create Queue Entry
 

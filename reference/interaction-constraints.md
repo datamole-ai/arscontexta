@@ -12,30 +12,6 @@ Granularity is not a system dimension. It is chosen per invocation via `/extract
 
 ---
 
-## Primary Cascades
-
-### Volume Cascade
-
-```
-high volume (>200 notes)
-  → requires deep navigation (shallow structures become unnavigable)
-  → requires semantic search (grep alone misses vocabulary divergence)
-  → requires automated maintenance (manual review at scale is impractical)
-```
-
-```
-low volume (<50 notes)
-  → permits shallow navigation (agent can hold full structure in context)
-  → permits keyword search (grep works when vocabulary is consistent)
-  → permits manual maintenance (small enough to review fully)
-```
-
-**Incoherent combinations to flag:**
-- High volume + no semantic search + shallow navigation → retrieval failure
-- Low volume + full automation + deep navigation → over-engineering
-
----
-
 ## Cross-Dimension Interaction Matrix
 
 Each cell describes the pressure that the row dimension's pole creates on the column dimension.
@@ -59,14 +35,6 @@ These produce friction but can work with compensating mechanisms:
 1. `linking == "explicit+implicit" + no_semantic_search`
    → "Implicit linking (semantic search) is enabled but no search tool is configured. The system will work with explicit links only."
 
-2. `volume > 200 + maintenance_conditions_disabled`
-   → "Large vaults need condition-based maintenance to prevent link rot and orphan accumulation. Disabling maintenance conditions at this volume risks drift."
-
-3. `high_note_creation_rate + maintenance_conditions_too_lax`
-   → "High note creation rate generates maintenance targets faster than lax thresholds can catch. Consider lowering condition thresholds (e.g., orphan count, stale node percentage)."
-
-4. `flat + navigation_depth == "2-tier" + volume > 50`
-   → "Flat organization with only 2 tiers gets crowded as notes accumulate. Consider adding topic-level MOCs (3-tier)."
 
 ### Kernel Primitive Constraints
 
@@ -111,9 +79,8 @@ Some dimension mismatches can be compensated rather than blocked:
 | Mismatch | Compensating Mechanism | Effectiveness |
 |----------|----------------------|---------------|
 | Dense schema + no validation hooks | Good templates reduce manual validation burden | Moderate — helps at capture, not at maintenance |
-| High volume + shallow nav | Strong semantic search enables discovery without deep hierarchy | Moderate — works for retrieval, not for orientation |
 
-The key question: are interaction constraints hard (violating them produces failure) or soft (violating them produces friction that compensating mechanisms can overcome)? The answer appears to be: volume and navigation cascades are hard, schema and linking mismatches are soft. You cannot shallow-navigate your way out of high volume without good search. But you can maintain a dense schema without validation hooks if you're disciplined enough — it's just friction, not failure.
+Interaction constraints split into hard (violating them produces failure) and soft (violating them produces friction that compensating mechanisms can overcome). Hard constraints are enforced at derivation time; soft constraints are surfaced as warnings and either auto-resolved via cascade or recorded in the derivation rationale for later reseeding.
 
 ---
 

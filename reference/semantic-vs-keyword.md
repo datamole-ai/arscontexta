@@ -2,22 +2,14 @@
 
 ## Purpose
 
-Guide the derivation engine in selecting which search modalities a generated system should support, how they interact, and when each is appropriate. Search is a kernel primitive (semantic-search in kernel.yaml) but implementation varies dramatically by platform, volume, and processing intensity. The wrong search configuration produces either retrieval failures (missing semantic when needed) or wasted complexity (deploying hybrid search for a 30-note vault).
-
-This document answers: given a derived system's configuration (volume, granularity, linking style), which search modalities should be enabled, how should they be prioritized, and what fallback chains should be generated?
+Guide the derivation engine in composing search modalities at query time. Semantic search (vector) and keyword search (BM25) are both always enabled; this document explains when each contributes most, how they fall back to each other, and how hybrid scoring resolves disagreements.
 
 ---
 
-## Derivation Questions
+## Core Questions
 
-Questions the engine must answer when generating search configuration:
-
-1. **What is the expected note volume trajectory?** Low (<50), moderate (50-200), high (>200). Search modality requirements shift at each threshold.
-2. **Does the linking dimension include implicit connections?** If linking = explicit+implicit, semantic search is structurally required — it IS the implicit linking mechanism.
-3. **Is semantic search opted in?** MCP-based semantic search via qmd is available. The derivation determines whether the user's domain and volume warrant enabling it.
-4. **What is the processing intensity?** Heavy processing generates vocabulary divergence faster (many notes reformulating the same concepts in different words), increasing semantic search value.
-5. **How domain-specific is the vocabulary?** Narrow domains with consistent terminology get less value from semantic search. Broad or cross-domain systems where the same concept appears under different names get maximum value.
-6. **Is duplicate detection a requirement?** If the pipeline includes a reduce phase that extracts claims, semantic duplicate detection prevents the same insight from being captured under different phrasings.
+1. **What is the expected vocabulary breadth?** Single-domain systems have consistent vocabulary; cross-disciplinary systems have divergent vocabulary that BM25 alone cannot bridge.
+2. **What is the linking style?** Explicit-only linking relies on the graph; explicit+implicit linking leans on semantic search for discovery.
 
 ---
 
@@ -39,7 +31,7 @@ Questions the engine must answer when generating search configuration:
 
 **Summary:** Vector embeddings project text into a high-dimensional space where semantic similarity corresponds to geometric proximity. Two notes about "friction in learning systems" and "errors as pedagogical feedback" share no significant keywords but occupy nearby regions in embedding space. This is the core value proposition of semantic search: it finds connections that keyword search structurally cannot, because keyword search requires vocabulary overlap that semantic relatedness does not guarantee.
 
-**Derivation Implication:** Semantic search (`vector_search`) becomes valuable when vocabulary divergence is expected — which correlates with note volume, processing intensity, and domain breadth. Systems with heavy processing generate more reformulations of the same concepts, increasing the chance that two notes about the same idea use different words.
+**Derivation Implication:** Semantic search (`vector_search`) is always enabled and contributes most where vocabulary divergence is largest — typically in cross-domain systems and in pipelines with heavy processing that reformulates source material. The derivation engine does not toggle vector search on or off; it weights how much signal the vector component carries relative to BM25.
 
 **Source:** Mikolov et al., "Efficient Estimation of Word Representations in Vector Space" (2013). Operationally confirmed: the vault's qmd vector-search catches duplicates that BM25 misses entirely.
 
@@ -91,7 +83,7 @@ Questions the engine must answer when generating search configuration:
 
 **Summary:** Finding genuine connections between notes is the highest-value search task in a knowledge system. It requires the full pipeline: BM25 for exact-term matches, vector search for vocabulary-divergent matches, query expansion for coverage, and LLM reranking to evaluate which candidates represent genuine conceptual connections rather than surface similarity. Each layer catches what the previous one misses. Skipping the reranking step produces connection suggestions that are topically related but not genuinely connected — the difference between "both mention context windows" and "this note's argument depends on that note's claim."
 
-**Derivation Implication:** Generated systems with processing = heavy or moderate should include a hybrid search mode for the reflect and reweave phases. Systems with processing = light can skip hybrid search because they generate fewer notes and the agent can use MOC traversal + keyword search for the limited connection-finding needed.
+**Derivation Implication:** Every generated system runs hybrid retrieval (BM25 + vector) for connection-finding phases such as reflect and reweave. LLM reranking is added on top of the always-on hybrid pipeline when connection quality justifies the latency; it is a scoring refinement, not an enablement decision.
 
 **Source:** Vault operational experience. The reflect skill uses `mcp__qmd__query` (hybrid) because connection quality justifies the ~20s latency.
 
@@ -185,13 +177,11 @@ Questions the engine must answer when generating search configuration:
 
 ### Search Mode Selection Matrix
 
-#### Volume determines the minimum viable search configuration
+#### Composition at query time
 
-**Summary:** The relationship between note volume and search modality requirements follows clear thresholds. Below 50 notes, the agent can read all descriptions and navigate the full MOC structure — keyword search suffices. Between 50-200 notes, vocabulary divergence begins to create blind spots that semantic search addresses. Above 200 notes, keyword search alone produces retrieval failures for cross-vocabulary concepts. These thresholds are approximate but directionally reliable across domains.
+The default hybrid retrieval order: semantic search (vector) first for recall, BM25 re-ranking on the top-K candidates for precision, MOC traversal as a final fallback when the query is navigational rather than content-seeking.
 
-**Derivation Implication:** The derivation engine should use expected volume trajectory (not current volume) to configure search. A system starting at 10 notes but expected to reach 200+ should be configured for semantic search from the start, with the understanding that it provides little value initially but prevents a painful mid-life reconfiguration.
-
-**Source:** Vault experience and information retrieval theory. Vocabulary divergence grows logarithmically with corpus size (Heaps' Law), creating an increasing gap between what keyword search finds and what exists.
+Both modalities always run. Disagreement between them is a signal, not a problem: when BM25 ranks a document high and vector search does not (or vice versa), the hybrid scorer exposes the discrepancy rather than hiding it.
 
 ---
 
@@ -199,19 +189,19 @@ Questions the engine must answer when generating search configuration:
 
 **Summary:** A narrow-domain system (e.g., tracking one sport's strategy) uses consistent terminology. "Opening move," "midgame position," and "endgame technique" are standard vocabulary that all notes share. Keyword search works well because the vocabulary is constrained. A broad or cross-domain system (e.g., tools for thought research that draws from cognitive science, information retrieval, software engineering, and philosophy) accumulates vocabulary divergence rapidly because each source domain brings its own terminology for overlapping concepts. "Context window" (LLM architecture), "working memory" (cognitive science), and "attention budget" (productivity) all describe related limitations but use completely different terms.
 
-**Derivation Implication:** Cross-domain systems should receive semantic search earlier in their lifecycle than single-domain systems. The derivation engine should ask about domain breadth during init and adjust search modality recommendations accordingly. A system spanning 3+ source domains should probably start with semantic search enabled regardless of initial volume.
+**Derivation Implication:** The derivation engine should ask about domain breadth during init and weight hybrid scoring accordingly. Cross-domain systems rely more heavily on the vector component of hybrid search because BM25 alone cannot bridge terminological gaps between source domains; single-domain systems see BM25 and vector contributions converge because vocabulary is consistent.
 
-**Source:** Information retrieval research on vocabulary mismatch in cross-domain corpora. Vault operational experience: the vault draws from 6+ source domains and experienced vocabulary divergence from the first 30 notes.
+**Source:** Information retrieval research on vocabulary mismatch in cross-domain corpora. Vault operational experience: the vault draws from 6+ source domains and experienced vocabulary divergence early.
 
 ---
 
 #### Processing intensity amplifies vocabulary divergence
 
-**Summary:** Heavy processing (extraction, reformulation, synthesis) generates more varied phrasings of the same concepts than light processing. Each reduce pass produces notes that reformulate source material in the agent's own words. Each reweave pass may further rephrase claims as understanding deepens. This compounding reformulation means heavy-processing systems accumulate vocabulary divergence faster than light-processing systems at the same note count, increasing the value of semantic search earlier in the system's lifecycle.
+**Summary:** Heavy processing (extraction, reformulation, synthesis) generates more varied phrasings of the same concepts than light processing. Each reduce pass produces notes that reformulate source material in the agent's own words. Each reweave pass may further rephrase claims as understanding deepens. This compounding reformulation means heavy-processing systems accumulate vocabulary divergence faster than light-processing systems, increasing the weight the hybrid scorer should place on the vector component.
 
-**Derivation Implication:** Adjust the volume thresholds for search modality based on processing intensity. Heavy processing: semantic search becomes valuable at ~30 notes. Moderate processing: ~75 notes. Light processing: ~150 notes. These adjusted thresholds reflect how quickly vocabulary divergence accumulates.
+**Derivation Implication:** Processing intensity shifts where semantic search contributes most within the always-on hybrid pipeline. Heavy processing produces more reformulations, so the vector component carries more signal relative to BM25; light processing keeps vocabulary closer to source material, so BM25 hits more often dominate. Both modalities still run; the hybrid scorer's weighting reflects this shift.
 
-**Source:** Vault operational observation. After heavy /reduce processing of 5 sources, the vault had significant vocabulary divergence across ~80 notes — concepts expressed in source-author vocabulary, vault-native vocabulary, and synthesized vocabulary.
+**Source:** Vault operational observation. After heavy /reduce processing of sources, the vault exhibited significant vocabulary divergence — concepts expressed in source-author vocabulary, vault-native vocabulary, and synthesized vocabulary.
 
 ---
 
@@ -255,4 +245,4 @@ Questions the engine must answer when generating search configuration:
 - Sources reviewed: 22
 - Claims included: 23
 - Claims excluded: 5
-- Cross-references: `kernel.yaml` (semantic-search primitive), `interaction-constraints.md` (volume cascade, linking dimension), `components.md` (Search component blueprint), `methodology.md` (key research claims on retrieval), `claim-map.md` (discovery-retrieval topic)
+- Cross-references: `kernel.yaml` (semantic-search primitive), `interaction-constraints.md` (linking dimension), `components.md` (Search component blueprint), `methodology.md` (key research claims on retrieval), `claim-map.md` (discovery-retrieval topic)

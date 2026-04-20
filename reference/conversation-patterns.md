@@ -14,7 +14,6 @@ These patterns are living documents that evolve with the heuristics. Run the ini
 
 | Signal | Dimension | Position | Confidence |
 |--------|-----------|----------|------------|
-| "2-3 books a month" | Volume projection | Low (~25-35 notes/year) | High |
 | "how books connect to each other" | Linking | Explicit — thematic connections between books | Medium |
 | No mention of academic use | Navigation | 2-tier — small collection permits simple browsing | High |
 
@@ -29,11 +28,11 @@ The follow-ups clarify pipeline fit (personal capture vs analytical extraction) 
 
 | Dimension | Position | Rationale |
 |-----------|----------|-----------|
-| Organization | Flat | Even at low volume, flat with MOCs is simpler than folders. No reason to create genre folders for 30 notes. |
+| Organization | Flat | Flat with MOCs is simpler than folders for a book-notes domain regardless of size. |
 | Linking | Explicit | Direct wiki links between books that share themes. No semantic search needed — vocabulary is consistent at this scale. |
 | Navigation | 2-tier | Hub MOC -> book notes. One hub with "Currently Reading," "Favorites," "By Theme" sections suffices. At 30 notes/year, deeper hierarchy is overhead. |
-| Maintenance | Condition-based | Low volume means lax thresholds are appropriate — review when 5+ unconnected notes accumulate or inbox grows past 3 items |
-| Schema | Minimal | `description`, `author`, `topics`. Rating optional. Dense schema adds capture friction that kills the habit at this volume. |
+| Maintenance | Condition-based | Review triggers when 5+ unconnected book notes accumulate or inbox grows past 3 items. |
+| Schema | Minimal | `description`, `author`, `topics`. Rating optional. Dense schema adds capture friction that kills casual reading habits. |
 
 **Natural pipeline fit:** `/capture` — reactions and impressions are generated in the moment, not extracted from a source. Per-book entries with multiple reactions suit /structure when the user wants to organize across several impressions at once.
 
@@ -100,14 +99,14 @@ The follow-ups clarify pipeline fit (personal capture vs analytical extraction) 
 - "How many people are in your close circle? Roughly how often would you be adding something new?"
 - "Would you want reminders — like a nudge before someone's birthday or when it's been a while since you checked in?"
 
-The first question calibrates volume and maintenance trigger thresholds. The second probes reminder needs (reminders.md in ops/ is a lightweight capability that doesn't require hooks). Both answers shape the system without requiring the user to understand configuration dimensions.
+The first question calibrates maintenance trigger thresholds. The second probes reminder needs (reminders.md in ops/ is a lightweight capability that doesn't require hooks). Both answers shape the system without requiring the user to understand configuration dimensions.
 
 ### Derived Configuration
 
 | Dimension | Position | Rationale |
 |-----------|----------|-----------|
 | Organization | Flat | Flat with entity MOCs. Each person gets their own MOC file as the primary lookup. No folder-per-person — wiki links handle grouping. |
-| Linking | Explicit | Direct links between people (shared events, mutual friends). No semantic search at expected volume. |
+| Linking | Explicit | Direct links between people (shared events, mutual friends); explicit linking suits this domain. |
 | Navigation | 2-tier | Hub MOC ("relationships") -> per-person MOCs. Simple, person-centric browsing. |
 | Maintenance | Condition-based | Review when contact recency flags trigger or follow-ups accumulate: who needs attention? Which follow-ups are pending? |
 | Schema | Moderate | `person`, `category` (preference/pattern/important-date/interaction/care-task), `last_confirmed`, `follow_up`. Emotional context as schema field because "nervous about new job" is the information that makes the user thoughtful. |
@@ -167,17 +166,16 @@ The first question calibrates volume and maintenance trigger thresholds. The sec
 
 | Signal | Dimension | Position | Confidence |
 |--------|-----------|----------|------------|
-| "5-10 papers a week" | Volume projection | High (~250-500 claims/year) | High |
 | "across disciplines" | Linking | Explicit+implicit — semantic search essential for cross-vocabulary matching | High |
 | "where they agree and disagree" | Schema | Moderate — classification fields, source tracking | High |
-| Academic/research register | Navigation | 3-tier — high volume needs deep hierarchy | High |
+| Academic/research register | Navigation | 3-tier — academic research across multiple disciplines needs deep hierarchy to separate discipline MOCs from topic MOCs | High |
 
 ### Follow-Up Questions
 
 - "Are you working toward a specific output — a literature review, thesis, or policy document? Or is this ongoing sense-making for your own understanding?"
 - "When you find conflicting claims, do you want to track the conflict as its own entity, or just note that papers disagree?"
 
-The first question affects pipeline choice (output-directed research maps most naturally to /extract) and self/ identity (research identity vs general learner). The second probes schema design for tension tracking — if conflicts are entities, they get their own note type with a `contradicts` relationship field. Both the user's high volume and cross-disciplinary focus make the signals unusually clear: this is a research system suited to /extract.
+The first question affects pipeline choice (output-directed research maps most naturally to /extract) and self/ identity (research identity vs general learner). The second probes schema design for tension tracking — if conflicts are entities, they get their own note type with a `contradicts` relationship field. The cross-disciplinary focus makes the signals unusually clear: this is a research system suited to /extract.
 
 ### Derived Configuration
 
@@ -185,8 +183,8 @@ The first question affects pipeline choice (output-directed research maps most n
 |-----------|----------|-----------|
 | Organization | Flat | Flat with MOC overlay. Folder-per-discipline would create silos that prevent the cross-disciplinary connections the user explicitly needs. |
 | Linking | Explicit+implicit | Explicit wiki links for known connections. Semantic search essential because policy and engineering papers use different vocabulary for the same phenomena ("resilience" vs "structural adaptation"). |
-| Navigation | 3-tier | Hub -> discipline MOCs (policy, engineering, ecology, economics) -> topic MOCs (flood adaptation, heat resilience, migration patterns) -> atomic claims. High volume demands deep navigation. |
-| Maintenance | Condition-based (tight thresholds) | Reweave pass after each processing batch completes. At 5-10 papers/week, lax thresholds would leave too many unconnected claims accumulating. |
+| Navigation | 3-tier | Hub -> discipline MOCs (policy, engineering, ecology, economics) -> topic MOCs (flood adaptation, heat resilience, migration patterns) -> atomic claims. |
+| Maintenance | Condition-based (tight thresholds) | Reweave pass after each processing batch completes. Lax thresholds would leave too many unconnected claims accumulating across disciplines. |
 | Schema | Moderate | `description`, `methodology` (which discipline), `source`, `classification` (claim/methodology/tension), `topics`. Dense enough for cross-discipline queries, not so dense as to slow capture. |
 
 **Natural pipeline fit:** `/extract` — claims from papers decompose naturally into atomic notes. "Track claims" is the direct signal: each claim from each paper gets its own note, enabling cross-disciplinary comparison that paper-level summaries can't provide.
@@ -228,7 +226,7 @@ The first question affects pipeline choice (output-directed research maps most n
 
 ### Key Insights
 
-1. **This pattern converges with the Research preset because the signals are unambiguous.** "Claims from papers" + "across disciplines" + high volume = /extract pipeline + semantic search. The derivation engine should recognize this convergence and produce configuration nearly identical to the preset.
+1. **This pattern converges with the Research preset because the signals are unambiguous.** "Claims from papers" + "across disciplines" = /extract pipeline + semantic search. The derivation engine should recognize this convergence and produce configuration nearly identical to the preset.
 
 2. **Semantic search is essential, not optional.** The user explicitly states that different disciplines use different terminology. Without semantic search, a search for "flood resilience" would miss papers about "structural flood adaptation" — and cross-disciplinary synthesis is the user's core need.
 
@@ -261,8 +259,8 @@ The first question resolves note scale (detailed reflections suit /structure to 
 | Dimension | Position | Rationale |
 |-----------|----------|-----------|
 | Organization | Flat | Flat with theme MOCs. Themes (anxiety, relationships, work stress, growth) emerge organically and cross-cut chronology. |
-| Linking | Explicit | Direct connections between reflections that share patterns. At moderate volume, explicit links suffice. Semantic search adds value later if collection grows past 100. |
-| Navigation | 2-tier | Hub ("my themes") -> theme MOCs (anxiety patterns, relationship insights, growth milestones). Volume stays moderate — regular journaling produces ~50 reflections/year. |
+| Linking | Explicit | Direct connections between reflections that share patterns; explicit linking suits the personal-reflection register. |
+| Navigation | 2-tier | Hub -> theme MOCs (anxiety patterns, relationship insights, growth milestones); two tiers fit the personal journaling register. |
 | Maintenance | Condition-based (tight thresholds) | Aligned with session rhythm. Condition-based health checks surface "you mentioned anxiety three times recently" — which is precisely the kind of insight the user seeks. |
 | Schema | Moderate | `category` (pattern/trigger/coping-strategy/insight/growth-goal), `confidence` (observed/hypothesized/verified), `frequency` (once/occasional/regular/constant). Rich enough for pattern queries without imposing clinical structure. |
 
@@ -301,7 +299,7 @@ The first question resolves note scale (detailed reflections suit /structure to 
 
 ### Excluded Feature Blocks
 
-- `semantic-search.md` — excluded (linking = explicit at low-moderate volume)
+- `semantic-search.md` — excluded (linking = explicit suits the register)
 - `schema.md` — excluded (moderate schema handled by template)
 - `multi-domain.md` — excluded (single domain)
 
@@ -421,13 +419,10 @@ The first question calibrates maintenance trigger sensitivity and schema tempora
 
 4. **Linking complexity drives feature block selection.** Explicit-only linking excludes semantic search. Explicit+implicit linking (as in Research) requires it for cross-vocabulary discovery.
 
-5. **Maintenance thresholds track domain cadence.** Tight thresholds match high-volume or review-centric domains (Research, Therapy). Lax thresholds are appropriate for low-volume personal domains (Books, Family).
-
 ### Signal Reliability
 
 | Signal Type | Reliability | Example |
 |-------------|-------------|---------|
-| Volume indicators ("5-10 papers/week") | High | Directly maps to volume cascade |
 | Processing words ("track claims," "remember reactions") | High | Verb choice reveals natural pipeline fit (/extract vs /structure vs /capture) |
 | Connection words ("across disciplines," "connect across products") | High | Explicitly reveals linking needs |
 | Emotional register ("the little things," "clicks weeks later") | Medium | Personality signal, but can be ambiguous |
@@ -465,7 +460,7 @@ Whether to enable qmd for meaning-based discovery across vocabularies.
 
 Example phrasing: "Semantic search lets the system find connections even when different terms describe the same concept — like matching 'strict scrutiny' with 'heightened review.' It is especially valuable for cross-disciplinary work. Would you like to enable it?"
 
-For Pattern 3 (Climate Research), qmd should be strongly recommended due to cross-disciplinary vocabulary. For Pattern 1 (Books) and Pattern 2 (Family), qmd is unnecessary at expected volume. For Pattern 4 (Therapy), qmd is optional — low volume initially but could help with pattern matching across vocabulary.
+For Pattern 3 (Climate Research), qmd is strongly recommended due to cross-disciplinary vocabulary. For Patterns 1 (Books) and 2 (Family), qmd is optional — enable if vocabulary breadth grows. For Pattern 4 (Therapy), qmd is optional — could help with pattern matching across vocabulary.
 
 These decisions appear in the conversation AFTER dimension derivation but BEFORE generation. The user always makes the final call.
 

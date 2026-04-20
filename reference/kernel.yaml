@@ -74,13 +74,13 @@ primitives:
 
   - id: schema-enforcement
     name: Schema enforcement via validation
-    description: Templates define required fields and enums. Validation checks notes against templates.
+    description: One unified template (`ops/templates/note.md`) defines the six required fields plus any Filter-A survivors. Validation checks notes against that template. No optional fields exist — every field in the template is required.
     layer: convention
     requires: markdown-yaml
     enforcement: invariant
     implementation: Hook-based validation (PostToolUse event)
     validation:
-      check: Templates exist as single source of truth. Validation mechanism catches missing required fields.
+      check: "`ops/templates/note.md` exists as the single source of truth. Validation catches missing required fields (title, content_type, granularity, description, created_at, tags, plus any Filter-A survivors)."
     cognitive_grounding: "Instruction compliance degrades as context fills — deterministic validation catches what instruction-following misses"
 
   - id: self-space

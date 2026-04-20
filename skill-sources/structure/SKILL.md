@@ -11,8 +11,7 @@ allowed-tools: Read, Write, Grep, Glob, mcp__qmd__query
 Read these files to configure domain-specific behavior:
 
 1. **`ops/derivation-manifest.md`** — vocabulary mapping, extraction categories, platform hints
-   - Use `vocabulary.note_collection` for the note collection directory
-   - If `entity_directories` section exists in manifest, read it for entity-type routing
+   - Use `vocabulary.note_collection` for the note collection directory (flat; all notes live here regardless of `granularity`)
    - Use `vocabulary.inbox` for the inbox folder name
    - Use `vocabulary.note` for the note type name in output
    - Use `vocabulary.note_plural` for the plural form
@@ -336,14 +335,11 @@ When source content adds value to an EXISTING {vocabulary.note} rather than crea
 
 ```markdown
 ---
-description: [~150 chars capturing the scope of grouped claims]
+content_type: [one of the vault's derived content_type enum values, e.g. {DOMAIN:content_type}]
 granularity: structure
-type: [insight | pattern | preference | fact | decision | question]
-claims:
-  - "first sub-claim as prose"
-  - "second sub-claim as prose"
-created: YYYY-MM-DD
-[domain-specific fields]
+description: [<=200 chars capturing the scope of grouped claims, no trailing period]
+created_at: YYYY-MM-DD
+tags: []
 ---
 
 # [prose-as-title capturing topic scope]
@@ -580,7 +576,7 @@ Queue Updates:
 
 ## Template Reference
 
-Note templates live in `ops/templates/structure/`.
+The single unified note template lives at `ops/templates/note.md`. Every note uses it regardless of `content_type` or `granularity`; structure notes set `granularity: structure` in frontmatter.
 
 ---
 

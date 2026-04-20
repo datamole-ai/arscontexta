@@ -136,7 +136,7 @@ Check every field listed in `_schema.required`. Each missing required field is a
 | Frontmatter delimiters | Must start with `---` and close with `---` | FAIL |
 | Valid YAML | Must parse without errors | FAIL |
 | No duplicate keys | Each YAML key appears only once | FAIL |
-| No unknown fields | Fields not in `_schema.required` or `_schema.optional` | WARN |
+| No unknown fields | Fields not in `_schema.required` | WARN |
 
 **Enum validation (WARN if invalid):**
 

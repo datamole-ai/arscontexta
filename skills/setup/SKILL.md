@@ -151,7 +151,6 @@ As the user talks, passively extract signals for dimensions. Do not ask about di
 | "Track people"                           | Entity tracking module                          | High       |
 | "I want rigor"                           | /extract pipeline fit, dense schema             | High       |
 | "Low ceremony"                           | /capture pipeline fit, minimal schema           | High       |
-| "20+ ideas daily"                        | High volume, pipeline needed                    | High       |
 | "Personal journal"                       | /structure or /capture pipeline fit             | Medium     |
 | "Academic research"                      | /extract pipeline fit, semantic search          | High       |
 | "Therapy sessions"                       | /structure pipeline fit                         | High       |
@@ -197,7 +196,7 @@ Record every domain-native term the user provides. These override preset vocabul
 
 After the opening response, ask 2-5 follow-up questions targeting:
 
-1. **Domain understanding** -- what kinds of knowledge, what volume, how often
+1. **Domain understanding** -- what kinds of knowledge
 2. **Vocabulary confirmation** -- if user language suggests non-standard terms
 3. **Signal conflict resolution** -- if contradictory signals emerged
 
@@ -279,10 +278,6 @@ Signals that clearly override defaults get applied. Signals that are ambiguous l
 
 Once primary dimensions are set, cascade through interaction constraints (already loaded from upfront reference reads).
 
-Key cascades:
-
-- High volume (>200 projected notes) -> requires deep navigation, semantic search, automated maintenance
-
 For cascaded values: confidence = INFERRED (0.2). User signals ALWAYS override cascade pressure.
 
 ### Step 3c: Vocabulary Derivation
@@ -323,15 +318,13 @@ For each soft constraint, evaluate the configuration:
 
 Soft constraints:
 
-- `volume > 200 + maintenance_thresholds too lax` -> large vaults need tighter condition thresholds
-- `flat + navigation_depth == "2-tier" + volume > 50` -> crowded navigation
+(none currently defined — soft constraints catalog is empty after volume cascades were removed as part of the agent-first simplification)
 
 **Pass 3 -- Compensating mechanism check:**
 
 For remaining soft violations, check if compensating mechanisms exist:
 
 - Dense schema + no validation hooks -> good templates reduce manual validation burden
-- High volume + shallow nav -> strong semantic search enables discovery
 
 Note active compensations in derivation rationale. Flag compensated dimensions for monitoring by health command.
 
@@ -378,56 +371,54 @@ All generated systems ship with full automation from day one. Every vault gets t
 
 **Init generates everything by default.** The context file includes all skill documentation.
 
-### Step 3g: Schema Derivation
+### Step 3g: Filter A — Fields (Justify-or-Drop)
 
-Derive initial `_schema` blocks for each note type (extract, structure, capture). This step makes schema derivation explicit — it was previously implicit in Pipeline Step 4.
+Every vault ships with five required frontmatter fields — NO exceptions, NO optional fields:
 
-**Inputs from prior steps:**
-- Vocabulary mapping (Step 3c) — domain-native field labels, enum values
-- Schema density dimension — minimal (few optional fields), moderate (standard set), dense (many optional fields with domain-specific enums)
-- Coherence results (Step 3d) — any constraints that affect schema structure
-- Automation config (Step 3f) — which note types are active
+- `content_type` — vault-specific enum derived below; agents route on it
+- `granularity` — one of `extract | structure | capture`; pipelines route on it
+- `description` — one sentence adding context beyond the title (<=200 chars)
+- `created_at` — ISO 8601 date; used by archive and staleness checks
+- `tags` — free-form array; escape hatch for emergent attributes
 
-**For each note type, derive a `_schema` block containing:**
-- `entity_type` — domain-named note identifier
-- `granularity` — extract, structure, or capture
-- `required` — fields that must be present (always includes: description, granularity, topics)
-- `optional` — domain-specific fields scaled by schema density setting
-- `enums` — valid values for enum fields, adapted to domain vocabulary
-- `constraints` — field-level rules (max length, format, array requirements)
+**Derive the `content_type` enum from conversation signals.** Listen for how the user names kinds of notes (decisions, specs, reflections, observations, lessons, ...). Three to six values is typical. Keep vault-specific. Never a fixed universal list.
 
-**Reference inputs:**
-- Read `${CLAUDE_PLUGIN_ROOT}/reference/templates/extract/base-note.md` for extract invariants
-- Read `${CLAUDE_PLUGIN_ROOT}/reference/templates/structure/base-note.md` for structure invariants (has canonical `_schema` block)
-- Read `${CLAUDE_PLUGIN_ROOT}/reference/templates/capture/base-note.md` for capture invariants (has canonical `_schema` block)
+**Then run Filter A on every candidate field beyond the six.** Candidates come from: preset defaults, user statements ("I track status"), conversation signals flagged as HIGH for schema (e.g. "I want rigor" suggesting `confidence` or `source_url`).
 
-Preserve all invariant fields and constraints from reference templates. Add domain-specific optional fields and enum values based on schema density and conversation signals.
+For each candidate field, produce three items:
 
-**For each field in the derived schema, record a one-line rationale** connecting it to a conversation signal, preset default, or reference template invariant. These rationales are used in Phase 4b to explain field choices to the user.
+1. **Reader** — name the specific skill or pipeline phase that consumes it (e.g. "reweave uses `status` to filter open decisions", "verify reads `source_url` when checking citations").
+2. **Use** — the concrete behavior that reader enables (e.g. "archives notes where `status == closed` older than 30 days").
+3. **Day-one check** — is that reader actually running on day one of this vault? If the reader is a future/opt-in skill, the answer is NO.
 
-Hold the derived schemas and rationales in working memory for Phase 4.
+**Outcome:**
 
-### Step 3g-ii: Entity Directory Resolution
+- All three present, concrete, and day-one → **Keep.** Add to the derived schema with rationale.
+- Any missing, vague, or not day-one → **Defer.** Record in working memory for `ops/deferred.md` with the reason.
 
-After deriving schemas, resolve entity types to directory names:
+**Hard rule:** never keep a field "because the preset usually includes it." A preset is a candidate list, not an entitlement. The same rule applies to any field named in the conversation signal table unless the user stated a concrete reader+use.
 
-1. Count distinct `entity_type` values across all derived schemas
-2. **If 1 entity type:** `vocabulary.note_collection` collapses to the same value as the notes folder transform (e.g., `notes/`, `reflections/`). No `entity_directories` section in the manifest. Current behavior preserved.
-3. **If 2+ entity types:**
-   a. Derive the `note_collection` vocabulary term from conversation signals (listen for how the user names their overall knowledge space) or use `knowledge-base` as default for complex systems
-   b. Map each entity type to a kebab-cased plural directory name (e.g., entity_type `project` → directory `projects/`)
-   c. Record in derivation state for inclusion in `ops/derivation-manifest.md` under `entity_directories`:
-      ```yaml
-      entity_directories:
-        - name: projects
-          entity_type: project
-          description: "Customer/Umbrella/Project hierarchy"
-        - name: contacts
-          entity_type: contact
-          description: "Key stakeholders per customer"
-      ```
+Hold the derived schema (the six required fields plus any Filter-A survivors with their rationale) and the deferred-field list in working memory for Phase 4.
 
-Hold entity directory mapping in working memory alongside schemas for Phase 4.
+### Step 3g-ii: Filter B — Directories (Justify-or-Drop)
+
+**Default:** flat vault. A single `{vocabulary.note_collection}/` directory holds every note regardless of `content_type`. No entity subdirectories by default.
+
+Collect candidate directories from: preset defaults, explicit user requests, and any grouping implied by signals (e.g. "I track contacts and projects separately"). For each candidate, produce two items:
+
+1. **Shared operation** — a system behavior that acts on the whole directory as a set (e.g. "daily archival sweep", "MOC regeneration", "pipeline routing by path").
+2. **Who runs it** — the specific skill or hook that performs that operation on day one.
+
+**Outcome:**
+
+- Shared operation + concrete day-one runner → **Keep.**
+- Browsing convenience, "looks tidier", or "humans like folders" → **Defer.**
+
+**Expected survivors for most vaults:** zero to one. `moc/` can survive if MOC regeneration is a scheduled operation. `people/`, `projects/`, `daily/` typically do NOT survive — they are browsing groupings.
+
+**Note:** the `{vocabulary.note_collection}/`, `{vocabulary.inbox}/`, `{vocabulary.archive}/`, `self/`, and `ops/` directories are kernel-mandated (not Filter-B candidates) and are always created. Filter B only gates *additional* content directories.
+
+Hold the surviving directory list and the deferred-directory list in working memory for Phase 4.
 
 ---
 
@@ -442,22 +433,7 @@ Present the derived system in concrete terms using the user's own vocabulary. Th
 Structure the proposal as:
 
 1. "Here's the system I'd create for you:"
-2. Folder structure with their domain-named directories
-   When multi-entity (2+ entity types derived), show the note_collection parent with entity subdirectories:
-
-   ```
-   knowledge-base/
-   ├── projects/           ← your project knowledge
-   ├── contacts/           ← key stakeholders
-   ├── blueprints/         ← reusable solution patterns
-   └── domain-knowledge/   ← industry context
-   ```
-
-   Explain that each entity type gets its own directory, MOCs live at the collection root for cross-entity navigation, and the processing pipeline routes notes to the correct directory by entity type.
-
-   The user can rename, add, or remove entity directories at this stage. Record any changes in the derivation state.
-
-   When single-entity, show the current flat layout unchanged.
+2. Folder structure with their domain-named directories. Flat by default: a single `{vocabulary.note_collection}/` holds every note regardless of `content_type` or `granularity`. List any Filter B survivors (Step 3g-ii) as additional directories with the shared day-one operation that justified each. List deferred directory candidates with the reason each was dropped; invite the user to challenge a drop by naming a concrete day-one reader and use.
 3. How their notes work -- with a specific example from their domain using their vocabulary
 4. How processing works, described in their words
 5. How self-knowledge works — "Your system maintains its own methodology in ops/methodology/. Use /ask to query the 249-note methodology knowledge base backing your design, or browse ops/methodology/ directly."
@@ -468,88 +444,92 @@ End with: **"Would you like me to adjust anything about the system design?"**
 
 Record any user overrides in the derivation rationale. If the user overrides a dimension, re-run the coherence check for affected constraints.
 
-### Phase 4b: Schema Walkthrough
+### Phase 4b: Schema and Deferrals Review
 
-After the user approves the system design, walk through the schemas. Present each note type one at a time, in this order: extract, structure, capture. Extract comes first because it has the most domain-specific adaptation. If the derivation excluded a note type, skip it.
+After the user approves the system design, walk through the single schema that Filter A produced, and the deferral lists from Filter A and Filter B. There is no per-granularity or per-content-type walkthrough — one schema covers every note.
 
-**For each note type:**
-
-1. **Present** the derived `_schema` block in YAML format with inline rationale comments explaining why each field is included:
+**1. Present the schema** in YAML with inline rationale comments for every field beyond the five required ones:
 
 ```yaml
 _schema:
-  entity_type: "research-note"
-  granularity: extract
   required:
-    - description   # Context sentence for the claim (~150 chars)
-    - granularity   # Note type marker (invariant)
-    - type          # Your core claim categories
-    - topics        # Connections to topic maps (wiki-links)
-  optional:
-    - source_url    # You mentioned working with academic papers
-    - confidence    # Some of your claims have varying certainty
+    - content_type   # vault enum; agents route on it
+    - granularity   # extract|structure|capture; pipelines route on it
+    - description   # one sentence, <=200 chars
+    - created_at    # ISO 8601 date
+    - tags          # free-form array, escape hatch
+    # --- Filter-A survivors below (if any) ---
+    # - status      # reweave uses it to filter open {content_type}=decision; day-one
   enums:
-    type: [insight, pattern, fact, decision]
-  constraints:
-    description: "One sentence, ~150 characters"
-    topics: "At least one wiki-link"
+    granularity: [extract, structure, capture]
+    content_type: [<derived vault enum>]
 ```
 
-2. **Explain** each non-obvious field by connecting it to a conversation signal: "I included `source_url` as optional because you mentioned working with academic papers. `confidence` is there because you said some findings are more tentative than others."
+**2. Explain each Filter-A survivor** by naming its reader and use in one sentence: "I kept `status` because `/reweave` filters open decisions by it on day one."
 
-3. **Ask** one focused question: "Anything you'd add, remove, or rename?"
+**3. Present the deferred list** — both fields and directories — with the reason each was dropped. Invite challenges: "If you have a day-one reader and use for any of these, tell me and I will move it up."
 
-4. **Apply** any adjustments the user requests. Confirm the updated schema before moving to the next note type. If an adjustment affects a required/invariant field (description, granularity, topics), explain why it's required and confirm the user still wants the change.
+**4. Apply the user's challenges.** For each challenge, apply the same Filter A or Filter B check. If the user names a concrete reader+use, move the item to Keep. Otherwise, it stays deferred. No silent additions.
 
-### Phase 4c: Schema Consolidation
+**5. Final approval:** "This is the schema I will use to generate your template. Everything else goes into `ops/deferred.md` for reference. Look good?"
 
-After all note types have been reviewed individually:
+### Write approved schema and deferrals
 
-1. **Consolidated view** — Present all approved schemas together. Highlight shared fields (description, topics, granularity appear in all types) vs. type-specific fields.
+After the user approves, write two files in the vault directory.
 
-2. **Cross-type consistency check** — If the user renamed or adjusted a shared field on one type (e.g., changed `topics` label), ask whether the same change should apply to the other types.
-
-3. **Final approval** — "These are the schemas I'll use to generate your templates. Look good?"
-
-### Write approved schemas
-
-After the user approves the consolidated schemas, write `ops/schemas.md` to the vault directory. Use this format:
+**`ops/schemas.md`:**
 
 ```markdown
-# Approved Schemas
+# Approved Schema
 
-Generated during setup. These schemas were used to create the templates in `ops/templates/`.
-To modify schemas after setup, use `/refactor`.
-
-## [Note Type Name]
-
-[1-2 sentence rationale connecting to user's domain]
+Single schema for every note in this vault.
+To modify the schema after setup, use `/refactor`.
 
 \`\`\`yaml
 _schema:
-  entity_type: "[domain]-note"
-  granularity: [extract|structure|capture]
   required:
-    - field_name   # rationale comment
-  optional:
-    - field_name   # rationale comment
+    - content_type   # vault enum: [<list>]
+    - granularity   # extract|structure|capture
+    - description   # one sentence, <=200 chars
+    - created_at    # ISO 8601 date
+    - tags          # free-form array
+    # --- Filter-A survivors ---
+    - <field>       # <reader>: <use>
   enums:
-    field_name: [value1, value2]
+    granularity: [extract, structure, capture]
+    content_type: [<vault enum values>]
+    # <any other enum fields produced by Filter A>
   constraints:
-    field_name: "constraint description"
+    description: "<=200 chars, no trailing period"
+    created_at: "ISO 8601 date (YYYY-MM-DD)"
 \`\`\`
 
 ### Rationale
-- **field** — longer explanation for non-obvious choices
-
-[Repeat for each note type]
+- **content_type enum** — derived from: <conversation signals>
+- **<survivor field>** — <reader>: <use>. Why day-one: <reason>.
 ```
 
-After writing `ops/schemas.md`, proceed to the final confirmation:
+**`ops/deferred.md`:**
+
+```markdown
+# Deferred Candidates
+
+Items considered during setup but dropped by Filter A (fields) or Filter B (directories). Each has a reason. If a deferred item becomes genuinely needed later (a concrete day-one reader and use emerges), promote it via `/refactor` or a future `/grow` skill.
+
+## Fields deferred
+
+- **<field_name>** — <reason>. Example: proposed by preset default but no day-one reader named.
+
+## Directories deferred
+
+- **<directory_name>** — <reason>. Example: grouped for browsing only; no shared day-one operation.
+```
+
+After writing both files, proceed to the final confirmation:
 
 **"Would you like me to adjust anything before I create this?"**
 
-This final prompt covers both the system design and schemas. If the user requests changes, apply them — re-run coherence check if a dimension was overridden, update `ops/schemas.md` if a schema was changed.
+If the user requests changes, apply them — re-run coherence check if a dimension was overridden, re-run Filter A or Filter B if a field or directory changed, update `ops/schemas.md` and `ops/deferred.md` accordingly.
 
 ---
 
@@ -765,62 +745,33 @@ This file serves three purposes:
 
 ##### Folder Structure
 
-Create the three-space layout with domain-named directories. The note_collection layout depends on how many entity types were derived in Step 3g:
-
-**Single entity type (1 entity_type across all schemas):**
+Create the three-space layout with domain-named directories. The layout is flat by default — Filter B (Step 3g-ii) determines whether any additional content directories survive.
 
 ```
 [workspace]/
-+-- [vocabulary:note_collection]/  <-- structured knowledge (flat, note_collection = notes folder)
-+-- [domain:inbox]/                <-- zero-friction capture
-+-- [domain:archive]/              <-- processed, inactive
-+-- self/                          <-- agent's persistent mind
-|   +-- identity.md                <-- (created in Pipeline Step 2)
-|   +-- methodology.md            <-- (created in Pipeline Step 2)
-|   +-- goals.md                  <-- (created in Pipeline Step 2)
-|   +-- relationships.md          <-- (optional, if domain involves people)
-|   +-- memory/                   <-- atomic personal insights
-+-- templates/                    <-- note templates (created in Pipeline Step 4)
-+-- ops/                          <-- operational coordination (already exists from Pipeline Step 1)
-|   +-- features/                 <-- feature reference files (progressive disclosure)
-|   +-- observations/             <-- atomic friction signals (Primitive 12)
-|   +-- tensions/                 <-- contradiction tracking (Primitive 12)
-|   +-- methodology/              <-- vault self-knowledge (Primitive 14)
-|   +-- queue/                    <-- unified task queue (pipeline + maintenance)
-|   |   +-- archive/              <-- completed task batches
-|   +-- sessions/                 <-- session tracking
-```
-
-**Multiple entity types (2+ entity_types derived):**
-
-```
-[workspace]/
-+-- [vocabulary:note_collection]/  <-- parent directory for all entity types
-|   +-- [entity_dir_1]/           <-- entity type directory (flat within)
-|   +-- [entity_dir_2]/           <-- entity type directory (flat within)
-|   +-- [entity_dir_n]/           <-- entity type directory (flat within)
-+-- [domain:inbox]/                <-- unified capture zone (one inbox for all entity types)
-+-- [domain:archive]/              <-- processed, inactive
-+-- self/                          <-- agent's persistent mind
-|   +-- identity.md
-|   +-- methodology.md
-|   +-- goals.md
-|   +-- relationships.md          <-- (optional)
-|   +-- memory/
-+-- templates/                    <-- note templates (one per entity type per granularity mode)
-+-- ops/
-|   +-- features/                 <-- feature reference files (progressive disclosure)
-|   +-- observations/
-|   +-- tensions/
-|   +-- methodology/
++-- {vocabulary.note_collection}/    <-- flat container for every note regardless of content_type
++-- [domain:inbox]/                  <-- zero-friction capture
++-- [domain:archive]/                <-- processed, inactive
++--self/                             <-- agent's persistent mind
+|   +-- identity.md                  <-- created in Pipeline Step 2
+|   +-- methodology.md               <-- created in Pipeline Step 2
+|   +-- goals.md                     <-- created in Pipeline Step 2
+|   +-- relationships.md             <-- optional, if domain involves people
+|   +-- memory/                      <-- atomic personal insights
++-- ops/                             <-- operational coordination
+|   +-- templates/                   <-- single note.md template (created in Pipeline Step 4)
+|   +-- features/                    <-- feature reference files
+|   +-- observations/                <-- friction signals (Primitive 12)
+|   +-- tensions/                    <-- contradiction tracking (Primitive 12)
+|   +-- methodology/                 <-- vault self-knowledge (Primitive 14)
 |   +-- queue/
 |   |   +-- archive/
 |   +-- sessions/
 ```
 
-Hub MOC (`index.md`) lives at the `[vocabulary:note_collection]/` root in both cases. Topic MOCs also live at the collection root — they span entity types by design. Entity directories contain only atomic notes, not MOCs.
+Hub MOC (`index.md`) lives at the `{vocabulary.note_collection}/` root. Topic MOCs also live at the collection root.
 
-The `ops/observations/` and `ops/tensions/` directories are required by Kernel Primitive 12 (Operational Learning Loop). They accumulate friction signals that /{DOMAIN:rethink} reviews when observation or tension counts exceed thresholds.
+The `ops/observations/` and `ops/tensions/` directories are required by Kernel Primitive 12 (Operational Learning Loop). They accumulate friction signals that `/{DOMAIN:rethink}` reviews when observation or tension counts exceed thresholds.
 
 The inbox folder is always generated. It provides zero-friction capture regardless of processing level.
 
@@ -1172,14 +1123,11 @@ vocabulary:
       output_type: "[note type]"
     # ... 4-8 domain-specific categories
 
-  # Entity directories (only present when 2+ entity types derived in Step 3g-ii)
-  # entity_directories:
-  #   - name: projects
-  #     entity_type: project
-  #     description: "Customer/Umbrella/Project hierarchy"
-  #   - name: contacts
-  #     entity_type: contact
-  #     description: "Key stakeholders per customer"
+  # Filter B survivor directories (only present when Step 3g-ii kept a directory)
+  # filter_b_survivors:
+  #   - name: archive
+  #     shared_operation: "scheduled archival sweep retires notes where status == closed older than 30 days"
+  #     runner: "/{DOMAIN:rethink} archive sweep"
 
 platform_hints:
   context: fork
@@ -1217,93 +1165,28 @@ The following step instructions are passed verbatim to Agent 1 via the agent pro
 
 ---
 
-##### Templates with _schema blocks
+##### Unified note template
 
-Create domain-specific templates in `templates/`:
+Create exactly one template file: `ops/templates/note.md`. Every note in the vault uses it regardless of `content_type` or `granularity`.
 
-**Always create:**
+Read `${CLAUDE_PLUGIN_ROOT}/reference/templates/note.md` for the canonical structure. Read `ops/schemas.md` for the vault's approved schema — this includes the five required fields plus any Filter-A survivors with rationale.
 
-- Extract note template (in ops/templates/extract/) — domain-named
-- Structure note template (in ops/templates/structure/) — domain-named
-- Capture template (in ops/templates/capture/) — domain-named
-- MOC template (in ops/templates/) — granularity-agnostic, domain-named
+To generate `ops/templates/note.md`:
 
-**Conditionally create:**
+1. Copy the reference `note.md` frontmatter block verbatim as the template's `_schema` section, then splice in:
+   - The vault's `content_type` enum values in the `enums.content_type` list.
+   - Any Filter-A survivor fields appended to `required` with their rationale comment.
+   - Any constraints associated with Filter-A survivors.
+2. Copy the body structure (H1, prose body, `---`, `Topics:` footer) verbatim.
+3. Apply vocabulary transformation to body prose and comments — but NEVER to YAML field names. `description`, `title`, `content_type`, `granularity`, `created_at`, `tags` stay structural.
+4. Write `ops/templates/note.md`.
 
-
-**Template subfolder structure:**
+**Output path:**
 
 ```
 ops/templates/
-├── extract/
-│   └── [domain]-note.md
-├── structure/
-│   └── [domain]-note.md
-├── capture/
-│   └── [domain]-capture.md
-└── [domain]-moc.md
+└── note.md
 ```
-
-Read `${CLAUDE_PLUGIN_ROOT}/reference/templates/` for canonical template structure per granularity. Each subfolder contains reference templates showing invariant fields, constraints, and body patterns.
-
-**Multi-entity template generation:** When `entity_directories` is present in the derivation state (2+ entity types), generate one template per entity type per applicable granularity mode. Each template's `_schema` block uses the matching `entity_type` value. Template filenames follow the pattern `[entity_type]-[granularity].md` (e.g., `project-extract.md`, `contact-capture.md`).
-
-For single-entity domains, template generation is unchanged — one template per granularity mode.
-
-Read `ops/schemas.md` for the approved `_schema` blocks. Use these as the authoritative schema definitions for each note type. Do NOT re-derive schemas from scratch — the user has already reviewed and approved these exact field sets, enums, and constraints.
-
-Read `ops/derivation.md` for domain vocabulary (field labels, note type names) and body structure guidance.
-
-For each granularity subfolder:
-- Use the approved `_schema` block from `ops/schemas.md` verbatim as the template's `_schema` section
-- Read the reference template for body structure (markdown layout below frontmatter)
-- Apply vocabulary transformation to body content and comments — but do not alter the `_schema` field definitions
-- MOC template is granularity-agnostic, adapt vocabulary only
-
-Each template MUST include a `_schema` block defining required fields, optional fields, enums, and constraints. The template IS the single source of truth for schema.
-
-Template structure:
-
-```markdown
----
-_schema:
-  entity_type: "[domain]-note"
-  applies_to: "[domain:notes]/*.md"
-  required:
-    - description
-    - topics
-  optional:
-    - [domain-specific fields based on schema density]
-  enums:
-    type:
-      - [domain-relevant types]
-  constraints:
-    description:
-      max_length: 200
-      format: "One sentence adding context beyond the title"
-    topics:
-      format: "Array of wiki links"
-
-# Template fields
-description: ""
-topics: []
-[domain fields with defaults]
----
-
-# {prose-as-title}
-
-{Content}
-
----
-
-Relevant Notes:
-- [[related note]] -- relationship context
-
-Topics:
-- [[relevant-moc]]
-```
-
-Apply vocabulary transformation to the template: field labels in comments and example values use domain vocabulary. YAML field names stay structural (description, topics, etc.).
 
 ##### Graph Query Scripts (derived from template schemas)
 
@@ -1311,8 +1194,8 @@ After creating templates, read the `_schema` blocks and generate domain-adapted 
 
 **Generation algorithm:**
 
-1. Read all `_schema.required` and `_schema.optional` fields from generated templates
-2. Identify queryable dimensions (fields with enum values, date fields, array fields with wiki links)
+1. Read all `_schema.required` fields from `ops/templates/note.md` (no optional fields exist)
+2. Identify queryable dimensions: `content_type` and `granularity` (enums), `created_at` (date), `tags` (array), plus any Filter-A survivor fields
 3. For each meaningful 2-field combination, generate a ripgrep-based query script:
   - **Cross-reference queries** -- notes sharing one field value but differing on another
   - **Temporal queries** -- items older than N days in a given status
@@ -1979,8 +1862,8 @@ Run all 15 primitive checks against the generated system. Use `${CLAUDE_PLUGIN_R
 3. **moc-hierarchy** -- At least 3 MOCs exist, every note appears in at least one MOC?
 4. **tree-injection** -- Session start procedure loads file structure? (hook or context file instruction)
 5. **description-field** -- Every note has a description field that differs from the title? (>95%)
-6. **topics-footer** -- Topics field present on every non-MOC note? (>95%)
-7. **schema-enforcement** -- Templates exist as single source of truth, validation mechanism present?
+6. **topics-footer** -- `tags` array and body-level `Topics:` footer present on every non-MOC note? (>95%)
+7. **schema-enforcement** -- `ops/templates/note.md` exists as the single source of truth; every note carries the six required fields (title, content_type, granularity, description, created_at, tags).
 8. **semantic-search** -- Configured or documented for future activation?
 9. **self-space** -- self/ exists with identity.md, methodology.md, goals.md?
 10. **session-rhythm** -- Context file references ops/features/session-rhythm.md for orient/work/persist cycle?
@@ -1994,8 +1877,8 @@ Report results: pass/fail per primitive with specific failures listed.
 
 After kernel validation, run a functional test:
 
-1. Create a test note in [domain:notes]/ with a sample title and description
-2. Verify it has correct schema (description, topics)
+1. Create a test note in [domain:notes]/ with all six required fields
+2. Verify frontmatter matches ops/templates/note.md schema (title, content_type, granularity, description, created_at, tags present)
 3. Verify the hub MOC can reference it
 4. Delete the test note and clean up
 

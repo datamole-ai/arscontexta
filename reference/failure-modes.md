@@ -30,7 +30,7 @@ How knowledge systems die. The init wizard uses this to include domain-specific 
 
 **Why it happens:** Creation feels complete without connection. The reflect phase gets skipped "just this once" which becomes always.
 
-**Vulnerable domains:** Research, Learning — high creation volume without mandatory connection.
+**Vulnerable domains:** Research, Learning — high creation rate without mandatory connection.
 
 **Prevention:**
 - Mandatory reflect phase after every note creation

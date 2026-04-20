@@ -55,7 +55,7 @@ Which research claims inform which configuration dimensions. The derivation engi
 | spaced repetition scheduling could optimize vault maintenance | Front-loaded review intervals | Scheduling pattern |
 | derived systems follow a seed-evolve-reseed lifecycle | Minimum viable → friction-driven → principled restructuring | Evolution pattern |
 
-**Default position:** Condition-based for all domains. High-volume active domains use tight thresholds (low orphan/inbox tolerance). Stable reference domains use lax thresholds. Threshold sensitivity scales with the domain's rate of change.
+**Default position:** Condition-based for all domains with tight thresholds (low orphan/inbox tolerance). Agent processing speed makes tight thresholds the appropriate default regardless of domain rate of change.
 
 ---
 
@@ -77,8 +77,6 @@ Which research claims inform which configuration dimensions. The derivation engi
 
 | Interaction | Claim | Effect |
 |-------------|-------|--------|
-| Volume → Navigation | small-world topology requires hubs | Large vaults need deeper navigation |
-| Volume → Maintenance | random note resurfacing prevents write-only memory | Large vaults need more frequent maintenance |
 
 ---
 

@@ -196,11 +196,9 @@ For each field in `_schema.required` that is not already filled by the prescript
 - Read the field's valid values from `_schema.enums` (if it is an enum)
 - Produce a value that satisfies all constraints, derived from the task file context
 
-For each field in `_schema.optional`:
-- Include it ONLY when the task file content provides a clear value
-- Do NOT add optional fields with placeholder or default values just to fill them
+There are no optional fields. Every field in `_schema.required` must be filled. If a value cannot be derived from the task file context, fall back to the field's documented default (e.g. `tags: []`) rather than omitting the field.
 
-**Enum fields:** Use ONLY values listed in `_schema.enums`. Never invent new enum values. If no listed value fits, omit the field (if optional) or choose the closest match and flag this in observations (if required).
+**Enum fields:** Use ONLY values listed in `_schema.enums`. Never invent new enum values. If no listed value fits, choose the closest match and flag this in observations.
 
 **Constrained fields:** Respect `_schema.constraints`:
 - `max_length` — do not exceed the character limit

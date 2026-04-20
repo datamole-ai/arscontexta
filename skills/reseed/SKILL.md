@@ -183,7 +183,6 @@ Apply the full coherence validation from `${CLAUDE_PLUGIN_ROOT}/reference/intera
 For each hard constraint, evaluate the re-derived configuration. If violated, the re-derivation must be adjusted before proceeding.
 
 Hard constraints:
-- `atomic + navigation_depth == "2-tier" + volume > 100` -- navigational vertigo
 - `processing == "heavy" + automation == "manual" + no_pipeline_skills` -- unsustainable
 
 ### Pass 2: Soft constraint check

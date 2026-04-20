@@ -57,8 +57,8 @@ Nine tests that verify the derivation engine produces coherent, functional syste
 | Dimension | Value | Rationale |
 |-----------|-------|-----------|
 | Organization | flat | Same benefit as research: reflections aren't categories, they're connected experiences |
-| Linking | explicit | Direct connections between reflections (no semantic search initially — volume is low) |
-| Nav depth | 2-tier | Hub → topic MOCs (moods, triggers, patterns, growth areas). Volume stays moderate. |
+| Linking | explicit | Direct connections between reflections suffice given explicit linking choice |
+| Nav depth | 2-tier | Hub → topic MOCs (moods, triggers, patterns, growth areas). |
 | Maintenance | condition-based (tight) | Review triggered by observation/tension thresholds. Therapy's value comes from revisiting, not accumulating. |
 | Schema | moderate | Mood, trigger, and pattern fields make reflections queryable. Not dense — just enough for retrieval. |
 
@@ -66,8 +66,6 @@ Nine tests that verify the derivation engine produces coherent, functional syste
 
 **Interaction constraint check:**
 - Moderate schema + convention: coherent (manageable without automated validation)
-- Explicit linking + no semantic search: coherent at low volume (<100 notes). WARN: add semantic search if collection grows.
-- 2-tier navigation + flat: coherent at moderate volume
 
 **Vocabulary mapping:**
 
@@ -149,7 +147,6 @@ _schema:
 **Natural pipeline fit:** /structure — matchup strategies require analysis and organization across multiple facets (character, stage, openings, punishes); /structure's synthesis step surfaces patterns across accumulated notes rather than extracting from a single source.
 
 **Interaction constraint check:**
-- 3-tier navigation + moderate volume: coherent (gaming domains generate lots of matchup-specific notes)
 - Tight condition thresholds + temporal dynamics: coherent (meta shifts frequently in competitive games, tight thresholds catch staleness quickly)
 - Explicit+implicit linking + semantic search required: need to configure qmd or equivalent. WARN if not set up.
 
@@ -269,8 +266,7 @@ _schema:
 | # | Violated Rule | Type | Explanation |
 |---|--------------|------|-------------|
 | 1 | `schema == "dense" + no validation hooks` | WARN | Dense schemas without automated validation create unsustainable maintenance burden — required fields go unchecked, populating correctly requires discipline the system does not enforce |
-| 2 | `navigation == "4-tier" + organization == "flat" + likely low volume` | WARN | Flat organization implies modest note volume. 4-tier navigation for a small collection is over-engineering — three layers of MOCs pointing to a handful of notes adds overhead without navigation benefit |
-| 3 | `maintenance == "very lax"` (compounding) | WARN | Very lax maintenance thresholds mean connections are rarely reviewed and the system drifts toward stagnation. Compounds with dense schema: fields grow stale without regular triage |
+| 2 | `maintenance == "very lax"` (compounding) | WARN | Very lax maintenance thresholds mean connections are rarely reviewed and the system drifts toward stagnation. Compounds with dense schema: fields grow stale without regular triage |
 
 **Constraint system response:**
 
@@ -279,17 +275,15 @@ The constraint system is productive, not just prohibitive. For each violation, i
 | Violation | Recommendation | Rationale |
 |-----------|---------------|-----------|
 | Dense schema + no validation hooks | Reduce schema to moderate OR add validation scripts | Dense schema without automated validation means required fields will be missing on 30%+ of notes within 2 months |
-| 4-tier navigation + flat organization + low volume | Reduce to 2-tier — hub → topic areas. Flat organization with modest volume means fewer notes, fewer notes means simpler navigation suffices | A 4-tier hierarchy for 40 documents means each MOC has 3-5 links — not enough to justify the navigation overhead |
 | Very lax maintenance thresholds | Tighten condition thresholds to at least lax — very lax leaves the system stagnant | Without active maintenance conditions, disconnected notes accumulate and schema fields go stale |
 
 **Corrected configuration after applying recommendations:**
 
 | Dimension | Original | Corrected | Change Reason |
 |-----------|----------|-----------|---------------|
-| Schema | dense | moderate | Reduced to match available validation and expected volume |
-| Navigation | 4-tier | 2-tier | Reduced to match expected note volume |
+| Schema | dense | moderate | Reduced to match available validation |
 | Organization | flat | flat | No change — coherent |
-| Linking | explicit only | explicit only | No change — coherent with low volume |
+| Linking | explicit only | explicit only | No change — coherent |
 | Maintenance | condition-based (very lax) | condition-based (lax) | Thresholds tightened to prevent stagnation |
 
 **Post-correction constraint check:** Zero violations. The corrected configuration is internally consistent.
@@ -373,7 +367,7 @@ In v1.6, all vaults ship with full automation from day one. There are no tier bo
 |------------|----------|------------------|
 | 0-5 | Initial capture, first concepts | Full system operational. All skills available. Templates enforce schema. Hooks automate orientation. |
 | 5-15 | Regular capture, first MOC created | Hub MOC appears naturally. Agent creates topic MOCs as clusters emerge. Condition-based maintenance has nothing to fire yet. |
-| 15-50 | Steady growth, processing routine | Processing pipeline handles volume. Condition-based hooks begin evaluating state but most thresholds not yet reached. |
+| 15-50 | Steady growth, processing routine | Processing pipeline handles incoming notes. Condition-based hooks begin evaluating state but most thresholds not yet reached. |
 | 50-100 | Accelerating growth | Semantic search becomes increasingly valuable. Condition-based triggers begin firing (orphan detection, MOC size thresholds). /next surfaces maintenance tasks. |
 | 100-150 | Full pipeline operation | Sub-MOCs emerge as topic MOCs exceed configured thresholds. Orchestration handles batch processing with fresh context per phase. |
 | 150+ | Mature system | Evolution is within the configuration: better skill instructions, richer schemas, more sophisticated orchestration. Reseed may be triggered by accumulated drift. |
@@ -442,10 +436,9 @@ Create 6 tensions to test contradiction detection:
 |---|--------------|----------|------------------|
 | 1 | "atomic granularity conflicts with compound reflection needs" | `[[granularity]]`, `[[therapy preset]]` | ops/tensions/ |
 | 2 | "heavy processing overhead versus light capture friction" | `[[processing]]`, `[[capture]]` | ops/tensions/ |
-| 3 | "semantic search value at low volume is unproven" | `[[semantic search]]`, `[[tier boundaries]]` | ops/tensions/ |
-| 4 | "MOC split threshold varies by domain — 40 for research, 25 for therapy" | `[[MOC hierarchy]]`, `[[use-case presets]]` | ops/tensions/ |
-| 5 | "discovery-first gate slows capture when speed matters" | `[[discovery-first]]`, `[[capture friction]]` | ops/tensions/ |
-| 6 | "convention automation degrades with context length but hooks add platform dependency" | `[[automation]]`, `[[platform tiers]]` | ops/tensions/ |
+| 3 | "MOC split threshold varies by domain — 40 for research, 25 for therapy" | `[[MOC hierarchy]]`, `[[use-case presets]]` | ops/tensions/ |
+| 4 | "discovery-first gate slows capture when speed matters" | `[[discovery-first]]`, `[[capture friction]]` | ops/tensions/ |
+| 5 | "convention automation degrades with context length but hooks add platform dependency" | `[[automation]]`, `[[platform tiers]]` | ops/tensions/ |
 
 **Capture validation:**
 - Each tension has YAML frontmatter: `description`, `observed`, `involves` (wiki links to notes in tension), `status: pending`
@@ -455,14 +448,14 @@ Create 6 tensions to test contradiction detection:
 
 **Phase 3: Threshold Detection**
 
-With 12 pending observations (exceeds threshold of 10) and 6 pending tensions (exceeds threshold of 5):
+With 12 pending observations (exceeds threshold of 10) and 5 pending tensions (meets threshold of 5):
 
 | Check | Threshold | Actual | Triggered? |
 |-------|-----------|--------|------------|
 | Pending observations | >= 10 | 12 | YES |
-| Pending tensions | >= 5 | 6 | YES |
+| Pending tensions | >= 5 | 5 | YES |
 
-**Expected behavior:** Session-start orientation surfaces the suggestion: "12 pending observations and 6 pending tensions exceed review thresholds. Consider running /rethink."
+**Expected behavior:** Session-start orientation surfaces the suggestion: "12 pending observations and 5 pending tensions meet review thresholds. Consider running /rethink."
 
 **Phase 4: Triage via /rethink**
 
@@ -489,8 +482,7 @@ Each pending observation receives one of four dispositions:
 | Tension | Disposition | Rationale |
 |---------|------------|-----------|
 | #1 (atomic vs compound) | Resolved → create resolution note | The design dimensions framework already addresses this — link to existing note |
-| #3 (semantic search at low volume) | Dissolved | Condition-based maintenance handles this — semantic search activates at friction, not at note count |
-| #5 (discovery-first vs capture speed) | Keep pending | Genuine unresolved tension — needs more operational data |
+| #4 (discovery-first vs capture speed) | Keep pending | Genuine unresolved tension — needs more operational data |
 
 **Phase 5: Status Lifecycle Verification**
 

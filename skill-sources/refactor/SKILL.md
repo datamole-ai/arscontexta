@@ -153,7 +153,7 @@ For content-impacting changes:
 Read `${CLAUDE_PLUGIN_ROOT}/reference/interaction-constraints.md` and check:
 
 1. **Hard blocks:** Would the new configuration create a combination that WILL fail?
-   - Example: atomic granularity + 2-tier navigation at high volume
+   - Example: explicit+implicit linking without a semantic-search tool configured
    - If a hard block is detected: WARN the user and recommend against the change
 
 2. **Soft warns:** What friction points does the new configuration create?

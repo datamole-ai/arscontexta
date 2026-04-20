@@ -212,14 +212,14 @@ For each of the 8 configuration dimensions, determine the recommended position:
 
 **Linking** — explicit / explicit+implicit
 - Key signals: platform capabilities, scale, discovery needs
-- Explicit only: simple systems, human-maintained, low volume
+- Explicit only: simple systems, manual maintenance fits the domain register
 - Explicit+implicit: semantic search available, agent-operated, discovery-focused
 
 **Processing** — heavy / moderate / light
 - Key signals: content type, time budget, value of deep analysis
 - Heavy: research, argument-building, agent-operated
 - Moderate: mixed content, balanced effort
-- Light: quick capture, high volume, low ceremony
+- Light: quick capture, low ceremony
 
 **Navigation** — 2-tier / 3-tier / 4-tier
 - Key signals: expected scale, domain complexity
@@ -229,8 +229,7 @@ For each of the 8 configuration dimensions, determine the recommended position:
 
 **Maintenance** — condition-based (tight) / condition-based (lax) / manual
 - Key signals: operator type, automation level, system criticality, rate of change
-- Condition-based (tight thresholds): high-volume, agent-operated, fast-changing domains
-- Condition-based (lax thresholds): low-volume, stable domains
+- Condition-based (tight thresholds): agent-operated, fast-changing domains
 - Manual: minimal ceremony, on-demand only
 
 **Schema** — minimal / moderate / dense
@@ -267,12 +266,7 @@ Read `${CLAUDE_PLUGIN_ROOT}/reference/interaction-constraints.md`.
 
 Test the proposed 8-dimension configuration against all hard block rules. Hard blocks are combinations that WILL fail:
 
-```
-Example hard block:
-  granularity: atomic + navigation: 2-tier
-  At high volume (200+ notes), atomic granularity with only 2 tiers
-  creates navigational vertigo — too many notes per MOC.
-```
+- Atomic granularity with only 2 tiers is a cross-cutting concern; prefer 3-tier navigation when atomic granularity is chosen
 
 If a hard block fires:
 1. Identify which dimensions conflict

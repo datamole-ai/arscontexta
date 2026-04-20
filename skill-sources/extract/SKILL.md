@@ -11,8 +11,7 @@ allowed-tools: Read, Write, Grep, Glob, mcp__qmd__query
 Read these files to configure domain-specific behavior:
 
 1. **`ops/derivation-manifest.md`** — vocabulary mapping, extraction categories, platform hints
-   - Use `vocabulary.note_collection` for the note collection directory
-   - If `entity_directories` section exists in manifest, read it for entity-type routing
+   - Use `vocabulary.note_collection` for the flat note collection directory (all notes live here regardless of `content_type` or `granularity`)
    - Use `vocabulary.inbox` for the inbox folder name
    - Use `vocabulary.note` for the note type name in output
    - Use `vocabulary.note_plural` for the plural form
@@ -440,13 +439,16 @@ Bad: "context management strategies" (topic label, not a claim)
 
 **b. Write the {vocabulary.note}**
 
+Use the unified note template at `ops/templates/note.md`. Every extracted note carries the six required frontmatter fields — `content_type`, `granularity`, `description`, `created_at`, `tags` — plus any Filter-A survivor fields the vault defined in `ops/schemas.md`. `content_type` is set from the user's directive or derived from content (matching the vault's `content_type` enum); `granularity` is always `extract` for notes produced by this skill.
+
 ```markdown
 ---
-description: [~150 chars elaborating the claim, adds info beyond title]
+content_type: [one of the vault's content_type enum values]
 granularity: extract
-type: [claim | methodology | problem | learning | tension]
-created: YYYY-MM-DD
-[domain-specific fields from derivation-manifest]
+description: [~150 chars elaborating the claim, adds info beyond title]
+created_at: YYYY-MM-DD
+tags: []
+[any Filter-A survivor fields from ops/schemas.md]
 ---
 
 # [prose-as-title proposition]
@@ -472,6 +474,8 @@ Topics:
 **c. Verify before writing**
 
 - Title passes the claim test ("this {vocabulary.note} argues that [title]")
+- All five required frontmatter fields present (`content_type`, `granularity: extract`, `description`, `created_at`, `tags`), plus any Filter-A survivor fields from `ops/schemas.md`
+- `content_type` is one of the vault's enum values
 - Description adds information beyond the title (not a restatement)
 - Body shows reasoning, not just assertion
 - At least one relevant {vocabulary.note} connection identified
@@ -480,7 +484,7 @@ Topics:
 
 **d. Create the file**
 
-Write to: `{vocabulary.note_collection}/[title].md` (single-entity) or `{vocabulary.note_collection}/[entity_dir]/[title].md` (multi-entity, routed by the note's entity_type matching an entity_directories entry)
+Write to the flat collection: `{vocabulary.note_collection}/[title].md`. The vault is flat by default — every note, regardless of `content_type` or `granularity`, lives directly under `{vocabulary.note_collection}/`. Pipelines and downstream skills route by the `granularity: extract` frontmatter value, not by path. Do NOT create or use `extract/`, per-entity-type, or per-content-type subdirectories.
 
 ---
 

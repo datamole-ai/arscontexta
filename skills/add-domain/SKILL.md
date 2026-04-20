@@ -100,7 +100,6 @@ As the user responds, extract signals for domain-adjustable dimensions:
 | "Need to find patterns across entries" | Linking | explicit+implicit |
 
 Also extract:
-- **Volume estimate** -- how many notes per processing batch
 - **Temporal dynamics** -- how fast does content change
 - **Vocabulary** -- the user's own words for notes, processes, organization
 - **Cross-domain relationship** -- how this connects to existing domain(s)
@@ -242,7 +241,7 @@ Folder structure:
 - Hub MOC (index.md): add [new domain] section with link to [[domain-index]]
 - Cross-domain links: [new domain] notes can link to [existing domain] notes and vice versa
 - Shared infrastructure: self/, ops/, templates/ remain shared
-- Semantic search: [new collection added / not needed at current volume]
+- Semantic search: [new collection added]
 
 --- What does NOT change ---
 

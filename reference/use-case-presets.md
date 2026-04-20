@@ -210,10 +210,8 @@ Listen for signals in the user's description and follow-up answers. Each signal 
 
 | Signal Type | Examples | Maps To |
 |-------------|---------|---------|
-| Volume indicators | "5-10 papers/week", "2-3 books/month" | Volume projection, navigation, maintenance |
 | Processing verbs | "track claims", "remember reactions", "document decisions" | Granularity, processing intensity |
 | Connection words | "across disciplines", "between projects", "patterns" | Linking philosophy, semantic search need |
-| Frequency indicators | "a few times a week", "whenever I have a session", "after each project" | Maintenance trigger signals |
 | Domain markers | "research papers", "personal growth", "relationships" | Closest preset match |
 | Emotional register | "feel seen", "like a friend", "professional" | Personality dimensions |
 | Design curiosity | "understand trade-offs", "custom", "unusual domain" | Experimental preset signal |
@@ -325,8 +323,8 @@ Novel domains often need schema fields that no preset provides. Derive them from
 | Organization | Flat | Wines cross regions and varietals |
 | Linking | Explicit | Direct connections: "this Barolo reminded me of that Nebbiolo" |
 | Processing | Light | Capture tasting notes, connect to similar wines |
-| Session | Continuous | Low volume, ongoing |
-| Maintenance | Condition-based | Low volume — review when 5+ unconnected tasting notes accumulate |
+| Session | Continuous | Ongoing tasting notes accumulate over time |
+| Maintenance | Condition-based | Review when 5+ unconnected tasting notes accumulate |
 | Search | Moderate | Structured fields for filtering + semantic for "wines like this" |
 | Automation | Convention | Light overhead |
 
