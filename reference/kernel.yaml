@@ -73,15 +73,15 @@ primitives:
     cognitive_grounding: "Bidirectional navigation — MOCs link down to notes, notes link up to MOCs"
 
   - id: schema-enforcement
-    name: Schema enforcement via validation
-    description: One unified template (`ops/templates/note.md`) defines the six required fields plus any Filter-A survivors. Validation checks notes against that template. No optional fields exist — every field in the template is required.
+    name: Schema enforcement via templates
+    description: One unified template (`ops/templates/note.md`) defines the six required fields plus any Filter-A survivors. Enforcement is template-driven — skills that create notes copy the template and populate every required field. No runtime validation hook is required. No optional fields exist.
     layer: convention
     requires: markdown-yaml
     enforcement: invariant
-    implementation: Hook-based validation (PostToolUse event)
     validation:
-      check: "`ops/templates/note.md` exists as the single source of truth. Validation catches missing required fields (title, content_type, granularity, description, created_at, tags, plus any Filter-A survivors)."
-    cognitive_grounding: "Instruction compliance degrades as context fills — deterministic validation catches what instruction-following misses"
+      check: "every note's frontmatter includes all fields declared in ops/templates/note.md _schema.required:"
+      threshold: ">95% of notes"
+    cognitive_grounding: "Template-as-contract — the shape of the template is the schema; skills that create notes reproduce that shape rather than relying on external validation"
 
   - id: self-space
     name: Self space for agent persistent memory

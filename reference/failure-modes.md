@@ -186,27 +186,6 @@ How knowledge systems die. The init wizard uses this to include domain-specific 
 
 ---
 
-## Domain Vulnerability Matrix
-
-Which failure modes are highest risk per use case. Select the top 3-4 for inclusion in the generated context file's "Common Pitfalls" section.
-
-| Failure Mode | Research | Learning | Therapy | Relationships | Creative | PM | Companion |
-|-------------|----------|----------|---------|---------------|----------|-----|-----------|
-| Collector's Fallacy | HIGH | HIGH | medium | low | medium | medium | low |
-| Orphan Drift | HIGH | HIGH | medium | low | medium | low | low |
-| Link Rot | medium | medium | low | low | medium | low | low |
-| Schema Erosion | medium | medium | medium | medium | low | medium | low |
-| MOC Sprawl | HIGH | medium | low | low | medium | low | low |
-| Verbatim Risk | HIGH | HIGH | low | low | low | low | low |
-| Cognitive Outsourcing | HIGH | medium | HIGH | low | medium | low | medium |
-| Over-Automation | medium | medium | medium | low | low | medium | low |
-| Productivity Porn | HIGH | medium | low | low | medium | HIGH | low |
-| Temporal Staleness | low | medium | low | low | low | HIGH | low |
-
-**Reading the matrix:** Include all HIGH-risk modes in the generated context file. Mention medium-risk modes briefly. Omit low-risk modes.
-
----
-
 ## Integration with Init
 
 When generating a context file in Step 5b, include a "Common Pitfalls" section:
@@ -233,3 +212,24 @@ Summarizing a source is not the same as extracting a claim. Each note must trans
 ### Productivity Porn
 It's tempting to keep perfecting the system instead of using it. The vault serves the research, not the other way around. If you're spending more time on methodology than on claims, recalibrate.
 ```
+
+---
+
+## Domain Vulnerability Matrix
+
+Which failure modes hit which preset hardest. The setup derivation engine reads this matrix in Phase 3d to flag HIGH-risk failure modes for inclusion in the generated vault's "Common Pitfalls" section.
+
+| Failure Mode          | Research | Learning | Therapy | Relationships | Creative | PM     | Companion |
+| --------------------- | -------- | -------- | ------- | ------------- | -------- | ------ | --------- |
+| Collector's Fallacy   | HIGH     | HIGH     | medium  | low           | medium   | medium | low       |
+| Orphan Drift          | HIGH     | HIGH     | medium  | low           | medium   | low    | low       |
+| Link Rot              | medium   | medium   | low     | low           | medium   | low    | low       |
+| Schema Erosion        | medium   | medium   | medium  | medium        | low      | medium | low       |
+| MOC Sprawl            | HIGH     | medium   | low     | low           | medium   | low    | low       |
+| Verbatim Risk         | HIGH     | HIGH     | low     | low           | low      | low    | low       |
+| Cognitive Outsourcing | HIGH     | medium   | HIGH    | low           | medium   | low    | medium    |
+| Over-Automation       | medium   | medium   | medium  | low           | low      | medium | low       |
+| Productivity Porn     | HIGH     | medium   | low     | low           | medium   | HIGH   | low       |
+| Temporal Staleness    | low      | medium   | low     | low           | low      | HIGH   | low       |
+
+**How Phase 3d uses this:** For the preset matched in Step 3a (or the top two presets for novel domains, unioned), flag all HIGH-risk modes. Include those in the generated CLAUDE.md's "Common Pitfalls" section using the prevention patterns, warning signs, and domain-specific descriptions from the per-failure-mode sections above. Mention medium-risk modes briefly. Omit low-risk modes.

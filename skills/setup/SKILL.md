@@ -20,8 +20,8 @@ Read these files to understand the methodology and available components. Read th
 
 **Deferred references (read at specific steps, not upfront):**
 
-- `${CLAUDE_PLUGIN_ROOT}/reference/use-case-presets.md` -- read in Step 3c (only the matched preset section)
-- `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md` -- read in Step 3e (only HIGH-risk failure mode sections identified by the inlined matrix)
+- `${CLAUDE_PLUGIN_ROOT}/reference/use-case-presets.md` -- read in Step 3a (only the matched preset section)
+- `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md` -- read in Step 3d (Domain Vulnerability Matrix plus the HIGH-risk per-failure-mode sections it surfaces)
 - `${CLAUDE_PLUGIN_ROOT}/reference/three-spaces.md` -- not needed; folder structure is fully specified in Pipeline Step 1
 - `${CLAUDE_PLUGIN_ROOT}/reference/conversation-patterns.md` -- consult only if derivation is ambiguous and worked examples would help
 
@@ -119,68 +119,18 @@ The conversation focuses on understanding the user's domain and needs. Users adj
 
 ### Signal Extraction
 
-As the user talks, passively extract signals for dimensions. Do not ask about dimensions directly. Listen for them in natural conversation. Record each signal with its confidence level.
-
-**Confidence scoring:**
-
-
-| Level    | Weight | Criteria                                                          | Example                                            |
-| -------- | ------ | ----------------------------------------------------------------- | -------------------------------------------------- |
-| HIGH     | 1.0    | Explicit statement, domain-specific language, concrete examples   | "I group claims from papers into structured notes" |
-| MEDIUM   | 0.6    | Implicit tone, general preference, domain defaults                | "I like to organize things"                        |
-| LOW      | 0.3    | Ambiguous phrasing, contradicted by other signals, single mention | "I want to track everything"                       |
-
-
-**Dimension resolution threshold:** A dimension is "resolved" when cumulative confidence from all its signals exceeds 1.5. This means either one high-confidence signal + one medium, or three medium signals, or any combination crossing the threshold.
-
-**Signal pattern table:**
-
-
-| Signal Pattern                           | Dimension / Pipeline Fit                        | Confidence |
-| ---------------------------------------- | ----------------------------------------------- | ---------- |
-| "Claims from papers"                     | /structure pipeline fit                         | High       |
-| "Track my reflections"                   | /structure pipeline fit                         | High       |
-| "Log what happened"                      | /capture pipeline fit                           | High       |
-| "Connections between ideas"              | Explicit linking                                | High       |
-| "Across disciplines"                     | Semantic search need                            | High       |
-| "I process a few a week"                 | /capture or /structure pipeline fit             | High       |
-| "Batch process research"                 | /structure pipeline fit, dense schema           | High       |
-| "I read a lot and forget"                | /structure pipeline fit                         | Medium     |
-| "Small precise insights"                 | /structure pipeline fit                         | High       |
-| "Multiple projects"                      | Multi-domain potential                          | High       |
-| "Track people"                           | Entity tracking module                          | High       |
-| "I want rigor"                           | /structure pipeline fit, dense schema           | High       |
-| "Low ceremony"                           | /capture pipeline fit, minimal schema           | High       |
-| "Personal journal"                       | /structure or /capture pipeline fit             | Medium     |
-| "Academic research"                      | /structure pipeline fit, semantic search        | High       |
-| "Therapy sessions"                       | /structure pipeline fit                         | High       |
-| "Project decisions"                      | Decision-centric, temporal tracking             | High       |
-| "Creative worldbuilding"                 | /structure pipeline fit, heavy linking          | Medium     |
-| "Book notes"                             | /structure pipeline fit                         | Medium     |
-| "Track family/friends"                   | Entity MOCs, emotional context schema           | High       |
-| "I revisit old notes often"              | Heavy maintenance, reweaving needed             | Medium     |
-| "I never go back to old stuff"           | Light maintenance                               | High       |
-| "Too much structure kills flow"          | /capture pipeline fit, minimal schema           | High       |
-| "I want the system to surprise me"       | Semantic search, dense linking                  | Medium     |
-| "Just keep it simple"                    | /capture pipeline fit, minimal schema, flat nav | Medium     |
-| "Quick capture, think later"             | Temporal separation, pipeline needed            | Medium     |
-| "Tags not folders"                       | Flat organization, faceted metadata             | High       |
-| "I work across 5+ projects"              | Multi-domain, dense schema                      | High       |
-| "I hate losing context between sessions" | Session handoff, strong orient phase            | High       |
-| "AI should handle the organizing"        | Full automation                                 | High       |
-| "I want full control"                    | Manual/convention, light automation             | High       |
-
+As the user talks, listen for four kinds of signal: **domain vocabulary** (how they name kinds of notes), **candidate fields** (things they say they track), **candidate directories** (groupings they name explicitly), and **failure-mode risks** (habits that suggest common pitfalls, e.g. "I read a lot and forget"). These feed vocabulary derivation and the Filter A/B inputs in Phase 3. Dimensions are NOT inferred from signals — they default to opinionated best practices (see the table above) and the user tunes them post-setup via `ops/config.yaml`.
 
 **Anti-signals -- patterns that seem like signals but mislead:**
 
 
-| Anti-Signal                         | What It Seems Like        | What It Actually Means                          | Correct Response                                                      |
-| ----------------------------------- | ------------------------- | ----------------------------------------------- | --------------------------------------------------------------------- |
-| "I want Zettelkasten"               | /structure pipeline fit   | User may want the label, not the discipline     | Ask: "Walk me through your last week of note-taking"                  |
-| "Make it like Obsidian"             | Specific tool request     | User wants a navigation feel, not a methodology | Ask: "What do you like about Obsidian?"                               |
-| "I need AI to think for me"         | Full automation           | Cognitive outsourcing risk                      | Probe: "What do you want to decide vs what should the system handle?" |
-| "Everything connects to everything" | Dense linking             | Undifferentiated linking desire                 | Ask for a specific example of two things that connect                 |
-| "I've tried everything"             | No clear signal           | PKM failure cycle -- needs simple start         | Start with minimal config, friction-driven adoption                   |
+| Phrase                              | Risk                                            | Probe                                                                 |
+| ----------------------------------- | ----------------------------------------------- | --------------------------------------------------------------------- |
+| "I want Zettelkasten"               | User may want the label, not the discipline     | Ask: "Walk me through your last week of note-taking"                  |
+| "Make it like Obsidian"             | User wants a navigation feel, not a methodology | Ask: "What do you like about Obsidian?"                               |
+| "I need AI to think for me"         | Cognitive outsourcing risk                      | Probe: "What do you want to decide vs what should the system handle?" |
+| "Everything connects to everything" | Undifferentiated linking desire                 | Ask for a specific example of two things that connect                 |
+| "I've tried everything"             | PKM failure cycle — needs simple start          | Start with minimal config, friction-driven adoption                   |
 
 
 ### Vocabulary Extraction
@@ -214,48 +164,9 @@ Do NOT ask:
 
 These are configuration questions that create paralysis. Defaults handle them.
 
-**Follow-up question priority (when dimensions are unresolved):**
+### Proceeding to Phase 3
 
-1. Organization -- affects folder structure and navigation
-2. Linking -- affects connection density
-3. Navigation depth -- affects MOC generation
-4. Schema density -- affects template complexity
-5. Maintenance triggers -- lowest priority, easily adjusted post-deployment
-
-### Completeness Detection
-
-After each turn, evaluate which completeness condition is met:
-
-1. **All resolved:** All 5 dimensions have cumulative confidence >= 1.5 from signals. Proceed to Phase 3 immediately.
-2. **Mostly resolved:** At least 4 dimensions resolved, remaining 1 tentative (confidence >= 0.6). Proceed with cascade filling tentative dimensions.
-3. **Turn limit:** After 6 conversation turns, proceed regardless. Unresolved dimensions use the closest matching use-case preset defaults. Tentative dimensions use cascade from resolved dimensions.
-4. **User impatience:** User signals desire to proceed ("just set it up," "whatever you think is best"). Use domain defaults for all unresolved dimensions. Log that defaults were used in derivation rationale.
-
-### Conflict Resolution Decision Tree
-
-When two signals point to different positions for the same dimension:
-
-```
-1. Is one signal EXPLICIT and the other IMPLICIT?
-   YES -> Explicit wins.
-         "I group claims from papers" (explicit: /structure pipeline fit) beats
-         casual tone suggesting /capture pipeline fit (implicit).
-
-2. Are both signals the same confidence level?
-   YES -> Does one appear LATER in the conversation?
-         YES -> Later wins. Users refine their thinking as they talk.
-         NO  -> Is one more SPECIFIC than the other?
-               YES -> Specific wins.
-               NO  -> Flag for clarifying question.
-
-3. Is the conflict between a USER SIGNAL and a DOMAIN DEFAULT?
-   YES -> User signal always wins over domain default.
-
-4. Is the conflict between a USER SIGNAL and a CASCADE pressure?
-   YES -> User signal wins, but log a warning in derivation rationale.
-         The coherence validator (Phase 3e) will catch configurations
-         where the user's preference creates constraint violations.
-```
+Proceed when the user signals readiness ("just set it up", "whatever you think is best") OR after 6 conversation turns, whichever comes first. Unresolved vocabulary uses the closest-matching preset. No dimension inference happens at setup.
 
 ---
 
@@ -263,115 +174,26 @@ When two signals point to different positions for the same dimension:
 
 Internal reasoning the user never sees. Do NOT present derivation internals to the user.
 
-### Step 3a: Map Signals to Dimensions
+Every generated vault ships with the complete skill set, full processing pipeline, and all hooks enabled from day one. The steps below determine vault-specific vocabulary and schema — everything else is constant.
 
-For each of 5 dimensions:
-
-- Collect all signals extracted during conversation
-- Sum confidence weights
-- Determine position (resolved if >= 1.5, tentative if >= 0.6, unresolved otherwise)
-- Apply conflict resolution tree if signals conflict
-
-Signals that clearly override defaults get applied. Signals that are ambiguous leave defaults in place.
-
-### Step 3b: Cascade Resolution
-
-Once primary dimensions are set, cascade through interaction constraints (already loaded from upfront reference reads).
-
-For cascaded values: confidence = INFERRED (0.2). User signals ALWAYS override cascade pressure.
-
-### Step 3c: Vocabulary Derivation
+### Step 3a: Vocabulary Derivation
 
 Read `${CLAUDE_PLUGIN_ROOT}/reference/use-case-presets.md` — but only the section for the matched preset (or the two closest presets if blending for a novel domain). Skip unmatched preset sections.
 
 Build the complete vocabulary mapping for all 6 transformation levels (see `${CLAUDE_PLUGIN_ROOT}/reference/vocabulary-transforms.md`):
 
-1. **User's own words** -- highest priority. If they said "book note," use "book note."
-2. **Preset table** -- fallback when user has not named a concept
-3. **Closest reference domain blend** -- for novel domains, blend vocabulary from two closest presets
+1. **User's own words** — highest priority. If they said "book note," use "book note."
+2. **Preset table** — fallback when user has not named a concept.
+3. **Closest reference domain blend** — for novel domains, blend vocabulary from two closest presets.
 
 For novel domains (no preset scores above 2.0 affinity):
 
-1. Score all 3 presets by signal overlap
-2. Select top two presets as blending sources
-3. For each term, use the preset with higher overlap for that specific concept
-4. Flag all blended terms for user confirmation in the proposal
+1. Score all 3 presets by signal overlap.
+2. Select top two presets as blending sources.
+3. For each term, use the preset with higher overlap for that specific concept.
+4. Flag all blended terms for user confirmation in the Phase 4 proposal.
 
-### Step 3d: Coherence Validation (Three-Pass Check)
-
-Run BEFORE proceeding to the proposal. Use the interaction constraints already loaded from upfront reference reads.
-
-**Pass 1 -- Hard constraint check:**
-
-For each hard constraint, evaluate the derived configuration. If violated, BLOCK generation. Explain the conflict to the user in their vocabulary. Ask a targeted resolution question. Re-derive affected dimensions with their answer.
-
-Hard constraints (these produce systems that will fail):
-
-
-**Pass 2 -- Soft constraint check:**
-
-For each soft constraint, evaluate the configuration:
-
-- If violated AND the weaker dimension was set by cascade (not explicit user signal) -> auto-adjust the cascaded value
-- If violated AND both dimensions were user-driven -> present warning with trade-off explanation
-- Record resolution in derivation rationale
-
-Soft constraints:
-
-(none currently defined — soft constraints catalog is empty after volume cascades were removed as part of the agent-first simplification)
-
-**Pass 3 -- Compensating mechanism check:**
-
-For remaining soft violations, check if compensating mechanisms exist:
-
-- Dense schema + no validation hooks -> good templates reduce manual validation burden
-
-Note active compensations in derivation rationale. Flag compensated dimensions for monitoring by health command.
-
-### Step 3e: Failure Mode Risk Assessment
-
-Check the derived configuration against the domain vulnerability matrix below. Flag all HIGH-risk failure modes for this configuration. These get included in the generated context file's "Common Pitfalls" section.
-
-**Domain Vulnerability Matrix:**
-
-
-| Failure Mode          | Research | Learning | Therapy | Relationships | Creative | PM     | Companion |
-| --------------------- | -------- | -------- | ------- | ------------- | -------- | ------ | --------- |
-| Collector's Fallacy   | HIGH     | HIGH     | medium  | low           | medium   | medium | low       |
-| Orphan Drift          | HIGH     | HIGH     | medium  | low           | medium   | low    | low       |
-| Link Rot              | medium   | medium   | low     | low           | medium   | low    | low       |
-| Schema Erosion        | medium   | medium   | medium  | medium        | low      | medium | low       |
-| MOC Sprawl            | HIGH     | medium   | low     | low           | medium   | low    | low       |
-| Verbatim Risk         | HIGH     | HIGH     | low     | low           | low      | low    | low       |
-| Cognitive Outsourcing | HIGH     | medium   | HIGH    | low           | medium   | low    | medium    |
-| Over-Automation       | medium   | medium   | medium  | low           | low      | medium | low       |
-| Productivity Porn     | HIGH     | medium   | low     | low           | medium   | HIGH   | low       |
-| Temporal Staleness    | low      | medium   | low     | low           | low      | HIGH   | low       |
-
-
-Include all HIGH-risk modes in the generated context file. Mention medium-risk modes briefly. Omit low-risk modes.
-
-Read `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md` — but only the sections for HIGH-risk failure modes identified above. Use the prevention patterns, warning signs, and domain-specific descriptions to write the "Common Pitfalls" section in domain-native vocabulary. Skip sections for medium and low-risk modes.
-
-### Step 3f: Full Automation Configuration
-
-All generated systems ship with full automation from day one. Every vault gets the complete skill set and full processing pipeline. Core hooks (orient, validate, commit) are provided by the arscontexta plugin globally.
-
-
-| Component                                 | Notes                                                            |
-| ----------------------------------------- | ---------------------------------------------------------------- |
-| Context file                              | Comprehensive, all sections                                      |
-| 16 processing skills + 10 plugin commands | Processing skills vocabulary-transformed with full quality gates |
-| Plugin hooks (orient, validate, commit)   | Provided by arscontexta plugin globally; vault generates only qmd-sync if semantic search active |
-| Queue system                              | ops/queue/                                                       |
-| Templates                                 | With _schema blocks                                              |
-| Self space (if opted in)                  | self/ or ops/ fallback                                           |
-| Semantic search (if opted in)             | qmd setup                                                        |
-
-
-**Init generates everything by default.** The context file includes all skill documentation.
-
-### Step 3g: Filter A — Fields (Justify-or-Drop)
+### Step 3b: Filter A — Fields (Justify-or-Drop)
 
 Every vault ships with five required frontmatter fields — NO exceptions, NO optional fields:
 
@@ -383,7 +205,7 @@ Every vault ships with five required frontmatter fields — NO exceptions, NO op
 
 **Derive the `content_type` enum from conversation signals.** Listen for how the user names kinds of notes (decisions, specs, reflections, observations, lessons, ...). Three to six values is typical. Keep vault-specific. Never a fixed universal list.
 
-**Then run Filter A on every candidate field beyond the six.** Candidates come from: preset defaults, user statements ("I track status"), conversation signals flagged as HIGH for schema (e.g. "I want rigor" suggesting `confidence` or `source_url`).
+**Then run Filter A on every candidate field beyond the five.** Candidates come from: preset defaults, user statements ("I track status"), conversation signals flagged as HIGH for schema (e.g. "I want rigor" suggesting `confidence` or `source_url`).
 
 For each candidate field, produce three items:
 
@@ -394,13 +216,13 @@ For each candidate field, produce three items:
 **Outcome:**
 
 - All three present, concrete, and day-one → **Keep.** Add to the derived schema with rationale.
-- Any missing, vague, or not day-one → **Defer.** Record in working memory for `ops/deferred.md` with the reason.
+- Any missing, vague, or not day-one → **Defer.** Record in working memory for the Deferred Candidates section of `ops/derivation.md` (written in Phase 5), with the reason.
 
-**Hard rule:** never keep a field "because the preset usually includes it." A preset is a candidate list, not an entitlement. The same rule applies to any field named in the conversation signal table unless the user stated a concrete reader+use.
+**Hard rule:** never keep a field "because the preset usually includes it." A preset is a candidate list, not an entitlement. The same rule applies to any field named in conversation unless the user stated a concrete reader+use.
 
-Hold the derived schema (the six required fields plus any Filter-A survivors with their rationale) and the deferred-field list in working memory for Phase 4.
+Hold the derived schema (the five required fields plus any Filter-A survivors with their rationale) and the deferred-field list in working memory for Phase 4.
 
-### Step 3g-ii: Filter B — Directories (Justify-or-Drop)
+### Step 3c: Filter B — Directories (Justify-or-Drop)
 
 **Default:** flat vault. A single `{vocabulary.note_collection}/` directory holds every note regardless of `content_type`. No entity subdirectories by default.
 
@@ -412,7 +234,7 @@ Collect candidate directories from: preset defaults, explicit user requests, and
 **Outcome:**
 
 - Shared operation + concrete day-one runner → **Keep.**
-- Browsing convenience, "looks tidier", or "humans like folders" → **Defer.**
+- Browsing convenience, "looks tidier", or "humans like folders" → **Defer.** Record in working memory for the Deferred Candidates section of `ops/derivation.md`.
 
 **Expected survivors for most vaults:** zero to one. `moc/` can survive if MOC regeneration is a scheduled operation. `people/`, `projects/`, `daily/` typically do NOT survive — they are browsing groupings.
 
@@ -420,116 +242,52 @@ Collect candidate directories from: preset defaults, explicit user requests, and
 
 Hold the surviving directory list and the deferred-directory list in working memory for Phase 4.
 
+### Step 3d: Failure-Mode Risk Flagging
+
+Read `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md`. The "Domain Vulnerability Matrix" section at the end of that file lists each failure mode against each use-case preset with HIGH/medium/low risk levels.
+
+Using the preset matched in Step 3a (or the top two presets for novel domains, unioned), identify all HIGH-risk failure modes for this vault.
+
+Also read the per-failure-mode sections of `reference/failure-modes.md` for each flagged mode. Use the prevention patterns, warning signs, and domain-specific descriptions to compose a "Common Pitfalls" block in domain-native vocabulary. Mention medium-risk modes briefly. Omit low-risk modes.
+
+Hold the flagged HIGH-risk list and the composed "Common Pitfalls" content in working memory for Phase 4 (shown in the proposal) and Phase 5 (included in the generated CLAUDE.md).
+
 ---
 
 ## PHASE 4: Proposal
 
-Present the derived system and schemas to the user for review. Phase 4 has three sub-sections: system proposal (4a), schema walkthrough (4b), and schema consolidation (4c).
+Present the derived system to the user as a single proposal message with a single approval gate. Use the user's own vocabulary throughout.
 
-### Phase 4a: System Proposal
+### Proposal structure
 
-Present the derived system in concrete terms using the user's own vocabulary. This is the user's chance to adjust the system design before reviewing schemas.
+Show six labeled blocks in one message:
 
-Structure the proposal as:
+1. **Folder structure** — domain-named directories using derived vocabulary. Flat by default: a single `{vocabulary.note_collection}/` holds every note regardless of `content_type` or `granularity`. List any Filter-B survivors (from Step 3c) as additional directories, each with the shared day-one operation that justified it. List deferred directory candidates with the reason each was dropped; invite the user to challenge a drop by naming a concrete day-one reader and use.
 
-1. "Here's the system I'd create for you:"
-2. Folder structure with their domain-named directories. Flat by default: a single `{vocabulary.note_collection}/` holds every note regardless of `content_type` or `granularity`. List any Filter B survivors (Step 3g-ii) as additional directories with the shared day-one operation that justified each. List deferred directory candidates with the reason each was dropped; invite the user to challenge a drop by naming a concrete day-one reader and use.
-3. How their notes work -- with a specific example from their domain using their vocabulary
-4. How processing works, described in their words
-5. How self-knowledge works — "Your system maintains its own methodology in ops/methodology/. Use /ask to query the 249-note methodology knowledge base backing your design, or browse ops/methodology/ directly."
-6. What was intentionally excluded and why
-7. Any high-risk failure modes flagged
+2. **One concrete note example** — a title + frontmatter + short body, using the user's vocabulary and the primary `content_type` they mentioned.
 
-End with: **"Would you like me to adjust anything about the system design?"**
+3. **Processing in their words** — one or two sentences describing the core workflow (capture → process → review). Full detail lives in the generated CLAUDE.md.
 
-Record any user overrides in the derivation rationale. If the user overrides a dimension, re-run the coherence check for affected constraints.
+4. **Schema** — the canonical schema lives in the `_schema:` block of `ops/templates/note.md` (written in Phase 5). In the proposal, show only:
+   - The five required field names as a bullet list: `content_type`, `granularity`, `description`, `created_at`, `tags`.
+   - The `content_type` enum values derived in Step 3b.
+   - Each Filter-A survivor with a one-line rationale: "I kept `<field>` because `<reader>` uses it to `<do what>` on day one."
 
-### Phase 4b: Schema and Deferrals Review
+   Do NOT inline the full YAML here — the canonical location is the template file.
 
-After the user approves the system design, walk through the single schema that Filter A produced, and the deferral lists from Filter A and Filter B. There is no per-granularity or per-content-type walkthrough — one schema covers every note.
+5. **Deferred items** — fields (from Step 3b) and directories (from Step 3c) that Filter A/B dropped, each with its reason. Invite challenge: "If you can name a day-one reader and concrete use for any of these, I'll move it up."
 
-**1. Present the schema** in YAML with inline rationale comments for every field beyond the five required ones:
+6. **Excluded items + failure-mode callouts** — intentional non-inclusions and HIGH-risk failure modes flagged in Step 3d, described in the user's vocabulary.
 
-```yaml
-_schema:
-  required:
-    - content_type   # vault enum; agents route on it
-    - granularity   # structure|capture; pipelines route on it
-    - description   # one sentence, <=200 chars
-    - created_at    # ISO 8601 date
-    - tags          # free-form array, escape hatch
-    # --- Filter-A survivors below (if any) ---
-    # - status      # reweave uses it to filter open {content_type}=decision; day-one
-  enums:
-    granularity: [structure, capture]
-    content_type: [<derived vault enum>]
-```
+End the proposal with: **"Would you like me to adjust anything before I create this?"**
 
-**2. Explain each Filter-A survivor** by naming its reader and use in one sentence: "I kept `status` because `/reweave` filters open decisions by it on day one."
+### Challenge handling
 
-**3. Present the deferred list** — both fields and directories — with the reason each was dropped. Invite challenges: "If you have a day-one reader and use for any of these, tell me and I will move it up."
+- **Deferred item challenged:** Apply the Filter A or Filter B check to the challenged item. If the user names a concrete reader+use that runs day-one, promote to Keep. Otherwise the item stays deferred. No silent additions.
+- **Structural change requested** (e.g. user wants a different folder structure or content_type enum): Apply the change and re-present the proposal. No separate coherence re-check.
+- **Schema field rename/removal:** Apply and update working-memory schema.
 
-**4. Apply the user's challenges.** For each challenge, apply the same Filter A or Filter B check. If the user names a concrete reader+use, move the item to Keep. Otherwise, it stays deferred. No silent additions.
-
-**5. Final approval:** "This is the schema I will use to generate your template. Everything else goes into `ops/deferred.md` for reference. Look good?"
-
-### Write approved schema and deferrals
-
-After the user approves, write two files in the vault directory.
-
-**`ops/schemas.md`:**
-
-```markdown
-# Approved Schema
-
-Single schema for every note in this vault.
-To modify the schema after setup, use `/refactor`.
-
-\`\`\`yaml
-_schema:
-  required:
-    - content_type   # vault enum: [<list>]
-    - granularity   # structure|capture
-    - description   # one sentence, <=200 chars
-    - created_at    # ISO 8601 date
-    - tags          # free-form array
-    # --- Filter-A survivors ---
-    - <field>       # <reader>: <use>
-  enums:
-    granularity: [structure, capture]
-    content_type: [<vault enum values>]
-    # <any other enum fields produced by Filter A>
-  constraints:
-    description: "<=200 chars, no trailing period"
-    created_at: "ISO 8601 date (YYYY-MM-DD)"
-\`\`\`
-
-### Rationale
-- **content_type enum** — derived from: <conversation signals>
-- **<survivor field>** — <reader>: <use>. Why day-one: <reason>.
-```
-
-**`ops/deferred.md`:**
-
-```markdown
-# Deferred Candidates
-
-Items considered during setup but dropped by Filter A (fields) or Filter B (directories). Each has a reason. If a deferred item becomes genuinely needed later (a concrete day-one reader and use emerges), promote it via `/refactor` or a future `/grow` skill.
-
-## Fields deferred
-
-- **<field_name>** — <reason>. Example: proposed by preset default but no day-one reader named.
-
-## Directories deferred
-
-- **<directory_name>** — <reason>. Example: grouped for browsing only; no shared day-one operation.
-```
-
-After writing both files, proceed to the final confirmation:
-
-**"Would you like me to adjust anything before I create this?"**
-
-If the user requests changes, apply them — re-run coherence check if a dimension was overridden, re-run Filter A or Filter B if a field or directory changed, update `ops/schemas.md` and `ops/deferred.md` accordingly.
+No file writes happen in Phase 4. All vault artifacts — including `ops/derivation.md` (which contains the Schema Decisions and Deferred Candidates sections) and `ops/templates/note.md` (which contains the canonical `_schema:` block with Filter-A survivors filled in) — are written in Phase 5.
 
 ---
 
@@ -685,13 +443,49 @@ engine_version: "1.0.0"
 # System Derivation
 
 ## Configuration Dimensions
-| Dimension | Position | Conversation Signal | Confidence |
-|-----------|----------|--------------------|--------------------|
-| Organization | [value] | "[signal]" | [confidence] |
-| Linking | [value] | "[signal]" | [confidence] |
-| Navigation | [value] | "[signal]" | [confidence] |
-| Maintenance | [value] | "[signal]" | [confidence] |
-| Schema | [value] | "[signal]" | [confidence] |
+| Dimension | Position | Conversation Signal (if user override) |
+|-----------|----------|----------------------------------------|
+| Organization | [value] | [signal or "default"] |
+| Linking | [value] | [signal or "default"] |
+| Navigation | [value] | [signal or "default"] |
+| Maintenance | [value] | [signal or "default"] |
+| Schema | [value] | [signal or "default"] |
+
+## Schema Decisions
+
+The canonical schema lives in the `_schema:` block of `ops/templates/note.md`. This section records the decisions that shaped it.
+
+**Required fields (always present):**
+- `content_type` — vault enum below
+- `granularity` — `extract | structure | capture`
+- `description` — one sentence, ≤200 chars
+- `created_at` — ISO 8601 date
+- `tags` — free-form array
+
+**Content_type enum (derived in Step 3b from conversation signals):**
+- [enum_value_1]
+- [enum_value_2]
+- [...]
+
+**Filter-A survivors (fields kept beyond the five required):**
+- [field_name] — kept because [reader] uses it to [do what]; day-one via [skill]. Signal that justified it: "[user phrase]".
+- [...]
+
+If Filter A produced no survivors, record: "None — the five required fields cover this vault."
+
+## Deferred Candidates
+
+Items considered during setup but dropped by Filter A (fields) or Filter B (directories). Each has a reason. If a deferred item becomes genuinely needed later (a concrete day-one reader and use emerges), promote it by editing `ops/templates/note.md` `_schema.required:` (for fields) or by creating the directory and wiring its day-one runner (for directories), and record the promotion in this section.
+
+### Fields deferred
+- **[field_name]** — [reason]. Example: proposed by preset default but no day-one reader named.
+- [...]
+
+### Directories deferred
+- **[directory_name]** — [reason]. Example: grouped for browsing only; no shared day-one operation.
+- [...]
+
+If nothing was deferred, record: "None — every candidate passed its filter."
 
 ## Vocabulary Mapping
 | Universal Term | Domain Term | Category |
@@ -719,11 +513,6 @@ engine_version: "1.0.0"
 - [x] ethical-guardrails -- always included (always)
 [List all conditional blocks with inclusion/exclusion rationale]
 
-## Coherence Validation Results
-- Hard constraints checked: [count]. Violations: [none / details]
-- Soft constraints checked: [count]. Auto-adjusted: [details]. User-confirmed: [details]
-- Compensating mechanisms active: [list or none]
-
 ## Failure Mode Risks
 [Top 3-4 HIGH-risk failure modes for this domain from vulnerability matrix]
 
@@ -745,7 +534,7 @@ This file serves three purposes:
 
 ##### Folder Structure
 
-Create the three-space layout with domain-named directories. The layout is flat by default — Filter B (Step 3g-ii) determines whether any additional content directories survive.
+Create the three-space layout with domain-named directories. The layout is flat by default — Filter B (Step 3c) determines whether any additional content directories survive.
 
 ```
 [workspace]/
@@ -977,7 +766,7 @@ status: active
 ---
 # derivation rationale for {domain}
 
-{Extract from ops/derivation.md the key dimension choices and the conversation signals that drove them. Include: automation level, active feature blocks, and coherence validation results. Write in prose format, not raw transcript — synthesize the reasoning into a readable narrative that future meta-skills can consult.}
+{Extract from ops/derivation.md the key dimension choices and the conversation signals that drove them. Include: automation level, active feature blocks, Filter A/B outcomes, and any flagged failure-mode risks. Write in prose format, not raw transcript — synthesize the reasoning into a readable narrative that future meta-skills can consult.}
 
 ---
 
@@ -1077,8 +866,6 @@ dimensions:
 active_blocks:
   - [list of active feature block IDs]
 
-coherence_result: [passed | passed_with_warnings]
-
 vocabulary:
   # Level 1: Folder names
   note_collection: "<derived note_collection name>"  # e.g., "notes", "knowledge-base", "reflections"
@@ -1122,21 +909,12 @@ vocabulary:
       output_type: "[note type]"
     # ... 4-8 domain-specific categories
 
-  # Filter B survivor directories (only present when Step 3g-ii kept a directory)
+  # Filter B survivor directories (only present when Step 3c kept a directory)
   # filter_b_survivors:
   #   - name: archive
   #     shared_operation: "scheduled archival sweep retires notes where status == closed older than 30 days"
   #     runner: "/{DOMAIN:rethink} archive sweep"
 
-platform_hints:
-  context: fork
-  allowed_tools: [Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion]
-  semantic_search_tool: [mcp__qmd__query | null]  # null when user opts out of semantic search
-  semantic_search_autoapprove:
-    - mcp__qmd__query
-    - mcp__qmd__get
-    - mcp__qmd__multi_get
-    - mcp__qmd__status
 
 ---
 ```
@@ -1146,9 +924,6 @@ platform_hints:
 **Who updates this file:**
 
 - `/setup` generates it
-- `/reseed` regenerates it after re-derivation
-- `/architect` updates it when implementing approved changes
-- `/add-domain` extends it with new domain vocabulary
 
 ---
 
@@ -1156,7 +931,7 @@ platform_hints:
 
 **Agent scope:** templates/*.md, ops/queries/*.sh
 
-**Agent reads:** ops/derivation.md, ops/schemas.md
+**Agent reads:** ops/derivation.md
 
 **Internal ordering:** Create templates first, then generate query scripts from the template `_schema` blocks.
 
@@ -1168,7 +943,7 @@ The following step instructions are passed verbatim to Agent 1 via the agent pro
 
 Create exactly one template file: `ops/templates/note.md`. Every note in the vault uses it regardless of `content_type` or `granularity`.
 
-Read `${CLAUDE_PLUGIN_ROOT}/reference/templates/note.md` for the canonical structure. Read `ops/schemas.md` for the vault's approved schema — this includes the five required fields plus any Filter-A survivors with rationale.
+Read `${CLAUDE_PLUGIN_ROOT}/reference/templates/note.md` for the canonical structure. Read the Schema Decisions section of `ops/derivation.md` for the content_type enum values and any Filter-A survivor fields (with their reader/use/day-one rationale). Fill those values into the `_schema:` block of the template when writing `ops/templates/note.md`.
 
 To generate `ops/templates/note.md`:
 

@@ -294,7 +294,6 @@ project-root/
 └── ops/
     ├── derivation.md
     ├── derivation-manifest.md
-    ├── schemas.md
     └── ...
 ```
 

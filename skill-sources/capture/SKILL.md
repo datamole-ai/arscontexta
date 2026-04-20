@@ -104,7 +104,7 @@ Scan the source content for references to existing {vocabulary.note_plural} or t
 
 ```yaml
 ---
-content_type: [vault content_type value — see ops/schemas.md]
+content_type: [vault content_type value — see the content_type enum in ops/templates/note.md _schema:]
 granularity: capture
 description: [~150 chars — context beyond the title]
 created_at: [YYYY-MM-DD]

@@ -90,7 +90,6 @@ One file per feature; `skills/setup/` enables a subset based on derived config:
 | Script | Event | Purpose |
 |---|---|---|
 | `session-orient.sh` | SessionStart | Inject tree + identity + maintenance signals |
-| `write-validate.sh` | PostToolUse(Write) | Schema enforcement on note writes |
 | `auto-commit.sh` | PostToolUse(Write, async) | Git auto-commit, non-blocking |
 | `vaultguard.sh` | helper | Early-exit outside vaults; do not bypass |
 

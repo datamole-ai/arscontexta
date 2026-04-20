@@ -67,17 +67,11 @@ rg '\[\[specific-title\]\]' --glob '*.md'
 
 ### Schema Evolution
 
-The schema evolves through observation, not decree. When a tag recurs across enough {DOMAIN:notes} that a skill would benefit from reading it as a first-class field, promote it via `/refactor`. The promotion adds the field to `ops/schemas.md` with its reader, use, and day-one rationale — the same Filter A bar that was applied during setup. Dead fields can be demoted back to `tags` or removed entirely.
+The schema evolves through observation, not decree. When a tag recurs across enough {DOMAIN:notes} that a skill would benefit from reading it as a first-class field, promote it by editing the `_schema.required:` list in `ops/templates/note.md` directly, then add a matching entry in the Schema Decisions section of `ops/derivation.md` naming its reader, use, and day-one rationale. Dead fields can be demoted back to `tags` or removed entirely. (A future `/refactor` or `/grow` skill may automate this promotion; until then the edit is manual.)
 
 ### Validation
 
-Validation checks the six required fields plus any Filter-A survivors in `ops/schemas.md`. Severity levels:
-
-- **PASS** — every required field present and well-formed
-- **WARN** — description too short, tags empty on a note that obviously needs one
-- **FAIL** — a required field missing, invalid enum value, broken link
-
-Validation runs after note creation, during `/{DOMAIN:verify}`, and during `/{DOMAIN:health}`. It never blocks capture — speed at capture matters more than perfection.
+Enforcement is template-driven: skills that create {DOMAIN:notes} copy `ops/templates/note.md` and populate every required field declared in its `_schema:` block.
 
 ### The `_schema` Block
 
@@ -88,4 +82,4 @@ Validation runs after note creation, during `/{DOMAIN:verify}`, and during `/{DO
 None — this is foundational.
 
 ## Domain Extensions
-The `content_type` enum values are vault-specific and derived during setup. Filter-A survivor fields are also vault-specific. See `ops/schemas.md` in each vault for the exact schema.
+The `content_type` enum values are vault-specific and derived during setup. Filter-A survivor fields are also vault-specific. See the `_schema:` block at the top of `ops/templates/note.md` for the exact schema.
