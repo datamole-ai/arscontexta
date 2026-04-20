@@ -22,7 +22,7 @@ Nine tests that verify the derivation engine produces coherent, functional syste
 | Maintenance | condition-based (tight) | continuous during processing + condition-triggered reweave | YES |
 | Schema | moderate | moderate (description + topics required; methodology, adapted_from, classification optional) | YES |
 
-**Natural pipeline fit:** /extract — research claims are atomic facts surfaced from source material; the extraction pipeline (6 Rs) maps directly to individual claim capture.
+**Natural pipeline fit:** /structure — research claims decompose into grouped sections of a single note; the 6 Rs pipeline maps directly to claim capture and organization.
 
 **Result: 5/5 match.** The derived configuration is a near-perfect prediction of what the vault evolved to organically. One dimension shows evolution beyond the starting preset (nav depth approaching 4-tier), which aligns with the seed-evolve-reseed lifecycle claim.
 
@@ -72,7 +72,7 @@ Nine tests that verify the derivation engine produces coherent, functional syste
 | Research Term | Therapy Term |
 |---------------|-------------|
 | claim | reflection |
-| extract | surface |
+| structure | surface |
 | reduce | process |
 | inbox | captures |
 | thinking notes | reflections |
@@ -156,7 +156,7 @@ _schema:
 |---------------|------------|
 | claim | strategy note |
 | MOC | matchup guide |
-| extract | analyze |
+| structure | analyze |
 | reduce | break down |
 | reflect | review (post-match) |
 | description | game plan summary |
@@ -215,7 +215,7 @@ _schema:
 | Maintenance | condition-based (tight) | condition-based (lax) | separate thresholds |
 | Schema | moderate | moderate | separate templates, shared base fields |
 
-**Natural pipeline fit:** /extract for research notes (atomic claims from source material); /capture for relationship notes (observations captured whole, connected manually).
+**Natural pipeline fit:** /structure for research notes (grouped claims from source material); /capture for relationship notes (observations captured whole, connected manually).
 
 **Composition mechanism:**
 - Separate templates: `thinking-note.md` (research claims) and `person-note.md` (relationship observations)
@@ -235,7 +235,7 @@ _schema:
 
 **This is exactly what our vault does.** The vault already composes Research (01_thinking/) with People (03_twitter/people/). Research claims link to people who inspired them. People MOCs link to research topics they engage with. The composition works because:
 1. Templates differ (thinking-note vs person-moc)
-2. Pipeline fit differs (/extract for research claims, /capture for relationship observations)
+2. Pipeline fit differs (/structure for research claims, /capture for relationship observations)
 3. The shared graph (wiki links) handles cross-domain naturally
 4. Hub MOC (index.md) provides unified entry point
 

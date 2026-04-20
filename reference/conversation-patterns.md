@@ -41,7 +41,7 @@ The follow-ups clarify pipeline fit (personal capture vs analytical extraction) 
 | Universal Term | Domain Term |
 |---------------|-------------|
 | note | book note |
-| extract / structure / capture | capture |
+| structure / capture | capture |
 | reflect / connect | find connections |
 | MOC | reading list |
 | description | reaction summary |
@@ -75,7 +75,7 @@ The follow-ups clarify pipeline fit (personal capture vs analytical extraction) 
 
 1. **Lax maintenance thresholds are correct because tighter ones produce more overhead than value at 25-35 notes/year.** Reviewing when a handful of unconnected notes accumulate surfaces connections and triggers new reactions without feeling like chores.
 
-2. **Using /capture does NOT mean no processing.** Capture-and-connect still requires the user to articulate reactions ("what struck me") and find thematic links. It is lighter than /extract but more intentional than raw filing.
+2. **Using /capture does NOT mean no processing.** Capture-and-connect still requires the user to articulate reactions ("what struck me") and find thematic links. It is lighter than /structure but more intentional than raw filing.
 
 3. **The derivation correctly avoids atomic granularity.** A book note with 3-4 reactions per book is the natural unit. Forcing "one reaction per file" would feel artificial and create tiny orphaned fragments that the user wouldn't revisit.
 
@@ -118,7 +118,7 @@ The first question calibrates maintenance trigger thresholds. The second probes 
 | Universal Term | Domain Term |
 |---------------|-------------|
 | note | memory |
-| extract / structure / capture | notice |
+| structure / capture | notice |
 | reflect / connect | trace connections |
 | MOC | person page |
 | description | memory context |
@@ -175,7 +175,7 @@ The first question calibrates maintenance trigger thresholds. The second probes 
 - "Are you working toward a specific output — a literature review, thesis, or policy document? Or is this ongoing sense-making for your own understanding?"
 - "When you find conflicting claims, do you want to track the conflict as its own entity, or just note that papers disagree?"
 
-The first question affects pipeline choice (output-directed research maps most naturally to /extract) and self/ identity (research identity vs general learner). The second probes schema design for tension tracking — if conflicts are entities, they get their own note type with a `contradicts` relationship field. The cross-disciplinary focus makes the signals unusually clear: this is a research system suited to /extract.
+The first question affects pipeline choice (output-directed research maps most naturally to /structure) and self/ identity (research identity vs general learner). The second probes schema design for tension tracking — if conflicts are entities, they get their own note type with a `contradicts` relationship field. The cross-disciplinary focus makes the signals unusually clear: this is a research system suited to /structure.
 
 ### Derived Configuration
 
@@ -187,14 +187,14 @@ The first question affects pipeline choice (output-directed research maps most n
 | Maintenance | Condition-based (tight thresholds) | Reweave pass after each processing batch completes. Lax thresholds would leave too many unconnected claims accumulating across disciplines. |
 | Schema | Moderate | `description`, `methodology` (which discipline), `source`, `classification` (claim/methodology/tension), `topics`. Dense enough for cross-discipline queries, not so dense as to slow capture. |
 
-**Natural pipeline fit:** `/extract` — claims from papers decompose naturally into atomic notes. "Track claims" is the direct signal: each claim from each paper gets its own note, enabling cross-disciplinary comparison that paper-level summaries can't provide.
+**Natural pipeline fit:** `/structure` — claims from papers decompose naturally into grouped sections of a single structured note. "Track claims" is the direct signal: each paper's claims become one structured note with per-claim sections, enabling cross-disciplinary comparison that paper-level summaries can't provide.
 
 ### Vocabulary Mapping
 
 | Universal Term | Domain Term |
 |---------------|-------------|
 | note | claim |
-| extract / structure / capture | extract |
+| structure / capture | structure |
 | reflect / connect | map connections |
 | MOC | topic map |
 | description | claim context |
@@ -226,7 +226,7 @@ The first question affects pipeline choice (output-directed research maps most n
 
 ### Key Insights
 
-1. **This pattern converges with the Research preset because the signals are unambiguous.** "Claims from papers" + "across disciplines" = /extract pipeline + semantic search. The derivation engine should recognize this convergence and produce configuration nearly identical to the preset.
+1. **This pattern converges with the Research preset because the signals are unambiguous.** "Claims from papers" + "across disciplines" = /structure pipeline + semantic search. The derivation engine should recognize this convergence and produce configuration nearly identical to the preset.
 
 2. **Semantic search is essential, not optional.** The user explicitly states that different disciplines use different terminology. Without semantic search, a search for "flood resilience" would miss papers about "structural flood adaptation" — and cross-disciplinary synthesis is the user's core need.
 
@@ -271,7 +271,7 @@ The first question resolves note scale (detailed reflections suit /structure to 
 | Universal Term | Domain Term |
 |---------------|-------------|
 | note | reflection |
-| extract / structure / capture | surface |
+| structure / capture | surface |
 | reflect / connect | find patterns |
 | verify | check resonance |
 | MOC | theme |
@@ -353,7 +353,7 @@ The first question calibrates maintenance trigger sensitivity and schema tempora
 | Universal Term | Domain Term |
 |---------------|-------------|
 | note | decision record |
-| extract / structure / capture | document |
+| structure / capture | document |
 | reflect / connect | link decisions |
 | verify | review quality |
 | MOC | decision register |
@@ -415,7 +415,7 @@ The first question calibrates maintenance trigger sensitivity and schema tempora
 
 2. **Schema density follows domain structure.** PM decisions have inherent structure -> dense. Therapy reflections have some structure -> moderate. Book reactions are free-form -> minimal.
 
-3. **Note scale is per-invocation, chosen via /extract, /structure, or /capture.** Each pattern produces notes at a natural scale (per-book, per-observation, per-claim) determined by how the user works and which skill they invoke — not by a vault-wide setting.
+3. **Note scale is per-invocation, chosen via /structure or /capture.** Each pattern produces notes at a natural scale (per-book, per-observation, per-claim) determined by how the user works and which skill they invoke — not by a vault-wide setting.
 
 4. **Linking complexity drives feature block selection.** Explicit-only linking excludes semantic search. Explicit+implicit linking (as in Research) requires it for cross-vocabulary discovery.
 
@@ -423,7 +423,7 @@ The first question calibrates maintenance trigger sensitivity and schema tempora
 
 | Signal Type | Reliability | Example |
 |-------------|-------------|---------|
-| Processing words ("track claims," "remember reactions") | High | Verb choice reveals natural pipeline fit (/extract vs /structure vs /capture) |
+| Processing words ("track claims," "remember reactions") | High | Verb choice reveals natural pipeline fit (/structure vs /capture) |
 | Connection words ("across disciplines," "connect across products") | High | Explicitly reveals linking needs |
 | Emotional register ("the little things," "clicks weeks later") | Medium | Personality signal, but can be ambiguous |
 | Absence of signals | Medium | No mention of analysis -> light processing (but could be implicit) |

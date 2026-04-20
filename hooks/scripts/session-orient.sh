@@ -76,7 +76,7 @@ if [ "$TENS_COUNT" -ge 5 ]; then
   echo "CONDITION: $TENS_COUNT unresolved tensions. Consider /rethink."
 fi
 if [ "$INBOX_COUNT" -ge 3 ]; then
-  echo "CONDITION: $INBOX_COUNT items in inbox. Consider /extract or /structure."
+  echo "CONDITION: $INBOX_COUNT items in inbox. Consider /structure or /capture."
 fi
 
 # Methodology staleness check (Rule Zero)

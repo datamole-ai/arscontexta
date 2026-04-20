@@ -21,7 +21,7 @@ There are NO optional fields. If a field is in the template, every note has it. 
 | Template says | Note does |
 |---------------|-----------|
 | `content_type` enum: [<vault values>] | Note uses one of those values |
-| `granularity` enum: [extract, structure, capture] | Note uses one of those values |
+| `granularity` enum: [structure, capture] | Note uses one of those values |
 | `description` max 200 chars | Every note has a description |
 | Body has an H1 | Note leads with a prose-as-title H1 |
 | Footer has Topics | Note links to its {DOMAIN:topic map}s |

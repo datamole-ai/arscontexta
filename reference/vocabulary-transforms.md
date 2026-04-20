@@ -2,7 +2,7 @@
 
 When generating a knowledge system for a specific domain, every universal term in the generated context file, templates, skills, and self/ files must use the domain-native equivalent. Vocabulary transformation is not cosmetic — it changes how the system feels to use.
 
-"Surface patterns in reflections" is therapy work. "Extract claims from sources" is research work. Same structural operation, different cognitive framing.
+"Surface patterns in reflections" is therapy work. "Structure claims from sources" is research work. Same structural operation, different cognitive framing.
 
 ---
 
@@ -11,7 +11,7 @@ When generating a knowledge system for a specific domain, every universal term i
 | Universal Term | Research | Therapy | Learning | Relationships | Creative | PM | Companion |
 |---------------|----------|---------|----------|---------------|----------|-----|-----------|
 | note | claim | reflection | concept note | observation | idea | decision | memory |
-| extract / reduce | reduce | surface | break down | notice | discover | document | remember |
+| reduce | reduce | surface | break down | notice | discover | document | remember |
 | connect / reflect | reflect | find patterns | relate concepts | trace connections | combine ideas | link decisions | recall together |
 | verify | verify | check resonance | test understanding | confirm accuracy | evaluate draft | review quality | verify memory |
 | MOC | topic map | theme | study guide | relationship map | project hub | decision register | memory collection |

@@ -1,6 +1,6 @@
 ---
 name: seed
-description: Add a source file to the processing queue. Checks for duplicates, creates archive folder, moves source from inbox, creates extract task, and updates queue. Triggers on "/seed", "/seed [file]", "queue this for processing".
+description: Add a source file to the processing queue. Checks for duplicates, creates archive folder, moves source from inbox, creates process task, and updates queue. Triggers on "/seed", "/seed [file]", "queue this for processing".
 version: "1.0"
 context: fork
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, mcp__qmd__query
@@ -13,7 +13,7 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash, mcp__qmd__query
 The target MUST be a file path. If no target provided, end immediately with: "ERROR: seed requires file path"
 
 **Granularity flag:**
-one of: --extract, --structure, --capture
+one of: --structure, --capture
 If no flag: end immediately with: "ERROR: seed requires granularity flag"
 
 ### Vocabulary
@@ -36,7 +36,7 @@ Checked: {locations checked}
 
 Read the file to understand:
 - **Content type**: what kind of material is this? (research article, documentation, transcript, etc.)
-- **Size**: line count (affects chunking decisions in /extract, /structure, /capture)
+- **Size**: line count (affects chunking decisions in /structure, /capture)
 - **Format**: markdown, plain text, structured data
 
 ## Step 2: Duplicate Detection
@@ -180,7 +180,7 @@ Full document
 
 ## Acceptance Criteria
 - Process claims, implementation ideas, tensions, and testable hypotheses
-- Duplicate check against {DOMAIN:note_collection}/ during extraction
+- Duplicate check against {DOMAIN:note_collection}/ during processing
 - Near-duplicates create enrichment tasks (do not skip)
 - Each output type gets appropriate handling
 
@@ -193,7 +193,7 @@ Full document
 
 ## Step 7: Update Queue
 
-Add the extract task entry to the queue file.
+Add the process task entry to the queue file.
 
 
 **For JSON queues (ops/queue/queue.json):**

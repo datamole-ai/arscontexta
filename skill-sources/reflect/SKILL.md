@@ -15,8 +15,7 @@ Derivation manifest for vocabulary mapping:
 
 After reading the target {vocabulary.note}, check its `granularity` frontmatter field. Adjust connection-finding depth:
 
-- **`extract`**: Full treatment — claim-level semantic search, forward and backward connections, {vocabulary.topic_map} placement with context phrases explaining WHY the {vocabulary.note} belongs.
-- **`structure`**: Forward connections at both topic and section level — the {vocabulary.note} as a whole connects to topics, but individual sections may connect to specific existing {vocabulary.note_plural}. Backward connections to {vocabulary.note_plural} relating to any sub-claim. {vocabulary.topic_map} placement.
+- **`structure`**: Forward connections at both topic and section level — the {vocabulary.note} as a whole connects to topics, but individual sections may connect to specific existing {vocabulary.note_plural}. Backward connections to {vocabulary.note_plural} relating to any sub-claim. {vocabulary.topic_map} placement with context phrases explaining WHY the {vocabulary.note} belongs.
 - **`capture`**: Lighter treatment — scan verbatim content for references to existing topics and {vocabulary.note_plural}. Add wikilinks ONLY outside the fenced block (in Relevant Notes and Topics footer sections). **NEVER modify content inside the fenced block.** {vocabulary.topic_map} placement.
 
 **Connection behavior:** Full dual discovery (MOC + semantic search). Evaluate every candidate. Multiple passes. Synthesis opportunity detection. Bidirectional link evaluation for all connections.
@@ -68,7 +67,7 @@ For each {vocabulary.note} you are connecting:
 - The scope (when does this apply? When not?)
 - The tensions (what might contradict this?)
 
-Read the task file to see what the extraction phase discovered. The reduce notes, semantic neighbor field, and classification provide critical context about why this {vocabulary.note} was extracted and what it relates to.
+Read the task file to see what the processing phase discovered. The reduce notes, semantic neighbor field, and classification provide critical context about why this {vocabulary.note} was produced and what it relates to.
 
 ### Phase 2: Discovery (Find Candidates)
 

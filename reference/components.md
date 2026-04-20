@@ -220,7 +220,7 @@ Check MOC coverage:
 
 | Phase | Purpose | Always On? |
 |-------|---------|-----------|
-| Extract | Mine today's logs for atomic insights | Yes |
+| Process | Mine today's logs for insights (via /structure or /capture) | Yes |
 | Inbox Process | Summarize captured URLs/PDFs | Optional |
 | Connect | Compare new insights against existing notes | Yes |
 | Navigate | Link new notes into MOCs | Yes |

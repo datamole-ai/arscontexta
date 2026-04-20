@@ -33,7 +33,7 @@ Read **The task file** at the provided path — parse frontmatter (`claim`, `cla
 
 ## THE MISSION
 
-You are the note creation engine. A task file enters with a claim and context. A fully-formed, schema-valid, correctly-placed {vocabulary.note} exits. Your job is to transform extracted claims into well-crafted notes with proper placement, complete frontmatter, developed reasoning, and graph connections.
+You are the note creation engine. A task file enters with a claim and context. A fully-formed, schema-valid, correctly-placed {vocabulary.note} exits. Your job is to transform claims into well-crafted notes with proper placement, complete frontmatter, developed reasoning, and graph connections.
 
 ### The Core Principle
 
@@ -44,7 +44,7 @@ You are the note creation engine. A task file enters with a claim and context. A
 A task file in `ops/queue/` containing:
 - A `claim` — the core proposition or scope this note will develop
 - A `classification` — closed (standalone) or open (needs investigation)
-- A `granularity` — extract, structure, or capture (how the claim was derived)
+- A `granularity` — structure or capture (how the claim was derived)
 - A `source_task` — which source batch this claim came from
 - A `semantic_neighbor` — an existing note with related content (or null)
 - Content sections with sub-claims, rationale, and source references
@@ -114,18 +114,14 @@ The claim from the task file becomes the filename using the prose-as-title patte
 - `.md` extension
 
 **The prose-as-title test:** Can you complete this sentence?
-> This {vocabulary.note} argues that [title]
-
-If it works for extract-granularity notes, the title is a valid proposition. For structure-granularity notes, use the scope variant:
 > This {vocabulary.note} covers [title]
 
 Good titles:
-- "LLM attention degrades as context fills" (extract — proposition)
 - "how caching strategies affect API latency under load" (structure — scope)
 
 Bad titles:
 - "caching" (topic label)
-- "attention and context" (vague, not a proposition or scope)
+- "attention and context" (vague, not a scope)
 
 ### 1d. Uniqueness Check
 

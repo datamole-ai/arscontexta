@@ -41,7 +41,7 @@ cat ops/methodology/derivation-rationale.md
 
 | Task | Grep Pattern | What You'll Find |
 |------|-------------|-----------------|
-| Processing a source | `rg -i 'pipeline\|processing\|extract' ops/methodology/` | Pipeline preferences, extraction categories |
+| Processing a source | `rg -i 'pipeline\|processing\|granularity' ops/methodology/` | Pipeline preferences, processing categories |
 | Finding connections | `rg -i 'connect\|link\|reflect' ops/methodology/` | Linking philosophy, connection standards |
 | Maintaining the graph | `rg -i 'maintenance\|health\|reweave' ops/methodology/` | Maintenance thresholds, condition triggers |
 | Writing for the domain | `rg -i 'voice\|tone\|vocabulary' ops/methodology/` | Domain vocabulary, personality guidance |

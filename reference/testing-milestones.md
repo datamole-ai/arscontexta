@@ -322,8 +322,8 @@ done
 
 **Pass criteria:**
 1. Test note can be created in inbox with minimal friction
-2. Processing skill (/reduce or domain equivalent) extracts at least one insight
-3. Extracted note appears in the notes directory with valid schema
+2. Processing skill (/structure or domain equivalent) produces at least one {DOMAIN:note}
+3. Produced note appears in the notes directory with valid schema
 4. Connection skill (/reflect or domain equivalent) links the note to at least one existing note
 5. The note appears in at least one MOC's Core Ideas section (or domain equivalent)
 
@@ -352,10 +352,10 @@ EOF
 echo "Step 1: Test note created in $INBOX_DIR/"
 
 # Step 2: Run processing (manually invoke or use skill)
-echo "Step 2: Invoke /reduce (or domain equivalent) on test-pipeline-input.md"
+echo "Step 2: Invoke /structure (or domain equivalent) on test-pipeline-input.md"
 echo "  [Agent processes the inbox note]"
 
-# Step 3: Verify extracted note exists with valid schema
+# Step 3: Verify produced note exists with valid schema
 echo ""
 echo "=== Step 3: Schema Validation ==="
 # After processing, check for new note(s) in notes directory
@@ -419,7 +419,7 @@ rm -f "$VAULT/$INBOX_DIR/test-pipeline-input.md"
 
 ```
 Step 1: Test note created in inbox/
-Step 2: Invoke /reduce on test-pipeline-input.md
+Step 2: Invoke /structure on test-pipeline-input.md
 
 === Step 3: Schema Validation ===
   PASS: New note(s) created:
@@ -440,11 +440,11 @@ Step 2: Invoke /reduce on test-pipeline-input.md
 
 | Failure | Cause | Fix |
 |---------|-------|-----|
-| No new notes created after /reduce | Extraction skill did not recognize content as relevant to the domain | Check skill's extraction criteria — ensure it handles general knowledge input |
+| No new notes created after /structure | Processing skill did not recognize content as relevant to the domain | Check skill's processing criteria — ensure it handles general knowledge input |
 | Note created but missing topics field | Create phase did not include topics in template | Verify note template includes topics as required field |
 | Note has no wiki links after /reflect | No existing notes matched semantically | Ensure the test vault has enough starter notes for connections to form |
 | Note not referenced from any MOC | Reflect phase did not update MOC | Check reflect skill for MOC update logic |
-| Schema validation errors | Template mismatch between generated template and note creation logic | Compare template `_schema` required fields against what /reduce outputs |
+| Schema validation errors | Template mismatch between generated template and note creation logic | Compare template `_schema` required fields against what /structure outputs |
 
 ---
 
@@ -727,7 +727,7 @@ for PRESET in "${PRESETS[@]}"; do
                 fi
                 ;;
             processing-pipeline)
-                if grep -qi "pipeline\|processing\|extract" "$VAULT/CLAUDE.md" 2>/dev/null; then
+                if grep -qi "pipeline\|processing\|structure\|capture" "$VAULT/CLAUDE.md" 2>/dev/null; then
                     echo "  PASS: $block — referenced in context file"
                 else
                     echo "  WARN: $block — enabled but not referenced in context file"

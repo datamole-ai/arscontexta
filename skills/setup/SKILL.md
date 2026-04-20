@@ -56,7 +56,7 @@ What you'll have when we're done:
   - A vault: a folder of markdown files connected by wiki links,
     forming a traversable knowledge graph
 
-  - A processing pipeline: skills that extract insights from sources,
+  - A processing pipeline: skills that produce notes from sources,
     find connections between notes, update old notes with new context,
     and verify quality
 
@@ -126,7 +126,7 @@ As the user talks, passively extract signals for dimensions. Do not ask about di
 
 | Level    | Weight | Criteria                                                          | Example                                            |
 | -------- | ------ | ----------------------------------------------------------------- | -------------------------------------------------- |
-| HIGH     | 1.0    | Explicit statement, domain-specific language, concrete examples   | "I extract claims from papers"                     |
+| HIGH     | 1.0    | Explicit statement, domain-specific language, concrete examples   | "I group claims from papers into structured notes" |
 | MEDIUM   | 0.6    | Implicit tone, general preference, domain defaults                | "I like to organize things"                        |
 | LOW      | 0.3    | Ambiguous phrasing, contradicted by other signals, single mention | "I want to track everything"                       |
 
@@ -138,21 +138,21 @@ As the user talks, passively extract signals for dimensions. Do not ask about di
 
 | Signal Pattern                           | Dimension / Pipeline Fit                        | Confidence |
 | ---------------------------------------- | ----------------------------------------------- | ---------- |
-| "Claims from papers"                     | /extract pipeline fit                           | High       |
+| "Claims from papers"                     | /structure pipeline fit                         | High       |
 | "Track my reflections"                   | /structure pipeline fit                         | High       |
 | "Log what happened"                      | /capture pipeline fit                           | High       |
 | "Connections between ideas"              | Explicit linking                                | High       |
 | "Across disciplines"                     | Semantic search need                            | High       |
 | "I process a few a week"                 | /capture or /structure pipeline fit             | High       |
-| "Batch process research"                 | /extract pipeline fit, dense schema             | High       |
+| "Batch process research"                 | /structure pipeline fit, dense schema           | High       |
 | "I read a lot and forget"                | /structure pipeline fit                         | Medium     |
-| "Small precise insights"                 | /extract pipeline fit                           | High       |
+| "Small precise insights"                 | /structure pipeline fit                         | High       |
 | "Multiple projects"                      | Multi-domain potential                          | High       |
 | "Track people"                           | Entity tracking module                          | High       |
-| "I want rigor"                           | /extract pipeline fit, dense schema             | High       |
+| "I want rigor"                           | /structure pipeline fit, dense schema           | High       |
 | "Low ceremony"                           | /capture pipeline fit, minimal schema           | High       |
 | "Personal journal"                       | /structure or /capture pipeline fit             | Medium     |
-| "Academic research"                      | /extract pipeline fit, semantic search          | High       |
+| "Academic research"                      | /structure pipeline fit, semantic search        | High       |
 | "Therapy sessions"                       | /structure pipeline fit                         | High       |
 | "Project decisions"                      | Decision-centric, temporal tracking             | High       |
 | "Creative worldbuilding"                 | /structure pipeline fit, heavy linking          | Medium     |
@@ -176,7 +176,7 @@ As the user talks, passively extract signals for dimensions. Do not ask about di
 
 | Anti-Signal                         | What It Seems Like        | What It Actually Means                          | Correct Response                                                      |
 | ----------------------------------- | ------------------------- | ----------------------------------------------- | --------------------------------------------------------------------- |
-| "I want Zettelkasten"               | /extract pipeline fit     | User may want the label, not the discipline     | Ask: "Walk me through your last week of note-taking"                  |
+| "I want Zettelkasten"               | /structure pipeline fit   | User may want the label, not the discipline     | Ask: "Walk me through your last week of note-taking"                  |
 | "Make it like Obsidian"             | Specific tool request     | User wants a navigation feel, not a methodology | Ask: "What do you like about Obsidian?"                               |
 | "I need AI to think for me"         | Full automation           | Cognitive outsourcing risk                      | Probe: "What do you want to decide vs what should the system handle?" |
 | "Everything connects to everything" | Dense linking             | Undifferentiated linking desire                 | Ask for a specific example of two things that connect                 |
@@ -238,8 +238,8 @@ When two signals point to different positions for the same dimension:
 ```
 1. Is one signal EXPLICIT and the other IMPLICIT?
    YES -> Explicit wins.
-         "I extract claims from papers" (explicit: /extract pipeline fit) beats
-         casual tone suggesting /structure pipeline fit (implicit).
+         "I group claims from papers" (explicit: /structure pipeline fit) beats
+         casual tone suggesting /capture pipeline fit (implicit).
 
 2. Are both signals the same confidence level?
    YES -> Does one appear LATER in the conversation?
@@ -376,7 +376,7 @@ All generated systems ship with full automation from day one. Every vault gets t
 Every vault ships with five required frontmatter fields — NO exceptions, NO optional fields:
 
 - `content_type` — vault-specific enum derived below; agents route on it
-- `granularity` — one of `extract | structure | capture`; pipelines route on it
+- `granularity` — one of `structure | capture`; pipelines route on it
 - `description` — one sentence adding context beyond the title (<=200 chars)
 - `created_at` — ISO 8601 date; used by archive and staleness checks
 - `tags` — free-form array; escape hatch for emergent attributes
@@ -454,14 +454,14 @@ After the user approves the system design, walk through the single schema that F
 _schema:
   required:
     - content_type   # vault enum; agents route on it
-    - granularity   # extract|structure|capture; pipelines route on it
+    - granularity   # structure|capture; pipelines route on it
     - description   # one sentence, <=200 chars
     - created_at    # ISO 8601 date
     - tags          # free-form array, escape hatch
     # --- Filter-A survivors below (if any) ---
     # - status      # reweave uses it to filter open {content_type}=decision; day-one
   enums:
-    granularity: [extract, structure, capture]
+    granularity: [structure, capture]
     content_type: [<derived vault enum>]
 ```
 
@@ -489,14 +489,14 @@ To modify the schema after setup, use `/refactor`.
 _schema:
   required:
     - content_type   # vault enum: [<list>]
-    - granularity   # extract|structure|capture
+    - granularity   # structure|capture
     - description   # one sentence, <=200 chars
     - created_at    # ISO 8601 date
     - tags          # free-form array
     # --- Filter-A survivors ---
     - <field>       # <reader>: <use>
   enums:
-    granularity: [extract, structure, capture]
+    granularity: [structure, capture]
     content_type: [<vault enum values>]
     # <any other enum fields produced by Filter A>
   constraints:
@@ -585,7 +585,7 @@ You are executing one step of a multi-step generation pipeline.
 - Note type: {domain:note}
 - Topic map: {domain:topic_map}
 - Process verbs: {domain:reflect}, {domain:reweave}, {domain:verify}
-- Pipeline skills: /extract, /structure, /capture (universal — not domain-renamed)
+- Pipeline skills: /structure, /capture (universal — not domain-renamed)
 - Skill names: {DOMAIN:reflect}, {DOMAIN:reweave}, {DOMAIN:verify}, {DOMAIN:rethink}
 
 ## Instructions
@@ -857,7 +857,7 @@ Topics:
 
 | Domain | Value |
 |---|---|
-| Research | I work with claims — extracting them from source material, evaluating them against what's already known, connecting them into a network of understanding that grows more useful over time. |
+| Research | I work with claims — pulling them from source material, evaluating them against what's already known, connecting them into a network of understanding that grows more useful over time. |
 | Learning | I work with concepts — breaking them down, relating them to what you already understand, building a web of knowledge that deepens with each session. |
 | Therapy | I work with your reflections — holding space for what you share, surfacing the patterns that emerge across sessions, connecting threads you might not see in the moment. |
 | Relationships | I work with observations about the people in your life — noticing how relationships develop, tracing the connections between what people say and what it reveals over time. |
@@ -1043,8 +1043,7 @@ features:
   sleep-processing: [true | false]
 
 processing:
-  extraction:
-    categories: auto       # auto (from derivation) | custom list
+  categories: auto       # auto (from derivation) | custom list
   reweave:
     scope: related         # related | broad | full
     frequency: after_create # after_create | periodic | manual
@@ -1057,7 +1056,7 @@ processing:
 
 ##### ops/derivation-manifest.md (Runtime Vocabulary for Inherited Skills)
 
-Generate the machine-readable derivation manifest. This is the KEY file that enables runtime vocabulary transformation for all inherited processing skills (/extract, /structure, /capture, /reflect, /reweave, /verify). Skills read this file at invocation time to apply domain-specific vocabulary without needing domain-specific skill copies.
+Generate the machine-readable derivation manifest. This is the KEY file that enables runtime vocabulary transformation for all inherited processing skills (/structure, /capture, /reflect, /reweave, /verify). Skills read this file at invocation time to apply domain-specific vocabulary without needing domain-specific skill copies.
 
 ```yaml
 # ops/derivation-manifest.md -- Machine-readable manifest for runtime skill configuration
@@ -1101,7 +1100,7 @@ vocabulary:
   topic_map: "[domain term]"    # e.g., "topic map", "theme", "decision register"
   hub: "[domain term]"          # e.g., "hub", "home", "overview"
 
-  # Level 5: Process verbs (pipeline skills /extract, /structure, /capture are universal — not mapped here)
+  # Level 5: Process verbs (pipeline skills /structure, /capture are universal — not mapped here)
   reflect: "[domain term]"      # e.g., "reflect", "find patterns", "link decisions"
   reweave: "[domain term]"      # e.g., "reweave", "revisit", "update"
   verify: "[domain term]"       # e.g., "verify", "check resonance", "validate"
@@ -1113,8 +1112,8 @@ vocabulary:
   cmd_verify: "[/domain-verb]"  # e.g., "/verify", "/check", "/audit"
   cmd_rethink: "[/domain-verb]" # e.g., "/rethink", "/reassess", "/retrospect"
 
-  # Level 7: Extraction categories (domain-specific, from conversation)
-  extraction_categories:
+  # Level 7: Processing categories (domain-specific, from conversation)
+  processing_categories:
     - name: "[category name]"
       what_to_find: "[description]"
       output_type: "[note type]"
@@ -1224,7 +1223,7 @@ Include a discovery section in the context file documenting what queries exist, 
 
 **Agent reads:** ops/derivation.md, ${CLAUDE_PLUGIN_ROOT}/skill-sources/*/SKILL.md
 
-**Agent-specific prompt addition:** Include the DOMAIN substitution map as an explicit key-value lookup table built from the vocabulary mapping in ops/derivation.md. Example: `{DOMAIN:extract}` → `/distill`, `{DOMAIN:notes}` → `claims`, `{DOMAIN:topic map}` → `MOC`.
+**Agent-specific prompt addition:** Include the DOMAIN substitution map as an explicit key-value lookup table built from the vocabulary mapping in ops/derivation.md. Example: `{DOMAIN:structure}` → `/group`, `{DOMAIN:notes}` → `claims`, `{DOMAIN:topic map}` → `MOC`.
 
 The following step instructions are passed verbatim to Agent 2 via the agent prompt template.
 
@@ -1252,7 +1251,6 @@ The skill sources to install:
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/archive-batch/` | archive-batch | Orchestration | B    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/rethink/`       | rethink       | Evolution     | B    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/remember/`      | remember      | Growth        | B    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/extract/`       | extract       | Processing    | B    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/structure/`     | structure     | Processing    | B    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/capture/`       | capture       | Processing    | B    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/verify/`        | verify        | Processing    | B    |
@@ -1295,7 +1293,7 @@ These skill sources contain only `{vocabulary.xxx}` patterns in their body. Thos
 
 ##### Tier B — DOMAIN substitution (mechanical string replace)
 
-**Skills:** seed, pipeline, archive-batch, rethink, remember, verify, extract, structure, capture
+**Skills:** seed, pipeline, archive-batch, rethink, remember, verify, structure, capture
 
 These skill sources contain `{DOMAIN:xxx}` patterns that must be literally substituted at setup time. They may also contain `{vocabulary.xxx}` patterns — leave those intact.
 
@@ -1310,7 +1308,7 @@ These skill sources contain `{DOMAIN:xxx}` patterns that must be literally subst
 
 **Verification:** After each Tier B skill, confirm zero `{DOMAIN:` strings remain in the output file. If any remain, the substitution map is incomplete — check `ops/derivation.md` vocabulary mapping for the missing entry.
 
-**Exception: /extract, /structure, /capture** — These three skills use Tier B DOMAIN substitution in their body but their `name:` and `description:` fields in frontmatter stay UNCHANGED. Do not domain-rename them. They are universal infrastructure commands. Setup copies the file, substitutes `{DOMAIN:xxx}` patterns in the body only, and installs to `.claude/skills/extract/SKILL.md`, `.claude/skills/structure/SKILL.md`, `.claude/skills/capture/SKILL.md`.
+**Exception: /structure, /capture** — These two skills use Tier B DOMAIN substitution in their body but their `name:` and `description:` fields in frontmatter stay UNCHANGED. Do not domain-rename them. They are universal infrastructure commands. Setup copies the file, substitutes `{DOMAIN:xxx}` patterns in the body only, and installs to `.claude/skills/structure/SKILL.md`, `.claude/skills/capture/SKILL.md`.
 
 ##### Skill Discoverability Protocol
 
@@ -1407,7 +1405,7 @@ Step 7: Coherence verification.
   - [ ] All mentioned skills exist in the generated skills (or are documented as dormant tiers)
   - [ ] All mentioned file paths exist in the generated folder structure
   - [ ] All mentioned templates exist in the generated templates
-  - [ ] Pipeline references use /extract, /structure, /capture correctly
+  - [ ] Pipeline references use /structure, /capture correctly
   - [ ] Schema fields mentioned in prose exist in generated templates
   - [ ] Every ops/features/ reference link points to a file that was actually written
   - [ ] Summaries follow semantic composition rules (orientation not instruction, terse density, no skill duplication)
@@ -1439,7 +1437,6 @@ Step 9: Write all files.
 ## Recently Created Skills (Pending Activation)
 
 These skills were created during initialization. Restart Claude Code to activate them.
-- /extract -- Extract atomic claims from source material (created [timestamp])
 - /structure -- Group related claims into structured notes (created [timestamp])
 - /capture -- Preserve source material verbatim (created [timestamp])
 - /[domain:reflect] -- Find connections between [domain:notes] (created [timestamp])
@@ -1468,7 +1465,7 @@ Generate all 7 manual pages using domain-native vocabulary from the derivation c
 
 **Generation instructions:**
 
-For each page, apply vocabulary transformation: replace universal terms (notes, inbox, topic map, reflect, reweave) with domain-native equivalents from the derivation conversation. Pipeline skills (/extract, /structure, /capture) are universal and not renamed. Use concrete domain examples where possible.
+For each page, apply vocabulary transformation: replace universal terms (notes, inbox, topic map, reflect, reweave) with domain-native equivalents from the derivation conversation. Pipeline skills (/structure, /capture) are universal and not renamed. Use concrete domain examples where possible.
 
 **Page 1: manual.md (Hub MOC)**
 
@@ -1502,7 +1499,7 @@ type: manual
 
 {Generate content covering:}
 - Drop something in {DOMAIN:inbox}/ — any file, paste, or voice transcript
-- Run /{DOMAIN:pipeline} — it asks which granularity (extract/structure/capture), then handles everything
+- Run /{DOMAIN:pipeline} — it asks which granularity (structure/capture), then handles everything
 - See what happened — pipeline report shows created {DOMAIN:note_plural}, connections, updated {DOMAIN:topic map}s
 - Browse the results — follow wiki links from new {DOMAIN:note_plural} to see how the graph connects
 - The session rhythm: orient (session start shows pending work) -> work (pipeline or manual commands) -> persist (session end saves state)
@@ -1524,15 +1521,14 @@ type: manual
 
 The primary workflow. One command for end-to-end source processing.
 
-- /{DOMAIN:pipeline} — end-to-end processing: seed, extract/structure/capture, reflect, reweave, verify, archive
+- /{DOMAIN:pipeline} — end-to-end processing: seed, structure/capture, reflect, reweave, verify, archive
 
 ## Pipeline Sub-Skills
 
 What pipeline runs for you. Use directly for fine-grained control.
 
 - /{DOMAIN:seed} — create queue entry with duplicate detection
-- /extract — atomic note extraction (one {DOMAIN:note} per claim)
-- /structure — grouped note extraction (related claims in one {DOMAIN:note})
+- /structure — grouped note production (related claims in one {DOMAIN:note})
 - /capture — verbatim capture (no transformation)
 - /{DOMAIN:reflect} — find connections, update {DOMAIN:topic map}s
 - /{DOMAIN:reweave} — update older {DOMAIN:note_plural} with new context
@@ -1589,7 +1585,7 @@ inbox -> /{DOMAIN:pipeline} -> connected knowledge. This is the primary workflow
 
 ## Processing Pipeline
 
-The 6 Rs: Record (capture into {DOMAIN:inbox}), Reduce (/extract or /structure or /capture), Reflect (find connections), Reweave (update older {DOMAIN:note_plural}), Verify (quality checks), Rethink (challenge assumptions). Link to [[pipeline]] for the deep-dive.
+The 6 Rs: Record (capture into {DOMAIN:inbox}), Reduce (/structure or /capture), Reflect (find connections), Reweave (update older {DOMAIN:note_plural}), Verify (quality checks), Rethink (challenge assumptions). Link to [[pipeline]] for the deep-dive.
 
 ## Session Rhythm
 
@@ -1621,20 +1617,19 @@ type: manual
 
 ## What Pipeline Does
 
-One command, full processing: {DOMAIN:seed} -> extract/structure/capture -> {DOMAIN:reflect} -> {DOMAIN:reweave} -> {DOMAIN:verify} -> archive. Drop a file in {DOMAIN:inbox}/, run /{DOMAIN:pipeline}, get connected knowledge.
+One command, full processing: {DOMAIN:seed} -> structure/capture -> {DOMAIN:reflect} -> {DOMAIN:reweave} -> {DOMAIN:verify} -> archive. Drop a file in {DOMAIN:inbox}/, run /{DOMAIN:pipeline}, get connected knowledge.
 
-## Three Granularity Modes
+## Two Granularity Modes
 
-Present all three as equal choices:
+Present both as equal choices:
 
-- `/{DOMAIN:pipeline} --extract` — one atomic {DOMAIN:note} per claim. Best for dense sources where each idea stands alone.
 - `/{DOMAIN:pipeline} --structure` — grouped {DOMAIN:note_plural} preserving shared context. Best for sources where ideas are interrelated.
 - `/{DOMAIN:pipeline} --capture` — verbatim preservation, no transformation. Best for reference material you want searchable but unaltered.
 - No flag — pipeline asks you to choose.
 
 ## Processing Phases
 
-Brief explanation of each phase: seed (duplicate detection, queue entry), extraction (granularity-routed), reflect (forward connections and {DOMAIN:topic map} updates), reweave (backward updates to older {DOMAIN:note_plural}), verify (quality gate), archive (cleanup and summary). What each does and why it matters.
+Brief explanation of each phase: seed (duplicate detection, queue entry), processing (granularity-routed), reflect (forward connections and {DOMAIN:topic map} updates), reweave (backward updates to older {DOMAIN:note_plural}), verify (quality gate), archive (cleanup and summary). What each does and why it matters.
 
 ## Resumability
 
@@ -1643,7 +1638,7 @@ Pipeline can be interrupted and resumed at any point. Queue state persists acros
 | Interrupted At | How to Resume |
 |----------------|---------------|
 | Before seed | Run /{DOMAIN:pipeline} again |
-| After seed, before extraction | /{DOMAIN:pipeline} --batch {id} |
+| After seed, before processing | /{DOMAIN:pipeline} --batch {id} |
 | During note processing | /{DOMAIN:pipeline} --batch {id} |
 | Before archive | /archive-batch {id} |
 
@@ -1756,7 +1751,7 @@ Before any qmd configuration, derive and register the collection name:
 3. If the derived name collides with an existing collection, choose an alternative (e.g., append the vault directory name: "claims-myproject") — report the conflict and chosen name in output
 4. Add `notes_collection` to **both** vocabulary stores:
    - `ops/derivation.md` — add a row to the Vocabulary Mapping table: `| notes_collection | <chosen-name> | qmd collection |`
-   - `ops/derivation-manifest.md` — add `notes_collection: "<chosen-name>"` to the vocabulary section (after Level 6 / before extraction_categories)
+   - `ops/derivation-manifest.md` — add `notes_collection: "<chosen-name>"` to the vocabulary section (after Level 6 / before processing_categories)
 
 ###### Check qmd installation and version
 
@@ -1894,7 +1889,6 @@ Show available commands in the user's vocabulary. Resolve command names from `op
 ```
 Here's what you can do:
 
-  /arscontexta:extract            -- extract atomic claims from source material
   /arscontexta:structure          -- group related claims into structured notes
   /arscontexta:capture            -- preserve source material verbatim
   /arscontexta:[domain:reflect]   -- find connections between your [domain:notes]

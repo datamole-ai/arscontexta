@@ -116,8 +116,7 @@ or `decisions/`), but the separation is invariant.
 
 | Command | What It Does |
 |---------|-------------|
-| `/seed` | Create extraction task with duplicate detection |
-| `/extract` | Extract atomic insights from sources |
+| `/seed` | Create processing task with duplicate detection |
 | `/structure` | Extract grouped insights preserving shared context |
 | `/capture` | Verbatim capture — preserves source without transformation |
 | `/create` | Create a new note |
@@ -152,7 +151,7 @@ meta-cognitive layer:
 | Phase | What Happens | Command |
 |-------|-------------|---------|
 | **Record** | Zero-friction capture into inbox/ | Manual |
-| **Reduce** | Extract insights with domain-native categories | `/extract`, `/structure`, `/capture` |
+| **Reduce** | Extract insights with domain-native categories | `/structure`, `/capture` |
 | **Reflect** | Find connections, update MOCs | `/reflect` |
 | **Reweave** | Update older notes with new context | `/reweave` |
 | **Verify** | Description + schema + health checks | `/verify` |

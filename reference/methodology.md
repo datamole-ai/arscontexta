@@ -88,7 +88,7 @@ All knowledge systems perform these operations, regardless of methodology:
 | Operation | Purpose | Example |
 |-----------|---------|---------|
 | **Capture** | Get information in with zero friction | Drop URL in inbox/ |
-| **Process** | Transform raw input to structured knowledge | Extract insights from daily log |
+| **Process** | Transform raw input to structured knowledge | Structure insights from daily log |
 | **Connect** | Link related knowledge | Find wiki-link connections |
 | **Navigate** | Manage attention, find content | MOCs, semantic search |
 | **Maintain** | Keep system healthy | Orphan detection, schema validation |
@@ -164,7 +164,7 @@ Topics:
 
 Raw capture (daily logs, inbox items, session notes) is write-only memory without processing. The gap between capture and useful knowledge requires transformation:
 
-1. **Extract** — Mine raw material for atomic insights
+1. **Process** — Mine raw material for insights (via /structure or /capture)
 2. **Connect** — Compare new insights against existing notes
 3. **Navigate** — Link new notes into MOCs
 4. **Maintain** — Detect orphans, validate schema, resurface old notes

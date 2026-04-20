@@ -1,6 +1,6 @@
 name: personal-assistant
 display_name: "Personal Assistant"
-description: "All skills available and active from day one, adapted for personal use. Full pipeline with personal extraction categories."
+description: "All skills available and active from day one, adapted for personal use. Full pipeline with personal processing categories."
 dimensions:
   organization: 0.5
   linking: 0.3

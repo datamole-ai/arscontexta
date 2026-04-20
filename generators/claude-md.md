@@ -155,7 +155,7 @@ These semantic rules govern how all CLAUDE.md content is written — both featur
 
 3. **Preserve key semantics** — Certain concepts are load-bearing and must survive summarization: the discovery-first constraint, the "never write directly to notes/" rule, the fresh-context-per-phase principle. If a concept shapes how the agent behaves in *other* contexts (not just within that feature), it belongs in the summary.
 
-4. **Routing over explaining** — When a feature maps cleanly to a skill, the summary should route ("use /extract, /structure, or /capture") rather than re-explain what the skill does.
+4. **Routing over explaining** — When a feature maps cleanly to a skill, the summary should route ("use /structure or /capture") rather than re-explain what the skill does.
 
 5. **No redundancy with skills** — If a skill's SKILL.md already contains the operational instructions, the summary must not duplicate them. State the principle, link the reference, route to the skill.
 

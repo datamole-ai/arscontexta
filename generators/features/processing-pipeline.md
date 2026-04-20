@@ -23,7 +23,7 @@ Capture everything. Process later.
 
 This is where value is created. Raw content becomes structured {DOMAIN:notes} through active transformation.
 
-Read the source material through the mission lens: "Does this serve {DOMAIN:the knowledge domain}?" Every extractable insight gets pulled out:
+Read the source material through the mission lens: "Does this serve {DOMAIN:the knowledge domain}?" Every insight worth keeping gets pulled into a {DOMAIN:note}:
 
 | Category | What to Find | Output |
 |----------|--------------|--------|
@@ -33,9 +33,9 @@ Read the source material through the mission lens: "Does this serve {DOMAIN:the 
 | Enrichments | Content that improves existing {DOMAIN:notes} | Enrichment task |
 | Anti-patterns | What breaks, what to avoid | Problem note |
 
-**Quality filter:** Not everything extracts. You must judge: does this add genuine insight, or is it noise? When in doubt, extract — it is easier to merge duplicates than recover missed insights.
+**Quality filter:** Not every insight survives. You must judge: does this add genuine value, or is it noise? When in doubt, keep it — it is easier to merge duplicates than recover missed insights.
 
-**Quality bar for extracted {DOMAIN:notes}:**
+**Quality bar for {DOMAIN:notes}:**
 - Title works as prose when linked: `since [[{DOMAIN:note title}]]` reads naturally
 - Description adds information beyond the title
 - Claim is specific enough to disagree with
@@ -98,7 +98,7 @@ Everything enters through {DOMAIN:inbox/}. Do not think about structure at captu
 - Sources (PDFs, articles, research results)
 - Anything where destination is unclear
 
-**Processing inbox items:** Inbox items get processed via /extract, /structure, or /capture based on source material and user intent. Research papers with decomposable claims → /extract. Meeting notes mixing multiple topics → /structure. Verbatim transcripts and reference documents → /capture.
+**Processing inbox items:** Inbox items get processed via /structure or /capture based on source material and user intent. Research papers, meeting notes, and mixed-topic sources → /structure. Verbatim transcripts and reference documents where exact wording matters → /capture.
 
 **The core principle:** Capture needs to be FAST (zero friction, do not interrupt flow). Processing needs to be SLOW (careful extraction, quality connections). Separating these two activities is what makes both work. If it is in {DOMAIN:inbox/}, it is unprocessed. Once processed, the value moves to {DOMAIN:notes} and the raw material gets archived or discarded.
 
@@ -123,7 +123,7 @@ The task queue tracks every {DOMAIN:note} being processed through the pipeline. 
     {
       "id": "source-name-001",
       "type": "note",
-      "granularity": "extract",
+      "granularity": "structure",
       "status": "pending",
       "target": "{DOMAIN:note} title here",
       "batch": "source-name",
@@ -141,7 +141,7 @@ The task queue tracks every {DOMAIN:note} being processed through the pipeline. 
 
 | Type | Purpose | Phase Sequence |
 |------|---------|---------------|
-| process | Process source through chosen granularity skill (/extract, /structure, or /capture) | (single phase) |
+| process | Process source through chosen granularity skill (/structure or /capture) | (single phase) |
 | note | Process a {DOMAIN:note} through downstream phases | {DOMAIN:connect} -> {DOMAIN:maintain} -> {DOMAIN:verify} |
 | enrichment | Enrich an existing {DOMAIN:note} then process | enrich -> {DOMAIN:connect} -> {DOMAIN:maintain} -> {DOMAIN:verify} |
 
@@ -149,13 +149,13 @@ The task queue tracks every {DOMAIN:note} being processed through the pipeline. 
 
 #### Per-{DOMAIN:Note} Task Files
 
-Each extracted {DOMAIN:note} gets its own task file that accumulates notes across all phases. The task file is the shared state between phases — it is how one phase communicates what it found to the next phase.
+Each {DOMAIN:note} gets its own task file that accumulates notes across all phases. The task file is the shared state between phases — it is how one phase communicates what it found to the next phase.
 
 ~~~markdown
 # {DOMAIN:Note} 001: {title}
 
 ## {DOMAIN:Process} Notes
-{Extraction rationale, duplicate judgment}
+{Processing rationale, duplicate judgment}
 
 ## Create
 {Note creation details}
@@ -214,7 +214,7 @@ Orchestrator reads queue -> picks next task -> invokes phase skill for one phase
 ~~~
 
 **Why fresh context matters:**
-- {DOMAIN:Process}/extract needs full attention on the source material
+- {DOMAIN:Process} needs full attention on the source material
 - {DOMAIN:Connect} needs full attention on the existing knowledge graph
 - {DOMAIN:Maintain}/reweave needs full attention on older {DOMAIN:notes}
 - {DOMAIN:Verify} needs neutral perspective, unbiased by creation
@@ -237,7 +237,7 @@ Every vault ships with the complete pipeline active from the first session. All 
 
 The philosophy: it is easier to disable features you do not need than to discover and enable features you did not know existed. If a feature exists, it works on day one.
 
-**All skills are available from day one.** /extract, /structure, /capture, /{DOMAIN:connect}, /{DOMAIN:maintain}, /{DOMAIN:verify}, /{DOMAIN:health}, and all other skills are ready to invoke on the first source you process. The full pipeline runs on the first {DOMAIN:note} you create.
+**All skills are available from day one.** /structure, /capture, /{DOMAIN:connect}, /{DOMAIN:maintain}, /{DOMAIN:verify}, /{DOMAIN:health}, and all other skills are ready to invoke on the first source you process. The full pipeline runs on the first {DOMAIN:note} you create.
 
 ### Quality Gates Summary
 
@@ -265,7 +265,7 @@ If a {DOMAIN:skill} exists for a task, use the {DOMAIN:skill}. Do not manually r
 
 | Trigger | Required {DOMAIN:Skill} |
 |---------|------------------------|
-| New content to {DOMAIN:process} | /extract, /structure, or /capture |
+| New content to {DOMAIN:process} | /structure or /capture |
 | New {DOMAIN:notes} need connections | /{DOMAIN:connect} |
 | Old {DOMAIN:notes} may need updating | /{DOMAIN:maintain} |
 | Quality verification needed | /{DOMAIN:verify} |
@@ -291,7 +291,6 @@ Your attention degrades as context fills. The first ~40% of context is the "smar
 Requires: yaml-schema, wiki-links, atomic-notes, mocs
 
 ## Skills Referenced
-- extract (extract atomic notes from sources)
 - structure (group related claims into structured notes)
 - capture (preserve source verbatim with frontmatter)
 - {DOMAIN:connect} (find connections, update topic maps)

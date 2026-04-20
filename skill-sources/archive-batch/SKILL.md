@@ -67,7 +67,7 @@ Write the updated queue file back. If the queue is now empty of task entries, pr
 Archived: {batch_id}
 Archive folder: {ARCHIVE_DIR}
 
-{DOMAIN:note_plural} extracted: {claim_count}
+{DOMAIN:note_plural} produced: {claim_count}
 Enrichments: {enrichment_count}
 Task files moved: {files_moved_count}
 

@@ -8,7 +8,7 @@ The valid configuration space is much smaller than the combinatorial product. Fi
 
 ### Granularity (Per-Invocation)
 
-Granularity is not a system dimension. It is chosen per invocation via `/extract` (atomic), `/structure` (moderate), or `/capture` (raw). Processing intensity and automation level are operational settings (`ops/config.yaml`), not design dimensions. Interaction constraints below apply to the 5 remaining dimensions: organization, linking, navigation, maintenance, schema.
+Granularity is not a system dimension. It is chosen per invocation via `/structure` (grouped claims) or `/capture` (raw). Processing intensity and automation level are operational settings (`ops/config.yaml`), not design dimensions. Interaction constraints below apply to the 5 remaining dimensions: organization, linking, navigation, maintenance, schema.
 
 ---
 

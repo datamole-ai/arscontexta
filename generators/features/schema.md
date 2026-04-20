@@ -13,7 +13,7 @@ Every {DOMAIN:note} has the same YAML frontmatter. One schema, six required fiel
 ---
 title: <string>               # prose-as-title, unique identifier
 content_type: <enum>          # vault-specific category (derived during setup)
-granularity: extract | structure | capture
+granularity: structure | capture
 description: <string>         # one sentence, <=200 chars, no trailing period
 created_at: <YYYY-MM-DD>      # ISO 8601 date
 tags: [<free-form strings>]   # may be empty []
@@ -24,7 +24,7 @@ tags: [<free-form strings>]   # may be empty []
 |-------|--------|-----|
 | `title` | every skill | wiki-link target, search, display |
 | `content_type` | routing + filtering skills | "show me all decisions" |
-| `granularity` | /extract, /structure, /capture pipelines | selects pipeline behavior |
+| `granularity` | /structure, /capture pipelines | selects pipeline behavior |
 | `description` | /{DOMAIN:verify}, progressive disclosure | filter-before-read |
 | `created_at` | archive, staleness checks | temporal queries |
 | `tags` | users and agents alike | emergent attributes that have not been formalized |
@@ -46,8 +46,8 @@ Do NOT use `tags` as a substitute for fields that clearly belong in the schema. 
 # Find all {DOMAIN:notes} of a given content_type
 rg '^content_type: decision' {DOMAIN:note_collection}/
 
-# Find all extract-granularity notes
-rg '^granularity: extract' {DOMAIN:note_collection}/
+# Find all structure-granularity notes
+rg '^granularity: structure' {DOMAIN:note_collection}/
 
 # Find notes with a given tag
 rg '^tags:.*\burgent\b' {DOMAIN:note_collection}/

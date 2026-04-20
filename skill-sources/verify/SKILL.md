@@ -22,9 +22,8 @@ The templates available are:
 
 After reading the target {vocabulary.note}, check its `granularity` frontmatter field:
 
-- **`extract`**: Full verification — composability test (standalone sense, specificity, clean linking), description cold-read test, schema compliance, link health (no broken links, in at least one {vocabulary.topic_map}).
-- **`structure`**: Scope coherence test (do all sections belong together?), section development test (does each section develop its sub-claim, not just state it?), description cold-read test, schema compliance, link health. Skip single-claim composability test.
-- **`capture`**: Description cold-read test, schema compliance, link health. Skip composability test and scope coherence test. Add: verbatim integrity check — fenced block present and non-empty, no wikilinks or edits inside the fenced block, all connections in footer sections only.
+- **`structure`**: Scope coherence test (do all sections belong together?), section development test (does each section develop its sub-claim, not just state it?), description cold-read test, schema compliance, link health (no broken links, in at least one {vocabulary.topic_map}).
+- **`capture`**: Description cold-read test, schema compliance, link health. Skip scope coherence test. Add: verbatim integrity check — fenced block present and non-empty, no wikilinks or edits inside the fenced block, all connections in footer sections only.
 
 ## EXECUTE NOW
 
@@ -109,7 +108,7 @@ Determine which template applies from frontmatter fields only (no filename infer
 **Template matching strategy:**
 
 1. Match the template whose `_schema` field set best fits the note's frontmatter — the template whose required and optional fields are present in the note
-2. If multiple templates match, prefer the one with the most specific field overlap (e.g., a note with `classification` and `methodology` matches `research-note` over `extract-note`)
+2. If multiple templates match, prefer the one with the most specific field overlap (e.g., a note with `classification` and `methodology` matches `research-note` over `generic-note`)
 3. If no template matches, FAIL: "No template found for this note type"
 
 Read the matched template's `_schema` block.

@@ -17,9 +17,8 @@ Derivation manifest for vocabulary mapping:
 
 After reading the target {vocabulary.note}, check its `granularity` frontmatter field:
 
-- **`extract`**: Full reweaving — update older {vocabulary.note_plural} with references to this new claim. Sharpen claims (does the older {vocabulary.note}'s title need updating given new understanding?). Full backward connections.
-- **`structure`**: Update older {vocabulary.note_plural} with references where relevant. Backward connections.
-- **`capture`**: Skip reweaving entirely. Raw capture does not produce new claims that change understanding of older {vocabulary.note_plural}. If someone later runs /extract on the capture as a source, THAT produces {vocabulary.note_plural} that trigger reweaving. Return immediately with "Capture {vocabulary.note} — reweaving skipped (no new claims to propagate)."
+- **`structure`**: Full reweaving — update older {vocabulary.note_plural} with references to the new claims. Sharpen claims (does the older {vocabulary.note}'s title need updating given new understanding?). Full backward connections.
+- **`capture`**: Skip reweaving entirely. Raw capture does not produce new claims that change understanding of older {vocabulary.note_plural}. Return immediately with "Capture {vocabulary.note} — reweaving skipped (no new claims to propagate)."
 
 ### Early Exit Check
 

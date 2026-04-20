@@ -10,7 +10,6 @@ _schema:
     - tags
   enums:
     granularity:
-      - extract
       - structure
       - capture
     content_type:
@@ -22,7 +21,7 @@ _schema:
     content_type:
       format: "One of the enum values derived during setup."
     granularity:
-      format: "One of extract | structure | capture."
+      format: "One of structure | capture."
     description:
       max_length: 200
       format: "One sentence adding context beyond the title. No trailing period."
@@ -38,7 +37,7 @@ _schema:
 
 title: ""
 content_type: ""
-granularity: extract
+granularity: structure
 description: ""
 created_at: YYYY-MM-DD
 tags: []

@@ -49,7 +49,7 @@ Analyze the user's description to extract:
 
 | Category | Applies When |
 |----------|-------------|
-| processing | How to extract, reduce, or handle content |
+| processing | How to structure, reduce, or handle content |
 | capture | How to record, file, or organize incoming material |
 | connection | How to find, evaluate, or add links between notes |
 | maintenance | How to handle health checks, reweaving, cleanup |
@@ -322,7 +322,7 @@ Choose the most specific applicable category:
 
 | Category | Use When |
 |----------|---------|
-| processing | Friction during /extract, /structure, /capture, or claim creation |
+| processing | Friction during /structure, /capture, or claim creation |
 | capture | Friction during inbox filing, raw material handling |
 | connection | Friction during /reflect, link evaluation, MOC updates |
 | maintenance | Friction during /reweave, health checks, cleanup |

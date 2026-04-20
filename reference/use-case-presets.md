@@ -21,7 +21,7 @@ Named points in the configuration space derived from methodology traditions and 
 | Atomicity | 0.8 | One claim per note maximizes composability and cross-source comparison |
 | Organization | 0.3 | Flat-associative with semantic search |
 | Linking | 0.7 | Explicit typed connections + semantic discovery |
-| Processing | 0.8 | Full pipeline: extract, connect, verify, reweave |
+| Processing | 0.8 | Full pipeline: structure, connect, verify, reweave |
 | Session | 0.7 | Fresh per task |
 | Maintenance | 0.6 | Event-driven |
 | Search | 0.8 | Semantic primary |
@@ -40,14 +40,14 @@ Named points in the configuration space derived from methodology traditions and 
 - `self_space: false`
 - `qmd: true` (opted in during onboarding)
 
-**Extraction categories:** claims, evidence, methodology-comparisons, contradictions, open-questions, design-patterns, design-dimensions
+**Processing categories:** claims, evidence, methodology-comparisons, contradictions, open-questions, design-patterns, design-dimensions
 
 **Key vocabulary:**
 
 | Level | Universal | Research |
 |-------|-----------|----------|
 | Note type | note | claim |
-| Processing verb | reduce/extract | reduce |
+| Processing verb | reduce | reduce |
 | Connection verb | reflect/connect | reflect |
 | Navigation unit | MOC | topic map |
 | Note collection | note_collection/ | notes/ |
@@ -77,14 +77,14 @@ Named points in the configuration space derived from methodology traditions and 
 
 **Closest tradition:** Custom — moderate processing for pattern detection, warm voice for personal content
 
-**Philosophy:** All skills available and active from day one, adapted for personal use. Full pipeline with personal extraction categories.
+**Philosophy:** All skills available and active from day one, adapted for personal use. Full pipeline with personal processing categories.
 
 | Dimension | Value | Rationale |
 |-----------|-------|-----------|
 | Atomicity | 0.5 | Mixed — per-session reflections, not atomic decomposition |
 | Organization | 0.5 | Light hierarchy for life areas |
 | Linking | 0.3 | Associative connections between reflections |
-| Processing | 0.7 | Full pipeline with personal extraction categories |
+| Processing | 0.7 | Full pipeline with personal processing categories |
 | Session | 0.3 | Continuous context across sessions |
 | Maintenance | 0.4 | Condition-based check-ins |
 | Search | 0.3 | Keyword primary, semantic optional |
@@ -103,14 +103,14 @@ Named points in the configuration space derived from methodology traditions and 
 - `self_space: true`
 - `qmd: "user_choice"` (choice during onboarding)
 
-**Extraction categories:** reflections, relationship-dynamics, goals, habits, gratitude, lessons
+**Processing categories:** reflections, relationship-dynamics, goals, habits, gratitude, lessons
 
 **Key vocabulary:**
 
 | Level | Universal | Personal Assistant |
 |-------|-----------|-------------------|
 | Note type | note | reflection |
-| Processing verb | reduce/extract | surface |
+| Processing verb | reduce | surface |
 | Connection verb | reflect/connect | find patterns |
 | Navigation unit | MOC | life area |
 | Note collection | note_collection/ | reflections/ |
@@ -165,7 +165,7 @@ Named points in the configuration space derived from methodology traditions and 
 - `self_space: "user_choice"`
 - `qmd: "user_choice"`
 
-**Extraction categories:** User-defined during init, guided by examples from research and personal-assistant presets
+**Processing categories:** User-defined during init, guided by examples from research and personal-assistant presets
 
 **Starter MOCs:** User-chosen during onboarding
 

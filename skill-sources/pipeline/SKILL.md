@@ -1,9 +1,9 @@
 ---
 name: pipeline
-description: End-to-end source processing -- seed, extract/structure/capture, process all notes through reflect/reweave/verify, archive. The full pipeline in one command. Triggers on "/pipeline", "/pipeline [file]", "process this end to end", "full pipeline".
+description: End-to-end source processing -- seed, structure/capture, process all notes through reflect/reweave/verify, archive. The full pipeline in one command. Triggers on "/pipeline", "/pipeline [file]", "process this end to end", "full pipeline".
 version: "1.0"
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
-argument-hint: " [file path] [--extract] [--structure] [--capture]
+argument-hint: " [file path] [--structure] [--capture]
 ---
 
 ## EXECUTE NOW
@@ -15,8 +15,8 @@ Parse immediately:
 - If target is empty: list files in {DOMAIN:inbox}/ and ask which to process
 
 **Granularity flag:**
-- one of: --extract, --structure, --capture
-- If no flag: present three options and ask user before proceeding
+- one of: --structure, --capture
+- If no flag: present both options and ask user before proceeding
 
 ### Vocabulary
 
@@ -68,13 +68,13 @@ Report: `$ Seeded: {source-name}`
 
 ## Phase 2: Process Source (Granularity-Routed) and claims
 
-Process the source via the appropriate skill based on granularity, extracting notes from the source and creating task entries in the queue.
+Process the source via the appropriate skill based on granularity, producing notes from the source and creating task entries in the queue.
 
 ### Phase 2 configuration
 
 | Phase | Skill Invoked | Purpose |
 |-------|---------------|---------|
-| process | /extract, /structure, or /capture (based on task.granularity) | Extract notes from source material |
+| process | /structure or /capture (based on task.granularity) | Produce notes from source material |
 | create | /create | Write the {DOMAIN:note} file with schema validation |
 | enrich | (inline enrichment) | Add content to existing {DOMAIN:note} |
 | reflect | /reflect | Find connections, update {DOMAIN:topic map}s |
@@ -97,7 +97,7 @@ phase_order:
 tasks:
   - id: source-name
     type: process
-    granularity: extract
+    granularity: structure
     status: pending
     source: ops/queue/archive/2026-01-30-source/source.md
     file: source-name.md
@@ -142,7 +142,7 @@ File: {file}
 
 | Current Phase | Skill to invoke |
 |-------|-----------------|
-| process | /extract, /structure, /capture based on granularity|
+| process | /structure or /capture based on granularity|
 | create | /create |
 | enrich | /enrich |
 | reflect | /{vocabulary.reflect} |
@@ -179,7 +179,7 @@ Look up `phase_order` from the queue header to determine the next phase. Find `c
 - Set `current_phase` to null
 - Append the completed phase to `completed_phases`
 
-**For process tasks ONLY:** Re-read the queue after marking done. The processing skill (/extract, /structure, or /capture) writes new task entries (1 entry per note/enrichment with `current_phase`/`completed_phases`) to the queue during execution. The lead must pick these up for subsequent iterations.
+**For process tasks ONLY:** Re-read the queue after marking done. The processing skill (/structure or /capture) writes new task entries (1 entry per note/enrichment with `current_phase`/`completed_phases`) to the queue during execution. The lead must pick these up for subsequent iterations.
 
 ### Phase 2.3.6 Report Progress
 
@@ -245,8 +245,8 @@ When all tasks for the batch are complete, archive the batch by using Skill tool
 Source: {source_file}
 Batch: {batch_id}
 
-Extraction:
-  {DOMAIN:note_plural} extracted: {N}
+Source processing:
+  {DOMAIN:note_plural} produced: {N}
   Enrichments identified: {M}
 
 Processing:
@@ -298,7 +298,7 @@ Queue Updates:
 
 **Seed failure:** If /seed fails (file not found, duplicate detected and user declines), stop the pipeline entirely.
 
-**Extract failure:** If Phase 2 extracts zero notes, report and stop. Do not proceed to an empty processing phase.
+**Processing failure:** If Phase 2 produces zero notes, report and stop. Do not proceed to an empty processing phase.
 
 ## Critical Constraints
 
