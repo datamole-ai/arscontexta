@@ -66,11 +66,7 @@ When processing multiple {DOMAIN:notes}, batch utilities streamline common opera
   ./ops/scripts/queue-status.sh
   ```
 
-- **Workboard reconciliation** — Run condition-based invariant checks, surface violated conditions as tasks, and auto-close satisfied conditions:
-  ```bash
-  ./ops/scripts/reconcile.sh
-  ```
-  This is idempotent — safe to run any number of times. It only reads state, never modifies your {DOMAIN:notes} or graph.
+- **Health diagnostics** — Run condition-based invariant checks and surface violations as a ranked report via /health. This is idempotent — safe to run any number of times. It only reads state, never modifies your {DOMAIN:notes} or graph.
 
 ### Domain-Specific Helpers
 

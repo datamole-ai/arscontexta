@@ -368,29 +368,19 @@ else
     fail "No operational learning loop detected (need observations dir, tensions dir, review trigger, rethink mechanism)"
 fi
 
-# --- Primitive 13: Task stack ---
-echo "13. Task stack"
-has_tasks_md=false
+# --- Primitive 13: Processing queue ---
+echo "13. Processing queue"
 has_queue_file=false
-
-# Check for ops/tasks.md or common variants
-for candidate in "ops/tasks.md" "04_meta/tasks/tasks.md"; do
-    [ -f "$VAULT/$candidate" ] && has_tasks_md=true && break
-done
 
 # Check for queue file (JSON or YAML)
 for candidate in "ops/queue/queue.json" "ops/queue/queue.yaml" "04_meta/tasks/queue.json" "04_meta/tasks/queue.yaml"; do
     [ -f "$VAULT/$candidate" ] && has_queue_file=true && break
 done
 
-if $has_tasks_md && $has_queue_file; then
-    pass "Task stack: tasks.md and queue file found"
-elif $has_tasks_md; then
-    warn "tasks.md found but no queue file"
-elif $has_queue_file; then
-    warn "Queue file found but no tasks.md"
+if $has_queue_file; then
+    pass "Processing queue: queue file found"
 else
-    warn "No task stack detected (ops/tasks.md + queue file)"
+    warn "No processing queue detected (ops/queue/queue.json or .yaml)"
 fi
 
 # --- Primitive 14: Methodology folder ---

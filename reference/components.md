@@ -248,20 +248,18 @@ Check MOC coverage:
 
 ---
 
-## Task Stack — Lifecycle Backbone
+## Processing Queue — Lifecycle Backbone
 
-**What:** Every note flows through a task state — from inbox capture through processing phases to completion. ops/tasks.md is the human-readable view; ops/queue/ holds the machine-readable queue file.
+**What:** Every note flows through phase states tracked in the queue file — from inbox capture through processing phases to completion.
 
-**Why:** Without task tracking, the agent has no lifecycle visibility. It cannot answer "what should I work on?" or "what processing is pending?" The task stack makes the processing pipeline observable and steerable.
+**Why:** Without queue tracking, the pipeline has no lifecycle visibility. It cannot answer "what processing is pending?" or resume after interruption. The queue makes the processing pipeline observable and steerable.
 
 **How to implement:**
-- `ops/tasks.md` — human-readable task overview (what's pending, in progress, done)
 - `ops/queue/queue.json` (or `queue.yaml`) — machine-readable queue for pipeline orchestration
-- Context file references both in the session-orient phase
-- `/next` command reads the task stack and surfaces the highest-priority work
+- Context file references it in the session-orient phase
 - Tasks track phase progression: each note moves through create, reflect, reweave, verify (or domain-appropriate equivalents)
 
-**Quality gate:** Can the agent answer "what should I work on next?" by reading the task stack? If yes, lifecycle visibility is achieved.
+**Quality gate:** Can the pipeline answer "what processing is pending?" by reading the queue? If yes, lifecycle visibility is achieved.
 
 ---
 

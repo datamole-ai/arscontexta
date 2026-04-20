@@ -174,11 +174,11 @@ Each extracted {DOMAIN:note} gets its own task file that accumulates notes acros
 
 **Batch archival:** When all {DOMAIN:notes} from a source reach `"done"`, the batch is archivable. Archival moves task files to `ops/queue/archive/{date}-{source}/`, generates a summary capturing what the batch produced, and cleans the queue.
 
-#### Maintenance Queue (Condition-Based Tasks)
+#### Maintenance via /health (Diagnostic, On-Demand)
 
-Maintenance work lives alongside pipeline work in the same queue. Instead of a separate tracking file, conditions materialize as `type: "maintenance"` queue entries with priority based on consequence speed. /next evaluates conditions on each invocation: fired conditions create queue entries, satisfied conditions auto-close them.
+Maintenance is diagnostic, not queued. The pipeline queue holds pipeline tasks only (process, create, enrich, reflect, reweave, verify). Vault health is evaluated on demand by /health, which reports fired conditions with specific files and ranked actions.
 
-**Maintenance conditions (evaluated by /next):**
+**Maintenance conditions (evaluated by /health):**
 
 | Signal | Threshold | Action |
 |--------|-----------|--------|
@@ -187,19 +187,19 @@ Maintenance work lives alongside pipeline work in the same queue. Instead of a s
 | {DOMAIN:Topic map} size | >40 {DOMAIN:notes} | Suggest split |
 | Orphan {DOMAIN:notes} | Any | Flag for connection finding |
 | Dangling links | Any | Flag for resolution |
-| Stale health check | >7 days | Suggest /{DOMAIN:health} |
 | Inbox age | >3 days | Suggest processing |
 | Pipeline batch stalled | >2 sessions without progress | Surface as blocked |
 
-**Priority derives from consequence speed**, not manual labels:
+**Impact-based ranking** (highest to lowest):
 
-| Consequence Speed | Priority | Examples |
-|-------------------|----------|----------|
-| `session` | Highest | Orphan {DOMAIN:notes}, dangling links, inbox pressure |
-| `multi_session` | Medium | Pipeline batch completion, stale health checks |
-| `slow` | Lower | {DOMAIN:Topic map} oversizing, rethink thresholds |
+| Impact Tier | Examples |
+|-------------|----------|
+| Highest | Dangling links, persistent orphans |
+| High | Schema violations, boundary violations |
+| Medium | Description quality, stale notes |
+| Low | {DOMAIN:Topic map} size warnings, throughput ratio |
 
-The session-start orientation checks these thresholds and surfaces the highest-priority items. This is reconciliation-based task management — the system tells you what needs attention based on measured state, not based on tasks someone remembered to create.
+The session-start orientation shows queue status; /health runs the full diagnostic when invoked. This is reconciliation-based diagnosis — /health tells you what needs attention based on measured state, with no maintenance queue to keep clean.
 
 ### Orchestrated Processing (Fresh Context Per Phase)
 

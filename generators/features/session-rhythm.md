@@ -12,7 +12,7 @@ Every session follows three phases. This rhythm prevents context loss across ses
 Before doing anything, understand where you are:
 
 1. **Read identity and goals** — If self space is enabled, check self/identity.md and self/goals.md. If self space is off, check ops/ for current threads and the context file for identity. What was the last session working on?
-2. **Check condition-based triggers** — Workboard reconciliation runs at session start. It checks maintenance conditions (orphans, dangling links, inbox pressure, observation thresholds) and surfaces any that need attention.
+2. **Check condition-based triggers** — The session-orient hook checks key maintenance conditions (orphans, dangling links, inbox pressure, observation thresholds) and surfaces any that need attention. Run /health for the full diagnostic sweep.
 3. **Check reminders** — Read ops/reminders.md if it exists. Past sessions may have left explicit notes for future sessions.
 4. **Understand current state** — What {DOMAIN:notes} exist? What's in {DOMAIN:inbox/}? What does the graph look like?
 

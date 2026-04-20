@@ -368,7 +368,7 @@ In v1.6, all vaults ship with full automation from day one. There are no tier bo
 | 0-5 | Initial capture, first concepts | Full system operational. All skills available. Templates enforce schema. Hooks automate orientation. |
 | 5-15 | Regular capture, first MOC created | Hub MOC appears naturally. Agent creates topic MOCs as clusters emerge. Condition-based maintenance has nothing to fire yet. |
 | 15-50 | Steady growth, processing routine | Processing pipeline handles incoming notes. Condition-based hooks begin evaluating state but most thresholds not yet reached. |
-| 50-100 | Accelerating growth | Semantic search becomes increasingly valuable. Condition-based triggers begin firing (orphan detection, MOC size thresholds). /next surfaces maintenance tasks. |
+| 50-100 | Accelerating growth | Semantic search becomes increasingly valuable. Condition-based triggers begin firing (orphan detection, MOC size thresholds). /health surfaces maintenance findings. |
 | 100-150 | Full pipeline operation | Sub-MOCs emerge as topic MOCs exceed configured thresholds. Orchestration handles batch processing with fresh context per phase. |
 | 150+ | Mature system | Evolution is within the configuration: better skill instructions, richer schemas, more sophisticated orchestration. Reseed may be triggered by accumulated drift. |
 

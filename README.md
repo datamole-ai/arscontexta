@@ -133,8 +133,6 @@ or `decisions/`), but the separation is invariant.
 |---------|-------------|
 | `/stats` | Vault metrics |
 | `/graph` | Graph analysis |
-| `/tasks` | Queue management |
-| `/next` | Next-action recommendation |
 
 #### Meta-Cognitive
 

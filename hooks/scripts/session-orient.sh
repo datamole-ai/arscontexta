@@ -79,11 +79,6 @@ if [ "$INBOX_COUNT" -ge 3 ]; then
   echo "CONDITION: $INBOX_COUNT items in inbox. Consider /extract or /structure."
 fi
 
-# Workboard reconciliation
-if [ -f ops/scripts/reconcile.sh ]; then
-  bash ops/scripts/reconcile.sh --compact 2>/dev/null
-fi
-
 # Methodology staleness check (Rule Zero)
 if [ -d ops/methodology ] && [ -f ops/config.yaml ]; then
   CONFIG_MTIME=$(stat -f %m ops/config.yaml 2>/dev/null || stat -c %Y ops/config.yaml 2>/dev/null || echo 0)

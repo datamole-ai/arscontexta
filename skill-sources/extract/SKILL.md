@@ -6,25 +6,16 @@ context: fork
 allowed-tools: Read, Write, Grep, Glob, mcp__qmd__query
 ---
 
-## Runtime Configuration (Step 0 — before any processing)
+### Vocabulary
 
-Read these files to configure domain-specific behavior:
+All output must use domain-native terms.
+Derivation manifest for vocabulary mapping:
+!`cat ops/derivation-manifest.md`
 
-1. **`ops/derivation-manifest.md`** — vocabulary mapping, extraction categories, platform hints
-   - Use `vocabulary.note_collection` for the flat note collection directory (all notes live here regardless of `content_type` or `granularity`)
-   - Use `vocabulary.inbox` for the inbox folder name
-   - Use `vocabulary.note` for the note type name in output
-   - Use `vocabulary.note_plural` for the plural form
-   - Use `vocabulary.reduce` for the process verb in output
-   - Use `vocabulary.cmd_reflect` for the next-phase command name
-   - Use `vocabulary.cmd_reweave` for the backward-pass command name
-   - Use `vocabulary.cmd_verify` for the verification command name
-   - Use `vocabulary.extraction_categories` for domain-specific extraction table
-   - Use `vocabulary.topic_map` for MOC/topic map references
-   - Use `vocabulary.topic_maps` for plural form
+### Task Queue
 
-2. **`ops/queue/queue.json`** — current task queue
-
+Current task queue:
+!`cat ops/queue/queue.json`
 
 ---
 

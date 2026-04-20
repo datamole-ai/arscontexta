@@ -341,4 +341,4 @@ Is this about the agent itself?
 
 - **Failure modes that afflict each space:** See `failure-modes.md` for the full failure mode taxonomy. Conflation failures (this document) are structural; failure-modes.md covers operational decay (collector's fallacy, orphan drift, schema erosion).
 - **What goes in each space per domain:** See `use-case-presets.md` for domain-specific routing decisions (therapy reflections vs research claims vs PM decisions).
-- **Kernel primitives that depend on three-space separation:** `self-space` (configurable), `session-rhythm`, `discovery-first`, `task-stack`, and `methodology-folder` all assume clean space boundaries. See `kernel.yaml`.
+- **Kernel primitives that depend on three-space separation:** `self-space` (configurable), `session-rhythm`, `discovery-first`, and `methodology-folder` all assume clean space boundaries. See `kernel.yaml`.

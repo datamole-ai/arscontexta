@@ -6,27 +6,16 @@ context: fork
 allowed-tools: Read, Write, Grep, Glob, mcp__qmd__query
 ---
 
-## Runtime Configuration (Step 0 — before any processing)
+### Vocabulary
 
-Read these files to configure domain-specific behavior:
+All output must use domain-native terms.
+Derivation manifest for vocabulary mapping:
+!`cat ops/derivation-manifest.md`
 
-1. **`ops/derivation-manifest.md`** — vocabulary mapping, extraction categories, platform hints
-   - Use `vocabulary.note_collection` for the note collection directory (flat; all notes live here regardless of `granularity`)
-   - Use `vocabulary.inbox` for the inbox folder name
-   - Use `vocabulary.note` for the note type name in output
-   - Use `vocabulary.note_plural` for the plural form
-   - Use `vocabulary.reduce` for the process verb in output
-   - Use `vocabulary.cmd_reflect` for the next-phase command name
-   - Use `vocabulary.cmd_reweave` for the backward-pass command name
-   - Use `vocabulary.cmd_verify` for the verification command name
-   - Use `vocabulary.topic_map` for MOC/topic map references
-   - Use `vocabulary.topic_maps` for plural form
+### Task Queue
 
-2. **`ops/queue/queue.json`** — current task queue
-
-If these files don't exist (pre-init invocation or standalone use), use universal defaults:
-- note collection: `notes/`
-- inbox folder: `inbox/`
+Current task queue:
+!`cat ops/queue/queue.json`
 
 ---
 
@@ -74,21 +63,7 @@ If YES -> split into separate structure notes
 **Target: $ARGUMENTS**
 
 Parse the source file path from arguments. If no argument is provided, report
-`ERROR: structure requires source file path from /pipeline` and stop. This skill
-is not user-invocable.
-
-**Execute these steps:**
-
-1. Read the source file fully — understand what it contains, what topics it covers
-2. **Source size check:** If source exceeds 2500 lines, STOP. Plan chunks of 350-1200 lines. Process each chunk with fresh context. See "Large Source Handling" section below.
-3. Identify topic clusters — groups of related claims
-4. For each cluster:
-   - Tier 1 (preferred): use `mcp__qmd__query` with query "[cluster scope as sentence]", collection="{vocabulary.notes_collection}", limit=5
-   - Tier 2 (CLI fallback): `qmd vsearch "[cluster scope as sentence]" --collection {vocabulary.notes_collection} -n 5`
-   - Tier 3 fallback if qmd is unavailable: use keyword grep duplicate checks
-   - If existing note covers same scope: evaluate for enrichment or merge
-5. Append the grouping summary (proposed titles, cluster membership, enrichments) to the source task file's `## Outputs` section. No chat output.
-6. Create per-note task files, update queue, output HANDOFF block
+`ERROR: structure requires source file path` and stop.
 
 **START NOW.** Reference below explains methodology — use to guide, not as output.
 

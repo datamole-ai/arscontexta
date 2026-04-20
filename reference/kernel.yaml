@@ -177,15 +177,15 @@ primitives:
       check: "ops/observations/ and ops/tensions/ directories exist. Review trigger (threshold or condition) documented in context file. /{DOMAIN:rethink} command or equivalent exists."
     cognitive_grounding: "Scientific method applied to knowledge systems — hypothesize, implement, observe, revise. Systems that cannot observe their own friction cannot evolve."
 
-  - id: task-stack
-    name: Task stack
-    description: "The lifecycle backbone. Every note flows through a task state. ops/tasks.md is the human-readable view; ops/queue/ holds the unified queue with both pipeline tasks (claims, enrichments) and maintenance tasks (auto-generated from condition evaluation, auto-closed when satisfied)."
+  - id: processing-queue
+    name: Processing queue
+    description: "The lifecycle backbone. Every note flows through phase states tracked in ops/queue/ — the unified queue holding pipeline tasks (claims, enrichments) and their phase progression (create, reflect, reweave, verify)."
     layer: convention
     requires: markdown-yaml, session-rhythm
     enforcement: invariant
     validation:
-      check: "ops/tasks.md exists. Queue file exists with schema_version >= 3. Context file references both in session-orient phase. /next reads task stack AND reconciles maintenance conditions in the queue."
-    cognitive_grounding: "Without task tracking, the agent has no lifecycle visibility. Cannot answer 'what should I work on?' or 'what processing is pending?'"
+      check: "Queue file (ops/queue/queue.json) exists. Context file references it in session-orient phase. Pipeline skills read and advance tasks through phase_order."
+    cognitive_grounding: "Without queue tracking, the pipeline has no lifecycle visibility. Cannot answer 'what processing is pending?' or resume after interruption."
 
   - id: methodology-folder
     name: Methodology folder
@@ -209,11 +209,11 @@ primitives:
 # description-field → discovery-first
 # topics-footer → discovery-first
 # schema-enforcement → operational-learning-loop
-# markdown-yaml + session-rhythm → task-stack
+# markdown-yaml + session-rhythm → processing-queue
 # markdown-yaml + moc-hierarchy + operational-learning-loop → methodology-folder
 # tree-injection (standalone)
 
 # Layer mapping:
 # foundation: markdown-yaml, wiki-links, unique-addresses
-# convention: moc-hierarchy, tree-injection, description-field, topics-footer, schema-enforcement, self-space, session-rhythm, discovery-first, operational-learning-loop, task-stack, methodology-folder
+# convention: moc-hierarchy, tree-injection, description-field, topics-footer, schema-enforcement, self-space, session-rhythm, discovery-first, operational-learning-loop, processing-queue, methodology-folder
 # automation: semantic-search

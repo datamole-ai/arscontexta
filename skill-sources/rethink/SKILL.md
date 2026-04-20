@@ -437,16 +437,6 @@ Every proposal MUST have:
 
 Do not propose architectural changes based on thin evidence. The threshold scales with the blast radius.
 
-### /next Integration
-
-If 10+ pending observations or 5+ pending tensions remain after triage AND pattern detection did not consume them into proposals:
-
-```
-  Threshold signal for /next:
-    [N] pending observations, [N] pending tensions remain
-    /next should prioritize {DOMAIN:rethink} at session priority
-```
-
 ---
 
 ## Phase 5: Present for Approval

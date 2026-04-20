@@ -56,8 +56,8 @@ Seven validation milestones for the Ars Contexta v1.6 plugin. Each milestone tes
   PASS Discovery-first gate in context file and skills
 12. Operational learning loop
   PASS Operational learning loop: observations, tensions, review trigger, rethink mechanism
-13. Task stack for work prioritization
-  PASS Task stack mechanism found (ops/tasks/ or equivalent)
+13. Processing queue for pipeline orchestration
+  PASS Processing queue found (ops/queue/queue.json or equivalent)
 14. Methodology folder for vault self-knowledge
   PASS ops/methodology/ exists with linked notes
 === Kernel Validation Summary ===
@@ -79,7 +79,7 @@ All 14 primitives validated successfully.
 | WARN on primitive 7 (schema enforcement) | Templates exist but no validation script generated | Ensure /setup creates a validate.sh or validate skill |
 | WARN on primitive 11 (discovery-first) | Context file has discovery section but skills lack discovery checks | Add discovery-first check to generated skill templates |
 | FAIL on primitive 12 (learning loop) | Missing ops/observations/ or ops/tensions/ directories | Ensure /setup creates both directories and documents condition-based triggers in context file |
-| FAIL on primitive 13 (task stack) | Missing ops/tasks/ or task stack mechanism | Ensure /setup creates task stack infrastructure |
+| FAIL on primitive 13 (processing queue) | Missing ops/queue/queue.json | Ensure /setup creates ops/queue/ with queue file |
 | FAIL on primitive 14 (methodology folder) | Missing ops/methodology/ directory | Ensure /setup creates ops/methodology/ with linked notes |
 
 ---
@@ -565,7 +565,7 @@ rm -f "$VAULT/self/goals.md.bak"
 **Pass criteria:**
 1. No time-based triggers (weekly, monthly, quarterly) in the generated context file unless time genuinely is the right trigger (e.g., content staleness)
 2. Condition-based hooks evaluate vault state at session start
-3. Fired conditions surface as tasks on the task stack via /next
+3. Fired conditions surface through /health diagnostics
 4. Conditions do not stack during periods of inactivity
 
 **Verification steps:**
@@ -615,7 +615,7 @@ fi
 | Time-based triggers in context file | Feature block template uses old time-based language | Update maintenance feature block to use condition-based triggers |
 | No condition evaluation at session start | Hook template does not include state checks | Add vault state evaluation (orphans, stale nodes, pending observations) to session-start hook |
 | Conditions stack during inactivity | Conditions fire even when vault has not changed | Add staleness check — if vault unchanged since last session, skip condition evaluation |
-| /next does not show fired conditions | Task stack not updated by condition hooks | Ensure condition hooks write fired conditions to ops/tasks/ for /next to surface |
+| /health does not surface fired conditions | Condition evaluation incomplete in /health diagnostics | Ensure /health Maintenance Signals section covers all configured conditions |
 
 ---
 

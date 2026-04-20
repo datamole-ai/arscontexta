@@ -67,8 +67,8 @@ These constraints apply to the 14 kernel primitives and their INVARIANT/CONFIGUR
 8. `condition_thresholds_all_zero`
    → WARN: "All condition-based maintenance thresholds are set to zero (disabled). The vault will not surface maintenance tasks. Consider enabling at least orphan detection and dangling link checks."
 
-9. `task_stack == false` (Primitive 13)
-   → BLOCK: "The task stack is INVARIANT. Without task tracking, the agent has no lifecycle visibility and cannot answer 'what should I work on?'"
+9. `processing_queue == false` (Primitive 13)
+   → BLOCK: "The processing queue is INVARIANT. Without queue tracking, the pipeline has no lifecycle visibility and cannot resume after interruption."
 
 ---
 

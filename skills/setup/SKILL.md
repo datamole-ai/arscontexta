@@ -363,7 +363,7 @@ All generated systems ship with full automation from day one. Every vault gets t
 | Context file                              | Comprehensive, all sections                                      |
 | 16 processing skills + 10 plugin commands | Processing skills vocabulary-transformed with full quality gates |
 | Plugin hooks (orient, validate, commit)   | Provided by arscontexta plugin globally; vault generates only qmd-sync if semantic search active |
-| Queue system                              | ops/tasks.md + ops/queue/                                        |
+| Queue system                              | ops/queue/                                                       |
 | Templates                                 | With _schema blocks                                              |
 | Self space (if opted in)                  | self/ or ops/ fallback                                           |
 | Semantic search (if opted in)             | qmd setup                                                        |
@@ -1236,28 +1236,26 @@ Generate ALL skills. Every vault ships with the complete skill set from day one.
 
 **Skill source templates live at `${CLAUDE_PLUGIN_ROOT}/skill-sources/`.** Each subdirectory contains a `SKILL.md` template that must be read and written to the user's skills directory.
 
-The 19 skill sources to install:
+The skill sources to install:
 
 
 | Source Directory                                     | Skill Name    | Category      | Tier |
 | ---------------------------------------------------- | ------------- | ------------- | ---- |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/tasks/`         | tasks         | Orchestration | A    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/reflect/`       | reflect       | Processing    | B    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/reweave/`       | reweave       | Processing    | B    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/stats/`         | stats         | Navigation    | B    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/graph/`         | graph         | Navigation    | B    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/refactor/`      | refactor      | Evolution     | B    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/create/`        | create        | Processing    | B    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/seed/`          | seed          | Orchestration | C    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/pipeline/`      | pipeline      | Orchestration | C    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/archive-batch/` | archive-batch | Orchestration | C    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/rethink/`       | rethink       | Evolution     | C    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/next/`          | next          | Navigation    | C    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/remember/`      | remember      | Growth        | C    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/extract/`       | extract       | Processing    | C    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/structure/`     | structure     | Processing    | C    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/capture/`       | capture       | Processing    | C    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/verify/`        | verify        | Processing    | C    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/reflect/`       | reflect       | Processing    | A    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/reweave/`       | reweave       | Processing    | A    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/stats/`         | stats         | Navigation    | A    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/graph/`         | graph         | Navigation    | A    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/refactor/`      | refactor      | Evolution     | A    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/create/`        | create        | Processing    | A    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/seed/`          | seed          | Orchestration | B    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/pipeline/`      | pipeline      | Orchestration | B    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/archive-batch/` | archive-batch | Orchestration | B    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/rethink/`       | rethink       | Evolution     | B    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/remember/`      | remember      | Growth        | B    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/extract/`       | extract       | Processing    | B    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/structure/`     | structure     | Processing    | B    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/capture/`       | capture       | Processing    | B    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/verify/`        | verify        | Processing    | B    |
 
 
 **For Claude Code:** Write each skill to `.claude/skills/[domain-skill-name]/SKILL.md`
@@ -1278,22 +1276,9 @@ Skills use two placeholder types:
 - `{vocabulary.xxx}` — resolves at **runtime** when the skill reads `ops/derivation-manifest.md`. Do NOT substitute these during setup.
 - `{DOMAIN:xxx}` — literal string templates that must be substituted at **setup time** using the vocabulary mapping.
 
-Process tiers in order: **A → B → C** (simplest first, saving context for skills that need transformation).
+Process tiers in order: **A → B** (simplest first, saving context for skills that need transformation).
 
-##### Tier A — Copy (no placeholders)
-
-**Skills:** tasks
-
-These skill sources contain zero placeholders of either type.
-
-1. Copy source to target: `cp ${CLAUDE_PLUGIN_ROOT}/skill-sources/[skill]/SKILL.md` → `.claude/skills/[domain-skill-name]/SKILL.md`
-2. Read frontmatter only (first ~5 lines) to see current `name:` and `description:` values
-3. Edit in place:
-  - `name:` → domain-native command name from vocabulary mapping
-  - `description:` → rewrite trigger phrases with domain vocabulary
-4. All other frontmatter fields and the entire body remain untouched — they were preserved by the copy
-
-##### Tier B — Frontmatter only (runtime vocabulary)
+##### Tier A — Frontmatter only (runtime vocabulary)
 
 **Skills:** reflect, reweave, stats, graph, refactor, create
 
@@ -1308,9 +1293,9 @@ These skill sources contain only `{vocabulary.xxx}` patterns in their body. Thos
 
 **CRITICAL:** Do NOT transform `{vocabulary.xxx}` patterns in the body. These are runtime references, not setup-time templates. If you see `{vocabulary.notes}` in the body, leave it exactly as-is.
 
-##### Tier C — DOMAIN substitution (mechanical string replace)
+##### Tier B — DOMAIN substitution (mechanical string replace)
 
-**Skills:** seed, pipeline, archive-batch, rethink, next, remember, verify, extract, structure, capture
+**Skills:** seed, pipeline, archive-batch, rethink, remember, verify, extract, structure, capture
 
 These skill sources contain `{DOMAIN:xxx}` patterns that must be literally substituted at setup time. They may also contain `{vocabulary.xxx}` patterns — leave those intact.
 
@@ -1323,9 +1308,9 @@ These skill sources contain `{DOMAIN:xxx}` patterns that must be literally subst
 5. Find and replace all `{DOMAIN:xxx}` patterns in the target file — use Grep to locate them or sed to replace in one pass, whichever is cleaner
 6. Do NOT touch `{vocabulary.xxx}` patterns — leave them for runtime resolution
 
-**Verification:** After each Tier C skill, confirm zero `{DOMAIN:` strings remain in the output file. If any remain, the substitution map is incomplete — check `ops/derivation.md` vocabulary mapping for the missing entry.
+**Verification:** After each Tier B skill, confirm zero `{DOMAIN:` strings remain in the output file. If any remain, the substitution map is incomplete — check `ops/derivation.md` vocabulary mapping for the missing entry.
 
-**Exception: /extract, /structure, /capture** — These three skills use Tier C DOMAIN substitution in their body but their `name:` and `description:` fields in frontmatter stay UNCHANGED. Do not domain-rename them. They are universal infrastructure commands. Setup copies the file, substitutes `{DOMAIN:xxx}` patterns in the body only, and installs to `.claude/skills/extract/SKILL.md`, `.claude/skills/structure/SKILL.md`, `.claude/skills/capture/SKILL.md`.
+**Exception: /extract, /structure, /capture** — These three skills use Tier B DOMAIN substitution in their body but their `name:` and `description:` fields in frontmatter stay UNCHANGED. Do not domain-rename them. They are universal infrastructure commands. Setup copies the file, substitutes `{DOMAIN:xxx}` patterns in the body only, and installs to `.claude/skills/extract/SKILL.md`, `.claude/skills/structure/SKILL.md`, `.claude/skills/capture/SKILL.md`.
 
 ##### Skill Discoverability Protocol
 
@@ -1333,7 +1318,7 @@ These skill sources contain `{DOMAIN:xxx}` patterns that must be literally subst
 
 After creating ALL skill files:
 
-1. **Report to main agent:** List all generated skill names (domain-native) and confirm zero `{DOMAIN:` strings remain in Tier C output. This information is used by Agent 3 (CLAUDE.md) to build the "Recently Created Skills" section.
+1. **Report to main agent:** List all generated skill names (domain-native) and confirm zero `{DOMAIN:` strings remain in Tier B output. This information is used by Agent 3 (CLAUDE.md) to build the "Recently Created Skills" section.
 2. **Phase 6 guidance:** If any skills were created, Phase 6 output includes: "Restart Claude Code now to activate all skills, then try /[domain:help] to see what's available."
 
 ---
@@ -1552,7 +1537,6 @@ What pipeline runs for you. Use directly for fine-grained control.
 - /{DOMAIN:reflect} — find connections, update {DOMAIN:topic map}s
 - /{DOMAIN:reweave} — update older {DOMAIN:note_plural} with new context
 - /{DOMAIN:verify} — description + schema + health check
-- /{DOMAIN:orchestrate} — queue-based orchestration engine (fresh context per phase)
 - /archive-batch — archive completed batch
 
 ## Operational
@@ -1561,8 +1545,6 @@ Vault state and diagnostics.
 
 - /{DOMAIN:stats} — vault metrics
 - /{DOMAIN:graph} — graph analysis
-- /{DOMAIN:tasks} — queue management
-- /{DOMAIN:next} — next-action recommendation
 
 Note: /arscontexta:health (plugin-level) also performs diagnostics but is always available, not generated.
 
@@ -1661,13 +1643,13 @@ Pipeline can be interrupted and resumed at any point. Queue state persists acros
 | Interrupted At | How to Resume |
 |----------------|---------------|
 | Before seed | Run /{DOMAIN:pipeline} again |
-| After seed, before extraction | /{DOMAIN:orchestrate} 1 --batch {id} --type process |
-| During note processing | /{DOMAIN:orchestrate} --batch {id} |
+| After seed, before extraction | /{DOMAIN:pipeline} --batch {id} |
+| During note processing | /{DOMAIN:pipeline} --batch {id} |
 | Before archive | /archive-batch {id} |
 
 ## Batch Orchestration
 
-/{DOMAIN:orchestrate} for processing multiple items. Queue management with /{DOMAIN:tasks}. Fresh context per phase ensures quality doesn't degrade.
+/{DOMAIN:pipeline} processes multiple items via the queue. Queue state lives in `ops/queue/queue.json`. Fresh context per phase ensures quality doesn't degrade.
 
 ## Going Manual
 
@@ -1708,7 +1690,7 @@ type: manual
 - Stale content — {DOMAIN:note_plural} not updated in 30+ days with sparse connections (run /{DOMAIN:reweave})
 - Methodology drift — system behavior diverging from methodology spec (run /{DOMAIN:rethink} drift)
 - Inbox overflow — too many items accumulating (run /{DOMAIN:pipeline} to process inbox items)
-- Pipeline stalls — tasks stuck in queue (check with /{DOMAIN:tasks}, resume with /{DOMAIN:orchestrate} --batch {id}). See [[pipeline]] resumability section.
+- Pipeline stalls — tasks stuck in queue (inspect `ops/queue/queue.json` directly, resume with /{DOMAIN:pipeline} --batch {id}). See [[pipeline]] resumability section.
 - Common mistakes table with corrections
 - Link to [[skills]] for command reference
 - Link to [[configuration]] for threshold adjustments
@@ -1869,7 +1851,7 @@ Run all 15 primitive checks against the generated system. Use `${CLAUDE_PLUGIN_R
 10. **session-rhythm** -- Context file references ops/features/session-rhythm.md for orient/work/persist cycle?
 11. **discovery-first** -- Context file contains Discovery-First Design section, notes optimized for findability?
 12. **operational-learning-loop** -- ops/observations/ and ops/tensions/ exist, review trigger documented in context file, /{DOMAIN:rethink} command exists?
-13. **task-stack** -- ops/tasks.md exists? Queue file (ops/queue/queue.json) exists with schema_version >= 3 and maintenance_conditions section? Context file references both in session-orient phase? /{DOMAIN:next} command exists with condition reconciliation?
+13. **processing-queue** -- Queue file (ops/queue/queue.json) exists with schema_version >= 3? Context file references it in session-orient phase? Pipeline skills advance tasks through phase_order?
 14. **methodology-folder** -- ops/methodology/ exists with methodology.md MOC? At least one derivation-rationale note exists? Context file references ops/methodology/ for meta-skill context?
 Report results: pass/fail per primitive with specific failures listed.
 
@@ -1918,7 +1900,6 @@ Here's what you can do:
   /arscontexta:[domain:reflect]   -- find connections between your [domain:notes]
   /arscontexta:health             -- check your knowledge system
   /arscontexta:help               -- see everything available
-  /arscontexta:next               -- get intelligent next-action recommendations
 ```
 
 Note: Plugin commands use the format `/arscontexta:command-name`. List all commands explicitly since they may not appear in tab completion. If skills were generated, note they require a Claude Code restart.

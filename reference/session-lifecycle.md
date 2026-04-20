@@ -217,7 +217,7 @@ Hooks automate session rhythm. A SessionStart hook injects the file tree and loa
 
 #### Condition-based trigger evaluation replaces time-based scheduling in the orient phase
 
-**Summary:** At session start, the system evaluates a set of declared conditions against the current vault state. When a condition fires, it surfaces as a task on the task stack via /next. This replaces all time-based scheduling (weekly health checks, monthly reviews, quarterly rethink). Conditions respond to actual state: "topic MOC exceeds 50 notes" fires when it is true, not on a Tuesday. "Stale nodes exceed 20%" fires when graph metrics warrant it, not monthly. "Unprocessed sessions exceed N" fires when transcripts accumulate. Conditions do not stack during periods of inactivity — if the vault has not changed since the last session, no conditions fire.
+**Summary:** At session start, the system evaluates a set of declared conditions against the current vault state. When a condition fires, it is surfaced in the orient output; /health provides the full on-demand diagnostic. This replaces all time-based scheduling (weekly health checks, monthly reviews, quarterly rethink). Conditions respond to actual state: "topic MOC exceeds 50 notes" fires when it is true, not on a Tuesday. "Stale nodes exceed 20%" fires when graph metrics warrant it, not monthly. "Unprocessed sessions exceed N" fires when transcripts accumulate. Conditions do not stack during periods of inactivity — if the vault has not changed since the last session, no conditions fire.
 
 **Derivation Implication:** Every generated system should include condition-based triggers evaluated at session start. The session-start hook runs condition evaluation and surfaces fired conditions. The condition declarations should be domain-appropriate: research vaults check orphan notes and MOC sizes; personal assistant vaults check follow-up due dates and memory staleness.
 
@@ -231,7 +231,7 @@ Hooks automate session rhythm. A SessionStart hook injects the file tree and loa
 
 **Derivation Implication:** Generated systems with processing = moderate or heavy should include a morning briefing mechanism. The session-start hook aggregates condition evaluation results with queue status and inbox count. The briefing pattern transforms "what should I do?" into "here is what needs doing" — reducing the orientation cost.
 
-**Source:** Vault queue reconciliation pattern. The session-start hook shows queue status and /next runs condition reconciliation, functioning as the morning briefing.
+**Source:** Vault queue reconciliation pattern. The session-start hook shows queue status and fired conditions, functioning as the morning briefing; /health runs the full diagnostic on demand.
 
 ---
 

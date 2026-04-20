@@ -101,7 +101,7 @@ Questions the engine must answer when generating evolution-ready systems:
 
 #### Every vault ships complete — users opt down, not up
 
-**Summary:** v1.6 reverses the progressive complexity approach. Instead of starting simple and adding features when friction demands, every vault ships with full automation: all processing skills, all hooks, all maintenance mechanisms, methodology folder, task stack. The philosophy is that it is easier to remove features than to discover and add them. The overhead of unused features is near-zero (hooks that never fire, skills that are never invoked, directories that stay empty), while the cost of discovering and adding features when friction emerges was higher than anticipated. Users who want less complexity disable features by editing `ops/config.yaml`.
+**Summary:** v1.6 reverses the progressive complexity approach. Instead of starting simple and adding features when friction demands, every vault ships with full automation: all processing skills, all hooks, all maintenance mechanisms, methodology folder, processing queue. The philosophy is that it is easier to remove features than to discover and add them. The overhead of unused features is near-zero (hooks that never fire, skills that are never invoked, directories that stay empty), while the cost of discovering and adding features when friction emerges was higher than anticipated. Users who want less complexity disable features by editing `ops/config.yaml`.
 
 **Derivation Implication:** The derivation engine generates the maximum viable system for the chosen preset. All 3 presets (Research, Personal Assistant, Experimental) include full automation by default. Users toggle optional features (semantic search, self space) by editing `ops/config.yaml` without regenerating. INVARIANT primitives cannot be disabled.
 
@@ -113,7 +113,7 @@ Questions the engine must answer when generating evolution-ready systems:
 
 **Summary:** Condition-based triggers respond to actual vault state, not calendar schedules. "Topic MOC exceeds 50 notes" fires when true. "Stale nodes exceed 20%" fires when the graph warrants it. "Pending observations exceed 10" fires when evidence accumulates. Time-based triggers (weekly, monthly, quarterly) assumed uniform activity — a vault scaling fast overwhelms a monthly check; a vault used rarely runs empty checks on schedule. Conditions fire exactly when maintenance is needed.
 
-**Derivation Implication:** Generated context files and hooks should use condition-based triggers exclusively for maintenance. Time-based conditions remain valid only when time genuinely is the right trigger (checking for content staleness). The session-start hook evaluates conditions and surfaces fired conditions on the task stack via /next. The context file documents available conditions and their thresholds.
+**Derivation Implication:** Generated context files and hooks should use condition-based triggers exclusively for maintenance. Time-based conditions remain valid only when time genuinely is the right trigger (checking for content staleness). The session-start hook evaluates conditions and surfaces fired conditions to the user; /health runs the full diagnostic sweep on demand. The context file documents available conditions and their thresholds.
 
 **Source:** v1.6 specification. Cognitive science mapping: human prospective memory works through environmental cues ("when I get home, call dad"), not calendar scheduling.
 
@@ -165,7 +165,7 @@ Questions the engine must answer when generating evolution-ready systems:
 
 #### The kernel is invariant across all evolution
 
-**Summary:** The 14 kernel primitives (markdown-yaml, wiki-links, moc-hierarchy, tree-injection, description-field, topics-footer, schema-enforcement, semantic-search, self-space, session-rhythm, unique-addresses, discovery-first, operational-learning-loop, task-stack, methodology-folder) are the structural foundation. INVARIANT primitives (wiki links, schema enforcement, methodology folder) cannot be disabled. CONFIGURABLE primitives (self space, semantic search) can be toggled by editing `ops/config.yaml`. Evolution adds on top of the kernel; it never removes or contradicts kernel primitives. A system that evolves away from prose-sentence titles, or stops requiring topics footers, or abandons self/ loading at session start has evolved into incoherence. The kernel is the stable core that makes everything above it interoperable.
+**Summary:** The 14 kernel primitives (markdown-yaml, wiki-links, moc-hierarchy, tree-injection, description-field, topics-footer, schema-enforcement, semantic-search, self-space, session-rhythm, unique-addresses, discovery-first, operational-learning-loop, processing-queue, methodology-folder) are the structural foundation. INVARIANT primitives (wiki links, schema enforcement, methodology folder) cannot be disabled. CONFIGURABLE primitives (self space, semantic search) can be toggled by editing `ops/config.yaml`. Evolution adds on top of the kernel; it never removes or contradicts kernel primitives. A system that evolves away from prose-sentence titles, or stops requiring topics footers, or abandons self/ loading at session start has evolved into incoherence. The kernel is the stable core that makes everything above it interoperable.
 
 **Derivation Implication:** The generated context file should mark kernel primitives as invariant (not subject to user override or evolution drift). `/health` should validate that all 14 kernel primitives remain intact. Evolution guidance should explicitly state: "You can add schema fields, create new MOC types, build new skills, and modify session workflow — but these 14 primitives are foundational and must not be removed."
 
@@ -189,7 +189,7 @@ Questions the engine must answer when generating evolution-ready systems:
 
 **Derivation Implication:** Generated systems can safely include automated observation capture at any tier. Even tier 1 systems can include "at session start, check: are descriptions adding information beyond titles? Are there orphan notes? Is the inbox growing?" instructions. Higher tiers add automated detection (reconciliation scripts). No tier should auto-fix detected problems — all remediation goes through human review or an explicit rethink/propose process.
 
-**Source:** Vault reconciliation pattern. Research claim: "automated detection is always safe because it only reads state." The vault's reconcile.sh is idempotent and side-effect-free.
+**Source:** Vault reconciliation pattern. Research claim: "automated detection is always safe because it only reads state." /health diagnostics are idempotent and side-effect-free.
 
 ### Drift Detection
 
@@ -211,12 +211,12 @@ Methodology notes that make behavioral assertions contradicted by the context fi
 | Level | When | What's Checked | Speed |
 |-------|------|---------------|-------|
 | Session start | Every session | Staleness only (timestamp comparison) | < 1 second |
-| /next reconciliation | When user asks "what next" | Staleness + coverage gaps | 5-10 seconds |
+| /health | On-demand diagnostic run | Staleness + coverage gaps | 5-10 seconds |
 | /rethink Phase 0 | When rethink runs | All three types (full assertion comparison) | 30-60 seconds |
 
 **Resolution flow:** All drift findings create observation notes in ops/observations/ with `category: drift`. These observations enter the standard triage pipeline during /rethink Phase 1. Staleness drift typically resolves through /remember. Coverage gaps resolve through methodology note creation. Assertion mismatches require human judgment.
 
-**Derivation Implication:** Generated systems must include drift detection in the session-start hook (staleness check), /next reconciliation (coverage check), and /rethink (Phase 0 full check). The observation template must support `category: drift`. The context file should document drift detection as part of the methodology folder's purpose.
+**Derivation Implication:** Generated systems must include drift detection in the session-start hook (staleness check), /health diagnostics (coverage check), and /rethink (Phase 0 full check). The observation template must support `category: drift`. The context file should document drift detection as part of the methodology folder's purpose.
 
 **Source:** Playtesting feedback (v1.6 sessions): methodology folder was treated as passive log rather than authoritative specification. Users expected the system to detect when it drifted from its own methodology.
 

@@ -121,7 +121,7 @@ When users ask about system structure, schema, or methodology:
 | Pattern | Route To | Fallback |
 |---------|----------|----------|
 | "What does my system know about..." | Check ops/methodology/ directly | Read bundled references |
-| "What should I work on..." | /next | Reconcile queue + recommend |
+| "What should I work on..." | /health | Diagnose + ranked recommendations |
 | "Challenge assumptions..." | /rethink | Triage observations/tensions |
 
 ```

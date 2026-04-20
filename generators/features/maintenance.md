@@ -80,7 +80,7 @@ Maintenance triggers are condition-based, not time-based. Time-based triggers (w
 | Stale pipeline batch | >2 sessions without progress | Surface as blocked |
 | Schema violations | Any detected | Surface for correction |
 
-These conditions are evaluated by /next via queue reconciliation. When a condition fires, it materializes as a `type: "maintenance"` entry in the queue — not a calendar reminder.
+These conditions are evaluated by /health on demand. When a condition fires, /health reports it with specific files and ranked recommended actions — not a calendar reminder.
 
 ### Session Maintenance Checklist
 
@@ -96,68 +96,52 @@ Maintenance is not cleanup — it's cultivation. Each pass through old {DOMAIN:n
 
 The graph doesn't just get maintained. It gets better.
 
-### Unified Queue Reconciliation
+### Diagnostic Reconciliation via /health
 
-Maintenance work lives alongside pipeline work in the same queue. Instead of a separate tracking file, /next evaluates conditions and materializes maintenance tasks directly in the queue.
+Maintenance is diagnostic, not a separate queue of work. /health evaluates all conditions on demand and reports fired conditions with specific files and ranked actions.
 
 The reconciliation pattern:
-1. **Declare conditions** — the system defines what "healthy" looks like (desired state) via `maintenance_conditions` in the queue
-2. **Measure actual state** — /next compares reality against each condition on every invocation
-3. **Auto-create tasks** — when a condition is violated, a `type: "maintenance"` entry appears in the queue
-4. **Auto-close tasks** — when the condition is satisfied again, the entry is marked done
+1. **Declare conditions** — the system defines what "healthy" looks like (desired state) via thresholds in `ops/config.yaml`
+2. **Measure actual state** — /health compares reality against each condition across its 8 diagnostic categories plus cross-cutting maintenance signals
+3. **Report findings** — /health produces a PASS/WARN/FAIL report with specific files, persisted to `ops/health/YYYY-MM-DD-report.md`
+4. **Self-healing** — the user fixes the underlying issue; the next /health run confirms resolution
 
-This is idempotent: running /next any number of times produces the same queue state (no duplicates). Each `condition_key` has at most one pending maintenance task.
+This is idempotent: running /health any number of times produces the same diagnostic report for unchanged state. There is no maintenance queue to keep clean — the state of the vault IS the state.
 
-The key insight: you don't manage task status manually. Fix the underlying problem and the task goes away on its own.
+The key insight: you don't manage maintenance task status manually. Fix the underlying problem and the next /health run shows it resolved.
 
-### Invariant-Based Task Creation
+### Invariant-Based Diagnostics
 
-The reconciliation checks 12 invariants that together define a healthy system:
+/health checks invariants that together define a healthy system:
 
 | Invariant | What It Checks |
 |-----------|---------------|
-| Inbox pressure (per subdir) | Are {DOMAIN:inbox/} subdirectories accumulating unprocessed material? |
+| Inbox pressure | Is {DOMAIN:inbox/} accumulating unprocessed material? |
 | Orphan {DOMAIN:notes} | Are there {DOMAIN:notes} with no incoming links? |
 | Dangling links | Do wiki links point to non-existent {DOMAIN:notes}? |
 | Observation accumulation | Have pending observations exceeded the threshold (10+)? |
 | Tension accumulation | Have pending tensions exceeded the threshold (5+)? |
 | {DOMAIN:Topic map} size | Has any {DOMAIN:topic map} grown beyond its healthy range? |
 | Stale batches | Are there processing batches that have been sitting unfinished? |
-| Infrastructure ideas | Are there improvement ideas waiting for review? |
-| Pipeline pressure | Is the processing queue backing up? |
 | Schema compliance | Do all {DOMAIN:notes} pass schema validation? |
-| Experiment staleness | Are there experiments or trials that need evaluation? |
+| Three-space boundaries | Is content leaking across self/, {DOMAIN:note_collection}/, and ops/? |
 
-Each invariant is self-healing: fix the underlying issue (process the inbox, connect the orphan, resolve the tension) and the task disappears at next reconciliation. No manual status updates needed.
+Each invariant is self-healing: fix the underlying issue (process the inbox, connect the orphan, resolve the tension) and the next /health run reports PASS.
 
-### Consequence-Speed Priority
+### Impact-Ranked Recommendations
 
-Maintenance tasks are prioritized by how fast their consequences compound, not by manual importance labels:
+/health closes with "Recommended Actions (top 3, ranked by impact)" — concrete commands for specific files. Ranking follows impact tiers:
 
-| Consequence Speed | Priority | Examples | Why This Priority |
-|-------------------|----------|----------|-------------------|
-| `session` | Highest | Orphan {DOMAIN:notes}, dangling links, inbox pressure | These degrade your work quality right now — orphans are invisible, dangling links confuse traversal, inbox pressure means lost ideas |
-| `multi_session` | Medium | Pipeline batch completion, stale batches | These compound over days — unfinished batches block downstream work |
-| `slow` | Lower | {DOMAIN:Topic map} oversizing, rethink thresholds, infrastructure ideas | These compound over weeks — annoying but not blocking |
+| Impact Tier | Examples | Why |
+|------------|---------|-----|
+| Highest | Dangling links, persistent orphans | Broken promises in the graph — readers hit dead ends |
+| High | Schema violations, boundary violations | Structural integrity — compounds into larger problems |
+| Medium | Description quality, stale notes | Retrieval quality — degraded but not broken |
+| Low | {DOMAIN:Topic map} size warnings, throughput ratio | Maintenance debt — matters at scale |
 
-The principle: a task that causes problems THIS session matters more than one that compounds slowly. Priority is derived from the invariant's consequence speed, not assigned by you. This means you don't waste time triaging priority — the system knows.
+### Integration with /{DOMAIN:rethink}
 
-### Integration with /{DOMAIN:next} and /{DOMAIN:rethink}
-
-The unified queue connects to two key workflows:
-
-**/{DOMAIN:next}** reconciles maintenance conditions and recommends the highest-priority action from the unified queue. It considers:
-- Consequence speed (session-priority maintenance tasks first)
-- Current pipeline state (are there claims waiting to be processed?)
-- Accumulated signals (are observations or tensions piling up?)
-
-This means you can start any session by asking "what should I work on?" and get a prioritized answer based on actual system state, not a stale to-do list.
-
-**/{DOMAIN:rethink}** is surfaced automatically when /next detects signal accumulation:
-- 10+ pending observations → /next creates a maintenance task suggesting /{DOMAIN:rethink}
-- 5+ pending tensions → /next creates a maintenance task suggesting /{DOMAIN:rethink}
-
-This closes the loop: maintenance detects that your system has accumulated enough operational evidence to warrant a meta-cognitive pass. You review the evidence, promote insights, implement changes, and the system evolves. Maintenance feeds evolution, evolution improves maintenance.
+When /health detects signal accumulation (10+ pending observations OR 5+ pending tensions), it recommends /{DOMAIN:rethink}. This closes the loop: maintenance detects that the system has accumulated enough operational evidence to warrant a meta-cognitive pass. You review the evidence, promote insights, implement changes, and the system evolves. Maintenance feeds evolution, evolution improves maintenance.
 ```
 
 ## Dependencies

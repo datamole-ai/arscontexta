@@ -47,7 +47,7 @@ Your methodology folder is more than a log — it is the canonical specification
 - Changes to system behavior update methodology FIRST. /{DOMAIN:remember} writes to ops/methodology/ as its primary action. /{DOMAIN:rethink} reads methodology as the spec to compare against.
 - Drift between methodology and actual behavior is automatically detected:
   - **Session start:** Lightweight staleness check — are methodology notes older than config changes?
-  - **/{DOMAIN:next}:** Coverage check — do active features have corresponding methodology notes?
+  - **/health:** Coverage check — do active features have corresponding methodology notes?
   - **/{DOMAIN:rethink}:** Full assertion comparison — do methodology directives match actual system behavior?
 - Drift observations feed back into the standard learning loop for triage and resolution.
 
