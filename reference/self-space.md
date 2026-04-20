@@ -4,9 +4,7 @@
 
 Guide the derivation engine in generating the agent's self-knowledge space. The self/ directory is where the agent stores who it is, how it works, what it is working on, and what it has learned about itself. Unlike the notes/ space (which holds domain knowledge for the user) and ops/ space (which holds temporal coordination state), self/ holds durable agent identity that is loaded at every session start. The derivation engine must translate personality dimensions, domain context, and user relationship signals into prose that reads as self-knowledge, not as configuration.
 
-**Optionality (v1.6):** Self space is CONFIGURABLE, not always required. It is OFF by default for Research presets (where the vault's methodology folder in ops/ provides sufficient operational identity) and ON by default for Personal Assistant presets (where agent identity and relationship context are core to the value proposition). When self space is disabled, goals route to ops/goals.md and methodology to ops/methodology/. The toggle is available by editing `ops/config.yaml`.
-
-This document answers: how do derivation signals map to identity files? What makes self-knowledge feel genuine rather than templated? How does identity persist and evolve across sessions? And when should self space be enabled vs disabled?
+Self space is an invariant kernel primitive — every generated vault includes it. This document answers: how do derivation signals map to identity files? What makes self-knowledge feel genuine rather than templated? How does identity persist and evolve across sessions?
 
 ---
 
@@ -17,7 +15,7 @@ Questions the engine must answer when generating the self/ space:
 1. **What personality dimensions were derived?** Warmth, opinionatedness, formality, and emotional awareness each affect how identity.md is written. A warm, casual agent has a fundamentally different self-voice than a clinical, formal one.
 2. **What domain is the agent working in?** The domain determines methodology.md content: a therapy agent's methodology emphasizes pattern recognition and emotional attunement; a research agent's methodology emphasizes extraction rigor and connection density.
 3. **What is the user relationship?** User signals about desired interaction style inform goals.md seeds and relationships.md content. A user who wants a "thinking partner" gets different relationship framing than one who wants an "organized assistant."
-4. **What self/ extensions are justified?** memory/ (for accumulated self-knowledge beyond core files), journal/ (for reflective writing), relationships.md (for multi-person contexts). Each extension adds maintenance cost — only generate what the configuration demands.
+4. **What self/ extensions are justified?** memory/ (for accumulated self-knowledge beyond core files), journal/ (for reflective writing), relationships.md (for multi-person contexts). Each extension adds maintenance cost — only generate what the domain demands.
 5. **How is self/ loaded at session start?** CLAUDE.md references and session-start hooks load self/ files automatically.
 6. **What is the identity evolution model?** Should identity be stable (rarely changing), adaptive (evolving with use), or provisional (explicitly experimental)? Research agents trend stable; companion agents trend adaptive.
 
@@ -79,15 +77,13 @@ Questions the engine must answer when generating the self/ space:
 
 ### Identity Persistence
 
-#### When enabled, self/ is read at every session start because identity must precede action
+#### self/ is read at every session start because identity must precede action
 
-**Summary:** When self space is enabled, the agent must know who it is before it does anything. This is not a philosophical claim but a practical one: identity.md establishes voice (how to communicate), methodology.md establishes quality standards (how to evaluate work), and goals.md establishes orientation (what to work on). Without these, the first session actions are generic — following methodology instructions from the context file but without the identity and history that make the system feel like a continuous relationship rather than a fresh interaction every time. The context file teaches HOW to work; self/ teaches WHO is working.
+**Summary:** The agent must know who it is before it does anything. This is not a philosophical claim but a practical one: identity.md establishes voice (how to communicate), methodology.md establishes quality standards (how to evaluate work), and goals.md establishes orientation (what to work on). Without these, the first session actions are generic — following methodology instructions from the context file but without the identity and history that make the system feel like a continuous relationship rather than a fresh interaction every time. The context file teaches HOW to work; self/ teaches WHO is working.
 
-When self space is disabled (e.g., Research preset default), goals route to ops/goals.md and methodology to ops/methodology/. The agent still has operational identity through the context file and methodology folder, but lacks the personal voice and relationship context that self/ provides.
+**Derivation Implication:** The generated context file or session-start hook must include explicit instructions to read self/ files at session start. The loading order matters: identity.md first (establishes voice and values), methodology.md second (establishes standards), goals.md third (establishes current work orientation).
 
-**Derivation Implication:** When self space is enabled, the generated context file or session-start hook must include explicit instructions to read self/ files at session start. The loading order matters: identity.md first (establishes voice and values), methodology.md second (establishes standards), goals.md third (establishes current work orientation). When self space is disabled, the session-start hook reads ops/goals.md and ops/methodology/ instead. The context file should document which mode is active and how to toggle it by editing `ops/config.yaml`.
-
-**Source:** Kernel primitive `self-space` (CONFIGURABLE enforcement). Research claim: "session handoff creates continuity without persistent memory." `three-spaces.md` — the session rhythm integration section.
+**Source:** Kernel primitive `self-space` (INVARIANT enforcement). Research claim: "session handoff creates continuity without persistent memory." `three-spaces.md` — the session rhythm integration section.
 
 ---
 
@@ -152,40 +148,6 @@ When self space is disabled (e.g., Research preset default), goals route to ops/
 **Derivation Implication:** Generate: (1) CLAUDE.md sections that reference self/ files and explain their purpose, (2) a session-start hook configuration that loads orientation files, (3) self/ file templates pre-filled with generated content from the derivation conversation. The CLAUDE.md should explain what the hook does so the agent does not duplicate the orientation.
 
 **Source:** Vault `.claude/hooks/` session-start hook. CLAUDE.md session patterns section. The dual mechanism (instructions + hooks) provides both understanding (instructions) and automation (hooks).
-
----
-
-### Self Space Optionality
-
-#### Self space is CONFIGURABLE — OFF by default for research, ON by default for personal assistant
-
-**Summary:** Self space optionality recognizes that not all vault configurations benefit equally from a dedicated agent identity space. Research vaults focus on the domain knowledge graph — the agent's methodology is better captured in ops/methodology/ (Primitive 14, INVARIANT) alongside other operational infrastructure. Personal assistant vaults, by contrast, derive significant value from a persistent agent identity: voice consistency across sessions, relationship memory, and the feeling of continuity that makes the agent feel like a partner rather than a fresh tool each session.
-
-**Configuration states:**
-
-| Preset | Self Space Default | Rationale |
-|--------|-------------------|-----------|
-| Research | OFF | Vault identity is in the research graph and methodology folder. Agent voice is analytical by default. |
-| Personal Assistant | ON | Identity, relationship memory, and voice consistency are core to the value proposition. |
-| Experimental | Configurable | User chooses during init conversation based on their needs. |
-
-**When OFF:**
-- No self/ directory is created
-- Goals route to ops/goals.md (still updated at session end for handoff)
-- Methodology routes to ops/methodology/ (already INVARIANT via Primitive 14)
-- The context file provides baseline agent behavior without personalized identity
-- Session-start hook reads ops/goals.md instead of self/goals.md
-
-**When ON:**
-- self/ directory is created with identity.md, methodology.md, goals.md
-- Session-start hook reads self/ files in identity-first order
-- Memory architecture (self/memory/) available for accumulated self-knowledge
-
-**Toggle mechanism:** Edit `ops/config.yaml` to toggle self space. Toggling ON creates self/ with generated content from the derivation conversation. Toggling OFF moves goals to ops/goals.md and removes the self/ directory (methodology is already in ops/methodology/). The toggle is safe and reversible.
-
-**Derivation Implication:** The derivation engine must check the self space configuration before generating self/ files. When disabled, ensure goals.md and methodology routing to ops/ is correctly configured. The context file should document the current state and how to change it.
-
-**Source:** v1.6 human feedback. Research vaults found self/ redundant with ops/methodology/. Personal assistant vaults found self/ essential for relationship continuity.
 
 ---
 

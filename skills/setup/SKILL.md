@@ -823,19 +823,7 @@ dimensions:
   organization: [flat | hierarchical]
   linking: [explicit | implicit | explicit+implicit]
   navigation: [2-tier | 3-tier]
-  maintenance: condition-based
   schema: [minimal | moderate | dense]
-
-features:
-  processing-pipeline: [true | false]
-  sleep-processing: [true | false]
-
-processing:
-  categories: auto       # auto (from derivation) | custom list
-  reweave:
-    scope: related         # related | broad | full
-    frequency: after_create # after_create | periodic | manual
-
 ```
 
 **Relationship:** config.yaml is the live operational config. derivation.md is the historical record of WHY. Config can drift; `/architect` detects and documents the drift.
@@ -1019,7 +1007,6 @@ The skill sources to install:
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/stats/`         | stats         | Navigation    | A    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/graph/`         | graph         | Navigation    | A    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/refactor/`      | refactor      | Evolution     | A    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/create/`        | create        | Processing    | A    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/seed/`          | seed          | Orchestration | B    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/pipeline/`      | pipeline      | Orchestration | B    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/archive-batch/` | archive-batch | Orchestration | B    |
@@ -1052,7 +1039,7 @@ Process tiers in order: **A → B** (simplest first, saving context for skills t
 
 ##### Tier A — Frontmatter only (runtime vocabulary)
 
-**Skills:** reflect, reweave, stats, graph, refactor, create
+**Skills:** reflect, reweave, stats, graph, refactor
 
 These skill sources contain only `{vocabulary.xxx}` patterns in their body. Those resolve at runtime — NOT setup-time templates.
 
@@ -1121,7 +1108,7 @@ Generate `CLAUDE.md` using `${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md` templ
 Step 1: Read generator template from ${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md.
 
 Step 2: Select feature blocks from ${CLAUDE_PLUGIN_ROOT}/generators/features/.
-  Always-included blocks (12): note-granularity, wiki-links, processing-pipeline, schema, maintenance, self-evolution, methodology-knowledge, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis
+  Always-included blocks (13): note-granularity, wiki-links, processing-pipeline, schema, maintenance, self-evolution, self-space, methodology-knowledge, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis
   Conditional blocks: based on derived dimensions (see Active Feature Blocks in derivation.md)
 
 Step 3: Write reference files. For each selected block:
@@ -1146,7 +1133,7 @@ Step 4: Compose CLAUDE.md with:
      10. templates (always)
      11. multi-domain (if active)
      12. ethical-guardrails (always)
-     13. self-space (if active)
+     13. self-space (always)
      14. helper-functions (always)
      15. graph-analysis (always)
 
@@ -1155,7 +1142,6 @@ Step 4: Compose CLAUDE.md with:
 Step 5: Cross-reference elimination.
   If a block is excluded, scan remaining summaries and reference files for references to excluded concepts and remove or rephrase:
   - mocs excluded -> simplify "topic MOCs" to "topic organization"
-  - self-space excluded -> references to self/identity.md route to ops/ equivalents
   - multi-domain excluded -> remove cross-domain references
 
 Step 6: Add required sections that are NOT from feature blocks:

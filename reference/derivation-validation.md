@@ -27,7 +27,7 @@ Nine tests that verify the derivation engine produces coherent, functional syste
 **Result: 5/5 match.** The derived configuration is a near-perfect prediction of what the vault evolved to organically. One dimension shows evolution beyond the starting preset (nav depth approaching 4-tier), which aligns with the seed-evolve-reseed lifecycle claim.
 
 **Features correctly enabled:**
-- Kernel (all 14 primitives): YES — vault has all 14 (self space disabled by default for research, but primitive still passes as CONFIGURABLE)
+- Kernel (all 14 primitives): YES — vault has all 14, including self space
 - inbox-processing: YES (processing = heavy ≥ moderate) — vault has 00_inbox/
 - processing-pipeline: YES (processing = heavy) — vault has /pipeline, full 6R pipeline
 - semantic-search: YES (linking = explicit+implicit) — vault has qmd with 4 collections
@@ -372,26 +372,19 @@ In v1.6, all vaults ship with full automation from day one. There are no tier bo
 | 100-150 | Full pipeline operation | Sub-MOCs emerge as topic MOCs exceed configured thresholds. Orchestration handles batch processing with fresh context per phase. |
 | 150+ | Mature system | Evolution is within the configuration: better skill instructions, richer schemas, more sophisticated orchestration. Reseed may be triggered by accumulated drift. |
 
-**Feature disabling validation:**
+**Dimensional tuning validation:**
 
-When a user disables a feature via /architect, the rest of the system must continue functioning:
+Users cannot disable kernel primitives. What they can change post-generation is the dimensional layer recorded in `ops/config.yaml` (organization, linking, navigation, schema). /refactor replays derivation with the edited dimensions and reshapes the vault; the kernel stays intact.
 
-| Disabled Feature | Expected Behavior | Degradation |
-|-----------------|-------------------|-------------|
-| Semantic search (qmd) | Keyword search only. Skills fall back to grep. | Cross-vocabulary discovery reduced |
-| Self space | Goals route to ops/goals.md, methodology to ops/methodology/. No self/ directory. | Identity persistence reduced but operational |
-| Processing pipeline | Manual processing only. Skills available but no orchestration. | Quality gates still in skills, no batch processing |
+**Critical invariant: kernel primitives are always present.**
 
-**Critical invariant: disabling features is safe and reversible.**
-
-- Disabling semantic search does not break any skill (skills fall back to keyword search)
-- Disabling self space routes its content to ops/ (no data loss)
-- Re-enabling any feature restores full functionality
-- The kernel primitives that are INVARIANT (wiki links, schema enforcement, methodology folder) cannot be disabled
+- All 14 kernel primitives (wiki links, schema enforcement, methodology folder, self space, semantic search, and the rest) ship in every vault
+- qmd is scaffolded even when absent; semantic-search skills degrade (not disable) until the binary is installed
+- Dimensional changes never remove a primitive — they only retune how the primitive is expressed
 
 **Kernel validation prediction:** 14/14 at all growth stages
 
-**Coherence assessment:** v1.6 reverses the Gall's Law application: instead of growing from simple to complex, all vaults ship complete and users opt down. This works because the overhead of unused features is near-zero (hooks that never fire, skills that are never invoked, directories that stay empty). The cost of discovering and adding features was higher than the cost of having them present but dormant. The critical invariant shifts from "additive transitions" to "safe disabling" — removing a feature must never break the system. This is validated by the feature disabling table: each optional feature has a fallback path. INVARIANT primitives (wiki links, schema enforcement, methodology folder) cannot be disabled, ensuring the structural foundation is always present.
+**Coherence assessment:** All vaults ship complete — the full kernel plus all processing skills. Users tune dimensions rather than toggling primitives. The overhead of a uniform kernel is near-zero (hooks that rarely fire, skills that are dormant until invoked, directories that stay lean), and removing the disable pathway collapses the ambiguity where skills had to detect whether a primitive existed before calling it. The structural foundation is invariant; evolution happens above the kernel.
 
 ---
 

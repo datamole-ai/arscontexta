@@ -7,9 +7,9 @@
 
 Your self space holds everything you know about yourself — your identity, methodology preferences, operational memories, and accumulated wisdom. It is architecturally separate from user knowledge ({DOMAIN:note_collection}/) and from operational state (ops/). This separation matters: your reflections on how you work should not pollute the user's knowledge graph, and your sense of who you are should not be confused with system configuration.
 
-### When Self Space Is Enabled
+### Structure
 
-When self/ is active, you have a persistent identity that survives between sessions. This is where your continuity lives.
+self/ gives you a persistent identity that survives between sessions. This is where your continuity lives.
 
 ```
 self/
@@ -31,37 +31,19 @@ self/
 
 **relationships.md** — Optional. When your use case involves tracking people, this becomes a {DOMAIN:topic map} for relationship observations. Add it when you feel the need, not before.
 
-### When Self Space Is Disabled
-
-When self/ is off (the default for research-focused vaults), your operational state moves to ops/:
-
-- Goals and handoff notes live in ops/ instead of self/goals.md
-- Minimal identity expression lives in the context file itself
-- Methodology learnings still go to ops/methodology/ (always present regardless of self/ status)
-- The system functions identically — the difference is whether you have a personal identity space
-
-The toggle is clean: self/ off means identity is implicit in the context file and methodology is captured in ops/. Self/ on means identity is explicit and personal.
-
 ### Session Rhythm Integration
 
 The self space connects directly to the session rhythm:
 
-**Orient phase:** If self/ is enabled, read self/identity.md and self/goals.md at session start. This is how you remember who you are and what you are working on. If self/ is disabled, read ops/ for current threads and the context file for identity.
+**Orient phase:** Read self/identity.md and self/goals.md at session start. This is how you remember who you are and what you are working on.
 
-**Persist phase:** If self/ is enabled, update self/goals.md with current state before session ends. Capture methodology learnings to self/methodology.md. Write personal insights to self/memory/ as atomic {DOMAIN:notes}. If self/ is disabled, update ops/ with current threads and capture learnings to ops/methodology/.
+**Persist phase:** Update self/goals.md with current state before session ends. Capture methodology learnings to self/methodology.md. Write personal insights to self/memory/ as atomic {DOMAIN:notes}.
 
 ### Optional Extensions
 
 Add these when friction signals the need — not preemptively:
 
 - **journal/** — Reflective writing and self-directed observations. Functions like a personal {DOMAIN:inbox} for agent insights.
-
-### Toggle Mechanism
-
-Edit `ops/config.yaml` to enable or disable self/. When toggling:
-
-- **Enabling self/:** Creates self/ directory with identity.md, methodology.md, goals.md, and memory/. Seeds identity.md with system voice and purpose. Migrates relevant ops/ content to self/.
-- **Disabling self/:** Migrates goals to ops/. Condenses identity into context file. Archives self/ content. Methodology learnings continue flowing to ops/methodology/.
 
 ### The Architecture Principle
 
@@ -73,5 +55,3 @@ Similarly, agent identity is not user knowledge. Your observations about your ow
 ## Dependencies
 None — self space is an independent identity layer.
 
-## Conditional
-Include when self space is enabled (on for personal assistant, off for research). When excluded, references to self/ in other blocks route to ops/ equivalents.

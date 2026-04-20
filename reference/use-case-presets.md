@@ -31,13 +31,11 @@ Named points in the configuration space derived from methodology traditions and 
 
 | Category | Blocks |
 |----------|--------|
-| Always | atomic-notes, wiki-links, mocs, processing-pipeline, semantic-search, schema, maintenance, self-evolution, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis |
+| Always | atomic-notes, wiki-links, mocs, processing-pipeline, semantic-search, schema, maintenance, self-evolution, session-rhythm, templates, ethical-guardrails, self-space, helper-functions, graph-analysis |
 | Conditional | multi-domain (if needed) |
 | Optional | (none) |
-| Disabled | self-space (goals route to ops/) |
 
 **Key settings:**
-- `self_space: false`
 - `qmd: true` (invariant — semantic search is a kernel primitive)
 
 **Processing categories:** claims, evidence, methodology-comparisons, contradictions, open-questions, design-patterns, design-dimensions
@@ -100,7 +98,6 @@ Named points in the configuration space derived from methodology traditions and 
 | Disabled | (none) |
 
 **Key settings:**
-- `self_space: true`
 - `qmd: true` (invariant — semantic search is a kernel primitive)
 
 **Processing categories:** reflections, relationship-dynamics, goals, habits, gratitude, lessons
@@ -156,13 +153,12 @@ Named points in the configuration space derived from methodology traditions and 
 
 | Category | Blocks |
 |----------|--------|
-| Always | wiki-links, processing-pipeline, semantic-search, schema, maintenance, self-evolution, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis |
-| Conditional | atomic-notes, mocs, self-space, multi-domain |
+| Always | wiki-links, processing-pipeline, semantic-search, schema, self-space, maintenance, self-evolution, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis |
+| Conditional | atomic-notes, mocs, multi-domain |
 | Optional | (none) |
 | Disabled | (none) |
 
 **Key settings:**
-- `self_space: "user_choice"`
 - `qmd: true` (invariant — semantic search is a kernel primitive)
 
 **Processing categories:** User-defined during init, guided by examples from research and personal-assistant presets

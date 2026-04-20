@@ -4,9 +4,9 @@ Every generated system divides its workspace into three spaces: self, notes, and
 
 ---
 
-## Self Space — The Agent's Persistent Mind (Configurable)
+## Self Space — The Agent's Persistent Mind
 
-**Enforcement:** Configurable. Off by default for research vaults, on by default for personal assistant vaults. Toggled by editing `ops/config.yaml`.
+**Enforcement:** Invariant. Every generated vault includes self/.
 
 **Durability:** Permanent. Content accumulates slowly and is rarely deleted.
 
@@ -16,9 +16,7 @@ Every generated system divides its workspace into three spaces: self, notes, and
 
 **Purpose:** The agent must remember who it is before doing anything else. Without self/, every session starts from zero — the agent knows methodology but not identity, goals, or accumulated operational wisdom.
 
-### When Self Space Is Enabled
-
-#### Core Files
+### Core Files
 
 | File | Contents | Update Trigger |
 |------|----------|----------------|
@@ -26,7 +24,7 @@ Every generated system divides its workspace into three spaces: self, notes, and
 | `methodology.md` | How the agent works — quality standards, processing principles, operational patterns | When operational learnings accumulate (evolves as agent learns) |
 | `goals.md` | Current threads — what's active, deferred, completed | Every session (the orientation file) |
 
-#### Optional Extensions (generated based on configuration)
+### Optional Extensions (generated based on configuration)
 
 | File/Directory | Included When | Purpose |
 |---------------|---------------|---------|
@@ -35,37 +33,21 @@ Every generated system divides its workspace into three spaces: self, notes, and
 | `journal/` | Agent captures raw session observations | Processing input for self-knowledge — analogous to inbox |
 | `sessions/` | Session logs need graduated storage | Session-specific logs that might graduate to memory/ or methodology.md |
 
-### When Self Space Is Disabled
-
-When self/ is off (the default for research vaults), the essential functions route elsewhere:
-
-| Function | Fallback Location | Notes |
-|----------|-------------------|-------|
-| Goals / orientation | `ops/goals.md` | Current threads, active work — the session orientation file |
-| Methodology / self-knowledge | `ops/methodology/` | Vault configuration rationale, pipeline config, evolution history |
-| Identity | Context file | Agent personality baked into the context file directly |
-
-The key insight is that self/ serves two distinct purposes: (1) agent identity/personality and (2) operational orientation. Research vaults typically do not need a persistent agent personality — the context file handles identity. Operational orientation (goals, methodology) routes to ops/ where it belongs alongside other operational state.
-
-### Toggle Mechanism
-
-Self space is toggled by editing `ops/config.yaml` and restarting. Enabling self/ creates the directory and scaffolds the core files; disabling migrates goals to `ops/goals.md` and archives self/. The toggle preserves content — disabling does not delete goals.
-
 ### Design Rule
 
 **Only what the agent needs about itself.** Self/ is not a second knowledge graph — it holds agent identity, operational learning, and current orientation. Domain knowledge lives in notes/. Processing scaffolding lives in ops/. Self/ answers: "Who am I? How do I work? What am I working on?"
 
 ### The Session Rhythm Integration
 
-Self space integrates with the session rhythm primitive, but is not required by it:
+Self space is the anchor of the session rhythm primitive:
 
 ```
-Orient -> read orientation state (self/ if enabled, ops/goals.md if not)
+Orient -> read self/identity.md, self/methodology.md, self/goals.md
 Work   -> do the actual task, surface connections
-Persist -> update orientation state (self/ or ops/goals.md)
+Persist -> update self/goals.md (and methodology.md when learnings accumulate)
 ```
 
-The session rhythm primitive depends on markdown-yaml, not on self-space. When self/ is disabled, the orient/persist cycle still works — it just reads from and writes to ops/ instead. The context file always provides methodology and identity; self/ adds a richer, evolving layer on top.
+The context file documents the agent's purpose; self/ carries the evolving identity, methodology, and orientation layered on top.
 
 ---
 
@@ -340,4 +322,4 @@ Is this about the agent itself?
 
 - **Failure modes that afflict each space:** See `failure-modes.md` for the full failure mode taxonomy. Conflation failures (this document) are structural; failure-modes.md covers operational decay (collector's fallacy, orphan drift, schema erosion).
 - **What goes in each space per domain:** See `use-case-presets.md` for domain-specific routing decisions (therapy reflections vs research claims vs PM decisions).
-- **Kernel primitives that depend on three-space separation:** `self-space` (configurable), `session-rhythm`, `discovery-first`, and `methodology-folder` all assume clean space boundaries. See `kernel.yaml`.
+- **Kernel primitives that depend on three-space separation:** `self-space`, `session-rhythm`, `discovery-first`, and `methodology-folder` all assume clean space boundaries. See `kernel.yaml`.

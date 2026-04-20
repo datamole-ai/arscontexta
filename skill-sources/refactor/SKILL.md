@@ -66,7 +66,7 @@ Compare each dimension in `ops/config.yaml` against the same dimension in `ops/d
 
 **Step 1: Read both files**
 
-Read `ops/config.yaml` and `ops/derivation.md` fully. Extract the position for each of the 8 dimensions from both.
+Read `ops/config.yaml` and `ops/derivation.md` fully. Extract the position for each of the 4 dimensions from both.
 
 **Step 2: Build comparison table**
 
@@ -75,19 +75,9 @@ Read `ops/config.yaml` and `ops/derivation.md` fully. Extract the position for e
 | organization | [val] | [val] | [yes/no] | [aligned/misaligned] |
 | linking | [val] | [val] | [yes/no] | [aligned/misaligned] |
 | navigation | [val] | [val] | [yes/no] | [aligned/misaligned] |
-| maintenance | [val] | [val] | [yes/no] | [aligned/misaligned] |
 | schema | [val] | [val] | [yes/no] | [aligned/misaligned] |
 
-**Step 3: Check feature flags**
-
-Also compare feature flags between derivation and config:
-
-| Feature | Derivation | Config | Changed? |
-|---------|-----------|--------|----------|
-| processing_pipeline | [on/off] | [on/off] | [yes/no] |
-| self_space | [on/off] | [on/off] | [yes/no] |
-
-**Step 4: Early exit if no changes**
+**Step 3: Early exit if no changes**
 
 If no changes detected:
 ```
@@ -409,18 +399,6 @@ For large migrations:
 1. Show the count and estimated time
 2. Offer batch processing: "This affects 150 notes. Process all at once or in batches of 50?"
 3. For batch processing, validate after each batch before continuing
-
-### Feature Flag Changes
-
-Feature flag changes (self_space, etc.) may require:
-- Creating new directories (self/ for self_space on)
-- Removing hooks (for automation off)
-
-Handle each feature flag change specifically:
-
-| Flag | On -> Off | Off -> On |
-|------|-----------|-----------|
-| self_space | Archive self/ contents, remove self/ references | Create self/ structure, generate identity files |
 
 ### No ops/derivation-manifest.md
 

@@ -77,9 +77,7 @@ Process the source via the appropriate skill based on granularity, producing not
 
 | Phase | Skill Invoked | Purpose |
 |-------|---------------|---------|
-| process | /structure or /capture (based on task.granularity) | Produce notes from source material |
-| create | /create | Write the {DOMAIN:note} file with schema validation |
-| enrich | (inline enrichment) | Add content to existing {DOMAIN:note} |
+| process | /structure or /capture (based on task.granularity) | Produce finished notes and apply enrichments from source material |
 | reflect | /reflect | Find connections, update {DOMAIN:topic map}s |
 | reweave | /reweave | Update older {DOMAIN:note_plural} with new connections |
 | verify | /verify | Description quality + schema + health checks |
@@ -94,8 +92,8 @@ Parse the queue. Identify ALL pending tasks.
 
 ```yaml
 phase_order:
-  note: [create, reflect, reweave, verify]
-  enrichment: [enrich, reflect, reweave, verify]
+  note: [reflect, reweave, verify]
+  enrichment: [reflect, reweave, verify]
 
 tasks:
   - id: source-name
@@ -110,10 +108,11 @@ tasks:
     type: note
     status: pending
     target: "note title here"
+    target_path: "{DOMAIN:note_collection}/path/to/note.md"
     batch: source-name
     file: source-name-010.md
     current_phase: reflect
-    completed_phases: [create]
+    completed_phases: [structure]
 ```
 
 If the queue file is empty, report: "Queue is empty. Use /pipeline to add sources."
@@ -123,8 +122,10 @@ If the queue file is empty, report: "Queue is empty. Use /pipeline to add source
 Build a list of **actionable tasks** — tasks where `status == "pending"`. Order by position in the tasks array (first = highest priority).
 
 The `phase_order` header defines the phase sequence:
-- `note`: create -> reflect -> reweave -> verify
-- `enrichment`: enrich -> reflect -> reweave -> verify
+- `note`: reflect -> reweave -> verify
+- `enrichment`: reflect -> reweave -> verify
+
+Note tasks exit /structure with `current_phase: reflect` and `completed_phases: [structure]` — the materialization (create/enrich) has already been done by /structure, so the pipeline never routes to `create` or `enrich` directly.
 
 ### Phase 2.3 Loop
 
@@ -145,9 +146,7 @@ File: {file}
 
 | Current Phase | Skill to invoke |
 |-------|-----------------|
-| process | /structure or /capture based on granularity|
-| create | /create |
-| enrich | /enrich |
+| process | /structure or /capture based on granularity |
 | reflect | /{vocabulary.reflect} |
 | reweave | /{vocabulary.reweave} |
 | verify | /{vocabulary.verify} |
@@ -182,7 +181,7 @@ Look up `phase_order` from the queue header to determine the next phase. Find `c
 - Set `current_phase` to null
 - Append the completed phase to `completed_phases`
 
-**For process tasks ONLY:** Re-read the queue after marking done. The processing skill (/structure or /capture) writes new task entries (1 entry per note/enrichment with `current_phase`/`completed_phases`) to the queue during execution. The lead must pick these up for subsequent iterations.
+**For process tasks ONLY:** Re-read the queue after marking done. The processing skill (/structure or /capture) writes new task entries (1 entry per materialized note/enrichment with `current_phase: reflect` and `completed_phases: [structure]`) to the queue during execution. The lead must pick these up for subsequent iterations.
 
 ### Phase 2.3.6 Report Progress
 
@@ -204,7 +203,7 @@ Before the next iteration, re-read the queue and re-filter tasks. Phase advancem
 
 After advancing a task to "done" (Phase 2.3.4), check if ALL tasks in that batch now have `status: "done"`. If yes and the batch has 2 or more completed claims:
 
-1. **Collect all note paths** from completed batch tasks. For each claim task with `status: "done"`, read the task file's `## Create` section to find the created note path.
+1. **Collect all note paths** from completed batch tasks. For each note task with `status: "done"`, read the task's `target_path` field from the queue entry.
 
 2. **Do cross-connect validation**:
 

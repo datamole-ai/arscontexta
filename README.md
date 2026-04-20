@@ -136,10 +136,8 @@ or `decisions/`), but the separation is invariant.
 | Command | What It Does |
 |---------|-------------|
 | `/seed` | Create processing task with duplicate detection |
-| `/structure` | Extract grouped insights preserving shared context |
+| `/structure` | Group claims into finished notes and apply enrichments to existing notes |
 | `/capture` | Verbatim capture — preserves source without transformation |
-| `/create` | Create a new note |
-| `/enrich` | Enrich an existing note |
 | `/reflect` | Find connections, update MOCs |
 | `/reweave` | Update older notes with new connections |
 | `/verify` | Combined quality check: description + schema + health |

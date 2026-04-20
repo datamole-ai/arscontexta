@@ -126,10 +126,11 @@ The task queue tracks every {DOMAIN:note} being processed through the pipeline. 
       "granularity": "structure",
       "status": "pending",
       "target": "{DOMAIN:note} title here",
+      "target_path": "{DOMAIN:note_collection}/path/to/note.md",
       "batch": "source-name",
       "created": "2026-02-13T10:00:00Z",
       "current_phase": "{DOMAIN:connect}",
-      "completed_phases": ["create"]
+      "completed_phases": ["{DOMAIN:process}"]
     }
   ]
 }
@@ -141,9 +142,9 @@ The task queue tracks every {DOMAIN:note} being processed through the pipeline. 
 
 | Type | Purpose | Phase Sequence |
 |------|---------|---------------|
-| process | Process source through chosen granularity skill (/structure or /capture) | (single phase) |
-| note | Process a {DOMAIN:note} through downstream phases | {DOMAIN:connect} -> {DOMAIN:maintain} -> {DOMAIN:verify} |
-| enrichment | Enrich an existing {DOMAIN:note} then process | enrich -> {DOMAIN:connect} -> {DOMAIN:maintain} -> {DOMAIN:verify} |
+| process | Process source through chosen granularity skill (/structure or /capture) — materializes all notes and enrichments inline | (single phase) |
+| note | A newly materialized {DOMAIN:note} flows through downstream phases | {DOMAIN:connect} -> {DOMAIN:maintain} -> {DOMAIN:verify} |
+| enrichment | An existing {DOMAIN:note} was modified inline during process; still flows through downstream phases | {DOMAIN:connect} -> {DOMAIN:maintain} -> {DOMAIN:verify} |
 
 **Recovery:** If you crash mid-phase, the queue still shows `current_phase` at the failed phase. The task file confirms the corresponding section is empty. Re-running the pipeline picks it up automatically — no manual intervention needed.
 
@@ -157,8 +158,8 @@ Each {DOMAIN:note} gets its own task file that accumulates notes across all phas
 ## {DOMAIN:Process} Notes
 {Processing rationale, duplicate judgment}
 
-## Create
-{Note creation details}
+## Materialize
+{Note path, template used, validation result — OR for enrichments: target path and integration mode}
 
 ## {DOMAIN:Connect}
 {Connections found, {DOMAIN:topic maps} updated}
@@ -176,7 +177,7 @@ Each {DOMAIN:note} gets its own task file that accumulates notes across all phas
 
 #### Maintenance via /health (Diagnostic, On-Demand)
 
-Maintenance is diagnostic, not queued. The pipeline queue holds pipeline tasks only (process, create, enrich, reflect, reweave, verify). Vault health is evaluated on demand by /health, which reports fired conditions with specific files and ranked actions.
+Maintenance is diagnostic, not queued. The pipeline queue holds pipeline tasks only (process, reflect, reweave, verify). Vault health is evaluated on demand by /health, which reports fired conditions with specific files and ranked actions.
 
 **Maintenance conditions (evaluated by /health):**
 
@@ -219,7 +220,7 @@ Orchestrator reads queue -> picks next task -> invokes phase skill for one phase
 - {DOMAIN:Maintain}/reweave needs full attention on older {DOMAIN:notes}
 - {DOMAIN:Verify} needs neutral perspective, unbiased by creation
 
-If all four phases run in one session, the verify phase runs on degraded attention — you have already decided this {DOMAIN:note} is good during create, and confirmation bias sets in. Fresh context prevents this.
+If all phases run in one session, the verify phase runs on degraded attention — you have already decided this {DOMAIN:note} is good during materialization, and confirmation bias sets in. Fresh context prevents this.
 
 **Handoff through files, not context:**
 - Each phase writes its findings to the task file

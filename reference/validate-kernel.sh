@@ -200,8 +200,8 @@ else
     fail "No templates or validation mechanism found"
 fi
 
-# --- Primitive 8: Self space (CONFIGURABLE) ---
-echo "8. Self space for agent persistent memory (configurable)"
+# --- Primitive 8: Self space (INVARIANT) ---
+echo "8. Self space for agent persistent memory"
 # Check for self/ in vault, sibling to vault, or common alternatives
 self_dir=""
 for candidate in "$VAULT/self" "$VAULT/../self" "$VAULT/self/memory"; do
@@ -219,17 +219,10 @@ if [ -n "$self_dir" ]; then
     elif [ "$self_files" -gt 0 ]; then
         warn "self/ exists with $self_files files but missing some core MOCs"
     else
-        warn "self/ directory exists but is empty"
+        fail "self/ directory exists but is empty — identity, methodology, and goals are required"
     fi
 else
-    # Self space is configurable — check for ops/ fallback
-    if [ -f "$VAULT/ops/goals.md" ]; then
-        pass "self/ disabled, ops/ fallback in use (ops/goals.md found)"
-    elif [ -d "$VAULT/.claude/memory" ]; then
-        warn "Memory mechanism found but no dedicated self/ space"
-    else
-        warn "No self/ directory found (configurable — off by default for research vaults)"
-    fi
+    fail "No self/ directory found — self space is an invariant primitive"
 fi
 
 # --- Primitive 9: Session rhythm ---

@@ -13,7 +13,7 @@ Seven validation milestones for the Ars Contexta v1.6 plugin. Each milestone tes
 - The vault must have at least 3 notes created (to exercise link and MOC checks)
 - `validate-kernel.sh` accessible at `./reference/validate-kernel.sh`
 
-**Pass criteria:** 14/14 checks pass (PASS status). WARN is acceptable only for semantic search (primitive 8) when the `.mcp.json` qmd wiring is present but qmd itself is not yet installed on the user's machine, and for self space (primitive 9) if disabled via configuration. All other primitives — including the presence of the qmd MCP wiring — must be PASS. A FAIL on semantic search means the wiring was never generated and must be fixed, not waived.
+**Pass criteria:** 14/14 checks pass (PASS status). WARN is acceptable only for semantic search (primitive 8) when the `.mcp.json` qmd wiring is present but qmd itself is not yet installed on the user's machine. All other primitives — including self space and the presence of the qmd MCP wiring — must be PASS. A FAIL on semantic search means the wiring was never generated and must be fixed, not waived. A FAIL on self space means self/ is missing or empty and must be seeded.
 
 **Verification steps:**
 
@@ -21,8 +21,8 @@ Seven validation milestones for the Ars Contexta v1.6 plugin. Each milestone tes
 # Run kernel validation against the generated vault
 ./reference/validate-kernel.sh /path/to/generated-vault
 
-# Expected: 15 PASS lines, 0 FAIL lines
-# Acceptable: 14 PASS + 1 WARN (semantic search when qmd executable is not installed but wiring is present, or self space when disabled)
+# Expected: 14 PASS lines, 0 FAIL lines
+# Acceptable: 13 PASS + 1 WARN (semantic search when qmd executable is not installed but wiring is present)
 ```
 
 **Expected output on success:**
@@ -74,8 +74,7 @@ All 14 primitives validated successfully.
 |---------|-------|-----|
 | FAIL on primitive 1 (YAML frontmatter) | Template generation skipped frontmatter | Check `generators/features/templates.md` — ensure all templates output YAML blocks |
 | FAIL on primitive 3 (MOC hierarchy) | Generated notes lack `type: moc` in frontmatter | Verify MOC template includes `type: moc` in YAML |
-| FAIL on primitive 9 (self space) | self/ directory not created when enabled | Check that /setup creates self/identity.md, self/methodology.md, self/goals.md when self space is enabled |
-| WARN on primitive 9 (self space) | self space disabled via configuration | Acceptable — self space is CONFIGURABLE, off by default for research presets, on for personal assistant |
+| FAIL on primitive 9 (self space) | self/ directory not created | Check that /setup creates self/identity.md, self/methodology.md, self/goals.md — self space is INVARIANT |
 | WARN on primitive 7 (schema enforcement) | Templates exist but no validation script generated | Ensure /setup creates a validate.sh or validate skill |
 | WARN on primitive 11 (discovery-first) | Context file has discovery section but skills lack discovery checks | Add discovery-first check to generated skill templates |
 | FAIL on primitive 12 (learning loop) | Missing ops/observations/ or ops/tensions/ directories | Ensure /setup creates both directories and documents condition-based triggers in context file |
@@ -629,11 +628,11 @@ fi
 - validate-kernel.sh accessible
 
 **Pass criteria:** For each preset:
-1. Kernel validation passes (14/14, or 13/14 with WARN for semantic search if qmd executable is not installed but wiring is present, or self space if disabled)
+1. Kernel validation passes (14/14, or 13/14 with WARN for semantic search if qmd executable is not installed but wiring is present)
 2. Vocabulary is domain-native (zero cross-domain term leakage)
 3. Interaction constraints are satisfied (no hard constraint violations)
 4. Active feature blocks match the preset's `active_blocks` list (17 blocks available)
-5. Personality dimensions are reflected in self/identity.md voice (when self space is enabled)
+5. Personality dimensions are reflected in self/identity.md voice
 
 **Verification steps:**
 
@@ -746,7 +745,7 @@ done
 **Expected output on success:**
 
 Each preset should produce:
-- Kernel: 14/14 PASS, or 13/14 PASS + 1 WARN (semantic search if qmd executable is not installed but wiring is present, or self space if disabled)
+- Kernel: 14/14 PASS, or 13/14 PASS + 1 WARN (semantic search if qmd executable is not installed but wiring is present)
 - Vocabulary: domain-native terms present, zero cross-domain leakage
 - Constraints: all coherence checks PASS
 - Features: all active blocks (from 16 available) produce output in context file
@@ -758,7 +757,7 @@ Each preset should produce:
 | Personal Assistant preset fails kernel on MOC hierarchy | Light-processing preset skipped MOC generation | Even light-processing systems need at least a hub MOC — enforce in /setup |
 | Experimental preset leaks "claim" into context file | Feature block `atomic-notes.md` uses "claim" generically | Parameterize all feature blocks with vocabulary variables |
 | Any preset missing ops/observations/ | Operational learning loop not generated | Learning loop is a kernel primitive — must be generated regardless of preset |
-| Self space generated when disabled | Preset has self space OFF but self/ was created | Check self space optionality flag — research preset defaults to OFF |
+| Any preset missing self/ | Self space not seeded | Self space is an invariant kernel primitive — /setup must create self/identity.md, self/methodology.md, self/goals.md for every preset |
 
 ---
 

@@ -50,23 +50,18 @@ These constraints apply to the 14 kernel primitives and their INVARIANT/CONFIGUR
 4. `wiki_links == false` (Primitive 3)
    → BLOCK: "Wiki links are INVARIANT. They are the universal reference form and the foundation of the graph database."
 
-**CONFIGURABLE primitives (can be toggled):**
+5. `self_space == false` (Primitive 8)
+   → BLOCK: "Self space is INVARIANT. self/ with identity.md, methodology.md, and goals.md is required in every vault; the agent's persistent memory cannot be disabled at the config level."
 
-5. `self_space == true + preset == "research"`
-   → WARN: "Self space is OFF by default for Research presets. The knowledge graph is the focus, not agent identity. Enable only if persistent agent memory across sessions is needed."
-
-6. `self_space == false + preset == "personal_assistant"`
-   → WARN: "Self space is ON by default for Personal Assistant presets. Agent identity and persistent memory are central to the experience. Disable only if the agent's sense of self is not needed."
-
-7. `semantic_search == false` (Primitive 10)
+6. `semantic_search == false` (Primitive 10)
    → BLOCK: "Semantic search is INVARIANT. Processing skills (/reflect, /verify, /structure, /seed, /reweave) call mcp__qmd__query directly. It cannot be disabled at the config level; if qmd is not installed, the wiring is still generated and the install is surfaced as a required next step."
 
 **Condition-based maintenance constraints:**
 
-8. `condition_thresholds_all_zero`
+7. `condition_thresholds_all_zero`
    → WARN: "All condition-based maintenance thresholds are set to zero (disabled). The vault will not surface maintenance tasks. Consider enabling at least orphan detection and dangling link checks."
 
-9. `processing_queue == false` (Primitive 13)
+8. `processing_queue == false` (Primitive 13)
    → BLOCK: "The processing queue is INVARIANT. Without queue tracking, the pipeline has no lifecycle visibility and cannot resume after interruption."
 
 ---

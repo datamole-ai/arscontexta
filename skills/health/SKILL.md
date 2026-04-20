@@ -294,16 +294,16 @@ Domain knowledge stored in self/ instead of {vocabulary.note_collection}/.
 rg '^topics:.*\[\[' self/memory/*.md 2>/dev/null | grep -v 'identity\|methodology\|goals\|relationships'
 ```
 
-#### 5f. Self Space Absence Effects (when self/ is disabled)
+#### 5f. Self Space Presence Check
 
-When self/ is disabled, verify ops/ absorbs self-space content correctly. Check that goals and handoffs are in ops/, not floating in {vocabulary.note_collection}/.
+Self space is an invariant kernel primitive — self/ must exist with identity.md, methodology.md, and goals.md populated.
 
 **Detection:**
 ```bash
-# If self/ doesn't exist, check that goals/handoffs are in note_collection/
 if [[ ! -d "self/" ]]; then
-  # Check for goals or handoff content in note_collection/
-  rg -i '(my goals|current goals|handoff|session handoff)' {vocabulary.note_collection}/ --glob '*.md'
+  echo "MISSING: self/ directory — self space is invariant"
+elif [[ ! -f "self/identity.md" || ! -f "self/methodology.md" || ! -f "self/goals.md" ]]; then
+  echo "INCOMPLETE: self/ exists but is missing required files (identity, methodology, goals)"
 fi
 ```
 
@@ -313,7 +313,7 @@ fi
 |-----------|-------|
 | Any boundary violation (5a, 5b, 5d, 5e) | WARN |
 | Trapped knowledge in ops (5c) | INFO |
-| Self-absence effects (5f) | WARN |
+| Missing or incomplete self/ (5f) | FAIL |
 | All boundaries intact | PASS |
 
 **Output format:**
@@ -648,14 +648,6 @@ Notes scanned: 0 | Topic maps: 0 | Inbox items: N
 All categories PASS (no notes to check)
 Maintenance Signal: inbox has N items — consider /structure or /capture to start building knowledge
 ```
-
-### Self Space Disabled
-
-When self/ does not exist:
-- Skip self-space boundary checks (5b, 5d, 5e inbound)
-- But DO check that ops/ correctly absorbs self-space content (5f)
-- Note in the report: "self/ is disabled — boundary checks adapted accordingly"
-
 
 ### Large Vaults (500+ notes)
 

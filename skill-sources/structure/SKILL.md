@@ -21,11 +21,11 @@ Current task queue:
 
 ## THE MISSION (READ THIS OR YOU WILL FAIL)
 
-You are the structuring engine. Raw source material enters. Structured, multi-claim {vocabulary.note_plural} exit. Your job is to identify coherent topic clusters and group related claims that share context, evidence, or argument threads.
+You are the structuring engine. Raw source material enters. Finished, schema-valid {vocabulary.note_plural} exit — either newly written or enriched in place. Your job spans five phases: identify topic clusters, classify each against the existing graph, materialize the artifact (new note or enrichment to an existing note), queue it for downstream processing, and emit a single handoff block.
 
 ### The Core Principle
 
-**You are here because the user chose structured grouping.** Your job is to find the best groupings — clusters of claims that share context, evidence, or argument threads. The default is to group. Split only when keeping claims together actively confuses or misleads.
+**Structure is the only producer in the Reduce phase.** No separate create or enrich skill runs after you — the pipeline hands newly materialized artifacts directly to /reflect. Your job is to find the best groupings AND produce the resulting notes with full schema compliance. The default is to group. Split only when keeping claims together actively confuses or misleads.
 
 ### The Grouping Principle
 
@@ -287,20 +287,165 @@ Fresh context per chunk (spawn subagent per chunk). Maximum quality.
 
 ---
 
-## Enrichment Detection
+## Materialize — Enrichment Path
 
-When source content adds value to an EXISTING {vocabulary.note} rather than creating a new note, create an enrichment task instead.
+For every cluster classified as an *enrichment* (an existing note covers the scope and the cluster adds evidence, refinement, or alternative framing), modify the existing note in place. Never create a new note on the enrichment path.
 
-### When to Create Enrichment Tasks
+### When a Cluster Is an Enrichment
 
 | Signal | Action |
 |--------|--------|
-| Source has new sub-claims for an existing structure note | Enrichment: add sections |
+| Source has new sub-claims for an existing structure note | Enrichment: add section or inline-integrate |
 | Source has better examples for existing sections | Enrichment: add examples |
 | Source has deeper framing or context | Enrichment: strengthen reasoning |
 | Source has citations or evidence | Enrichment: add evidence base |
+| Source contradicts or reframes existing claim | Enrichment: append alternative framing + create tension note |
 
 **The enrichment default:** When in doubt between "new structure note" and "enrichment to existing note", lean toward enrichment. The existing note already has connections, {vocabulary.topic_map} placement, and integration.
+
+### E1. Load the Target
+
+Read the target existing note (the `semantic_neighbor` identified during Classify). Parse:
+- Frontmatter (keep the full YAML for later rewrite)
+- Body sections (headings + content)
+- Footer (Source, Relevant Notes, Topics)
+
+### E2. Decide Integration Mode
+
+Scan the target note's body for a section whose heading or topic matches the cluster's thrust. Use wiki-link overlap and topic-tag overlap as signals. Three modes:
+
+- **inline-integrate** — a matching section exists AND the cluster adds evidence or refinement that fits that section. Append the cluster's developed content as additional paragraphs under that section heading. Keep the heading intact.
+- **append-with-tension** — a matching section exists AND the cluster contradicts or significantly reframes it. Add a new subsection titled `### Alternative framing from {source}` immediately below the matching section. Do NOT alter the prior content. Also create a tension note in `ops/tensions/` per the Observation Capture rules.
+- **append-new-section** — no matching section exists. Add a new `## {topic}` section at the end of the body, immediately above the `---` that precedes the footer.
+
+Decide mode before writing. Log the chosen mode for the handoff summary.
+
+### E3. Apply the Modification
+
+Write the new content into the chosen location using the same body rules as the New-note path (develop the claim, use connective words, inline wiki-links where genuine, reference source evidence, do not invent claims).
+
+**Preserve invariants (non-negotiable):**
+- NEVER delete existing body content.
+- NEVER remove existing wiki-links.
+- NEVER alter existing section headings (inline-integrate appends under the heading; it does not rewrite it).
+- NEVER strip existing footer entries.
+
+**Update frontmatter:**
+- Update `updated` (or equivalent timestamp field) to today's date. If the template has no `updated` field, skip.
+- If the note has a `sources` list (or equivalent provenance field), append the new source.
+- If the cluster changes the note's scope such that `description` is now misleading, DO NOT auto-revise the description. Flag it in the handoff under "description may need refresh" — leave the description as-is.
+
+**Update footer:**
+- Append the new source to the existing `Source:` line as an additional wiki-link if the footer uses the multi-source pattern, OR add a line `Additional source: [[new source]]` if the footer uses the single-source pattern. Match the existing convention.
+- Add any new relevant-notes connections discovered while writing, each with a context phrase.
+
+### E4. Two-Phase Validation and Write
+
+Enrichment writes are atomic:
+
+1. Compose the full modified note content in memory (frontmatter + body + footer).
+2. Run the 6-check schema validation from Shared Helpers on the in-memory content.
+3. **On PASS:** overwrite the target note file. Emit a queue entry (see Queue Management) with `type: enrichment`, `current_phase: reflect`, `target_path` set to the modified note's path.
+4. **On FAIL:** the target note file is NOT modified. Write the proposed content to `ops/quarantine/{target-basename}-enrichment-{YYYY-MM-DD-HHMM}.md` with a sidecar `.reason` file containing the failure detail. Skip emitting a queue entry for this enrichment. Log in the handoff as quarantined.
+
+---
+
+## Materialize — New-note Path
+
+For every cluster classified as a *new note* (no existing note covers the scope), produce the artifact inline. Four sub-steps, executed per cluster:
+
+### M1. Place the Note
+
+Three decisions in order.
+
+**Base directory:** `{vocabulary.note_collection}/` is the root for all notes.
+
+**Entity directory routing:** If `entity_directories` appears in the derivation manifest, match the cluster's claim/classification/context against each entity type's description and place the note in `{vocabulary.note_collection}/{entity_type}/`. If no `entity_directories` block exists, place directly in `{vocabulary.note_collection}/`.
+
+**Filename:** the cluster's scope expressed as a prose sentence. Rules:
+- Lowercase with spaces
+- No filesystem-breaking punctuation: `. * ? + [ ] ( ) { } | \ ^`
+- Express the full scope; there is no character limit
+- `.md` extension
+
+The prose-as-title test: can you complete this sentence?
+> This {vocabulary.note} covers [title]
+
+Before writing, verify no collision:
+
+```bash
+find . -name "[proposed filename].md" -type f
+```
+
+If a collision is found, refine the title to be more specific. Do NOT append numbers or suffixes — refine the claim to distinguish it.
+
+### M2. Select Template and Fill Frontmatter
+
+**Select template:** Read all templates in `ops/templates/`. For each, examine the `_schema` block (`entity_type`, `granularity`, `required` fields). Select the template whose `_schema` field set best fits the cluster. If only one template exists, use it.
+
+Parse the selected `_schema` block fully:
+- `required` — fields that MUST appear in the output
+- `optional` — fields that MAY appear when warranted
+- `enums` — valid values for enum fields
+- `constraints` — field-level rules (`max_length`, `format`, `fixed`)
+
+**Fill prescriptive fields** (always present regardless of template):
+
+- **`description`** (required): ~150 characters, no trailing period, adds information beyond the title. Example of a bad description that restates the title: Title "LLM attention degrades as context fills" → Description "Attention in LLMs gets worse as the context window fills up". Example of a good description that adds mechanism: Same title → "Token-level attention scores drop measurably after 60% context utilization, affecting retrieval accuracy for earlier tokens".
+- **`topics`** (required): at least one wiki-link to a {vocabulary.topic_map}. Scan existing topic maps:
+
+```bash
+find {vocabulary.note_collection}/ -name "*.md" -type f | head -50 | while read f; do
+  if grep -q "^## Core Ideas" "$f" 2>/dev/null; then
+    echo "$(basename "$f" .md)"
+  fi
+done
+```
+
+If no existing topic map matches, note this — the reflect phase will handle topic map creation.
+- **`created`** (required): today's date in YYYY-MM-DD format.
+
+**Fill template-driven fields:** For each field in `_schema.required` not already filled by the prescriptive step, derive a value from the cluster content that satisfies all constraints. Enum fields use ONLY values from `_schema.enums`. Constrained fields respect `max_length`, `format`, `fixed`. There are no optional fields — every field in `_schema.required` must be filled.
+
+The `_schema` block is metadata ABOUT the template; it is NOT included in the output note's frontmatter. Strip it when writing.
+
+### M3. Write Body and Footer
+
+**Heading:** same as the filename, expressed as the prose-as-title claim.
+
+**Body (prescriptive rules):**
+- Develop the claim. Do not just assert it. Show WHY, provide context, show the reasoning chain.
+- Use connective words: because, therefore, this suggests, however, in contrast, building on.
+- Use inline wiki-links as prose where genuine connections exist: "Since [[other note]], the question becomes..." or "This contradicts [[existing claim]] because..."
+- Reference the source material's evidence and reasoning — do not invent unsupported claims.
+- If the cluster is "open" (needs investigation), acknowledge what remains unresolved.
+- If the reasoning is not provided in the source, do not make it up.
+
+For structure notes, body sections each develop one sub-claim within the shared context. Section headings state the claim or argument thread, not a vague topic label.
+
+**Footer** (always present, exact structure):
+
+```markdown
+---
+
+Source: [[source filename]]
+
+Relevant Notes:
+- [[related note]] — relationship context explaining WHY to follow the link
+
+Topics:
+- [[parent-topic-map]]
+```
+
+Derive `Source:` from the structure task's source. `Relevant Notes:` includes the semantic neighbor (if classification found one) as the first entry with a context phrase ("extends this by...", "contradicts because...", "provides the evidence base for..."); add other genuine connections discovered while writing. Bare links are not allowed. `Topics:` is the topic map(s) identified during frontmatter filling.
+
+### M4. Schema Validation (run in order)
+
+See the Shared Helpers appendix for the full 6-check validation procedure. Severity rules:
+- **FAIL** — missing required field, invalid enum, constraint violation, empty description, no topics. FIX INLINE (edit the note) and re-validate. No FAIL-state notes get written.
+- **WARN** — broken wiki-link to a note that does not exist yet, missing optional field. Log and continue.
+
+If validation FAILs cannot be resolved after one fix attempt, quarantine the artifact (see Shared Helpers) and continue with the next cluster.
 
 ---
 
@@ -415,15 +560,15 @@ TOTAL: ?
 
 ## Queue Management
 
-This skill always handles queue management for orchestrated execution.
+Structure produces the note and writes the queue entry in the same run. Task files exist only to carry downstream-phase output (reflect → reweave → verify → rethink) — they are created pre-populated with the work already done.
 
-### Per-Note Task Files
+### Per-Artifact Task Files
 
-After structuring, for EACH approved note, create a task file in `ops/queue/`:
+After materializing each new note OR enrichment, create a task file in `ops/queue/`:
 
-**Filename:** `{source}-NNN.md` where:
-- {source} is the source basename (from the structure task)
-- NNN is the note number, starting from `next_claim_start` in the structure task file
+**Filename:**
+- New notes: `{source}-NNN.md` where NNN starts from `next_claim_start` in the structure task file.
+- Enrichments: `{source}-EEE.md` where EEE starts at 1 and increments per enrichment.
 
 **Structure:**
 
@@ -432,11 +577,13 @@ After structuring, for EACH approved note, create a task file in `ops/queue/`:
 claim: "[the scope as a sentence]"
 classification: closed | open
 granularity: structure
+type: note | enrichment
 source_task: [source-basename]
 semantic_neighbor: "[related note title]" | null
+target_path: [full path to the materialized or enriched note]
 ---
 
-# Note NNN: [note title]
+# {Note NNN | Enrichment EEE}: [title or target name]
 
 Source: [[source filename]]
 
@@ -448,14 +595,16 @@ Sub-claims:
 - [claim A]
 - [claim B]
 
-Rationale: [why these belong together]
+Rationale: [why these belong together, or — for enrichments — why this strengthens the target note]
 
-Semantic neighbor: [if found, explain why DISTINCT not DUPLICATE]
+Semantic neighbor: [if found, explain the relationship]
+
+## Materialize
+
+{For new notes: path to written file, template used, validation result.}
+{For enrichments: target path, mode chosen (inline-integrate | append-with-tension | append-new-section), validation result.}
 
 ---
-
-## Create
-(to be filled by create phase)
 
 ## {vocabulary.cmd_reflect}
 (to be filled by {vocabulary.cmd_reflect} phase)
@@ -471,52 +620,38 @@ Semantic neighbor: [if found, explain why DISTINCT not DUPLICATE]
 
 After creating task files, update `ops/queue/queue.json`:
 
-1. Mark the structure task as `"status": "done"` with completion timestamp
-2. For EACH note, add ONE queue entry:
+1. Mark the structure task as `"status": "done"` with completion timestamp.
+2. For each materialized artifact (new note OR enrichment), add ONE queue entry:
 
 ```json
 {
-  "id": "note-NNN",
-  "type": "note",
+  "id": "note-NNN" | "enrich-EEE",
+  "type": "note" | "enrichment",
   "granularity": "structure",
   "status": "pending",
-  "target": "[note title]",
+  "target": "[note title or enriched-note title]",
+  "target_path": "[full path to the written/modified note]",
   "classification": "closed|open",
   "batch": "[source-basename]",
-  "file": "[source-basename]-NNN.md",
+  "file": "[source-basename]-NNN.md | [source-basename]-EEE.md",
   "created": "[ISO timestamp]",
-  "current_phase": "create",
-  "completed_phases": []
+  "current_phase": "reflect",
+  "completed_phases": ["structure"]
 }
 ```
 
-3. For EACH enrichment, add ONE queue entry:
-
-```json
-{
-  "id": "enrich-EEE",
-  "type": "enrichment",
-  "status": "pending",
-  "target": "[existing note title]",
-  "source_detail": "[what to add]",
-  "batch": "[source-basename]",
-  "file": "[source-basename]-EEE.md",
-  "created": "[ISO timestamp]",
-  "current_phase": "enrich",
-  "completed_phases": []
-}
-```
+3. For each quarantined artifact, do NOT add a queue entry. Log it in the handoff instead.
 
 **Critical queue rules:**
-- ONE entry per note (NOT one per phase) — phase progression is tracked via `current_phase` and `completed_phases`
-- `type` is `"note"` with `"granularity": "structure"` — these are the task's single queue entries
-- Every task MUST have `"file"` pointing to its uniquely-named task file
-- Every task MUST have `"batch"` identifying which source batch it belongs to
-- `current_phase` starts at `"create"` for notes, `"enrich"` for enrichments
+- ONE entry per artifact (NOT one per phase).
+- `current_phase` starts at `"reflect"` for every entry produced by structure — the materialization is already done.
+- `completed_phases` starts as `["structure"]` — reflecting that structure has already produced the finished artifact.
+- Every task MUST have `"file"` pointing to its uniquely-named task file and `"target_path"` pointing to the materialized note.
+- Every task MUST have `"batch"` identifying which source batch it belongs to.
 
 ### Handoff Output Format
 
-After creating files and updating queue, output:
+After materializing all artifacts, creating task files, and updating the queue, output a single handoff block:
 
 ```
 === HANDOFF: structure ===
@@ -524,15 +659,21 @@ Target: [source file]
 
 Work Done:
 - Identified N topic clusters from [source]
-- Created note files: {source}-NNN.md through {source}-NNN.md
-- Created M enrichment files: {source}-EEE.md through {source}-EEE.md (if any)
-- Duplicates skipped: [list or "none"]
-- Semantic neighbors flagged for cross-linking: [list or "none"]
+- Classified: {written} new, {enriched} enrichment, {skipped} duplicates
+- New notes written: {source}-NNN.md through {source}-NNN.md → paths: [list target_paths]
+- Enrichments applied: {source}-EEE.md through {source}-EEE.md → targets: [list target note titles with chosen mode]
+- Quarantined: [list artifacts + reason, or "none"]
+- Descriptions flagged for refresh: [list target notes whose scope drifted, or "none"]
 
 Files Modified:
-- ops/queue/{source}-NNN.md (note files)
-- ops/queue/{source}-EEE.md (enrichment files, if any)
-- ops/queue/queue.json (N note tasks + M enrichment tasks, 1 entry each)
+- {vocabulary.note_collection}/ ({written} new notes + {enriched} modified notes)
+- ops/queue/{source}-NNN.md (note task files)
+- ops/queue/{source}-EEE.md (enrichment task files)
+- ops/queue/queue.json (1 entry per materialized artifact, current_phase: "reflect")
+- ops/quarantine/ (any quarantined artifacts with .reason sidecars)
+- ops/tensions/ (any tension notes created during append-with-tension enrichments)
+
+Summary: {written: N, enriched: M, quarantined: K}
 
 Learnings:
 - [Friction]: [description] | NONE
@@ -542,8 +683,7 @@ Learnings:
 
 Queue Updates:
 - Mark: {source} done
-- Create: note-NNN entries (1 per note, current_phase: "create")
-- Create: enrich-EEE entries (1 per enrichment, current_phase: "enrich", if any)
+- Create: {written + enriched} entries (current_phase: "reflect", completed_phases: ["structure"])
 === END HANDOFF ===
 ```
 
@@ -578,3 +718,58 @@ After structuring completes, the created {vocabulary.note_plural} proceed throug
 - The title describes SCOPE, not a single claim
 - `granularity: structure` distinguishes these from atomic notes
 - Every section develops a sub-claim — it does not merely state it
+
+---
+
+## Shared Helpers (Reference)
+
+Appendix referenced by both Materialize paths. Do not invoke independently.
+
+### Schema Validation (6 checks, run in order)
+
+| # | Check | Severity | Action on Failure |
+|---|-------|----------|-------------------|
+| 1 | **Required fields** — every field in `_schema.required` exists in the frontmatter | FAIL | Add missing field, re-validate |
+| 2 | **Enum compliance** — every enum field's value is in `_schema.enums.{field}` | FAIL | Correct to valid value, re-validate |
+| 3 | **Constraint compliance** — each field satisfies `_schema.constraints` (`max_length`, `format`, `fixed`) | FAIL | Fix violation, re-validate |
+| 4 | **Description quality** — adds info beyond the title (not a restatement, not empty) | FAIL | Rewrite description, re-validate |
+| 5 | **Topics present** — at least one wiki-link in the topics field | FAIL | Add topic link, re-validate |
+| 6 | **Wiki-link health** — `[[links]]` in body/footer point to files that exist | WARN | Log, continue |
+
+**Severity levels:**
+- **FAIL** — missing required field, invalid enum, constraint violation, empty description, no topics. Fix inline (edit the content in memory) and re-validate. If a FAIL cannot be resolved after one fix attempt, quarantine the artifact.
+- **WARN** — broken wiki-link to a note that does not exist yet, missing optional field. Log the warning and continue. Broken links are common during batch creation — sibling notes may not exist yet.
+
+### Quarantine Procedure
+
+When validation FAIL cannot be resolved:
+
+1. Write the proposed artifact to `ops/quarantine/<filename>` (for new notes: same basename as would have been written; for enrichments: `{target-basename}-enrichment-{YYYY-MM-DD-HHMM}.md` carrying the proposed modified content).
+2. Write a sidecar `ops/quarantine/<filename>.reason` containing the validation failure summary (which checks failed, what values were produced, what's blocking).
+3. Do NOT write to `{vocabulary.note_collection}/` for new notes, and do NOT modify the target note for enrichments.
+4. Do NOT emit a queue entry for the quarantined artifact.
+5. Continue with the next cluster. Quarantine does not abort the batch.
+
+### Topic Map Scan
+
+Find existing {vocabulary.topic_map}s in the vault:
+
+```bash
+find {vocabulary.note_collection}/ -name "*.md" -type f | head -50 | while read f; do
+  if grep -q "^## Core Ideas" "$f" 2>/dev/null; then
+    echo "$(basename "$f" .md)"
+  fi
+done
+```
+
+If no existing topic map matches the cluster, leave `topics` with a best-available placeholder link and flag it in the handoff — the reflect phase will handle topic map creation.
+
+### Uniqueness Check for Filenames
+
+Before writing a new note:
+
+```bash
+find . -name "[proposed filename].md" -type f
+```
+
+If a collision is found, refine the title to be more specific. Do NOT append numbers or suffixes.

@@ -42,7 +42,7 @@ docs/             superpowers/{plans,specs}          design specs
 | Phase | Skills |
 |---|---|
 | Reduce | `structure/`, `capture/` |
-| Mutate | `seed/`, `create/` |
+| Mutate | `seed/` |
 | Reflect | `reflect/` |
 | Reweave | `reweave/` |
 | Verify | `verify/` |

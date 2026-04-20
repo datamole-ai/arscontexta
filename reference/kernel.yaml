@@ -88,7 +88,7 @@ primitives:
     description: "Dedicated directory for identity, methodology, goals. Read at session start, updated at session end."
     layer: convention
     requires: markdown-yaml, moc-hierarchy
-    enforcement: configurable
+    enforcement: invariant
     structure:
       required:
         - identity.md

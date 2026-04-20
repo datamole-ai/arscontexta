@@ -12,7 +12,7 @@ This document answers: what happens after init? How do systems grow from simple 
 
 Questions the engine must answer when generating evolution-ready systems:
 
-1. **What is the starting configuration?** All presets ship with full automation. The initial configuration determines which optional features are enabled or disabled.
+1. **What is the starting configuration?** All presets ship with full automation and the full kernel. The initial configuration determines dimensional choices (organization, linking, navigation depth, schema richness) recorded in `ops/config.yaml`.
 2. **What friction observation mechanism should be included?** All systems need a way to capture operational friction. The mechanism ranges from a simple section in the context file to a full observation capture pipeline.
 3. **What self-extension blueprints should be included?** Blueprints teach the agent to build its own hooks, skills, and schema extensions. The included blueprints determine how self-sufficient the system can become.
 4. **What is the expected evolution timeline?** Frequently used systems evolve faster than occasionally used systems. The evolution guidance in the generated context file should match expected usage intensity.
@@ -103,7 +103,7 @@ Questions the engine must answer when generating evolution-ready systems:
 
 **Summary:** v1.6 reverses the progressive complexity approach. Instead of starting simple and adding features when friction demands, every vault ships with full automation: all processing skills, all hooks, all maintenance mechanisms, methodology folder, processing queue. The philosophy is that it is easier to remove features than to discover and add them. The overhead of unused features is near-zero (hooks that never fire, skills that are never invoked, directories that stay empty), while the cost of discovering and adding features when friction emerges was higher than anticipated. Users who want less complexity disable features by editing `ops/config.yaml`.
 
-**Derivation Implication:** The derivation engine generates the maximum viable system for the chosen preset. All 3 presets (Research, Personal Assistant, Experimental) include full automation by default. Users can toggle optional features (e.g. self space) by editing `ops/config.yaml` without regenerating. INVARIANT primitives — including semantic search — cannot be disabled; they are not exposed in `ops/config.yaml`.
+**Derivation Implication:** The derivation engine generates the maximum viable system for the chosen preset. All 3 presets (Research, Personal Assistant, Experimental) include full automation by default. INVARIANT primitives — including semantic search and self space — cannot be disabled; they are not exposed in `ops/config.yaml`.
 
 **Source:** v1.6 human feedback: the progressive tier system created friction in discovery. Users did not know what features existed until they needed them and could not find them.
 
@@ -121,7 +121,7 @@ Questions the engine must answer when generating evolution-ready systems:
 
 #### The methodology folder is the vault's self-knowledge substrate
 
-**Summary:** The methodology folder (Primitive 14, INVARIANT, ops/methodology/) stores the vault's operational self-knowledge as linked notes. Derivation rationale, active kernel state, friction observations, and methodology learnings live here. Unlike self/ (which is the agent's personal identity and is CONFIGURABLE), ops/methodology/ is structural infrastructure — it records how the vault works, not who the agent is. When evidence accumulates beyond configured thresholds, condition-based hooks surface a suggestion to run /rethink.
+**Summary:** The methodology folder (Primitive 14, INVARIANT, ops/methodology/) stores the vault's operational self-knowledge as linked notes. Derivation rationale, active kernel state, friction observations, and methodology learnings live here. Unlike self/ (which holds the agent's personal identity), ops/methodology/ is structural infrastructure — it records how the vault works, not who the agent is. When evidence accumulates beyond configured thresholds, condition-based hooks surface a suggestion to run /rethink.
 
 **Derivation Implication:** Every generated vault MUST include ops/methodology/. /remember writes to ops/methodology/. /rethink reads from it. The folder uses the same atomic note + linking pattern as the notes/ space.
 
@@ -129,13 +129,13 @@ Questions the engine must answer when generating evolution-ready systems:
 
 ---
 
-#### Feature disabling is safe because INVARIANT primitives cannot be removed
+#### Dimensional tuning is safe because the kernel is invariant
 
-**Summary:** Users can disable optional features (semantic search, self space, processing pipeline) by editing `ops/config.yaml`. INVARIANT primitives (wiki links, schema enforcement, methodology folder) cannot be disabled. This creates a safe disabling guarantee: the structural foundation is always present regardless of which optional features the user removes. Re-enabling any feature restores full functionality. When self space is disabled, its content routes to ops/ (goals to ops/goals.md, methodology to ops/methodology/).
+**Summary:** All fourteen kernel primitives are INVARIANT — wiki links, schema enforcement, methodology folder, semantic search, self space, and the rest. None can be disabled. What the user tunes is the dimensional layer above the kernel: organization (flat vs hierarchical), linking density, navigation depth, and schema richness, recorded in `ops/config.yaml`. Changing a dimension reshapes how notes are organized; it never removes structural foundations.
 
-**Derivation Implication:** Generated systems should clearly distinguish INVARIANT from CONFIGURABLE primitives in the context file. The config schema should prevent disabling INVARIANT primitives and document consequences of disabling optional features. The fallback paths for each optional feature should be documented.
+**Derivation Implication:** Generated systems should make the invariance of kernel primitives explicit in the context file. The config schema should expose only dimensions (not primitive toggles) and document the consequences of each dimensional choice. Drift detection (/refactor) compares current dimensional choices against the derivation manifest.
 
-**Source:** v1.6 specification. The INVARIANT/CONFIGURABLE distinction ensures evolution safety — users cannot accidentally break the structural foundation.
+**Source:** v1.6 specification, updated to treat the full kernel as invariant. Dimensional tuning is the only sanctioned form of post-generation evolution short of /rethink.
 
 ---
 
@@ -165,7 +165,7 @@ Questions the engine must answer when generating evolution-ready systems:
 
 #### The kernel is invariant across all evolution
 
-**Summary:** The 14 kernel primitives (markdown-yaml, wiki-links, moc-hierarchy, tree-injection, description-field, topics-footer, schema-enforcement, semantic-search, self-space, session-rhythm, unique-addresses, discovery-first, operational-learning-loop, processing-queue, methodology-folder) are the structural foundation. INVARIANT primitives (wiki links, schema enforcement, methodology folder) cannot be disabled. CONFIGURABLE primitives (self space, semantic search) can be toggled by editing `ops/config.yaml`. Evolution adds on top of the kernel; it never removes or contradicts kernel primitives. A system that evolves away from prose-sentence titles, or stops requiring topics footers, or abandons self/ loading at session start has evolved into incoherence. The kernel is the stable core that makes everything above it interoperable.
+**Summary:** The 14 kernel primitives (markdown-yaml, wiki-links, moc-hierarchy, tree-injection, description-field, topics-footer, schema-enforcement, semantic-search, self-space, session-rhythm, unique-addresses, discovery-first, operational-learning-loop, processing-queue, methodology-folder) are the structural foundation. All fourteen are INVARIANT — none can be disabled. Evolution adds on top of the kernel; it never removes or contradicts kernel primitives. A system that evolves away from prose-sentence titles, or stops requiring topics footers, or abandons self/ loading at session start has evolved into incoherence. The kernel is the stable core that makes everything above it interoperable.
 
 **Derivation Implication:** The generated context file should mark kernel primitives as invariant (not subject to user override or evolution drift). `/health` should validate that all 14 kernel primitives remain intact. Evolution guidance should explicitly state: "You can add schema fields, create new MOC types, build new skills, and modify session workflow — but these 14 primitives are foundational and must not be removed."
 

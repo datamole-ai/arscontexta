@@ -43,7 +43,7 @@ If any answer is "no," fix it before saving. Discovery-first is not a polish ste
 Session orient is handled by hook. Full orient → work → persist rhythm documented in `ops/features/session-rhythm.md`.
 ```
 
-## Self Space (conditional — on for personal assistant, off for research)
+## Self Space (always include)
 
 ```markdown
 ## Your Mind Space (self/)
@@ -67,8 +67,6 @@ self/
 - `sessions/` — Session logs tracking what happened each session
 - `journal/` — Raw capture for later processing
 - `relationships.md` — If your use case involves tracking people
-
-**When self/ is disabled:** Goals and handoff notes move to ops/. Minimal identity expression lives in the context file. Methodology learnings still go to ops/methodology/.
 ```
 
 ## Memory Type Routing (always include)
@@ -190,19 +188,18 @@ Compose feature summaries in this order:
 10. templates (always)
 11. multi-domain (if multiple domains)
 12. ethical-guardrails (always)
-13. self-space (optional)
+13. self-space (always)
 14. helper-functions (always)
 15. graph-analysis (always)
 
-**Always-included blocks (13):** note-granularity, wiki-links, processing-pipeline, semantic-search, schema, maintenance, self-evolution, methodology-knowledge, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis.
+**Always-included blocks (14):** note-granularity, wiki-links, processing-pipeline, semantic-search, schema, maintenance, self-evolution, methodology-knowledge, session-rhythm, templates, ethical-guardrails, self-space, helper-functions, graph-analysis.
 
-**Conditional blocks (3):** mocs (navigation depth), multi-domain (multiple domains), self-space (user choice).
+**Conditional blocks (2):** mocs (navigation depth), multi-domain (multiple domains).
 
 ### Cross-reference elimination (unchanged)
 
 If a block is excluded, remove/rephrase references to it in remaining summaries and reference files:
 - mocs excluded → simplify "topic MOCs" to "topic organization"
-- self-space excluded → references to self/ route to ops/ equivalents
 - multi-domain excluded → remove cross-domain references
 
 ## Pipeline Enforcement (always include)

@@ -437,25 +437,6 @@ The first question calibrates maintenance trigger sensitivity and schema tempora
 | Therapy | Personal Assistant | Moderate | Personal Assistant base, significantly adapted for therapy domain and personality |
 | PM | Experimental | Moderate | Novel enough to warrant full dimension exploration; PM decision tracking has unique temporal dynamics |
 
-### Opt-In/Opt-Out Decisions
-
-After establishing the domain and preset direction, the wizard presents two opt-in/opt-out decisions with full explanations. These apply to ALL conversation patterns:
-
-**1. Self Space:**
-
-The self/ directory provides agent persistent memory (identity, methodology, goals) that persists across sessions.
-
-| Preset | Default | Rationale |
-|--------|---------|-----------|
-| Research | OFF | Focus is the knowledge graph, not agent identity |
-| Personal Assistant | ON | Agent identity and persistent memory are central |
-| Experimental | Configurable | Depends on domain signals |
-
-Example phrasing: "Your research vault focuses on the knowledge graph — the notes and connections are the value. Some users also want a self/ space where the agent develops persistent identity and remembers its own methodology across sessions. For research, this is usually not needed. Would you like it enabled?"
-
-
-These decisions appear in the conversation AFTER dimension derivation but BEFORE generation. The user always makes the final call.
-
 ### The Follow-Up Pattern
 
 Across all five examples, effective follow-up questions share characteristics:

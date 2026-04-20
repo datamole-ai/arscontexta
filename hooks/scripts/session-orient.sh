@@ -46,12 +46,9 @@ echo ""
 if [ -f self/goals.md ]; then
   cat self/goals.md
   echo ""
-elif [ -f ops/goals.md ]; then
-  cat ops/goals.md
-  echo ""
 fi
 
-# Identity (if self space enabled)
+# Identity
 if [ -f self/identity.md ]; then
   cat self/identity.md self/methodology.md 2>/dev/null
   echo ""

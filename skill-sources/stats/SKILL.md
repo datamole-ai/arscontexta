@@ -187,12 +187,12 @@ fi
 ### 1e. System Metrics
 
 ```bash
-# Self space
+# Self space (invariant — must exist)
 if [[ -d "self/" ]]; then
   SELF_FILES=$(find self/ -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
-  SELF_STATUS="enabled ($SELF_FILES files)"
+  SELF_STATUS="$SELF_FILES files"
 else
-  SELF_STATUS="disabled"
+  SELF_STATUS="MISSING (invariant primitive)"
 fi
 
 # Methodology notes
@@ -346,9 +346,9 @@ Do not show health, pipeline, growth, or system sections for an empty vault — 
 
 Skip the Pipeline section entirely. Do not show an error.
 
-### No Self Space
+### Missing Self Space
 
-Show "disabled" for self space line. Do not show an error.
+Self space is an invariant primitive — if self/ is missing, surface "MISSING (invariant primitive)" in the system metrics and recommend running /health for remediation guidance.
 
 ### No ops/derivation-manifest.md
 
