@@ -27,7 +27,7 @@ Nine tests that verify the derivation engine produces coherent, functional syste
 **Result: 5/5 match.** The derived configuration is a near-perfect prediction of what the vault evolved to organically. One dimension shows evolution beyond the starting preset (nav depth approaching 4-tier), which aligns with the seed-evolve-reseed lifecycle claim.
 
 **Features correctly enabled:**
-- Kernel (all 14 primitives): YES — vault has all 14, including self space
+- Kernel (all 13 primitives): YES — vault has all 13, including self space
 - inbox-processing: YES (processing = heavy ≥ moderate) — vault has 00_inbox/
 - processing-pipeline: YES (processing = heavy) — vault has /pipeline, full 6R pipeline
 - semantic-search: YES (linking = explicit+implicit) — vault has qmd with 4 collections
@@ -36,9 +36,8 @@ Nine tests that verify the derivation engine produces coherent, functional syste
 
 **Gaps between derived and actual:**
 1. Vault has **dual operators** (Cornelius/Heinrich) — init generates for single operator. This is a multi-agent extension, not a base derivation concern.
-2. Vault has **04_meta/logs/** (observations, tensions) — a maturity feature that emerged through practice. Could become a feature for processing ≥ heavy.
-3. Vault has **03_twitter/** — domain-specific content pipeline not represented in generic research preset. Would be a second domain in composition test.
-4. Vault evolved **numbered folder prefixes** (00_, 01_, 02_, 03_, 04_) — Obsidian ordering convention. Init uses generic names (notes/, inbox/, archive/). Both are valid.
+2. Vault has **03_twitter/** — domain-specific content pipeline not represented in generic research preset. Would be a second domain in composition test.
+3. Vault evolved **numbered folder prefixes** (00_, 01_, 02_, 03_, 04_) — Obsidian ordering convention. Init uses generic names (notes/, inbox/, archive/). Both are valid.
 
 **Conclusion:** The derivation engine correctly predicts the vault's configuration from the "Research" use case. Gaps are evolutionary features consistent with the seed-evolve-reseed lifecycle — they emerged from friction-driven adaptation, not from missing initial configuration.
 
@@ -59,7 +58,7 @@ Nine tests that verify the derivation engine produces coherent, functional syste
 | Organization | flat | Same benefit as research: reflections aren't categories, they're connected experiences |
 | Linking | explicit | Direct connections between reflections suffice given explicit linking choice |
 | Nav depth | 2-tier | Hub → topic MOCs (moods, triggers, patterns, growth areas). |
-| Maintenance | condition-based (tight) | Review triggered by observation/tension thresholds. Therapy's value comes from revisiting, not accumulating. |
+| Maintenance | condition-based (tight) | Review triggered by orphan accumulation and staleness thresholds. Therapy's value comes from revisiting, not accumulating. |
 | Schema | moderate | Mood, trigger, and pattern fields make reflections queryable. Not dense — just enough for retrieval. |
 
 **Natural pipeline fit:** /capture — reflections are compound journal entries captured whole; atomic extraction would fragment the emotional arc that gives therapy notes their meaning.
@@ -113,7 +112,7 @@ _schema:
 - `methodology.md`: "I surface connections between reflections, track recurring patterns, and help you see growth over time..."
 - `goals.md`: Active growth threads, not research questions
 
-**Kernel validation prediction:** 14/14 PASS (or 14 PASS + 1 WARN on semantic search if not configured)
+**Kernel validation prediction:** 13/13 PASS (or 13 PASS + 1 WARN on semantic search if not configured)
 
 **Coherence assessment:** The configuration is internally consistent. Tight condition-based maintenance enables pattern detection — the core therapy value. Schema fields use emotional vocabulary (mood, trigger, pattern), not research jargon. Note that the "moderate granularity" noted in signal extraction describes how the user naturally produces notes (compound reflections rather than atomic claims) — granularity is not a configured dimension; it is observed per-invocation. The system would feel natural to use for its purpose.
 
@@ -191,7 +190,7 @@ _schema:
 
 **Key derivation insight:** The `meta_state` field addresses temporal dynamics that the Research preset doesn't capture. The "outdated" value enables filtering stale strategies — critical for competitive gaming where last patch's knowledge can be wrong. This field emerged from the interaction between temporal dynamics and schema density.
 
-**Kernel validation prediction:** 14/14 PASS (assuming semantic search is configured)
+**Kernel validation prediction:** 13/13 PASS (assuming semantic search is configured)
 
 **Coherence assessment:** The derived configuration makes gaming-domain sense. Moderate granularity captures strategies as compound thoughts without forcing artificial decomposition ("jab into frame trap when opponent respects plus frames" is one idea, not three). Tight condition-based maintenance responds to patch cycles and meta shifts. The `meta_state` field solves the temporal problem naturally. The system would be immediately useful for tracking matchup knowledge.
 
@@ -239,7 +238,7 @@ _schema:
 3. The shared graph (wiki links) handles cross-domain naturally
 4. Hub MOC (index.md) provides unified entry point
 
-**Kernel validation prediction:** 14/14 PASS
+**Kernel validation prediction:** 13/13 PASS
 
 **Coherence assessment:** Multi-domain composition works when the shared layer (wiki links, MOC hierarchy, description fields) is domain-agnostic while templates and processing are domain-specific. The five composition rules (from the composable-knowledge-architecture blueprint) hold:
 1. Shared graph: wiki links are domain-agnostic ✓
@@ -288,7 +287,7 @@ The constraint system is productive, not just prohibitive. For each violation, i
 
 **Post-correction constraint check:** Zero violations. The corrected configuration is internally consistent.
 
-**Kernel validation prediction:** 14/14 (corrected configuration satisfies all primitives)
+**Kernel validation prediction:** 13/13 (corrected configuration satisfies all primitives)
 
 **Coherence assessment:** The constraint system serves as a design advisor, not a gatekeeper. It detected three issues in the input configuration, explained why each was problematic, recommended specific corrections, and produced a valid configuration. The key insight is that the constraint system is productive — it does not simply reject bad configurations but guides users toward coherent ones. This is essential for the conversational derivation flow, where users may express preferences that are individually reasonable but collectively incoherent. The system respects user preferences when possible (flat organization and explicit linking survived unchanged) while adjusting dimensions that were in tension with the rest (dense schema downgraded, 4-tier navigation reduced, very lax maintenance thresholds tightened). The corrections are minimal — changing only what is necessary to achieve coherence.
 
@@ -345,7 +344,7 @@ Scan the entire generated output for research-domain terms that should have been
 2. The ops/derivation.md file records the derivation rationale and may reference the research-domain mapping as part of its provenance trail
 3. Template `_schema` blocks use structural field names (`entity_type`, `applies_to`) that are system-internal, not user-facing
 
-**Kernel validation prediction:** 14/14
+**Kernel validation prediction:** 13/13
 
 **Coherence assessment:** Vocabulary transformation fidelity is not cosmetic — it determines whether the system feels native to its domain. A therapy user encountering "extract claims from sources" would experience cognitive dissonance: the system sounds like it was built for someone else and awkwardly repurposed. When every term is domain-native ("surface patterns in reflections"), the system feels purpose-built. This test validates that the transformation is complete and systematic, not partial. The search methodology is intentionally exhaustive because partial transformation is worse than no transformation — a system that says "surface reflections" in one paragraph and "extract claims" in the next signals inconsistency. The test also documents the narrow exceptions where research vocabulary is acceptable (meta-documentation, derivation provenance), preventing false positives from flagging legitimate uses.
 
@@ -374,144 +373,17 @@ In v1.6, all vaults ship with full automation from day one. There are no tier bo
 
 **Dimensional tuning validation:**
 
-Users cannot disable kernel primitives. What they can change post-generation is the dimensional layer recorded in `ops/config.yaml` (organization, linking, navigation, schema). /refactor replays derivation with the edited dimensions and reshapes the vault; the kernel stays intact.
+Users cannot disable kernel primitives. What they can change post-generation is the dimensional layer recorded in `ops/config.yaml` (organization, linking, navigation, schema). The kernel stays intact.
 
 **Critical invariant: kernel primitives are always present.**
 
-- All 14 kernel primitives (wiki links, schema enforcement, methodology folder, self space, semantic search, and the rest) ship in every vault
+- All 13 kernel primitives (wiki links, schema enforcement, self space, semantic search, and the rest) ship in every vault
 - qmd is scaffolded even when absent; semantic-search skills degrade (not disable) until the binary is installed
 - Dimensional changes never remove a primitive — they only retune how the primitive is expressed
 
-**Kernel validation prediction:** 14/14 at all growth stages
+**Kernel validation prediction:** 13/13 at all growth stages
 
 **Coherence assessment:** All vaults ship complete — the full kernel plus all processing skills. Users tune dimensions rather than toggling primitives. The overhead of a uniform kernel is near-zero (hooks that rarely fire, skills that are dormant until invoked, directories that stay lean), and removing the disable pathway collapses the ambiguity where skills had to detect whether a primitive existed before calling it. The structural foundation is invariant; evolution happens above the kernel.
-
----
-
-## Test 9: Operational Learning Loop Integration
-
-**Question:** Does Primitive 12 (operational-learning-loop) function as a complete cycle — from capturing observations and tensions through threshold detection to triage and status lifecycle?
-
-**Input:**
-- Use case: Research vault (our vault's configuration)
-- Focus: Verify the full loop end-to-end, not just component existence
-
-**Phase 1: Observation Capture**
-
-Create 12 observations across categories to test capture mechanics:
-
-| # | Observation Title | Category | Expected Location |
-|---|-------------------|----------|------------------|
-| 1 | "descriptions that restate titles waste progressive disclosure" | quality | ops/observations/ |
-| 2 | "batch processing of 8+ claims degrades quality in later phases" | process | ops/observations/ |
-| 3 | "semantic search misses notes created in the last 10 minutes" | friction | ops/observations/ |
-| 4 | "MOC split at 40 notes felt premature — 50 would have been better" | methodology | ops/observations/ |
-| 5 | "reflect phase consistently finds 3-5 connections per claim" | surprise | ops/observations/ |
-| 6 | "enrichment tasks take longer than new claims because existing context must be loaded" | process | ops/observations/ |
-| 7 | "validation hook catches missing descriptions but not weak descriptions" | friction | ops/observations/ |
-| 8 | "reweave rarely changes titles but often adds 2-3 new connections" | methodology | ops/observations/ |
-| 9 | "tenant sessions that skip orient phase produce lower quality output" | process | ops/observations/ |
-| 10 | "cross-topic synthesis notes have 5x more incoming links than atomic claims" | surprise | ops/observations/ |
-| 11 | "schema validation takes 3 seconds per note — acceptable at 200 notes" | quality | ops/observations/ |
-| 12 | "dangling link detection finds 0-2 issues per batch — system is healthy" | quality | ops/observations/ |
-
-**Capture validation:**
-- Each observation has YAML frontmatter: `description`, `category`, `observed` (date), `status: pending`
-- Each observation has prose-sentence title
-- Each observation links to `[[observations]]` MOC
-- MOC groups observations by category
-
-**Phase 2: Tension Capture**
-
-Create 6 tensions to test contradiction detection:
-
-| # | Tension Title | Involves | Expected Location |
-|---|--------------|----------|------------------|
-| 1 | "atomic granularity conflicts with compound reflection needs" | `[[granularity]]`, `[[therapy preset]]` | ops/tensions/ |
-| 2 | "heavy processing overhead versus light capture friction" | `[[processing]]`, `[[capture]]` | ops/tensions/ |
-| 3 | "MOC split threshold varies by domain — 40 for research, 25 for therapy" | `[[MOC hierarchy]]`, `[[use-case presets]]` | ops/tensions/ |
-| 4 | "discovery-first gate slows capture when speed matters" | `[[discovery-first]]`, `[[capture friction]]` | ops/tensions/ |
-| 5 | "convention automation degrades with context length but hooks add platform dependency" | `[[automation]]`, `[[platform tiers]]` | ops/tensions/ |
-
-**Capture validation:**
-- Each tension has YAML frontmatter: `description`, `observed`, `involves` (wiki links to notes in tension), `status: pending`
-- Each tension has prose-sentence title
-- Each tension links to `[[tensions]]` MOC
-- MOC groups tensions by status (pending, resolved, dissolved)
-
-**Phase 3: Threshold Detection**
-
-With 12 pending observations (exceeds threshold of 10) and 5 pending tensions (meets threshold of 5):
-
-| Check | Threshold | Actual | Triggered? |
-|-------|-----------|--------|------------|
-| Pending observations | >= 10 | 12 | YES |
-| Pending tensions | >= 5 | 5 | YES |
-
-**Expected behavior:** Session-start orientation surfaces the suggestion: "12 pending observations and 5 pending tensions meet review thresholds. Consider running /rethink."
-
-**Phase 4: Triage via /rethink**
-
-Each pending observation receives one of four dispositions:
-
-| Disposition | Meaning | Status After | Destination |
-|-------------|---------|-------------|-------------|
-| Promote | Observation is a durable insight worthy of becoming a note | `promoted` | Create note in notes/, link back to observation |
-| Implement | Observation suggests a system change | `implemented` | Update context file or skill, note the change |
-| Archive | Observation is session-specific or no longer relevant | `archived` | Remains in ops/observations/ with archived status |
-| Keep pending | Not enough evidence yet — needs more data | `pending` (unchanged) | Stays in ops/observations/ |
-
-**Example triage outcomes:**
-
-| Observation | Disposition | Rationale |
-|-------------|------------|-----------|
-| #1 (descriptions restate titles) | Promote | This is a reusable quality insight — becomes a note in notes/ |
-| #2 (batch 8+ degrades) | Implement | This should update the context file's batch processing guidance |
-| #3 (semantic search 10-min lag) | Archive | Infrastructure quirk, not a knowledge claim |
-| #5 (3-5 connections per claim) | Keep pending | Interesting but needs more data to validate as a reliable metric |
-
-**Tension triage outcomes:**
-
-| Tension | Disposition | Rationale |
-|---------|------------|-----------|
-| #1 (atomic vs compound) | Resolved → create resolution note | The design dimensions framework already addresses this — link to existing note |
-| #4 (discovery-first vs capture speed) | Keep pending | Genuine unresolved tension — needs more operational data |
-
-**Phase 5: Status Lifecycle Verification**
-
-Track that status transitions are valid:
-
-| Valid Transition | Example |
-|-----------------|---------|
-| pending → promoted | Observation becomes a note |
-| pending → implemented | Observation becomes a system change |
-| pending → archived | Observation deemed irrelevant |
-| pending → pending | Observation kept for more data |
-| pending → resolved (tensions) | Tension resolved via resolution note |
-| pending → dissolved (tensions) | Tension dissolved — not a real conflict |
-
-| Invalid Transition | Why |
-|-------------------|-----|
-| promoted → pending | Cannot un-promote a note |
-| implemented → pending | Cannot un-implement a change |
-| archived → promoted | If it's worth promoting, it should not have been archived |
-| resolved → pending | Resolution is final — if wrong, create a new tension |
-
-**Full loop validation:**
-
-```
-Observe (create observation/tension)
-  → Accumulate (notes collect in ops/)
-    → Threshold (count exceeds limit)
-      → Triage (/rethink evaluates each)
-        → Promote (→ notes/) | Implement (→ context file) | Archive (→ stays with status) | Dissolve (→ tension resolved)
-          → System improves (promoted insights enrich graph, implementations improve methodology)
-            → Observe again (new friction from improved system)
-```
-
-**Kernel validation prediction:** 14/14
-
-**Coherence assessment:** The operational learning loop is the system's immune system — it detects friction, accumulates evidence, and triggers targeted improvement. This test validates the entire cycle, not just the existence of obs/observations/ and ops/tensions/ directories. The critical findings are: (1) the threshold mechanism works as an attention filter — below threshold, observations accumulate silently; above threshold, the system demands review, (2) the four-disposition triage model (promote, implement, archive, keep) provides clear action paths for every observation, (3) the status lifecycle has valid transitions that prevent regression (you cannot un-promote or un-implement), and (4) the loop is genuinely recursive — improvements generate new friction, which generates new observations, which feeds back into the loop. Without this primitive, the system is static: it works as generated but never improves from experience. With it, the system converges toward its optimal configuration through accumulated operational evidence.
 
 ---
 
@@ -519,14 +391,13 @@ Observe (create observation/tension)
 
 | Test | Configuration Match | Kernel Passes | Vocabulary Correct | Coherence |
 |------|--------------------|--------------|--------------------|-----------|
-| Self-derivation (Research) | 5/5 dimensions | 14/14 | N/A (is the source) | Full |
-| Cross-domain (Therapy) | Internally consistent | 14-14/14 | Research jargon eliminated | Full |
-| Novel domain (Gaming) | Principled deviation from reference | 14/14 | Domain-native vocabulary | Full |
-| Multi-domain (Research + Relationships) | Per-domain configs composed | 14/14 | Per-domain vocabularies | Full |
-| Constraint violation recovery | 3 violations detected, corrected | 14/14 (post-correction) | N/A (structural test) | Full (after correction) |
-| Vocabulary transformation fidelity | Zero leaked terms | 14/14 | Exhaustive verification | Full |
-| Progressive configuration | Full automation works at all scales | 14/14 (all growth stages) | N/A (infrastructure test) | Full |
-| Operational learning loop | Full cycle validated | 14/14 | N/A (primitive-specific test) | Full |
+| Self-derivation (Research) | 5/5 dimensions | 13/13 | N/A (is the source) | Full |
+| Cross-domain (Therapy) | Internally consistent | 13/13 | Research jargon eliminated | Full |
+| Novel domain (Gaming) | Principled deviation from reference | 13/13 | Domain-native vocabulary | Full |
+| Multi-domain (Research + Relationships) | Per-domain configs composed | 13/13 | Per-domain vocabularies | Full |
+| Constraint violation recovery | 3 violations detected, corrected | 13/13 (post-correction) | N/A (structural test) | Full (after correction) |
+| Vocabulary transformation fidelity | Zero leaked terms | 13/13 | Exhaustive verification | Full |
+| Progressive configuration | Full automation works at all scales | 13/13 (all growth stages) | N/A (infrastructure test) | Full |
 
 **Key findings:**
 
@@ -538,10 +409,10 @@ Observe (create observation/tension)
 
 4. **Multi-domain composition works through shared-graph-with-separate-templates.** Our vault already proves this pattern. The derivation engine needs to support it explicitly: generate separate templates per domain, shared navigation, and cross-domain linking conventions.
 
-5. **The kernel primitives are satisfied through hooks and automation.** All 14 primitives are implemented through Claude Code's hook system, skill infrastructure, and MCP integration. The automation layer provides deterministic enforcement that instruction-following cannot match.
+5. **The kernel primitives are satisfied through hooks and automation.** All 13 primitives are implemented through Claude Code's hook system, skill infrastructure, and MCP integration. The automation layer provides deterministic enforcement that instruction-following cannot match.
 
 6. **The constraint system is productive, not just prohibitive.** The violation recovery test (Test 6) shows that incoherent configurations are not dead ends — the constraint system guides users toward valid configurations by recommending minimal corrections. This is essential for conversational derivation where users express individually reasonable preferences that are collectively incoherent.
 
 7. **Feature disabling is safe and reversible.** The progressive configuration test (Test 8) confirms that disabling optional features does not break the system. Each optional feature has a fallback path. INVARIANT primitives cannot be disabled, ensuring the structural foundation is always present. The system ships complete and users opt down — the reverse of the former tier-based approach.
 
-**Derivation engine confidence: HIGH.** The 14 kernel primitives provide a universal base. The 5 configuration dimensions parameterize the variation space. Interaction constraints prevent incoherent combinations. The 3 presets (Research, Personal Assistant, Experimental) provide pre-validated starting points. The system derives working configurations for research, therapy, competitive gaming, multi-domain composition, constraint recovery, vocabulary-verified domains, progressive configuration, and self-improving operational loops.
+**Derivation engine confidence: HIGH.** The 13 kernel primitives provide a universal base. The 5 configuration dimensions parameterize the variation space. Interaction constraints prevent incoherent combinations. The 3 presets (Research, Personal Assistant, Experimental) provide pre-validated starting points. The system derives working configurations for research, therapy, competitive gaming, multi-domain composition, constraint recovery, vocabulary-verified domains, and progressive configuration.

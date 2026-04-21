@@ -344,7 +344,7 @@ You are executing one step of a multi-step generation pipeline.
 - Topic map: {domain:topic_map}
 - Process verbs: {domain:reflect}, {domain:reweave}, {domain:verify}
 - Pipeline skills: /structure, /capture (universal — not domain-renamed)
-- Skill names: {DOMAIN:reflect}, {DOMAIN:reweave}, {DOMAIN:verify}, {DOMAIN:rethink}
+- Skill names: {DOMAIN:reflect}, {DOMAIN:reweave}, {DOMAIN:verify}
 
 ## Instructions
 1. Read ops/derivation.md FIRST -- it is your source of truth for all configuration decisions
@@ -507,7 +507,6 @@ If nothing was deferred, record: "None — every candidate passed its filter."
 [Checked = included, unchecked = excluded with reason]
 - [x] wiki-links -- always included (kernel)
 - [x] maintenance -- always included (always)
-- [x] self-evolution -- always included (always)
 - [x] session-rhythm -- always included (always)
 - [x] templates -- always included (always)
 - [x] ethical-guardrails -- always included (always)
@@ -550,17 +549,13 @@ Create the three-space layout with domain-named directories. The layout is flat 
 +-- ops/                             <-- operational coordination
 |   +-- templates/                   <-- single note.md template (created in Pipeline Step 4)
 |   +-- features/                    <-- feature reference files
-|   +-- observations/                <-- friction signals (Primitive 12)
-|   +-- tensions/                    <-- contradiction tracking (Primitive 12)
-|   +-- methodology/                 <-- vault self-knowledge (Primitive 14)
+|   +-- methodology/                 <-- derivation rationale (documentation)
 |   +-- queue/
 |   |   +-- archive/
 |   +-- sessions/
 ```
 
 Hub MOC (`index.md`) lives at the `{vocabulary.note_collection}/` root. Topic MOCs also live at the collection root.
-
-The `ops/observations/` and `ops/tensions/` directories are required by Kernel Primitive 12 (Operational Learning Loop). They accumulate friction signals that `/{DOMAIN:rethink}` reviews when observation or tension counts exceed thresholds.
 
 The inbox folder is always generated. It provides zero-friction capture regardless of processing level.
 
@@ -722,37 +717,21 @@ Topics:
 
 ##### ops/methodology/ (Vault Self-Knowledge)
 
-This step creates the vault's self-knowledge folder required by Kernel Primitive 14 (methodology-folder).
+This step creates the vault's derivation rationale as documentation. It is not read or written by automation — it exists so that a future operator (human or agent) can understand why the system was shaped this way.
 
 **Create `ops/methodology/methodology.md`** (MOC):
 
 ```markdown
 ---
-description: The vault's self-knowledge — derivation rationale, configuration state, and operational evolution history
+description: Why this vault was configured the way it was
 type: moc
 ---
 # methodology
 
-This folder records what the system knows about its own operation — why it was configured this way, what the current state is, and how it has evolved. Meta-skills (/{DOMAIN:rethink}, /{DOMAIN:architect}) read from and write to this folder. /{DOMAIN:remember} captures operational corrections here.
+This folder documents the reasoning behind the current configuration.
 
 ## Derivation Rationale
 - [[derivation-rationale]] — Why each configuration dimension was set the way it was
-
-## Configuration State
-(Populated by /{DOMAIN:rethink}, /{DOMAIN:architect})
-
-## Evolution History
-(Populated by /{DOMAIN:rethink}, /{DOMAIN:architect}, /{DOMAIN:reseed})
-
-## How to Use This Folder
-
-Browse notes: `ls ops/methodology/`
-Query by category: `rg '^category:' ops/methodology/`
-Find active directives: `rg '^status: active' ops/methodology/`
-Ask the research graph: `/ask [question about your system]`
-
-Meta-skills (/{DOMAIN:rethink}, /architect) read from and write to this folder.
-/{DOMAIN:remember} captures operational corrections here.
 ```
 
 **Create `ops/methodology/derivation-rationale.md`** (initial note):
@@ -766,7 +745,7 @@ status: active
 ---
 # derivation rationale for {domain}
 
-{Extract from ops/derivation.md the key dimension choices and the conversation signals that drove them. Include: automation level, active feature blocks, Filter A/B outcomes, and any flagged failure-mode risks. Write in prose format, not raw transcript — synthesize the reasoning into a readable narrative that future meta-skills can consult.}
+{Extract from ops/derivation.md the key dimension choices and the conversation signals that drove them. Include: automation level, active feature blocks, Filter A/B outcomes, and any flagged failure-mode risks. Write in prose format, not raw transcript — synthesize the reasoning into a readable narrative.}
 
 ---
 
@@ -774,7 +753,7 @@ Topics:
 - [[methodology]]
 ```
 
-The seven content categories for ops/methodology/ are: `derivation-rationale`, `kernel-state`, `pipeline-config`, `maintenance-conditions`, `vocabulary-map`, `configuration-state`, `drift-detection`. Only `derivation-rationale` is created at init; the others are populated by meta-skills during operation.
+`derivation-rationale` is the only supported category.
 
 ##### self/goals.md
 
@@ -878,13 +857,11 @@ vocabulary:
   reflect: "[domain term]"      # e.g., "reflect", "find patterns", "link decisions"
   reweave: "[domain term]"      # e.g., "reweave", "revisit", "update"
   verify: "[domain term]"       # e.g., "verify", "check resonance", "validate"
-  rethink: "[domain term]"      # e.g., "rethink", "reassess", "retrospect"
 
   # Level 6: Command names (as users invoke them)
   cmd_reflect: "[/domain-verb]" # e.g., "/reflect", "/find-patterns", "/link-decisions"
   cmd_reweave: "[/domain-verb]" # e.g., "/reweave", "/revisit", "/update-old"
   cmd_verify: "[/domain-verb]"  # e.g., "/verify", "/check", "/audit"
-  cmd_rethink: "[/domain-verb]" # e.g., "/rethink", "/reassess", "/retrospect"
 
   # Level 7: Processing categories (domain-specific, from conversation)
   processing_categories:
@@ -900,7 +877,7 @@ vocabulary:
   # filter_b_survivors:
   #   - name: archive
   #     shared_operation: "scheduled archival sweep retires notes where status == closed older than 30 days"
-  #     runner: "/{DOMAIN:rethink} archive sweep"
+  #     runner: "/archive-batch sweep"
 
 
 ---
@@ -1006,12 +983,9 @@ The skill sources to install:
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/reweave/`       | reweave       | Processing    | A    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/stats/`         | stats         | Navigation    | A    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/graph/`         | graph         | Navigation    | A    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/refactor/`      | refactor      | Evolution     | A    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/seed/`          | seed          | Orchestration | B    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/pipeline/`      | pipeline      | Orchestration | B    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/archive-batch/` | archive-batch | Orchestration | B    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/rethink/`       | rethink       | Evolution     | B    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/remember/`      | remember      | Growth        | B    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/structure/`     | structure     | Processing    | B    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/capture/`       | capture       | Processing    | B    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/verify/`        | verify        | Processing    | B    |
@@ -1039,7 +1013,7 @@ Process tiers in order: **A → B** (simplest first, saving context for skills t
 
 ##### Tier A — Frontmatter only (runtime vocabulary)
 
-**Skills:** reflect, reweave, stats, graph, refactor
+**Skills:** reflect, reweave, stats, graph
 
 These skill sources contain only `{vocabulary.xxx}` patterns in their body. Those resolve at runtime — NOT setup-time templates.
 
@@ -1054,7 +1028,7 @@ These skill sources contain only `{vocabulary.xxx}` patterns in their body. Thos
 
 ##### Tier B — DOMAIN substitution (mechanical string replace)
 
-**Skills:** seed, pipeline, archive-batch, rethink, remember, verify, structure, capture
+**Skills:** seed, pipeline, archive-batch, verify, structure, capture
 
 These skill sources contain `{DOMAIN:xxx}` patterns that must be literally substituted at setup time. They may also contain `{vocabulary.xxx}` patterns — leave those intact.
 
@@ -1077,132 +1051,97 @@ These skill sources contain `{DOMAIN:xxx}` patterns that must be literally subst
 
 After creating ALL skill files:
 
-1. **Report to main agent:** List all generated skill names (domain-native) and confirm zero `{DOMAIN:` strings remain in Tier B output. This information is used by Agent 3 (CLAUDE.md) to build the "Recently Created Skills" section.
+1. **Report to main agent:** List all generated skill names (domain-native) and confirm zero `{DOMAIN:` strings remain in Tier B output.
 2. **Phase 6 guidance:** If any skills were created, Phase 6 output includes: "Restart Claude Code now to activate all skills, then try /[domain:help] to see what's available."
 
 ---
 
-#### Pipeline Step 6: Context File + Feature References (Agent 3)
+#### Pipeline Step 6: Context File, Feature References, and /ask Skill (Agent 3)
 
-**Agent scope:** CLAUDE.md, ops/features/*.md
+**Agent scope:** `CLAUDE.md`, `ops/features/*.md`, `.claude/skills/ask/SKILL.md`
 
-**Agent reads:** ops/derivation.md, ${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md, ${CLAUDE_PLUGIN_ROOT}/generators/features/*.md, generated templates (for reference verification), generated skills (for reference verification and "Recently Created Skills" section)
+**Agent reads:** `ops/derivation.md`, `ops/config.yaml`, `${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md`, `${CLAUDE_PLUGIN_ROOT}/generators/features/*.md`, `${CLAUDE_PLUGIN_ROOT}/generators/ask-router.md`, `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md`, `${CLAUDE_PLUGIN_ROOT}/reference/vocabulary-transforms.md`, generated templates (for reference verification), generated skills (for reference verification).
 
-**Agent-specific prompt addition:** Include the list of active feature blocks and their file paths under ${CLAUDE_PLUGIN_ROOT}/generators/features/.
+**Agent-specific prompt addition:** Include the list of active feature blocks and their source paths under `${CLAUDE_PLUGIN_ROOT}/generators/features/`.
 
-This agent runs AFTER templates and skills are generated, so it can verify coherence against actual files on disk. All mentioned skills, templates, and file paths can be checked for existence.
+This agent runs AFTER templates and skills are generated, so it can verify coherence against actual files on disk.
 
 The following step instructions are passed verbatim to Agent 3 via the agent prompt template.
 
 ---
 
-##### Context File
+##### Context File, Feature References, and /ask Skill
 
-This is the most critical generation step. The context file IS the system.
+Generate three artifacts in order:
 
-Generate `CLAUDE.md` using `${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md` template.
+1. `ops/features/*.md` — one file per enabled feature block.
+2. `CLAUDE.md` — seven-section context file from `generators/claude-md.md`.
+3. `.claude/skills/ask/SKILL.md` — router skill from `generators/ask-router.md`.
 
-**Context file composition algorithm:**
+**Generation algorithm:**
 
 ```
-Step 1: Read generator template from ${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md.
+Step 1: Select feature blocks.
+  Read ops/derivation.md to identify active feature blocks.
+  Always-included blocks: note-granularity, wiki-links, processing-pipeline,
+    semantic-search, schema, maintenance, session-rhythm, templates,
+    ethical-guardrails, helper-functions, graph-analysis, self-space.
+  Conditional blocks: mocs (if navigation >= 2-tier), multi-domain (if multiple
+    domains)
 
-Step 2: Select feature blocks from ${CLAUDE_PLUGIN_ROOT}/generators/features/.
-  Always-included blocks (13): note-granularity, wiki-links, processing-pipeline, schema, maintenance, self-evolution, self-space, methodology-knowledge, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis
-  Conditional blocks: based on derived dimensions (see Active Feature Blocks in derivation.md)
-
-Step 3: Write reference files. For each selected block:
-  a. Read the block file
-  b. Apply vocabulary transformation (LLM-based contextual replacement, NOT string find-replace)
-  c. Write domain-adapted content to ops/features/<name>.md as a standalone document
+Step 2: Write ops/features/<name>.md for each selected block.
+  a. Read ${CLAUDE_PLUGIN_ROOT}/generators/features/<name>.md
+  b. Apply vocabulary transformation (LLM-based contextual replacement, NOT
+     string find-replace)
+  c. Write domain-adapted content to ops/features/<name>.md as a standalone
+     reference document
   d. Release the block from context before reading the next
 
-Step 4: Compose CLAUDE.md with:
-  a. Base template sections (Philosophy, Discovery-first, Where Things Go, Infrastructure Routing, Pipeline Compliance, Self-Improvement, Common Pitfalls, System Evolution, Recently Created Skills)
-  b. Feature summaries in canonical order, following the semantic composition rules in the generator template:
-     1. note-granularity (always)
-     2. wiki-links (always)
-     3. mocs (if active)
-     4. processing-pipeline (always)
-     5. semantic-search (always)
-     6. schema (always)
-     7. maintenance (always)
-     8. self-evolution (always)
-     8b. methodology-knowledge (always)
-     9. session-rhythm (always)
-     10. templates (always)
-     11. multi-domain (if active)
-     12. ethical-guardrails (always)
-     13. self-space (always)
-     14. helper-functions (always)
-     15. graph-analysis (always)
+Step 3: Compose CLAUDE.md.
+  a. Read ${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md
+  b. Emit the seven sections in order: Header+Philosophy, Discovery-First,
+     Memory Type Routing, Pipeline Compliance, Self-Improvement, Common
+     Pitfalls (compressed), Infrastructure Routing
+  c. For Common Pitfalls: select 3-4 HIGH-risk failure modes from the Domain
+     Vulnerability Matrix in reference/failure-modes.md. For each selected
+     mode, emit one bullet using the `one_line_rule:` field, vocabulary-
+     transformed. Do not inline full prevention prose.
+  d. Apply vocabulary transformation one final time on the assembled file.
+  e. Write CLAUDE.md.
 
-  For each feature: write a dense summary following the semantic composition rules (progressive disclosure awareness, terse density, preserve key semantics, routing over explaining, no redundancy with skills). Link to ops/features/<name>.md. Very short blocks may be inlined directly.
+Step 4: Compose .claude/skills/ask/SKILL.md.
+  a. Read ${CLAUDE_PLUGIN_ROOT}/generators/ask-router.md
+  b. Follow the skill-body composition steps in that template.
+  c. For Part B topic sections: emit one section per enabled feature (from
+     Step 1) whose ops/features/<name>.md file was actually written in Step 2.
+  d. Apply vocabulary transformation.
+  e. Write .claude/skills/ask/SKILL.md.
 
-Step 5: Cross-reference elimination.
-  If a block is excluded, scan remaining summaries and reference files for references to excluded concepts and remove or rephrase:
-  - mocs excluded -> simplify "topic MOCs" to "topic organization"
-  - multi-domain excluded -> remove cross-domain references
-
-Step 6: Add required sections that are NOT from feature blocks:
-  a. Header with philosophy statement and domain identity
-  b. Discovery-first design section (kernel primitive 11)
-  c. Memory type routing table (where content goes: notes/, self/, ops/, inbox/, reminders.md)
-  d. Infrastructure routing table (routes methodology questions to arscontexta plugin skills)
-  e. Self-improvement loop (brief: capture friction, don't derail, escalate patterns)
-  f. Common Pitfalls (3-4 HIGH-risk failure modes from vulnerability matrix, in domain vocabulary)
-  g. System Evolution section (architect, reseed, friction-driven growth)
-  h. Derivation Rationale summary (which dimensions, which signals, which tradition)
-  i. Pipeline Compliance (NEVER write directly to notes/, route through inbox)
-  j. Operational Learning Loop (brief principle only — detail in ops/features/self-evolution.md)
-  k. Session Rhythm (one-line reference to ops/features/session-rhythm.md — orient hook handles session start)
-
-Step 7: Coherence verification.
-  - [ ] No orphaned references to excluded blocks
-  - [ ] Vocabulary consistent (same universal term -> same domain term everywhere)
-  - [ ] Warm, neutral, helpful tone consistent across all sections
-  - [ ] All mentioned skills exist in the generated skills (or are documented as dormant tiers)
-  - [ ] All mentioned file paths exist in the generated folder structure
-  - [ ] All mentioned templates exist in the generated templates
-  - [ ] Pipeline references use /structure, /capture correctly
-  - [ ] Schema fields mentioned in prose exist in generated templates
-  - [ ] Every ops/features/ reference link points to a file that was actually written
-  - [ ] Summaries follow semantic composition rules (orientation not instruction, terse density, no skill duplication)
-
-Step 8: Apply vocabulary transformation one final time.
-  Read the completed CLAUDE.md. Replace every remaining universal term with its domain-native equivalent.
-  The vocabulary test: would a domain user ever see a term from a different discipline?
-
-Step 9: Write all files.
-  Write CLAUDE.md. Verify all ops/features/*.md files were written in Step 3.
+Step 5: Coherence verification.
+  - [ ] CLAUDE.md has exactly seven sections (header through Infrastructure
+        Routing)
+  - [ ] CLAUDE.md contains no feature summaries
+  - [ ] CLAUDE.md pitfall bullets each correspond to a `one_line_rule:` in
+        reference/failure-modes.md
+  - [ ] CLAUDE.md Infrastructure Routing table has a /ask row
+  - [ ] Every ops/features/<name>.md referenced by /ask exists on disk
+  - [ ] /ask Part B emits sections only for features with matching
+        ops/features/ files
+  - [ ] Vocabulary consistent (same universal term -> same domain term
+        across CLAUDE.md, ops/features/, and /ask)
+  - [ ] Warm, neutral, helpful tone across all files
+  - [ ] Structural markers (YAML field names, markdown syntax) untouched by
+        vocabulary transform
 ```
 
-**Structural Marker Protection:** Vocabulary transformation must NEVER touch structural markers. Field names in YAML (`description:`, `topics:`, `relevant_notes:`, `type:`, `status:`, `_schema:`) are structural and stay universal. Domain vocabulary applies to VALUES, prose content, and user-facing labels -- never to YAML field names or structural syntax.
+**Structural Marker Protection:** Vocabulary transformation must NEVER touch structural markers. Field names in YAML (`description:`, `topics:`, `relevant_notes:`, `type:`, `status:`, `_schema:`, `name:`, `allowed-tools:`) are structural and stay universal. Domain vocabulary applies to VALUES, prose content, and user-facing labels — never to YAML field names or structural syntax.
 
-**CRITICAL quality requirements for the generated context file:**
+**CRITICAL quality requirements:**
 
-- Tell the agent to ALWAYS read self/ at session start
-- Explain prose-as-title with examples from the user's domain
-- Include domain-specific schema in the YAML section
-- Include derivation rationale (which dimensions, which signals)
-- Feel cohesive, not like assembled blocks
-- Use domain-native vocabulary throughout
-- Feature summaries provide orientation, not instruction — detail lives in ops/features/
-- Every ops/features/ file is self-contained and domain-adapted
-
-**Skill Discoverability:** Since this agent runs after skill generation (Pipeline Step 5), include a "Recently Created Skills (Pending Activation)" section in the generated CLAUDE.md listing all skill files found in `.claude/skills/` with their domain-native names:
-
-```markdown
-## Recently Created Skills (Pending Activation)
-
-These skills were created during initialization. Restart Claude Code to activate them.
-- /structure -- Group related claims into structured notes (created [timestamp])
-- /capture -- Preserve source material verbatim (created [timestamp])
-- /[domain:reflect] -- Find connections between [domain:notes] (created [timestamp])
-...
-```
-
-Read `.claude/skills/*/SKILL.md` to discover skill names. The SessionStart hook checks for this section; once skills are confirmed loaded, the section can be removed.
+- CLAUDE.md stays close to ~70 lines. No feature summaries, no inlined operational detail.
+- Every rule in CLAUDE.md is one the agent could need mid-task without invoking any other skill.
+- `/ask` is a router, not an encyclopedia. Topic sections are 2-line orientations with a file pointer; do not paraphrase the full feature file into the skill body.
+- Domain vocabulary is consistent across CLAUDE.md, `ops/features/*.md`, and `/ask`.
 
 ---
 
@@ -1302,16 +1241,6 @@ Vault state and diagnostics.
 - /{DOMAIN:graph} — graph analysis
 
 Note: /arscontexta:health (plugin-level) also performs diagnostics but is always available, not generated.
-
-## Meta-Cognitive
-
-System evolution and research. Use these to understand, challenge, and improve your system.
-
-- /{DOMAIN:rethink} — challenge system assumptions, review observations and tensions, detect drift
-- /{DOMAIN:remember} — capture friction and methodology learnings
-- /{DOMAIN:refactor} — structural improvements
-
-{For meta-cognitive skills: 2-3 sentences each on when and how to use, absorbing content formerly in meta-skills.md}
 
 ## Plugin-Level (always available)
 
@@ -1442,7 +1371,6 @@ type: manual
 - Orphan {DOMAIN:notes} — {DOMAIN:note_plural} with no incoming links (run /{DOMAIN:reflect})
 - Dangling links — wiki links to non-existent {DOMAIN:note_plural} (check after renames)
 - Stale content — {DOMAIN:note_plural} not updated in 30+ days with sparse connections (run /{DOMAIN:reweave})
-- Methodology drift — system behavior diverging from methodology spec (run /{DOMAIN:rethink} drift)
 - Inbox overflow — too many items accumulating (run /{DOMAIN:pipeline} to process inbox items)
 - Pipeline stalls — tasks stuck in queue (inspect `ops/queue/queue.json` directly, resume with /{DOMAIN:pipeline} --batch {id}). See [[pipeline]] resumability section.
 - Common mistakes table with corrections
@@ -1588,7 +1516,7 @@ If git is already initialized (existing repo), skip `git init` and just commit t
 
 ### Kernel Validation
 
-Run all 15 primitive checks against the generated system. Use `${CLAUDE_PLUGIN_ROOT}/reference/validate-kernel.sh` if available. Otherwise manually verify:
+Run all 14 primitive checks against the generated system. Manually verify:
 
 1. **markdown-yaml** -- Every .md file has valid YAML frontmatter? (>95% threshold)
 2. **wiki-links** -- All wiki links resolve to existing files? (>90% threshold)
@@ -1601,9 +1529,8 @@ Run all 15 primitive checks against the generated system. Use `${CLAUDE_PLUGIN_R
 9. **self-space** -- self/ exists with identity.md, methodology.md, goals.md?
 10. **session-rhythm** -- Context file references ops/features/session-rhythm.md for orient/work/persist cycle?
 11. **discovery-first** -- Context file contains Discovery-First Design section, notes optimized for findability?
-12. **operational-learning-loop** -- ops/observations/ and ops/tensions/ exist, review trigger documented in context file, /{DOMAIN:rethink} command exists?
-13. **processing-queue** -- Queue file (ops/queue/queue.json) exists with schema_version >= 3? Context file references it in session-orient phase? Pipeline skills advance tasks through phase_order?
-14. **methodology-folder** -- ops/methodology/ exists with methodology.md MOC? At least one derivation-rationale note exists? Context file references ops/methodology/ for meta-skill context?
+12. **processing-queue** -- Queue file (ops/queue/queue.json) exists with schema_version >= 3? Context file references it in session-orient phase? Pipeline skills advance tasks through phase_order?
+13. **methodology-folder** (configurable) -- If ops/methodology/ exists, it contains methodology.md MOC and derivation-rationale.md?
 Report results: pass/fail per primitive with specific failures listed.
 
 ### Pipeline Smoke Test
@@ -1695,7 +1622,7 @@ Created:
   ops/methodology/       -- vault self-knowledge (query with /ask or browse directly)
   ops/config.yaml        -- edit this to adjust dimensions without re-running init
 
-Kernel Validation: [PASS count] / 15 passed
+Kernel Validation: [PASS count] / 14 passed
 [Any warnings to address]
 
 IMPORTANT: Restart Claude Code now to activate skills and hooks.

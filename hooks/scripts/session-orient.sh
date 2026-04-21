@@ -1,6 +1,6 @@
 #!/bin/bash
 # Ars Contexta — Session Orientation Hook
-# Injects workspace structure, identity, methodology, and maintenance signals at session start.
+# Injects workspace structure, identity, and inbox maintenance signals at session start.
 
 # Only run in Ars Contexta vaults
 GUARD_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -54,35 +54,9 @@ if [ -f self/identity.md ]; then
   echo ""
 fi
 
-# Learned behavioral patterns (recent methodology notes)
-for f in $(ls -t ops/methodology/*.md 2>/dev/null | head -5); do
-  head -3 "$f"
-done
-
 # Condition-based maintenance signals
-OBS_COUNT=$(ls -1 ops/observations/*.md 2>/dev/null | wc -l | tr -d ' ')
-TENS_COUNT=$(ls -1 ops/tensions/*.md 2>/dev/null | wc -l | tr -d ' ')
 INBOX_COUNT=$(ls -1 inbox/*.md 2>/dev/null | wc -l | tr -d ' ')
 
-if [ "$OBS_COUNT" -ge 10 ]; then
-  echo "CONDITION: $OBS_COUNT pending observations. Consider /rethink."
-fi
-if [ "$TENS_COUNT" -ge 5 ]; then
-  echo "CONDITION: $TENS_COUNT unresolved tensions. Consider /rethink."
-fi
 if [ "$INBOX_COUNT" -ge 3 ]; then
   echo "CONDITION: $INBOX_COUNT items in inbox. Consider /structure or /capture."
-fi
-
-# Methodology staleness check (Rule Zero)
-if [ -d ops/methodology ] && [ -f ops/config.yaml ]; then
-  CONFIG_MTIME=$(stat -f %m ops/config.yaml 2>/dev/null || stat -c %Y ops/config.yaml 2>/dev/null || echo 0)
-  NEWEST_METH=$(ls -t ops/methodology/*.md 2>/dev/null | head -1)
-  if [ -n "$NEWEST_METH" ]; then
-    METH_MTIME=$(stat -f %m "$NEWEST_METH" 2>/dev/null || stat -c %Y "$NEWEST_METH" 2>/dev/null || echo 0)
-    DAYS_STALE=$(( (CONFIG_MTIME - METH_MTIME) / 86400 ))
-    if [ "$DAYS_STALE" -ge 30 ]; then
-      echo "CONDITION: Methodology notes are ${DAYS_STALE}+ days behind config changes. Consider /rethink drift."
-    fi
-  fi
 fi

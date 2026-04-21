@@ -59,11 +59,10 @@ When generating a knowledge system for a specific domain, every universal term i
 | /reflect | /reflect | /find-patterns | /relate | /trace | /combine | /link | /recall |
 | /verify | /verify | /check-resonance | /test | /confirm | /evaluate | /review | /verify |
 | /reweave | /reweave | /revisit | /revise | /reconnect | /rework | /update | /revisit |
-| /remember | /remember | /note-friction | /flag | /flag | /flag | /flag | /remember |
 | /stats | /stats | /stats | /stats | /stats | /stats | /stats | /stats |
 | /graph | /graph | /graph | /graph | /graph | /graph | /graph | /graph |
 
-**Note:** /remember (formerly /friction) captures operational friction with automatic detection in session transcripts. /stats provides vault metrics and progress visualization. /graph enables graph query generation. These commands use universal names across all domains.
+**Note:** /stats provides vault metrics and progress visualization. /graph enables graph query generation. These commands use universal names across all domains.
 
 ---
 

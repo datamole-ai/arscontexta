@@ -6,67 +6,15 @@ Seven validation milestones for the Ars Contexta v1.6 plugin. Each milestone tes
 
 ## Milestone 1: Kernel Validation
 
-**What it tests:** A freshly generated vault contains all 14 universal primitives from kernel.yaml. This is the foundational check — if the kernel is missing primitives, nothing built on top of it will function correctly.
+**What it tests:** A freshly generated vault contains all 13 universal primitives from kernel.yaml. This is the foundational check — if the kernel is missing primitives, nothing built on top of it will function correctly.
 
 **Prerequisites:**
 - A generated vault from /setup (any domain, any preset)
 - The vault must have at least 3 notes created (to exercise link and MOC checks)
-- `validate-kernel.sh` accessible at `./reference/validate-kernel.sh`
 
-**Pass criteria:** 14/14 checks pass (PASS status). WARN is acceptable only for semantic search (primitive 8) when the `.mcp.json` qmd wiring is present but qmd itself is not yet installed on the user's machine. All other primitives — including self space and the presence of the qmd MCP wiring — must be PASS. A FAIL on semantic search means the wiring was never generated and must be fixed, not waived. A FAIL on self space means self/ is missing or empty and must be seeded.
+**Pass criteria:** All 13 primitives pass verification. WARN is acceptable only for semantic search (primitive 8) when the `.mcp.json` qmd wiring is present but qmd itself is not yet installed on the user's machine. All other primitives — including self space and the presence of the qmd MCP wiring — must pass. A fail on semantic search means the wiring was never generated and must be fixed, not waived. A fail on self space means self/ is missing or empty and must be seeded.
 
-**Verification steps:**
-
-```bash
-# Run kernel validation against the generated vault
-./reference/validate-kernel.sh /path/to/generated-vault
-
-# Expected: 14 PASS lines, 0 FAIL lines
-# Acceptable: 13 PASS + 1 WARN (semantic search when qmd executable is not installed but wiring is present)
-```
-
-**Expected output on success:**
-
-```
-=== Kernel Validation: /path/to/generated-vault ===
-
-1. Markdown files with YAML frontmatter
-  PASS N markdown files, all with YAML frontmatter
-2. Wiki links as graph edges
-  PASS N of N files contain wiki links
-3. MOC hierarchy for attention management
-  PASS N MOCs found
-4. Tree injection at session start
-  PASS Tree injection mechanism found
-5. Description field for progressive disclosure
-  PASS All N notes have description fields
-6. Topics footer linking notes to MOCs
-  PASS All N notes have topics
-7. Schema enforcement via validation
-  PASS Templates and validation mechanism found
-8. Semantic search capability
-  PASS Semantic search capability found
-9. Self space for agent persistent memory
-  PASS self/ with N files (identity, methodology, goals present)
-10. Session rhythm: orient, work, persist
-  PASS Session rhythm documented or automated
-10A. Unique addresses (wiki links as INVARIANT reference form)
-  PASS All internal references use wiki links, filenames are unique
-11. Discovery-first quality gate
-  PASS Discovery-first gate in context file and skills
-12. Operational learning loop
-  PASS Operational learning loop: observations, tensions, review trigger, rethink mechanism
-13. Processing queue for pipeline orchestration
-  PASS Processing queue found (ops/queue/queue.json or equivalent)
-14. Methodology folder for vault self-knowledge
-  PASS ops/methodology/ exists with linked notes
-=== Kernel Validation Summary ===
-  PASS: 14
-  WARN: 0
-  FAIL: 0
-
-All 14 primitives validated successfully.
-```
+**Verification:** Walk the 13-primitive list in `skills/setup/SKILL.md` (PHASE 6 → Kernel Validation) against the generated vault. The `/health` skill automates the subset related to ongoing vault state (schema compliance, orphan detection, link health, three-space boundaries).
 
 **Common failure modes and remediation:**
 
@@ -77,9 +25,7 @@ All 14 primitives validated successfully.
 | FAIL on primitive 9 (self space) | self/ directory not created | Check that /setup creates self/identity.md, self/methodology.md, self/goals.md — self space is INVARIANT |
 | WARN on primitive 7 (schema enforcement) | Templates exist but no validation script generated | Ensure /setup creates a validate.sh or validate skill |
 | WARN on primitive 11 (discovery-first) | Context file has discovery section but skills lack discovery checks | Add discovery-first check to generated skill templates |
-| FAIL on primitive 12 (learning loop) | Missing ops/observations/ or ops/tensions/ directories | Ensure /setup creates both directories and documents condition-based triggers in context file |
-| FAIL on primitive 13 (processing queue) | Missing ops/queue/queue.json | Ensure /setup creates ops/queue/ with queue file |
-| FAIL on primitive 14 (methodology folder) | Missing ops/methodology/ directory | Ensure /setup creates ops/methodology/ with linked notes |
+| FAIL on primitive 12 (processing queue) | Missing ops/queue/queue.json | Ensure /setup creates ops/queue/ with queue file |
 
 ---
 
@@ -178,9 +124,7 @@ echo "  (See Milestone 3 for full vocabulary validation)"
 | Failure | Cause | Fix |
 |---------|-------|-----|
 | Missing "Common Pitfalls" section | Feature block conditional logic skipped it | Check `generators/features/ethical-guardrails.md` — pitfalls are always-on |
-| Unresolved `{DOMAIN:rethink}` placeholder | Vocabulary transform missed skill names | Ensure skill name mapping from `vocabulary-transforms.md` is applied during generation |
 | "Self-Extension Blueprints" section references unavailable features | Blueprint selection not filtered by configuration | Filter blueprints by current configuration — disabled features should not appear in blueprints |
-| Missing "System Evolution" section | The section is generated by `self-evolution.md` feature block which is always-on but may have a generation bug | Verify the always-on feature blocks list includes `self-evolution` |
 
 ---
 
@@ -625,10 +569,9 @@ fi
 **Prerequisites:**
 - All 3 preset configurations available (Research, Personal Assistant, Experimental)
 - /setup wizard functional
-- validate-kernel.sh accessible
 
 **Pass criteria:** For each preset:
-1. Kernel validation passes (14/14, or 13/14 with WARN for semantic search if qmd executable is not installed but wiring is present)
+1. Kernel validation passes (13/13, or 12/13 with WARN for semantic search if qmd executable is not installed but wiring is present)
 2. Vocabulary is domain-native (zero cross-domain term leakage)
 3. Interaction constraints are satisfied (no hard constraint violations)
 4. Active feature blocks match the preset's `active_blocks` list (17 blocks available)
@@ -647,10 +590,10 @@ for PRESET in "${PRESETS[@]}"; do
     # Assume /setup was run with this preset, output in /tmp/test-$PRESET
     VAULT="/tmp/test-$PRESET"
 
-    # 1. Kernel validation
+    # 1. Kernel validation (see Milestone 1)
     echo ""
-    echo "--- Kernel Validation ---"
-    ./reference/validate-kernel.sh "$VAULT"
+    echo "--- Kernel Validation (manual) ---"
+    echo "  See Milestone 1 — walk the 14-primitive list against $VAULT"
     echo ""
 
     # 2. Vocabulary check (domain-specific terms)
@@ -745,10 +688,10 @@ done
 **Expected output on success:**
 
 Each preset should produce:
-- Kernel: 14/14 PASS, or 13/14 PASS + 1 WARN (semantic search if qmd executable is not installed but wiring is present)
+- Kernel: 13/13 PASS, or 12/13 PASS + 1 WARN (semantic search if qmd executable is not installed but wiring is present)
 - Vocabulary: domain-native terms present, zero cross-domain leakage
 - Constraints: all coherence checks PASS
-- Features: all active blocks (from 16 available) produce output in context file
+- Features: all active blocks (from 15 available) produce output in context file
 
 **Common failure modes and remediation:**
 
@@ -756,7 +699,6 @@ Each preset should produce:
 |---------|-------|-----|
 | Personal Assistant preset fails kernel on MOC hierarchy | Light-processing preset skipped MOC generation | Even light-processing systems need at least a hub MOC — enforce in /setup |
 | Experimental preset leaks "claim" into context file | Feature block `atomic-notes.md` uses "claim" generically | Parameterize all feature blocks with vocabulary variables |
-| Any preset missing ops/observations/ | Operational learning loop not generated | Learning loop is a kernel primitive — must be generated regardless of preset |
 | Any preset missing self/ | Self space not seeded | Self space is an invariant kernel primitive — /setup must create self/identity.md, self/methodology.md, self/goals.md for every preset |
 
 ---
@@ -770,7 +712,7 @@ Each preset should produce:
 # (assume /setup produces output in specified directories)
 
 # 2. Run milestones in order
-echo "=== Milestone 1: Kernel ===" && ./reference/validate-kernel.sh /tmp/test-research
+echo "=== Milestone 1: Kernel ===" # (manual — walk 14-primitive list from skills/setup/SKILL.md PHASE 6)
 echo "=== Milestone 2: Context ==="  # (run section checks manually or via script above)
 echo "=== Milestone 3: Vocabulary ===" # (run against therapy vault)
 echo "=== Milestone 4: Pipeline ===" # (requires active agent session)

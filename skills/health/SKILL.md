@@ -72,8 +72,6 @@ done
 - `description` field is non-empty (not just present)
 - `topics` field contains at least one wiki link
 
-**If `validate-kernel.sh` exists** in `${CLAUDE_PLUGIN_ROOT}/reference/`, run it and include results.
-
 **Thresholds:**
 
 | Condition | Level |
@@ -259,13 +257,13 @@ rg -i '(my methodology|I observed that|agent reflection|session learning|I learn
 
 #### 5c. Notes into Ops (Trapped Knowledge)
 
-Genuine insights trapped in session logs, observations, or ops files that should be promoted to {vocabulary.note_collection}/.
+Genuine insights trapped in session logs or ops files that should be promoted to {vocabulary.note_collection}/.
 
 **Detection:**
 ```bash
 # Check for claim-like content in ops that could be notes
-# Look for files with description fields in ops/observations/ or ops/methodology/
-rg '^description:' ops/observations/*.md ops/methodology/*.md 2>/dev/null
+# Look for files with description fields in ops/methodology/
+rg '^description:' ops/methodology/*.md 2>/dev/null
 ```
 
 | Found | Level |
@@ -324,7 +322,7 @@ fi
         - notes/task-tracking.md contains queue state fields (current_phase, batch)
         - Should be in ops/queue/ not notes/
     1 potential trapped knowledge:
-      - ops/observations/interesting-pattern.md has note-like schema
+      - ops/methodology/interesting-pattern.md has note-like schema
         Consider promoting to notes/ via /structure or direct creation
     Recommendation: move task-tracking.md to ops/queue/
 ```
@@ -489,8 +487,6 @@ After running all applicable diagnostic categories, check these condition-based 
 
 | Condition | Threshold | Recommendation |
 |-----------|-----------|---------------|
-| Pending observations | >= 10 files in ops/observations/ | Consider running /rethink |
-| Open tensions | >= 5 files in ops/tensions/ | Consider running /rethink |
 | Inbox items | >= 3 items | Consider /structure, /capture, or /pipeline |
 | Orphan notes | Any persistent (> 7d) | Run /reflect on orphaned notes |
 | Dangling links | Any | Fix broken references immediately |
@@ -502,12 +498,6 @@ After running all applicable diagnostic categories, check these condition-based 
 **How to check condition counts:**
 
 ```bash
-# Pending observations
-OBS_COUNT=$(find ops/observations/ -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
-
-# Open tensions
-TENSION_COUNT=$(find ops/tensions/ -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
-
 # Inbox items
 INBOX_COUNT=$(find {vocabulary.inbox}/ -name '*.md' -not -path '*/archive/*' 2>/dev/null | wc -l | tr -d ' ')
 
@@ -670,8 +660,6 @@ Health report findings feed into other skills:
 | Boundary violations | Manual restructuring | Move files to correct space |
 | Processing throughput | /structure, /capture, or /pipeline | Process inbox items to improve ratio |
 | {vocabulary.topic_map} oversized | Manual split or /architect | Split oversized {vocabulary.topic_maps} into sub-{vocabulary.topic_maps} |
-| Accumulated observations | /rethink | Review and triage observations |
-| Accumulated tensions | /rethink | Resolve or dissolve tensions |
 
 **The health-to-action loop:**
 ```

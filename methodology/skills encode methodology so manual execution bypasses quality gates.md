@@ -31,7 +31,7 @@ Relevant Notes:
 - [[processing effort should follow retrieval demand]] — explains why selectivity gates matter
 - [[fresh context per task preserves quality better than chaining phases]] — explains WHY phase boundaries matter: chaining phases degrades attention quality
 - [[complex systems evolve from simple working systems]] — skills exemplify Gall's Law: the quality gates in extraction or connection-finding couldn't have been designed upfront, they evolved through use
-- [[bootstrapping principle enables self-improving systems]] — skills are concrete instances of bootstrapping: each improvement becomes available for building the next, which is why quality gates emerged through recursive use
+- bootstrapping principle enables self-improving systems — skills are concrete instances of bootstrapping: each improvement becomes available for building the next, which is why quality gates emerged through recursive use
 - [[the generation effect requires active transformation not just storage]] — explains WHAT quality gates are: the generative operations (duplicate checking, extraction, reflection) that produce new artifacts
 - [[good descriptions layer heuristic then mechanism then implication]] — example of an encoded quality gate: extraction and retrieval testing can enforce the layering formula consistently, while manual description writing skips it
 - [[gardening cycle implements tend prune fertilize operations]] — tests whether maintenance skills should separate operations (tend/prune/fertilize) or combine them (backward maintenance); if validated, skill design shifts from one skill per workflow to one skill per cognitive operation

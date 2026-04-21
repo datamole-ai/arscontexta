@@ -5,7 +5,7 @@
 A Claude Code plugin that generates complete knowledge systems from conversation.
 You describe how you think and work. The engine derives a cognitive architecture
 -- folder structure, context files, processing pipeline, hooks, navigation maps,
-and note templates -- tailored to your domain and backed by 249 research claims.
+and note templates -- tailored to your domain and backed by 242 research claims.
 
 No templates. No configuration. Just conversation.
 
@@ -89,7 +89,7 @@ domain needs and why.
 | **Derivation** | Maps signals to eight configuration dimensions with confidence scoring |
 | **Proposal** | Shows what will be generated and why, in your vocabulary |
 | **Generation** | Produces all files: context file, folders, templates, skills, hooks, manual |
-| **Validation** | Checks all 14 kernel primitives, runs pipeline smoke test |
+| **Validation** | Checks all 13 kernel primitives, runs pipeline smoke test |
 
 The whole process takes about 20 minutes. It's token-intensive because the engine
 reads research claims, reasons about your domain, and generates substantial output.
@@ -150,20 +150,11 @@ or `decisions/`), but the separation is invariant.
 | `/stats` | Vault metrics |
 | `/graph` | Graph analysis |
 
-#### Meta-Cognitive
-
-| Command | What It Does |
-|---------|-------------|
-| `/rethink` | Challenge system assumptions |
-| `/remember` | Mine session learnings |
-| `/refactor` | Structural improvements |
-
 ---
 
 ## Processing Pipeline
 
-The vault implements the **6 Rs**, extending Cornell Note-Taking's 5 Rs with a
-meta-cognitive layer:
+The vault implements the **5 Rs**, mirroring Cornell Note-Taking's 5 Rs:
 
 | Phase | What Happens | Command |
 |-------|-------------|---------|
@@ -172,7 +163,6 @@ meta-cognitive layer:
 | **Reflect** | Find connections, update MOCs | `/reflect` |
 | **Reweave** | Update older notes with new context | `/reweave` |
 | **Verify** | Description + schema + health checks | `/verify` |
-| **Rethink** | Challenge system assumptions | `/rethink` |
 
 ---
 
@@ -186,7 +176,7 @@ meta-cognitive layer:
 
 ## The Research Graph
 
-The `methodology/` directory contains **249 interconnected research claims**
+The `methodology/` directory contains **242 interconnected research claims**
 about tools for thought, knowledge management, and agent-native cognitive
 architecture. These claims back every configuration decision.
 
@@ -256,25 +246,23 @@ arscontexta/
 |-- skills/                      # Plugin-level commands
 |   |-- setup/                   # Conversational onboarding
 |   +-- health/                  # Diagnostic checks
-|-- skill-sources/               # 16 generated command templates
-|   |-- reduce/                  # Extract insights
+|-- skill-sources/               # 10 generated command templates
+|   |-- structure/               # Extract insights
 |   |-- reflect/                 # Find connections
 |   |-- reweave/                 # Backward pass
 |   |-- verify/                  # Combined quality check
-|   +-- ...                      # 12 more processing commands
+|   +-- ...                      # 6 more processing commands
 |-- hooks/
 |   |-- hooks.json               # Hook configuration
 |   +-- scripts/                 # Hook implementations
 |-- generators/
 |   |-- claude-md.md             # CLAUDE.md template
-|   +-- features/                # 17 composable feature blocks
-|-- methodology/                 # 249 research claims
+|   +-- features/                # 14 composable feature blocks
+|-- methodology/                 # 242 research claims
 |-- reference/                   # Core reference documents
-|   |-- kernel.yaml              # 14 kernel primitives
+|   |-- kernel.yaml              # 13 kernel primitives
 |   |-- three-spaces.md          # Architecture spec
 |   +-- use-case-presets.md      # Pre-validated configs
-|-- presets/                     # Pre-validated configurations
-|-- scripts/                     # Utility scripts
 +-- README.md
 ```
 
@@ -303,7 +291,7 @@ Every time you make changes, re-install the plugin:
 
 ### Key Files for Contributors
 
-- `reference/kernel.yaml` -- 14 primitives every system must include
+- `reference/kernel.yaml` -- 13 primitives every system must include
 - `generators/features/*.md` -- composable feature blocks
 - `skill-sources/*/SKILL.md` -- generated command templates
 - `skills/setup/SKILL.md` -- the derivation engine

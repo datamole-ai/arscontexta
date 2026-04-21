@@ -263,21 +263,17 @@ Check MOC coverage:
 
 ---
 
-## Methodology Folder — Vault Self-Knowledge
+## Methodology Folder — Derivation Rationale Documentation
 
-**What:** ops/methodology/ contains linked notes explaining why the vault is configured the way it is, what processing pipeline it uses, and how it has evolved.
+**What:** ops/methodology/ holds a single derivation-rationale note explaining why the vault was configured the way it was. Optional documentation convention — no automation reads or writes it.
 
-**Why:** Without self-knowledge, meta-skills operate blind. /rethink cannot reason about changes. /remember has nowhere to capture corrections. The methodology folder is the vault's memory of its own design decisions.
+**Why:** A written derivation rationale lets future operators (human or agent) understand why the system was shaped this way. It is documentation, not a feedback loop.
 
 **How to implement:**
 - `ops/methodology/` directory with `methodology.md` MOC
-- Content types: derivation-rationale, kernel-state, pipeline-config, maintenance-conditions, vocabulary-map, configuration-state
-- At least one derivation-rationale note exists at generation time (capturing why the vault was configured this way)
-- Context file references ops/methodology/ for meta-skill context
-- `/remember` writes to ops/methodology/ when the agent captures operational corrections
-- Meta-skills (/rethink, /remember) read from it
+- `derivation-rationale.md` note at generation time (capturing why the vault was configured this way)
 
-**Quality gate:** Can the agent explain WHY the vault is configured the way it is? If it can answer "why do we use flat folders?" or "why did we pick this linking density?" by reading ops/methodology/, the self-knowledge layer is functional.
+**Quality gate:** Can the agent explain WHY the vault is configured the way it is by reading `ops/methodology/derivation-rationale.md`? If yes, the documentation layer is functional.
 
 ---
 

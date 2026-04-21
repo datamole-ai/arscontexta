@@ -54,7 +54,7 @@ But fallbacks matter precisely when primary systems fail. Since qmd has document
 
 ---
 
-Source: /rethink session (2026-02-08), promoted from [[description quality for humans diverges from description quality for keyword search]]
+Source: reflection session (2026-02-08), promoted from [[description quality for humans diverges from description quality for keyword search]]
 ---
 
 Relevant Notes:

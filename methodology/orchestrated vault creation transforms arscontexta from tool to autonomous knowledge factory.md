@@ -20,7 +20,7 @@ This product evolution has three stages.
 
 **Stage 3: Continuous learning** (future). The orchestrated vault doesn't stop after initial population. It continues researching, tracking new publications, updating its knowledge graph as the domain evolves. The output is a living knowledge system that stays current. Value: replaces a research assistant.
 
-The strategic insight is that since [[the derivation engine improves recursively as deployed systems generate observations]], orchestration at scale becomes a feedback accelerator. Each orchestrated vault generates operational observations about what works: which research seeds produce dense knowledge graphs, which configuration choices create friction in specific domains, which pipeline phases produce the most value. Ten orchestrated vaults generate ten times the operational observations that ten manual deployments would, because the orchestrator can systematically capture what worked and what didn't. This feedback loop improves derivation quality faster than organic adoption.
+The strategic insight is that since the derivation engine improves recursively as deployed systems generate observations, orchestration at scale becomes a feedback accelerator. Each orchestrated vault generates operational observations about what works: which research seeds produce dense knowledge graphs, which configuration choices create friction in specific domains, which pipeline phases produce the most value. Ten orchestrated vaults generate ten times the operational observations that ten manual deployments would, because the orchestrator can systematically capture what worked and what didn't. This feedback loop improves derivation quality faster than organic adoption.
 
 The technical architecture is intentionally simple. Since [[agent session boundaries create natural automation checkpoints that human-operated systems lack]], each `claude -p` call to the target vault is a natural checkpoint. The orchestrator can inspect the filesystem after each call, evaluate progress, and adjust strategy. No complex inter-process communication, no shared state beyond the filesystem. The target vault doesn't even know it's being orchestrated — it just processes whatever appears in its inbox, same as it would if a human were working it.
 
@@ -31,7 +31,7 @@ The competitive positioning is significant. Most AI knowledge tools offer one of
 
 Relevant Notes:
 - [[derivation generates knowledge systems from composable research claims not template customization]] — derivation is the structural layer; orchestration adds the content layer, completing the vision of principled knowledge system generation
-- [[the derivation engine improves recursively as deployed systems generate observations]] — orchestrated creation at scale becomes a feedback accelerator: 50 orchestrated vaults generate 50x the operational observations that manual deployments would
+- the derivation engine improves recursively as deployed systems generate observations — orchestrated creation at scale becomes a feedback accelerator: 50 orchestrated vaults generate 50x the operational observations that manual deployments would
 - [[goal-driven memory orchestration enables autonomous domain learning through directed compute allocation]] — the mechanism note; this note addresses the product and strategic implications
 - [[agent session boundaries create natural automation checkpoints that human-operated systems lack]] — session boundaries in the target vault become automation checkpoints the orchestrator can monitor and act on
 

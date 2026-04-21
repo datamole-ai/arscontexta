@@ -29,7 +29,7 @@ tags: [<free-form strings>]   # may be empty []
 | `created_at` | archive, staleness checks | temporal queries |
 | `tags` | users and agents alike | emergent attributes that have not been formalized |
 
-**There are no optional fields.** If a field is in the template, it is required. If it is not required, it does not belong in the template. Emergent attributes live in `tags` until they earn promotion to a field via `/refactor`.
+**There are no optional fields.** If a field is in the template, it is required. If it is not required, it does not belong in the template. Emergent attributes live in `tags` until they earn promotion to a field.
 
 ### The Escape Hatch
 
@@ -67,7 +67,7 @@ rg '\[\[specific-title\]\]' --glob '*.md'
 
 ### Schema Evolution
 
-The schema evolves through observation, not decree. When a tag recurs across enough {DOMAIN:notes} that a skill would benefit from reading it as a first-class field, promote it by editing the `_schema.required:` list in `ops/templates/note.md` directly, then add a matching entry in the Schema Decisions section of `ops/derivation.md` naming its reader, use, and day-one rationale. Dead fields can be demoted back to `tags` or removed entirely. (A future `/refactor` or `/grow` skill may automate this promotion; until then the edit is manual.)
+The schema evolves through observation, not decree. When a tag recurs across enough {DOMAIN:notes} that a skill would benefit from reading it as a first-class field, promote it by editing the `_schema.required:` list in `ops/templates/note.md` directly, then add a matching entry in the Schema Decisions section of `ops/derivation.md` naming its reader, use, and day-one rationale. Dead fields can be demoted back to `tags` or removed entirely.
 
 ### Validation
 
@@ -76,10 +76,3 @@ Enforcement is template-driven: skills that create {DOMAIN:notes} copy `ops/temp
 ### The `_schema` Block
 
 `ops/templates/note.md` contains the authoritative `_schema` block. Skills and hooks read it to check compliance. Every vault's `_schema` block contains the same six required fields plus whatever survived Filter A during setup.
-```
-
-## Dependencies
-None — this is foundational.
-
-## Domain Extensions
-The `content_type` enum values are vault-specific and derived during setup. Filter-A survivor fields are also vault-specific. See the `_schema:` block at the top of `ops/templates/note.md` for the exact schema.

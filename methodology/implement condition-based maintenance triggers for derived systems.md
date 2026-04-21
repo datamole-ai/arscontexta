@@ -89,7 +89,7 @@ Since [[confidence thresholds gate automated action between the mechanical and j
 
 ## The Reconciliation Pattern
 
-Since [[reconciliation loops that compare desired state to actual state enable drift correction without continuous monitoring]], the plugin's maintenance architecture inverts the traditional imperative model. Instead of reacting to events with "add this link" or "fix this schema," the system declares desired state and periodically measures divergence.
+Since reconciliation loops that compare desired state to actual state enable drift correction without continuous monitoring, the plugin's maintenance architecture inverts the traditional imperative model. Instead of reacting to events with "add this link" or "fix this schema," the system declares desired state and periodically measures divergence.
 
 **The reconciliation table:**
 
@@ -239,7 +239,7 @@ This guidance is grounded in:
 - [[three concurrent maintenance loops operate at different timescales to catch different classes of problems]] — loop architecture
 - [[automated detection is always safe because it only reads state while automated remediation risks content corruption]] — detection vs remediation
 - [[maintenance scheduling frequency should match consequence speed not detection capability]] — frequency calibration
-- [[reconciliation loops that compare desired state to actual state enable drift correction without continuous monitoring]] — reconciliation pattern
+- reconciliation loops that compare desired state to actual state enable drift correction without continuous monitoring — reconciliation pattern
 - [[idempotent maintenance operations are safe to automate because running them twice produces the same result as running them once]] — idempotency requirement
 - [[confidence thresholds gate automated action between the mechanical and judgment zones]] — gating automated remediation
 - [[structure without processing provides no value]] — why maintenance is non-optional

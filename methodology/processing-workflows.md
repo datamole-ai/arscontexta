@@ -19,7 +19,7 @@ The pipeline that transforms raw material into connected knowledge. Capture, red
 - [[attention residue may have a minimum granularity that cannot be subdivided]] -- Micro-interruptions as brief as 2.8 seconds double error rates, suggesting an irreducible attention quantum below which 
 - [[batching by context similarity reduces switching costs in agent processing]] -- Once you have fresh context per task, the next question is how to sequence work within a session — organizing by topic s
 - [[behavioral anti-patterns matter more than tool selection]] -- PKM failure research shows systems break through habits not software — the Collector's Fallacy, productivity porn, and u
-- [[bootstrapping principle enables self-improving systems]] -- Engelbart's insight that using current best tools to build better tools creates recursive improvement where each enhance
+- bootstrapping principle enables self-improving systems -- Engelbart's insight that using current best tools to build better tools creates recursive improvement where each enhance
 - [[capture the reaction to content not just the content itself]] -- Reactions seed synthesis while raw content only seeds reference — prompting "what is your reaction?" during capture crea
 - [[closure rituals create clean breaks that prevent attention residue bleed]] -- Explicitly marking tasks as complete signals the brain to release them from working memory — for agents this means writi
 - [[complex systems evolve from simple working systems]] -- Gall's Law — design from scratch fails because complexity requires evolutionary scaffolding that only working simplicity
@@ -31,7 +31,7 @@ The pipeline that transforms raw material into connected knowledge. Capture, red
 - [[generation effect gate blocks processing without transformation]] -- Before any note exits inbox, require at least one agent-generated artifact exists — a description, synthesis comment, or
 - [[hook composition creates emergent methodology from independent single-concern components]] -- Nine hooks across five events compose into quality pipelines, session bookends, and coordination awareness that no singl
 - [[hook enforcement guarantees quality while instruction enforcement merely suggests it]] -- Hooks fire automatically regardless of attention state so quality checks happen on every operation, while instructions d
-- [[hook-driven learning loops create self-improving methodology through observation accumulation]] -- Hooks enforce quality and nudge observation capture, observations accumulate until they trigger meta-cognitive review, r
+- hook-driven learning loops create self-improving methodology through observation accumulation -- Hooks enforce quality and nudge observation capture, observations accumulate until they trigger meta-cognitive review, r
 - [[hooks cannot replace genuine cognitive engagement yet more automation is always tempting]] -- The same mechanism that frees agents for substantive work -- delegating procedural checks to hooks -- could progressivel
 - [[incremental reading enables cross-source connection finding]] -- Interleaving extracts from multiple sources in a shared queue creates juxtaposition that surfaces relationships sequenti
 - [[insight accretion differs from productivity in knowledge systems]] -- Evergreen systems optimize for depth of understanding over efficiency of output, which means the vault exists for thinki

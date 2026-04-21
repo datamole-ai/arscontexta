@@ -149,34 +149,6 @@ primitives:
       check: "Generated context file contains Discovery-First Design section. Generated skills include discovery checks. PostToolUse validation hook exists."
     cognitive_grounding: "Discoverability compounds — the system's value grows through findability. Every note that can't be found is negative value."
 
-  - id: operational-learning-loop
-    name: Operational learning loop
-    description: "The system accumulates friction signals (observations, tensions) and periodically reviews them to evolve itself."
-    layer: convention
-    requires: schema-enforcement
-    enforcement: invariant
-    components:
-      observation-capture:
-        description: "After every significant action, the agent asks: what did I learn? Creates atomic note in ops/observations/ with prose-sentence title and structured YAML."
-        schema:
-          required: [description, category, observed, status]
-          category_values: [methodology, process, friction, surprise, quality]
-          status_values: [pending, promoted, implemented, archived]
-      tension-capture:
-        description: "When any skill discovers content that contradicts existing notes or system assumptions, IMMEDIATELY creates atomic note in ops/tensions/."
-        schema:
-          required: [description, observed, involves, status]
-          status_values: [pending, resolved, dissolved]
-      threshold-review:
-        description: "When pending observations exceed 10 or pending tensions exceed 5, session-start orient surfaces suggestion to run /{DOMAIN:rethink}."
-        thresholds:
-          observations: 10
-          tensions: 5
-    implementation: "PostToolUse hook logs friction automatically. Skill-integrated tension detection. /{DOMAIN:rethink} command with session-start threshold check."
-    validation:
-      check: "ops/observations/ and ops/tensions/ directories exist. Review trigger (threshold or condition) documented in context file. /{DOMAIN:rethink} command or equivalent exists."
-    cognitive_grounding: "Scientific method applied to knowledge systems — hypothesize, implement, observe, revise. Systems that cannot observe their own friction cannot evolve."
-
   - id: processing-queue
     name: Processing queue
     description: "The lifecycle backbone. Every note flows through phase states tracked in ops/queue/ — the unified queue holding pipeline tasks (claims, enrichments) and their phase progression (create, reflect, reweave, verify)."
@@ -189,13 +161,17 @@ primitives:
 
   - id: methodology-folder
     name: Methodology folder
-    description: "The vault's self-knowledge. ops/methodology/ contains linked notes explaining why the vault is configured the way it is, what processing pipeline it uses, and how it has evolved. Content types: derivation-rationale, kernel-state, pipeline-config, maintenance-conditions, vocabulary-map, configuration-state."
+    description: "Optional documentation convention. ops/methodology/ holds a single derivation-rationale note explaining why the vault was configured the way it was. No automation reads or writes it."
     layer: convention
-    requires: markdown-yaml, moc-hierarchy, operational-learning-loop
-    enforcement: invariant
+    requires: markdown-yaml, moc-hierarchy
+    enforcement: configurable
+    structure:
+      required:
+        - methodology.md
+        - derivation-rationale.md
     validation:
-      check: "ops/methodology/ directory exists with methodology.md MOC. At least one derivation-rationale note exists. Context file references ops/methodology/ for meta-skill context. /remember writes to ops/methodology/. Meta-skills read from it."
-    cognitive_grounding: "Without self-knowledge, meta-skills operate blind. /rethink cannot reason about changes. /remember has nowhere to capture corrections."
+      check: "If ops/methodology/ exists, methodology.md MOC and derivation-rationale.md exist inside."
+    cognitive_grounding: "A written derivation rationale lets future operators understand why the system was shaped this way. It is documentation, not a feedback loop."
 
 # Dependency graph (DAG):
 # markdown-yaml → description-field
@@ -208,12 +184,11 @@ primitives:
 # wiki-links + markdown-yaml → unique-addresses
 # description-field → discovery-first
 # topics-footer → discovery-first
-# schema-enforcement → operational-learning-loop
 # markdown-yaml + session-rhythm → processing-queue
-# markdown-yaml + moc-hierarchy + operational-learning-loop → methodology-folder
+# markdown-yaml + moc-hierarchy → methodology-folder
 # tree-injection (standalone)
 
 # Layer mapping:
 # foundation: markdown-yaml, wiki-links, unique-addresses
-# convention: moc-hierarchy, tree-injection, description-field, topics-footer, schema-enforcement, self-space, session-rhythm, semantic-search, discovery-first, operational-learning-loop, processing-queue, methodology-folder
+# convention: moc-hierarchy, tree-injection, description-field, topics-footer, schema-enforcement, self-space, session-rhythm, semantic-search, discovery-first, processing-queue, methodology-folder
 # automation: (none)

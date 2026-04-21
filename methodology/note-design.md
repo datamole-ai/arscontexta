@@ -25,7 +25,7 @@ How to design individual notes for maximum composability and retrieval quality. 
 - [[notes are skills — curated knowledge injected when relevant]] -- notes and skills follow the same pattern — highly curated knowledge that gets injected into context when relevant, refra
 - [[progressive schema validates only what active modules require not the full system schema]] -- Each module declares its required YAML fields and validation checks only active modules — otherwise disabling modules do
 - [[provenance tracks where beliefs come from]] -- agents should track not just what they believe but where beliefs originated — observed, prompted, or inherited — to cali
-- [[schema evolution follows observe-then-formalize not design-then-enforce]] -- Five signals (manual additions, placeholder stuffing, dead enums, patterned text, oversized MOCs) drive a quarterly prot
+- schema evolution follows observe-then-formalize not design-then-enforce -- Five signals (manual additions, placeholder stuffing, dead enums, patterned text, oversized MOCs) drive a quarterly prot
 - [[schema field names are the only domain specific element in the universal note pattern]] -- The five-component note architecture (prose-title, YAML frontmatter, body, wiki links, topics footer) is domain-invarian
 - [[schema fields should use domain-native vocabulary not abstract terminology]] -- When schema field names match how practitioners naturally think — "triggers" not "antecedent_conditions" — adoption succ
 - [[source attribution enables tracing claims to foundations]] -- Distinguishes original thinking from consumed ideas, creating a verification graph where any claim can follow its eviden

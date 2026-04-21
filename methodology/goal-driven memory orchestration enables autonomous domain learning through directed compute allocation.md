@@ -32,7 +32,7 @@ There is a deeper implication. If orchestration works, it means knowledge system
 Relevant Notes:
 - [[derivation generates knowledge systems from composable research claims not template customization]] — derivation creates the empty system; orchestration fills it with domain knowledge through directed research
 - [[fresh context per task preserves quality better than chaining phases]] — the orchestrator inherits the same isolation principle: each research cycle and pipeline invocation gets fresh context via claude -p
-- [[the derivation engine improves recursively as deployed systems generate observations]] — orchestrated vaults are mass-produced experiments: each generates observations that sharpen the derivation engine faster than manual deployments
+- the derivation engine improves recursively as deployed systems generate observations — orchestrated vaults are mass-produced experiments: each generates observations that sharpen the derivation engine faster than manual deployments
 - [[stigmergy coordinates agents through environmental traces without direct communication]] — the orchestrator and target vault coordinate through files on disk, not message passing: research results are written to inbox, pipeline state is read from queue files
 - [[external memory shapes cognition more than base model]] — economic justification: directed compute allocation to memory architecture is high-ROI because architecture determines what the domain agent retrieves and therefore thinks; the knowledge graph IS the cognitive upgrade, more impactful than model improvement
 

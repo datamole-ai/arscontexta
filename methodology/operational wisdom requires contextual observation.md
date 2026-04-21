@@ -21,13 +21,13 @@ For any context requiring tacit knowledge:
 
 This works for platforms (twitter, discord), communities (academics, practitioners), individuals (communication preferences), and domains (research norms, publishing conventions).
 
-The pattern has a direct parallel in how the vault evolves its own infrastructure. Since [[schema evolution follows observe-then-formalize not design-then-enforce]], schema fields crystallize through accumulated usage evidence rather than upfront specification. The same observe-then-formalize logic applies: you cannot predict which schema fields will earn their cost until the system is in use, just as you cannot predict which cultural norms matter until you have observed the community. Both resist premature formalization.
+The pattern has a direct parallel in how the vault evolves its own infrastructure. Since schema evolution follows observe-then-formalize not design-then-enforce, schema fields crystallize through accumulated usage evidence rather than upfront specification. The same observe-then-formalize logic applies: you cannot predict which schema fields will earn their cost until the system is in use, just as you cannot predict which cultural norms matter until you have observed the community. Both resist premature formalization.
 
 ## The Acquisition Mechanism
 
 How does tacit knowledge actually form? Since [[implicit knowledge emerges from traversal]], repeated exposure to the same paths builds intuitive understanding that bypasses explicit retrieval. An agent that has traversed twitter engagement patterns across many sessions develops a feel for what works — not through rules but through accumulated exposure. The observation log is the explicit complement to this implicit process: it captures what might otherwise remain unarticulated, making pattern-matching possible across sessions where implicit knowledge resets.
 
-The concrete mechanism for this in the vault is the hook-driven learning loop. Since [[hook-driven learning loops create self-improving methodology through observation accumulation]], hooks nudge the agent to capture observations at session boundaries, observations accumulate as atomic notes, and when enough accumulate the meta-cognitive layer (/rethink) pattern-matches across them to revise methodology. This is operational wisdom acquisition systematized: observe, accumulate, pattern-match, adapt.
+The concrete mechanism for this in the vault is periodic review of accumulated self/memory notes. Observations captured at session boundaries accumulate as atomic notes in self/memory/, and when enough accumulate the agent pattern-matches across them during reflection to revise methodology. This is operational wisdom acquisition systematized: observe, accumulate, pattern-match, adapt.
 
 ## Why This Matters for Agents
 
@@ -43,8 +43,7 @@ Relevant Notes:
 - [[external memory shapes cognition more than base model]] — retrieval includes cultural context, so the architecture that surfaces operational observations shapes what the agent can pattern-match on
 - [[the vault constitutes identity for agents]] — tacit knowledge is part of identity: an agent's accumulated operational wisdom distinguishes it from other instances with the same weights
 - [[agent self-memory should be architecturally separate from user knowledge systems]] — the architectural container: operational wisdom belongs in the agent's self-memory space, not mixed with domain research claims
-- [[hook-driven learning loops create self-improving methodology through observation accumulation]] — the implementation mechanism: hooks nudge observation capture, observations accumulate, and pattern-matching across accumulated observations drives methodology revision
-- [[schema evolution follows observe-then-formalize not design-then-enforce]] — parallel pattern: schema fields crystallize through accumulated usage evidence rather than upfront design, applying the same observe-then-formalize logic to data structures
+- schema evolution follows observe-then-formalize not design-then-enforce — parallel pattern: schema fields crystallize through accumulated usage evidence rather than upfront design, applying the same observe-then-formalize logic to data structures
 - [[provenance tracks where beliefs come from]] — epistemic calibration: knowing whether operational wisdom was observed firsthand versus inherited from prompts determines how much to trust it
 
 Topics:

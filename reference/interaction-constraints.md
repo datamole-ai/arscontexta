@@ -37,12 +37,9 @@ _No soft constraints currently apply to the linking dimension — semantic searc
 
 ### Kernel Primitive Constraints
 
-These constraints apply to the 14 kernel primitives and their INVARIANT/CONFIGURABLE status:
+These constraints apply to the 13 kernel primitives and their INVARIANT/CONFIGURABLE status:
 
 **INVARIANT primitives (always present, cannot be disabled):**
-
-1. `methodology_folder == false` (Primitive 14)
-   → BLOCK: "The methodology folder is INVARIANT. Meta-skills (/rethink, /remember) require ops/methodology/ to reason about system state."
 
 3. `schema_enforcement == false` (Primitive 7)
    → BLOCK: "Schema enforcement is INVARIANT. Without validation, metadata drift corrupts retrieval within weeks."

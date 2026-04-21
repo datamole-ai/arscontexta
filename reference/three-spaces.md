@@ -114,7 +114,6 @@ These hold across all generated systems:
 | `reminders.md` | User-delegated time-bound actions — flat markdown, checked at orient, items removed on completion | Active rotation — items added and removed regularly |
 | `sessions/` | Session logs — what happened today, handoff notes for next session | Rolling archive — logs older than 30 days can be archived without knowledge loss |
 | `health/` | Schema validation results, orphan lists, link health metrics — point-in-time snapshots | Superseding — yesterday's report is superseded by today's |
-| `observations/` | Operational learnings captured during work — pre-promotion holding area | Graduating — observations get promoted to notes/ or self/ when they earn permanence |
 | `queue/` | Processing queue state — what needs extraction, connection, verification | Flowing — items move through and complete |
 
 ### Reminders Specification
@@ -139,16 +138,16 @@ These hold across all generated systems:
 **Content moves from temporal to durable, never the reverse.** Promotion is one-directional:
 
 ```
-ops/observations/ -> notes/ (when observation proves durable)
-ops/observations/ -> self/methodology.md (when observation is about agent operation)
+ops/sessions/ -> notes/ (when a session insight proves durable)
+ops/sessions/ -> self/methodology.md (when a session insight is about agent operation)
 ```
 
 Content never moves FROM notes/ or self/ INTO ops/. Durable knowledge doesn't become temporal scaffolding.
 
 ### The Promotion Pattern
 
-1. Content enters ops/ at low ceremony (friction logs, session notes, queue entries)
-2. When it demonstrates persistence — same observation recurs, insight proves useful across sessions, pattern is confirmed — it gets promoted
+1. Content enters ops/ at low ceremony (session notes, queue entries, health reports)
+2. When it demonstrates persistence — an insight proves useful across sessions, a pattern is confirmed — it gets promoted
 3. Promotion means creating a proper note in notes/ or adding to self/, not moving the ops entry
 4. The ops entry can then be archived, its value extracted
 
@@ -241,7 +240,6 @@ project-root/
     ├── reminders.md
     ├── sessions/
     ├── health/
-    ├── observations/
     └── queue/
 ```
 
@@ -310,7 +308,6 @@ Is this about the agent itself?
 | "I work best when..." | self/methodology.md | Agent operational learning |
 | "The user prefers..." | self/relationships.md | Agent knowledge about user |
 | "Spaced repetition helps memory" | notes/ | Domain knowledge |
-| "The reduce skill over-extracts" | ops/observations/ | Operational friction (may promote) |
 | "Queue has 12 items" | ops/queue/ | Temporal coordination state |
 | "Schema validation passed" | ops/health/ | Point-in-time diagnostic |
 | "My goal this quarter is..." | self/goals.md | Agent orientation |
@@ -322,4 +319,4 @@ Is this about the agent itself?
 
 - **Failure modes that afflict each space:** See `failure-modes.md` for the full failure mode taxonomy. Conflation failures (this document) are structural; failure-modes.md covers operational decay (collector's fallacy, orphan drift, schema erosion).
 - **What goes in each space per domain:** See `use-case-presets.md` for domain-specific routing decisions (therapy reflections vs research claims vs PM decisions).
-- **Kernel primitives that depend on three-space separation:** `self-space`, `session-rhythm`, `discovery-first`, and `methodology-folder` all assume clean space boundaries. See `kernel.yaml`.
+- **Kernel primitives that depend on three-space separation:** `self-space`, `session-rhythm`, and `discovery-first` all assume clean space boundaries. See `kernel.yaml`.

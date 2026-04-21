@@ -138,7 +138,6 @@ Since [[maintenance operations are more universal than creative pipelines becaus
 | Stale note detected | No updates in 30+ days while topic is active | Flag for reweaving |
 | Schema drift detected | Missing required fields accumulate | Batch validation pass |
 | Processing backlog | Inbox grows beyond threshold | Alert user or trigger processing |
-| Tension accumulation | 5+ unresolved tensions | Trigger rethink pass |
 
 ### 4. Progressive Disclosure
 

@@ -10,6 +10,8 @@ How knowledge systems die. The init wizard uses this to include domain-specific 
 
 **What:** Accumulating without processing. Inbox grows indefinitely, nothing gets synthesized.
 
+**one_line_rule:** Process before capturing more when the inbox exceeds ~20 items.
+
 **Why it happens:** Capture is easy and feels productive. Processing is hard and feels slow. The gap widens until the inbox becomes psychologically overwhelming.
 
 **Vulnerable domains:** All (universal). Especially dangerous for Research and Learning where source material is abundant.
@@ -27,6 +29,8 @@ How knowledge systems die. The init wizard uses this to include domain-specific 
 ### 2. Orphan Drift
 
 **What:** Notes created but never connected to the graph. The system fragments into disconnected islands.
+
+**one_line_rule:** Every new note joins at least one MOC and earns at least one incoming link before you move on.
 
 **Why it happens:** Creation feels complete without connection. The reflect phase gets skipped "just this once" which becomes always.
 
@@ -46,6 +50,8 @@ How knowledge systems die. The init wizard uses this to include domain-specific 
 
 **What:** Wiki-links pointing to notes that were renamed or deleted. The graph develops dead ends.
 
+**one_line_rule:** Never delete — archive; update all incoming links in the same commit as any rename.
+
 **Why it happens:** Manual renames don't update references. Archiving notes breaks incoming links.
 
 **Vulnerable domains:** All systems with heavy linking. Worse at scale.
@@ -63,6 +69,8 @@ How knowledge systems die. The init wizard uses this to include domain-specific 
 ### 4. Schema Erosion
 
 **What:** YAML fields inconsistently used, enum values drift from template, validation ignored.
+
+**one_line_rule:** Treat the template as the only schema; remove fields nobody queries rather than filling them reluctantly.
 
 **Why it happens:** Schemas add friction at capture time. Without enforcement, the path of least resistance is skipping fields.
 
@@ -82,6 +90,8 @@ How knowledge systems die. The init wizard uses this to include domain-specific 
 
 **What:** Too many MOCs created, none properly maintained. Navigation overhead exceeds navigation value.
 
+**one_line_rule:** Create a MOC only at 20+ related notes; merge any MOC back when it drops below 10.
+
 **Why it happens:** Creating a MOC feels like organizing. But an unmaintained MOC is worse than no MOC — it provides false confidence about topic coverage.
 
 **Vulnerable domains:** Research, Creative — domains where topics proliferate.
@@ -99,6 +109,8 @@ How knowledge systems die. The init wizard uses this to include domain-specific 
 ### 6. Verbatim Risk
 
 **What:** Copying content instead of transforming it. Storage without the generation effect.
+
+**one_line_rule:** Transform, don't copy — every note must pass "This note argues that [title]" before it is saved.
 
 **Why it happens:** Copy-paste is faster than reformulation. The agent (or human) takes the shortcut, producing notes that are summaries rather than claims.
 
@@ -118,6 +130,8 @@ How knowledge systems die. The init wizard uses this to include domain-specific 
 
 **What:** Delegating judgment entirely to the system until the human can no longer evaluate quality.
 
+**one_line_rule:** Propose system changes, never auto-execute them; keep human review checkpoints in the pipeline.
+
 **Why it happens:** The system gets good enough that the human stops checking. Quality drifts without the human noticing.
 
 **Vulnerable domains:** Research (unchecked claims compound), Therapy (pattern detection without human validation).
@@ -135,6 +149,8 @@ How knowledge systems die. The init wizard uses this to include domain-specific 
 ### 8. Over-Automation
 
 **What:** Hooks encoding judgment rather than verification, corrupting quality silently.
+
+**one_line_rule:** Hooks verify, skills judge — automation should fail loudly rather than fix silently.
 
 **Why it happens:** Automation feels like progress. The boundary between "check if description exists" (verification) and "write a good description" (judgment) blurs.
 
@@ -154,6 +170,8 @@ How knowledge systems die. The init wizard uses this to include domain-specific 
 
 **What:** Building the system instead of using it. Meta-work displaces the actual knowledge work.
 
+**one_line_rule:** Time-box system tinkering under 20% of work; notes created must outnumber template edits.
+
 **Why it happens:** System design is interesting and feels productive. The actual work (processing, connecting, synthesizing) is harder and less visible.
 
 **Vulnerable domains:** All (universal). Especially dangerous for system builders and meta-researchers.
@@ -171,6 +189,8 @@ How knowledge systems die. The init wizard uses this to include domain-specific 
 ### 10. Temporal Staleness
 
 **What:** Content becomes outdated but isn't flagged. Old notes presented as current.
+
+**one_line_rule:** Flag or refresh notes older than your domain's staleness threshold before citing them.
 
 **Why it happens:** Knowledge systems don't inherently track temporal validity. A note written 6 months ago appears identical to one written yesterday.
 

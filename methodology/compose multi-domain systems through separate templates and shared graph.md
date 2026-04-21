@@ -359,7 +359,7 @@ This guidance is grounded in:
 - [[cross-links between MOC territories indicate creative leaps and integration depth]] — cross-domain links as the primary value signal of composition
 - [[false universalism applies same processing logic regardless of domain]] — why Rule 4 (domain-specific processing) is necessary
 - [[friction-driven module adoption prevents configuration debt by adding complexity only at pain points]] — why add-domain is incremental, not upfront
-- [[schema evolution follows observe-then-formalize not design-then-enforce]] — domain-specific fields emerge from use, not from upfront design
+- schema evolution follows observe-then-formalize not design-then-enforce — domain-specific fields emerge from use, not from upfront design
 
 ---
 

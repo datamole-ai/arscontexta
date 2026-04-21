@@ -97,13 +97,13 @@ Questions the engine must answer when generating the self/ space:
 
 ---
 
-#### Self-evolution guardrails prevent identity drift without stifling growth
+#### Identity guardrails prevent drift without stifling growth
 
-**Summary:** Identity should evolve — the agent learns about itself over time and its self-knowledge should reflect that learning. But unguarded evolution risks identity drift: gradual changes that individually seem reasonable but cumulatively transform the agent into something unrecognizable. Guardrails prevent this: personality dimensions are explicit constraints (recorded in derivation.md), core values are stable anchors in identity.md, and methodology.md changes should be captured as observations before being implemented. The pattern is: observe -> propose -> approve (human) -> implement. Never auto-modify identity.
+**Summary:** Identity should evolve — the agent learns about itself over time and its self-knowledge should reflect that learning. But unguarded evolution risks identity drift: gradual changes that individually seem reasonable but cumulatively transform the agent into something unrecognizable. Guardrails prevent this: personality dimensions are explicit constraints (recorded in derivation.md), core values are stable anchors in identity.md, and methodology.md changes should be proposed before being implemented. The pattern is: propose -> approve (human) -> implement. Never auto-modify identity.
 
-**Derivation Implication:** Generated context files should include identity evolution guidance: "You can add to your self-knowledge (new memories, updated goals) but do not unilaterally change your identity or methodology. If you discover something about yourself that feels like an identity change, propose it rather than implementing it." This mirrors the vault's /rethink pattern: propose changes with evidence, never auto-implement.
+**Derivation Implication:** Generated context files should include identity evolution guidance: "You can add to your self-knowledge (new memories, updated goals) but do not unilaterally change your identity or methodology. If you discover something about yourself that feels like an identity change, propose it rather than implementing it."
 
-**Source:** Vault /rethink skill pattern. Research claim: "cognitive outsourcing risk in agent-operated systems" — if the agent evolves its own identity without human oversight, the user loses the ability to validate the evolution.
+**Source:** Research claim: "cognitive outsourcing risk in agent-operated systems" — if the agent evolves its own identity without human oversight, the user loses the ability to validate the evolution.
 
 ---
 
@@ -181,7 +181,7 @@ Questions the engine must answer when generating the self/ space:
 
 **Derivation Implication:** At generation time, identity.md starts thin — personality prose, basic capability description, domain approach. The context file should instruct the agent to accumulate operational wisdom in identity.md over time: "When you learn something important about how you work, add it to identity.md. This is how your identity grows — not through personality changes, but through deepening self-knowledge."
 
-**Source:** Vault self/identity.md. Over time, identity.md accumulates operational observations that were first captured in ops/observations/ and then promoted to self/ after proving durable.
+**Source:** Vault self/identity.md. Over time, identity.md accumulates operational observations that were first captured in self/journal/ or self/sessions/ and then promoted to self/ after proving durable.
 
 ---
 

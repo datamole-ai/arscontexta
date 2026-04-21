@@ -79,13 +79,13 @@ Since [[schema fields should use domain-native vocabulary not abstract terminolo
 
 ## The Observe-Then-Formalize Lifecycle
 
-Since [[schema evolution follows observe-then-formalize not design-then-enforce]], the plugin never designs a 15-field schema on day one. Every field starts its life as an observation, graduates to a convention, and is formalized as schema.
+Since schema evolution follows observe-then-formalize not design-then-enforce, the plugin never designs a 15-field schema on day one. Every field starts its life as an observation, graduates to a convention, and is formalized as schema.
 
 ### The Lifecycle Stages
 
 **Stage 1: Minimal seed.** The plugin generates a starting schema with 2-3 required fields (always `description` and `topics`, plus one domain-critical field). Everything else is optional or absent. The schema is deliberately incomplete — it captures just enough to make the vault queryable, not enough to be burdensome.
 
-**Stage 2: Observation.** As the user works, the agent notices patterns: fields being added manually, fields being stuffed with "N/A," free-text fields developing internal structure. These observations accumulate as evidence for schema change. Since [[hook-driven learning loops create self-improving methodology through observation accumulation]], the observation mechanism already exists — schema evolution piggybacks on the general learning loop.
+**Stage 2: Observation.** As the user works, the agent notices patterns: fields being added manually, fields being stuffed with "N/A," free-text fields developing internal structure. These observations accumulate as evidence for schema change. Since hook-driven learning loops create self-improving methodology through observation accumulation, the observation mechanism already exists — schema evolution piggybacks on the general learning loop.
 
 **Stage 3: Convention.** When an observation recurs 5+ times, it becomes a convention — documented in the context file as guidance but not yet enforced. "We tend to track triggers on therapy reflections" is a convention. It guides behavior without blocking it.
 
@@ -95,7 +95,7 @@ This lifecycle mirrors since [[methodology development should follow the traject
 
 ## The Five Evolution Signals
 
-Since [[evolution observations provide actionable signals for system adaptation]], the quarterly review protocol uses five diagnostic signals to identify schema that needs to change. These signals are the concrete mechanism for the observe-then-formalize lifecycle:
+Since evolution observations provide actionable signals for system adaptation, the quarterly review protocol uses five diagnostic signals to identify schema that needs to change. These signals are the concrete mechanism for the observe-then-formalize lifecycle:
 
 ### 1. Manual Additions
 
@@ -167,7 +167,7 @@ When generating a new vault, the plugin:
 When a user adds a new note type:
 1. The plugin proposes a schema based on similar domains (since [[novel domains derive by mapping knowledge type to closest reference domain then adapting]])
 2. Critical fields are identified by asking: "What will you query this note type for?"
-3. The schema starts minimal and grows — since [[schema evolution follows observe-then-formalize not design-then-enforce]]
+3. The schema starts minimal and grows — since schema evolution follows observe-then-formalize not design-then-enforce
 
 ### For /recommend (Maintenance)
 
@@ -204,10 +204,10 @@ This guidance is grounded in:
 - [[schema validation hooks externalize inhibitory control that degrades under cognitive load]] — why enforcement must be externalized, not instructed
 - [[schema fields should use domain-native vocabulary not abstract terminology]] — why enforcement must respect domain language
 - [[progressive schema validates only what active modules require not the full system schema]] — module-aware enforcement
-- [[schema evolution follows observe-then-formalize not design-then-enforce]] — enforcement generates the observation data for evolution
+- schema evolution follows observe-then-formalize not design-then-enforce — enforcement generates the observation data for evolution
 - [[nudge theory explains graduated hook enforcement as choice architecture for agents]] — theoretical basis for graduated enforcement
 - [[schema templates reduce cognitive overhead at capture time]] — templates as the capture-side of enforcement
-- [[evolution observations provide actionable signals for system adaptation]] — the five signals that drive schema evolution
+- evolution observations provide actionable signals for system adaptation — the five signals that drive schema evolution
 - [[generation effect gate blocks processing without transformation]] — pipeline boundary enforcement as a quality gate
 
 ---

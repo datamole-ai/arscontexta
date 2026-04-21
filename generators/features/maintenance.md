@@ -74,8 +74,6 @@ Maintenance triggers are condition-based, not time-based. Time-based triggers (w
 | Orphan {DOMAIN:notes} | Any detected | Surface for connection-finding |
 | Dangling links | Any detected | Surface for resolution |
 | {DOMAIN:Topic map} size | >40 {DOMAIN:notes} | Suggest sub-{DOMAIN:topic map} split |
-| Pending observations | >=10 | Suggest /{DOMAIN:rethink} |
-| Pending tensions | >=5 | Suggest /{DOMAIN:rethink} |
 | Inbox pressure | Items older than 3 days | Suggest processing |
 | Stale pipeline batch | >2 sessions without progress | Surface as blocked |
 | Schema violations | Any detected | Surface for correction |
@@ -119,14 +117,12 @@ The key insight: you don't manage maintenance task status manually. Fix the unde
 | Inbox pressure | Is {DOMAIN:inbox/} accumulating unprocessed material? |
 | Orphan {DOMAIN:notes} | Are there {DOMAIN:notes} with no incoming links? |
 | Dangling links | Do wiki links point to non-existent {DOMAIN:notes}? |
-| Observation accumulation | Have pending observations exceeded the threshold (10+)? |
-| Tension accumulation | Have pending tensions exceeded the threshold (5+)? |
 | {DOMAIN:Topic map} size | Has any {DOMAIN:topic map} grown beyond its healthy range? |
 | Stale batches | Are there processing batches that have been sitting unfinished? |
 | Schema compliance | Do all {DOMAIN:notes} pass schema validation? |
 | Three-space boundaries | Is content leaking across self/, {DOMAIN:note_collection}/, and ops/? |
 
-Each invariant is self-healing: fix the underlying issue (process the inbox, connect the orphan, resolve the tension) and the next /health run reports PASS.
+Each invariant is self-healing: fix the underlying issue (process the inbox, connect the orphan, correct the schema violation) and the next /health run reports PASS.
 
 ### Impact-Ranked Recommendations
 
@@ -139,9 +135,6 @@ Each invariant is self-healing: fix the underlying issue (process the inbox, con
 | Medium | Description quality, stale notes | Retrieval quality — degraded but not broken |
 | Low | {DOMAIN:Topic map} size warnings, throughput ratio | Maintenance debt — matters at scale |
 
-### Integration with /{DOMAIN:rethink}
-
-When /health detects signal accumulation (10+ pending observations OR 5+ pending tensions), it recommends /{DOMAIN:rethink}. This closes the loop: maintenance detects that the system has accumulated enough operational evidence to warrant a meta-cognitive pass. You review the evidence, promote insights, implement changes, and the system evolves. Maintenance feeds evolution, evolution improves maintenance.
 ```
 
 ## Dependencies

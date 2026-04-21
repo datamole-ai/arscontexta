@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-**Ars Contexta** — Claude Code plugin. Conversational derivation engine: a conversation about how the user works produces a bespoke knowledge system (folders, notes, processing skills, hooks, manual) backed by 249 wiki-linked research claims. **This repo is the engine, not a vault** — do not scaffold one here. `README.md` has the product pitch; this file navigates the code.
+**Ars Contexta** — Claude Code plugin. Conversational derivation engine: a conversation about how the user works produces a bespoke knowledge system (folders, notes, processing skills, hooks, manual) backed by 242 wiki-linked research claims. **This repo is the engine, not a vault** — do not scaffold one here. `README.md` has the product pitch; this file navigates the code.
 
 ## Quick Map
 
@@ -9,9 +9,11 @@
 | Derivation engine (onboarding → generation) | `skills/setup/SKILL.md` |
 | Diagnostic command | `skills/health/SKILL.md` |
 | Processing command templates (copied into generated vaults) | `skill-sources/<name>/SKILL.md` |
-| Generated CLAUDE.md composition | `generators/claude-md.md` + `generators/features/*.md` |
-| Architectural invariants (14 primitives) | `reference/kernel.yaml` |
-| Research graph (249 claims) | `methodology/*.md` — indexed via `reference/claim-map.md` |
+| Generated CLAUDE.md composition | `generators/claude-md.md`  |
+| Generated `/ask` skill | `generators/ask-router.md`  |
+| Feature reference generation | `generators/features/*.md` → `ops/features/*.md` |
+| Architectural invariants (13 primitives) | `reference/kernel.yaml` |
+| Research graph (242 claims) | `methodology/*.md` — indexed via `reference/claim-map.md` |
 | Hook behavior | `hooks/hooks.json` + `hooks/scripts/*.sh` |
 | Plugin manifest / version | `.claude-plugin/plugin.json` |
 | Author scratchpad | `todo.md` |
@@ -21,20 +23,20 @@
 ```
 .claude-plugin/   plugin.json, marketplace.json      plugin registration
 skills/           setup/, health/                    plugin-level commands (user-invoked)
-skill-sources/    15 command templates               copied into generated vaults
-generators/       claude-md.md + features/ (16)      composed into generated CLAUDE.md
+skill-sources/    10 command templates               copied into generated vaults
+generators/       claude-md.md + features/ (14)      composed into generated CLAUDE.md
 hooks/            hooks.json, scripts/*.sh           SessionStart + PostToolUse(Write)
-methodology/      249 claim notes                    wiki-linked research graph
+methodology/      wiki-linked research graph
 reference/        canonical design docs              see index below
 docs/             superpowers/{plans,specs}          design specs
 ```
 
 ## Core Concepts
 
-1. **Kernel** — 14 invariant primitives every generated vault must satisfy. `reference/kernel.yaml` + `reference/validate-kernel.sh`.
+1. **Kernel** — 13 invariant primitives every generated vault must satisfy. `reference/kernel.yaml`.
 2. **Three-space architecture** — `self/` (agent mind) · `notes/` (knowledge graph) · `ops/` (coordination). Names adapt per domain; separation is invariant. `reference/three-spaces.md`.
 3. **Derivation, not templating** — engine reasons from claims to architecture. Every dimension choice traces to research. `reference/dimension-claim-map.md`.
-4. **6 Rs pipeline** — Record, Reduce, Reflect, Reweave, Verify, Rethink. One skill per R.
+4. **5 Rs pipeline** — Record, Reduce, Reflect, Reweave, Verify. One skill per R.
 5. **Vocabulary transforms** — universal terms → domain-native. `reference/vocabulary-transforms.md`.
 
 ## skill-sources/ by Pipeline Phase
@@ -46,7 +48,6 @@ docs/             superpowers/{plans,specs}          design specs
 | Reflect | `reflect/` |
 | Reweave | `reweave/` |
 | Verify | `verify/` |
-| Meta | `rethink/`, `remember/`, `refactor/` |
 | Orchestration | `pipeline/` |
 | Reporting | `stats/`, `graph/`, `archive-batch/` |
 
@@ -56,7 +57,7 @@ Each `SKILL.md` uses `{DOMAIN:…}` placeholders that the derivation engine rewr
 
 | File | Content |
 |---|---|
-| `kernel.yaml` | 14 invariants |
+| `kernel.yaml` | 13 invariants |
 | `three-spaces.md` | self/notes/ops architecture |
 | `components.md` | per-component build blueprints |
 | `methodology.md` | portable TFT research distillation |
@@ -69,19 +70,17 @@ Each `SKILL.md` uses `{DOMAIN:…}` placeholders that the derivation engine rewr
 | `conversation-patterns.md` | worked derivation examples |
 | `failure-modes.md` | how vaults die (warnings injected into vaults) |
 | `session-lifecycle.md` | orient / work / persist spec |
-| `evolution-lifecycle.md` | post-scaffold growth patterns |
 | `self-space.md` | agent-identity generation guide |
 | `semantic-vs-keyword.md` | search modality selection |
 | `derivation-validation.md` | 9 coherence tests |
 | `testing-milestones.md` | 7 validation layers |
 | `templates/` | `moc.md`, `note.md`, `session-log.md` |
-| `validate-kernel.sh` | kernel conformance checker |
 
 ## generators/features/ (composable CLAUDE.md blocks)
 
 One file per feature; `skills/setup/` enables a subset based on derived config:
 
-`ethical-guardrails`, `graph-analysis`, `helper-functions`, `maintenance`, `methodology-knowledge`, `mocs`, `multi-domain`, `note-granularity`, `processing-pipeline`, `schema`, `self-evolution`, `self-space`, `semantic-search`, `session-rhythm`, `templates`, `wiki-links`.
+`ethical-guardrails`, `graph-analysis`, `helper-functions`, `maintenance`, `mocs`, `multi-domain`, `note-granularity`, `processing-pipeline`, `schema`, `self-space`, `semantic-search`, `session-rhythm`, `templates`, `wiki-links`.
 
 ## Hooks
 

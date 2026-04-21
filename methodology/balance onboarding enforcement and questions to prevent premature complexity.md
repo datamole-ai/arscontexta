@@ -102,7 +102,7 @@ Immediate use prevents the "I set it up but never used it" failure mode. Since [
 | Common Question | Why Skip It | What to Do Instead |
 |----------------|------------|---------------------|
 | "How many MOC levels?" | Users can't predict this | Start with 1-2 levels, grow organically |
-| "What schema fields do you want?" | Users don't know yet | Start with domain defaults, evolve per [[schema evolution follows observe-then-formalize not design-then-enforce]] |
+| "What schema fields do you want?" | Users don't know yet | Start with domain defaults, evolve per schema evolution follows observe-then-formalize not design-then-enforce |
 | "How should notes connect?" | Abstract question with no good answer | Show connection types through example |
 | "What maintenance schedule?" | Since [[maintenance scheduling frequency should match consequence speed not detection capability]] | Set condition-based defaults |
 | "What processing model?" | Meaningless to non-technical users | Derive from domain + goal |
@@ -215,7 +215,7 @@ This guidance is grounded in:
 - [[configuration paralysis emerges when derivation surfaces too many decisions]] — minimize questions
 - [[use-case presets dissolve the tension between composability and simplicity]] — presets as simplification
 - [[derived systems follow a seed-evolve-reseed lifecycle]] — /setup is seed, not final state
-- [[schema evolution follows observe-then-formalize not design-then-enforce]] — schemas grow from use
+- schema evolution follows observe-then-formalize not design-then-enforce — schemas grow from use
 - [[progressive schema validates only what active modules require not the full system schema]] — schema tracks feature activation
 
 ---

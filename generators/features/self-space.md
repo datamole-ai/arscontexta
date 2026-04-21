@@ -43,6 +43,7 @@ The self space connects directly to the session rhythm:
 
 Add these when friction signals the need — not preemptively:
 
+- **sessions/** — Session logs capturing what happened each session. Useful when you want a continuous narrative across sessions rather than just a goals snapshot.
 - **journal/** — Reflective writing and self-directed observations. Functions like a personal {DOMAIN:inbox} for agent insights.
 
 ### The Architecture Principle

@@ -45,7 +45,7 @@ Relevant Notes:
 - [[metacognitive confidence can diverge from retrieval capability]] — structural instance: stale MOC boundaries are organizational metacognitive divergence where the system appears well-organized while actual community structure has drifted, producing false confidence in navigation
 - [[basic level categorization determines optimal MOC granularity]] — complementary theory: community detection reveals WHEN boundaries should move, basic level theory explains WHERE they should land; Rosch's prototype theory predicts the optimal resolution for sub-MOC titles, and the expertise-shift mechanism explains why the right granularity evolves with understanding, not just with volume
 - [[federated wiki pattern enables multi-agent divergence as feature not bug]] — application beyond MOCs: community detection can operationalize federation's quality test by measuring whether parallel interpretations attract distinct link communities or fragment a single cluster
-- [[evolution observations provide actionable signals for system adaptation]] — broader diagnostic frame: MOC threshold is one of six diagnostic patterns in the evolution protocol; community detection deepens that specific row with algorithmic signals beyond simple note count, suggesting each diagnostic can be elaborated with more sophisticated methods
+- evolution observations provide actionable signals for system adaptation — broader diagnostic frame: MOC threshold is one of six diagnostic patterns in the evolution protocol; community detection deepens that specific row with algorithmic signals beyond simple note count, suggesting each diagnostic can be elaborated with more sophisticated methods
 
 Topics:
 - [[graph-structure]]
