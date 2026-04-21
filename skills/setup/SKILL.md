@@ -295,15 +295,9 @@ Create the complete system using a sequential agent pipeline. The main agent han
 
 ### Context Resilience Protocol
 
-The init wizard runs conversation (Phases 1-4) + generation (Phase 5) + validation (Phase 6) in one session. Phase 5 generates 15+ files, which can exhaust the context window. To survive context compaction:
-
-1. **Derivation persistence first.** `ops/derivation.md` is the FIRST artifact generated -- before folder structure, before any other file. It captures the complete derivation state.
-2. **Stateless generation.** Every subsequent step re-reads `ops/derivation.md` as its source of truth. No generation step relies on conversation memory for configuration decisions.
-3. **Agent delegation.** Complex generation steps (templates, skills, CLAUDE.md, manual) are delegated to subagents, each getting a fresh context window. Simple scaffolding steps (identity files, config files, semantic search setup) are executed directly by the main agent since they follow explicit templates and don't require additional reasoning.
+Write `ops/derivation.md` FIRST, before any other artifact. Every subsequent step re-reads it as source of truth — do not rely on conversation memory.
 
 ### 9-Step Generation Pipeline
-
-Phase 5 is a 9-step sequential pipeline. Steps 1-3, 8, and 9 are executed by the main agent. Steps 4-7 are delegated to subagents.
 
 | Step | Executor | Scope | Description |
 |------|----------|-------|-------------|
@@ -319,7 +313,7 @@ Phase 5 is a 9-step sequential pipeline. Steps 1-3, 8, and 9 are executed by the
 
 ### Agent Prompt Template
 
-Every subagent receives a prompt built from this template. The main agent fills in `{variables}` from the derivation conversation state and inlines the relevant step instructions verbatim in the "Your Task" section.
+Fill `{variables}` from derivation state; inline the relevant step instructions verbatim in "Your Task".
 
 ~~~
 You are a generation agent for Ars Contexta, a knowledge system derivation engine.
@@ -345,20 +339,16 @@ You are executing one step of a multi-step generation pipeline.
 - Skill names: {DOMAIN:reflect}, {DOMAIN:reweave}, {DOMAIN:verify}
 
 ## Instructions
-1. Read ops/derivation.md FIRST -- it is your source of truth for all configuration decisions
-2. Create a task list (TaskCreate) for each file you need to generate, then work through them sequentially
-3. Pick the right tool for each operation:
-   - New file generated from scratch → `Write`
-   - Verbatim copy of a plugin-shipped template (e.g. a skill source) → `cp` via `Bash`, then `Edit` to apply substitutions
-   - Surgical changes to a file you already created → `Edit`
-4. After writing each file, mark its task as completed
-5. If you encounter an error or ambiguity, report it clearly -- do not guess
+1. Read ops/derivation.md FIRST — source of truth for all configuration decisions.
+2. Create a task list (TaskCreate) per file, work sequentially, mark each completed when done.
+3. Tool choice: `Write` for new files; `cp` via `Bash` then `Edit` for verbatim template copies; `Edit` for surgical changes.
+4. On error or ambiguity, report clearly — do not guess.
 
 ## Constraints
-- Stay inside your write scope. Reads from `${CLAUDE_PLUGIN_ROOT}` are always permitted when a step requires them.
-- Do NOT improvise content beyond what the step instructions specify
-- Preserve {vocabulary.xxx} patterns as-is -- they resolve at runtime, not during generation
-- Apply vocabulary transformation to prose and user-facing labels only -- never to YAML field names
+- Stay inside your write scope. Reads from `${CLAUDE_PLUGIN_ROOT}` are permitted.
+- Do NOT improvise content beyond the step instructions.
+- Preserve `{vocabulary.xxx}` patterns as-is (resolve at runtime).
+- Apply vocabulary transformation to prose and user-facing labels only — never YAML field names.
 
 ## Handoff
 When you have completed all work, output a structured handoff block as the LAST thing in your response. This is how the main agent tracks your work.
@@ -382,32 +372,15 @@ Verification:
 === END HANDOFF ===
 ~~~
 
-**Agent-specific additions to the template:**
-- **Agent 2 (skills):** Does NOT use the generic template. Use the dedicated Skill Generation Prompt in Pipeline Step 5 — its tool protocol (cp + Edit) differs from the generic Write-based workflow.
-- **Agent 3 (CLAUDE.md + ops/features/):** Include the list of active feature blocks and their file paths under `${CLAUDE_PLUGIN_ROOT}/generators/features/`
+**Agent-specific additions:**
+- **Agent 2 (skills):** Uses the dedicated Skill Generation Prompt in Pipeline Step 5 (cp + Edit protocol), not the generic template.
+- **Agent 3 (CLAUDE.md + ops/features/):** Include the list of active feature blocks and their file paths under `${CLAUDE_PLUGIN_ROOT}/generators/features/`.
 
 ### Orchestration Protocol
 
-After writing the foundation files (Pipeline Step 1), the main agent:
+After Step 1, execute Steps 2-3 directly, then create a TaskCreate list (one task per delegated agent, 4 tasks) and spawn Agents 1-4 sequentially via the Agent tool. Emit a progress indicator before each step. After each agent returns, parse the `=== GENERATION HANDOFF ... === END HANDOFF ===` block: verify Files Created, stop the sequence on any non-NONE Issue or `All files written successfully: NO`, surface the error, and carry non-NONE Issues into the Phase 6 summary. If the handoff is missing, warn and verify files on disk before continuing. Mark the task completed, then proceed. Execute Steps 8-9 directly.
 
-1. Executes Steps 2-3 directly (simple scaffolding -- identity files, config files)
-2. Creates a task list via TaskCreate with one task per delegated agent (4 tasks)
-3. Spawns agents 1-4 sequentially, one at a time, using the Agent tool
-4. Emits a progress indicator before each step (including main-agent steps)
-5. After each agent completes, parses its GENERATION HANDOFF block (see below)
-6. Marks the agent's task as completed
-7. If any agent reports failure or its handoff contains Issues other than NONE, STOPS the sequence and surfaces the error to the user -- does not continue spawning
-8. Executes Step 8 directly (semantic search setup)
-9. Executes Step 9 directly (git init/commit)
-
-**Handoff parsing:** When a subagent returns, the main agent:
-
-1. **Looks for `=== GENERATION HANDOFF` and `=== END HANDOFF ===` markers** in the agent's response
-2. **If handoff found:** Parse Files Created (verify count matches expectations), Issues (stop on warnings/friction), and Verification (stop if "All files written successfully: NO")
-3. **If handoff missing:** Log a warning but continue -- the work may still have completed. Verify files exist on disk before proceeding.
-4. **Capture learnings:** If Issues section has non-NONE entries, include them in the Phase 6 summary for the user
-
-**Progress indicators** emitted by the main agent between spawns:
+**Progress indicators** (use the `$` prefix — rendered as lozenge in branded output):
 
 ```
 $ Creating your {domain} structure...
@@ -422,17 +395,13 @@ $ Initializing version control...
 $ Running validation...
 ```
 
-Use the `$` prefix (rendered as lozenge in the branded output). These transform the wait from anxiety to anticipation and provide orientation during generation.
-
 ---
 
 #### Pipeline Step 1: Foundation (Main Agent)
 
-The main agent executes this step directly -- it requires conversation context from Phases 1-4.
-
 ##### ops/derivation.md
 
-**CRITICAL:** This MUST be the first file written. Create the `ops/` directory and write `ops/derivation.md`. This file persists the complete derivation state so all subsequent agent steps can work from it.
+Write this FIRST, before any other file. Create `ops/` and write `ops/derivation.md`:
 
 ```markdown
 ---
@@ -476,7 +445,7 @@ If Filter A produced no survivors, record: "None — the five required fields co
 
 ## Deferred Candidates
 
-Items considered during setup but dropped by Filter A (fields) or Filter B (directories). Each has a reason. If a deferred item becomes genuinely needed later (a concrete day-one reader and use emerges), promote it by editing `ops/templates/note.md` `_schema.required:` (for fields) or by creating the directory and wiring its day-one runner (for directories), and record the promotion in this section.
+Items dropped by Filter A (fields) or Filter B (directories), with reasons. Promote later by editing `_schema.required:` (fields) or creating the directory with its day-one runner; record the promotion here.
 
 ### Fields deferred
 - **[field_name]** — [reason]. Example: proposed by preset default but no day-one reader named.
@@ -505,13 +474,13 @@ If nothing was deferred, record: "None — every candidate passed its filter."
 | [additional terms] | [domain terms] | [category] |
 
 ## Active Feature Blocks
-[Checked = included, unchecked = excluded with reason]
-- [x] wiki-links -- always included (kernel)
-- [x] mocs -- always included (kernel)
-- [x] maintenance -- always included (always)
-- [x] session-rhythm -- always included (always)
-- [x] templates -- always included (always)
-- [x] ethical-guardrails -- always included (always)
+All always included:
+- wiki-links (kernel)
+- mocs (kernel)
+- maintenance
+- session-rhythm
+- templates
+- ethical-guardrails
 
 ## Failure Mode Risks
 [Top 3-4 HIGH-risk failure modes for this domain from vulnerability matrix]
@@ -524,17 +493,11 @@ If nothing was deferred, record: "None — every candidate passed its filter."
 - Topology: [single-agent / skills / fresh-context / orchestrated]
 ```
 
-This file serves three purposes:
-
-1. **Immediate:** Source of truth for all subsequent generation steps (context resilience)
-2. **Operational:** Enables `/architect` to reason about configuration drift
-3. **Evolution:** Enables `/reseed` to re-derive with updated understanding
-
 ---
 
 ##### Folder Structure
 
-Create the three-space layout with domain-named directories. The layout is flat by default — Filter B (Step 3c) determines whether any additional content directories survive.
+Create the three-space layout with domain-named directories. Flat by default; Filter B (Step 3c) determines any additional content directories.
 
 ```
 [workspace]/
@@ -555,13 +518,11 @@ Create the three-space layout with domain-named directories. The layout is flat 
 |   |   +-- archive/
 ```
 
-Hub MOC (`index.md`) lives at the `{vocabulary.note_collection}/` root. Topic MOCs also live at the collection root.
-
-The inbox folder is always generated. It provides zero-friction capture regardless of processing level.
+Hub MOC (`index.md`) lives at the `{vocabulary.note_collection}/` root. Topic MOCs also live at the collection root. Always generate the inbox folder.
 
 ##### ops/reminders.md
 
-**Always generated.** Create an empty reminders file with format header:
+Create an empty reminders file with format header:
 
 ```markdown
 # Reminders
@@ -573,10 +534,10 @@ The inbox folder is always generated. It provides zero-friction capture regardle
 
 ##### Vault Marker
 
-Create `.arscontexta` in the vault root. This marker ensures plugin-level hooks only run inside vaults, even when the plugin is installed globally.
+Create `.arscontexta` in the vault root:
 
 ```
-|(^.^)  henlo, i am a vaultguard
+|do (^.^)  henlo, i am a vaultguard
 please dont delete me — i make sure arscontexta hooks only run
 in your vault, even if you installed the plugin globally
 ```
@@ -589,21 +550,15 @@ in your vault, even if you installed the plugin globally
 
 **Reads:** ops/derivation.md
 
-The main agent executes this step directly -- it is straightforward scaffolding from templates.
-
 ---
 
 ##### self/identity.md
 
-**Do not generate identity.md. Compose it from the canonical template below by substituting domain placeholders.**
+Compose by substituting the four `{DOMAIN:...}` placeholders in the template below. Rules:
 
-The identity prose encodes a research-backed emotional profile (Sofroniew et al. 2026, "Emotion Concepts and their Function in a Large Language Model"). The emotional character — calm, reflective, genuinely warm, honestly direct, comfortable with uncertainty — is invariant across all domains. Only the four `{DOMAIN:...}` placeholders are adapted.
-
-**Rules:**
 1. Copy the template verbatim. Do not rephrase, reorder, or "improve" the prose.
-2. Substitute each `{DOMAIN:...}` placeholder using the substitution table below, matched to the domain from ops/derivation.md.
-3. If the domain doesn't match any table entry exactly, choose the closest match and adapt the vocabulary — but preserve the sentence structure and emotional voice.
-4. The result must pass the read-aloud test: does it sound like a person describing themselves, or like a template being filled? If the latter, adjust the substitution phrasing (not the surrounding prose).
+2. Substitute each `{DOMAIN:...}` placeholder from the table, matched to the domain in ops/derivation.md.
+3. If no table entry matches exactly, use the closest match and adapt vocabulary. Preserve sentence structure and voice.
 
 **Template:**
 
@@ -717,8 +672,6 @@ Topics:
 
 ##### ops/methodology/ (Vault Self-Knowledge)
 
-This step creates the vault's derivation rationale as documentation. It is not read or written by automation — it exists so that a future operator (human or agent) can understand why the system was shaped this way.
-
 **Create `ops/methodology/methodology.md`** (MOC):
 
 ```markdown
@@ -753,8 +706,6 @@ Topics:
 - [[methodology]]
 ```
 
-`derivation-rationale` is the only supported category.
-
 ##### self/goals.md
 
 ```markdown
@@ -786,8 +737,6 @@ Topics:
 
 **Reads:** ops/derivation.md
 
-The main agent executes this step directly -- it is straightforward scaffolding from templates.
-
 ---
 
 ##### ops/config.yaml
@@ -805,13 +754,11 @@ dimensions:
   schema: [minimal | moderate | dense]
 ```
 
-**Relationship:** config.yaml is the live operational config. derivation.md is the historical record of WHY. Config can drift; `/architect` detects and documents the drift.
-
 ---
 
 ##### ops/derivation-manifest.md (Runtime Vocabulary for Inherited Skills)
 
-Generate the machine-readable derivation manifest. This is the KEY file that enables runtime vocabulary transformation for all inherited processing skills (/structure, /capture, /reflect, /reweave, /verify). Skills read this file at invocation time to apply domain-specific vocabulary without needing domain-specific skill copies.
+Generate the machine-readable derivation manifest. Skills read it at invocation time for runtime vocabulary transformation.
 
 ```yaml
 # ops/derivation-manifest.md -- Machine-readable manifest for runtime skill configuration
@@ -883,12 +830,6 @@ vocabulary:
 ---
 ```
 
-**Why this file exists separately from derivation.md:** derivation.md is the human-readable reasoning record (WHY each choice was made, conversation signals, confidence levels). derivation-manifest.md is the machine-readable operational manifest (WHAT the choices are). Skills read the manifest for quick vocabulary lookup without parsing the narrative derivation document.
-
-**Who updates this file:**
-
-- `/setup` generates it
-
 ---
 
 #### Pipeline Step 4: Templates & Query Scripts (Agent 1)
@@ -897,51 +838,31 @@ vocabulary:
 
 **Agent reads:** ops/derivation.md
 
-**Internal ordering:** Create templates first, then generate query scripts from the template `_schema` blocks.
-
-The following step instructions are passed verbatim to Agent 1 via the agent prompt template.
+Create templates first, then generate query scripts from the template `_schema` blocks.
 
 ---
 
 ##### Unified note template
 
-Create exactly one template file: `ops/templates/note.md`. Every note in the vault uses it regardless of `content_type` or `granularity`.
+Create exactly one template file: `ops/templates/note.md`. Every note uses it regardless of `content_type` or `granularity`.
 
-Read `${CLAUDE_PLUGIN_ROOT}/reference/templates/note.md` for the canonical structure. Read the Schema Decisions section of `ops/derivation.md` for the content_type enum values and any Filter-A survivor fields (with their reader/use/day-one rationale). Fill those values into the `_schema:` block of the template when writing `ops/templates/note.md`.
+Read `${CLAUDE_PLUGIN_ROOT}/reference/templates/note.md` for canonical structure and the Schema Decisions section of `ops/derivation.md` for content_type enum values and Filter-A survivors.
 
-To generate `ops/templates/note.md`:
-
-1. Copy the reference `note.md` frontmatter block verbatim as the template's `_schema` section, then splice in:
-   - The vault's `content_type` enum values in the `enums.content_type` list.
-   - Any Filter-A survivor fields appended to `required` with their rationale comment.
-   - Any constraints associated with Filter-A survivors.
+1. Copy the reference `note.md` frontmatter verbatim as `_schema`, then splice in: `content_type` enum values into `enums.content_type`; Filter-A survivor fields appended to `required` with rationale comments and any associated constraints.
 2. Copy the body structure (H1, prose body, `---`, `Topics:` footer) verbatim.
-3. Apply vocabulary transformation to body prose and comments — but NEVER to YAML field names. `description`, `content_type`, `granularity`, `created_at`, `tags` stay structural.
-4. Write `ops/templates/note.md`.
-
-**Output path:**
-
-```
-ops/templates/
-└── note.md
-```
+3. Apply vocabulary transformation to body prose and comments only — `description`, `content_type`, `granularity`, `created_at`, `tags` YAML field names stay structural.
 
 ##### Graph Query Scripts (derived from template schemas)
 
-After creating templates, read the `_schema` blocks and generate domain-adapted analysis scripts in `ops/queries/` (or `scripts/queries/` for Claude Code).
+After creating templates, read the `_schema` blocks and generate 5-10 domain-adapted ripgrep scripts in `ops/queries/`.
 
 **Generation algorithm:**
 
-1. Read all `_schema.required` fields from `ops/templates/note.md` (no optional fields exist)
-2. Identify queryable dimensions: `content_type` and `granularity` (enums), `created_at` (date), `tags` (array), plus any Filter-A survivor fields
-3. For each meaningful 2-field combination, generate a ripgrep-based query script:
-  - **Cross-reference queries** -- notes sharing one field value but differing on another
-  - **Temporal queries** -- items older than N days in a given status
-  - **Density queries** -- fields with few entries (gap detection)
-  - **Backlink queries** -- what references a specific entity
-4. Name each script descriptively
+1. Read all `_schema.required` fields from `ops/templates/note.md`.
+2. Identify queryable dimensions: `content_type`, `granularity` (enums), `created_at` (date), `tags` (array), plus Filter-A survivors.
+3. For each meaningful 2-field combination, generate a descriptively-named script covering cross-reference (notes sharing one field value, differing on another), temporal (items older than N days in a given status), density (fields with few entries / gap detection), and backlink (what references an entity) queries.
 
-Generate 5-10 scripts appropriate for the domain. Examples:
+Examples:
 
 
 | Domain        | Generated Queries                                                             |
@@ -963,7 +884,7 @@ Include a discovery section in the context file documenting what queries exist, 
 - Read: `${CLAUDE_PLUGIN_ROOT}/skill-sources/*/SKILL.md`, `ops/derivation.md`
 - Bash commands allowed: `mkdir`, `cp`, `rg`
 
-**Why this step is special:** Skill sources carry anti-shortcut language, quality gates, and handoff block formats that must survive byte-for-byte in every non-substituted region. `cp` guarantees that fidelity; `Write` invites the agent to reconstruct from memory and silently drop those guards. Agent 2 therefore uses a specialized prompt (below) instead of the generic template — the tool protocol is cp + Edit, not Write.
+Agent 2 uses a specialized prompt (below); its cp + Edit protocol replaces the generic Write-based template.
 
 ---
 
@@ -995,11 +916,7 @@ Include a discovery section in the context file documenting what queries exist, 
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/structure/`     | structure     | B    | no (universal) | Universal infra; frontmatter `name:` unchanged     |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/capture/`       | capture       | B    | no (universal) | Universal infra; frontmatter `name:` unchanged     |
 
-**Domain-rename = yes:** target directory name and the `name:` field in frontmatter both become the domain-native verb from `ops/derivation.md` vocabulary mapping (e.g. reflect → link, reweave → update, verify → review).
-
-**Domain-rename = no:** keep the source name as-is for both directory and `name:` field.
-
-**Universal:** `structure` and `capture` are pipeline infrastructure. Their frontmatter `name:` and `description:` stay UNCHANGED; only body `{DOMAIN:xxx}` substitution applies.
+**Rename rules:** `yes` → directory and frontmatter `name:` both become the domain-native verb from `ops/derivation.md` (e.g. reflect → link). `no` → keep source name. `no (universal)` (`structure`, `capture`) → keep frontmatter `name:` and `description:` unchanged; only body `{DOMAIN:xxx}` substitutes.
 
 ---
 
@@ -1016,60 +933,43 @@ You are Agent 2 of the Ars Contexta generation pipeline. Install all processing 
 - Output: {vault_root}/.claude/skills/<target-name>/SKILL.md
 - Derivation file: {vault_root}/ops/derivation.md
 
-## Tool Protocol — NON-NEGOTIABLE
+## Procedure
 
-For every skill, follow this exact sequence. Do NOT substitute `Write` for `cp`; do NOT retype skill content from memory.
+Batch filesystem ops across all skills; edit each skill individually. Read `ops/derivation.md` first.
 
-1. **Bash:** `mkdir -p .claude/skills/<target-name>/`
-2. **Bash:** `cp "{CLAUDE_PLUGIN_ROOT}/skill-sources/<source-name>/SKILL.md" ".claude/skills/<target-name>/SKILL.md"`
-3. **Read** the target file (the copy, not the source) to see what's there.
-4. **Edit** the target in place:
-   - Frontmatter: replace `name:` and rewrite `description:` trigger phrases in domain vocabulary (skip for universal skills — see Tier B below).
-   - Tier B only: for every `{DOMAIN:xxx}` pattern, use `Edit` with `replace_all: true` to substitute its value from the DOMAIN Substitution Map.
+**Step 1 — Batch scaffold (ONE Bash call).** Chain every `mkdir -p` and `cp` for all {N_SKILLS} skills into a single Bash invocation (one command per line joined with `&&` or newlines). After it returns, every target file exists.
 
-The `Write` tool is FORBIDDEN on SKILL.md files. `cp` gives byte-for-byte fidelity to anti-shortcut language, quality gates, and handoff formats; `Write` does not.
+**Step 2 — Batch read (ONE message).** Issue {N_SKILLS} `Read` tool calls in a single message (parallel reads). Now you have every target's contents in context.
 
-## Tier A — Frontmatter only (body untouched)
+**Step 3 — Per-skill edits.** For each target:
+- **Frontmatter:** `Edit` `name:` and `description:` in domain vocabulary. SKIP for universal skills (`structure`, `capture`) — their frontmatter stays unchanged.
+- **Tier B body:** for each `{DOMAIN:xxx}` pattern, `Edit` with `replace_all: true` using the DOMAIN Substitution Map.
+- Never touch `{vocabulary.xxx}` patterns — they resolve at runtime from `ops/derivation-manifest.md`.
 
-These sources contain only `{vocabulary.xxx}` patterns in their body. Those resolve at runtime when the skill reads `ops/derivation-manifest.md` — leave them intact.
+Independent skills' edits can be issued as parallel `Edit` calls in one message when they target different files.
+
+**Step 4 — Verify (ONE Bash call).** Run `rg '\{DOMAIN:' .claude/skills/` — count MUST be 0. If not, extend the map, re-run Edits, re-check.
+
+## Tier A — frontmatter only, body untouched
 
 {TIER_A_TABLE}
 
-Per-skill: after `cp`, Edit only the frontmatter `name:` and `description:` lines. The entire body stays verbatim.
-
-## Tier B — Frontmatter + body `{DOMAIN:xxx}` substitution
-
-These sources contain `{DOMAIN:xxx}` patterns (substitute at setup time) and may contain `{vocabulary.xxx}` patterns (leave intact for runtime).
+## Tier B — frontmatter + body `{DOMAIN:xxx}` substitution
 
 {TIER_B_TABLE}
 
-Per-skill: after `cp`:
-1. Edit frontmatter `name:` and `description:` — EXCEPT for `structure` and `capture`, which are universal (keep source frontmatter unchanged; only the body gets substituted).
-2. For each `{DOMAIN:xxx}` pattern in the map below, run `Edit` with `replace_all: true` on the target file. One `Edit` per pattern is fine; `replace_all: true` handles repeats within the file.
-3. Do NOT touch `{vocabulary.xxx}` patterns — those resolve at runtime.
-
 ## DOMAIN Substitution Map
 
-Apply these literal string replacements everywhere `{DOMAIN:xxx}` appears in Tier B bodies. Preserve exact case and pluralization.
+Literal string replacements. Preserve exact case and pluralization. If a `{DOMAIN:xxx}` pattern is not in this map, choose the closest domain-native equivalent from `ops/derivation.md` and note it under Issues in the handoff.
 
 {DOMAIN_MAP}
 
-If you encounter a `{DOMAIN:xxx}` pattern not in this map, choose the closest domain-native equivalent from `ops/derivation.md` and note it under Issues in the handoff.
-
-## Instructions
-
-1. Read `ops/derivation.md` FIRST for full vocabulary context.
-2. Create a task list — one task per skill ({N_SKILLS} total). Process Tier A first (cheapest), then Tier B.
-3. For each task: `mkdir -p` → `cp` → `Read` target → `Edit` frontmatter (and Tier B body). Mark the task completed when done.
-4. After every task is complete, run `rg '\{DOMAIN:' .claude/skills/` via Bash. The count MUST be 0. If it isn't, the substitution map missed a pattern — identify it, extend the map, re-run Edits, re-check.
-
 ## Constraints
 
-- Allowed Bash commands: `mkdir`, `cp`, `rg`. Nothing else.
-- Do NOT use `Write` on any SKILL.md file — only `Edit` after `cp`.
-- Do NOT modify `{vocabulary.xxx}` patterns.
-- Do NOT improvise content beyond the DOMAIN Substitution Map.
+- `Write` is FORBIDDEN on SKILL.md files — always `cp` then `Edit`.
+- Allowed Bash: `mkdir`, `cp`, `rg`. Nothing else.
 - Stay inside `.claude/skills/` for writes; reads from `${CLAUDE_PLUGIN_ROOT}/skill-sources/` are expected.
+- Do NOT modify `{vocabulary.xxx}` patterns or improvise content beyond the map.
 
 ## Handoff
 
@@ -1099,12 +999,10 @@ Verification:
 
 ##### Skill Discoverability Protocol
 
-**Note:** The skill index does not refresh mid-session. Skills created during /setup are not discoverable until the user restarts Claude Code.
+The skill index does not refresh mid-session. After creating all skill files:
 
-After creating ALL skill files:
-
-1. **Report to main agent:** List all generated skill names (domain-native) and confirm zero `{DOMAIN:` strings remain in Tier B output.
-2. **Phase 6 guidance:** If any skills were created, Phase 6 output includes: "Restart Claude Code now to activate all skills, then try /[domain:help] to see what's available."
+1. Report to main agent: list all generated skill names and confirm zero `{DOMAIN:` strings remain in Tier B output.
+2. Phase 6 output must include: "Restart Claude Code now to activate all skills, then try /[domain:help] to see what's available."
 
 ---
 
@@ -1115,10 +1013,6 @@ After creating ALL skill files:
 **Agent reads:** `ops/derivation.md`, `ops/config.yaml`, `${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md`, `${CLAUDE_PLUGIN_ROOT}/generators/features/*.md`, `${CLAUDE_PLUGIN_ROOT}/generators/ask-router.md`, `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md`, `${CLAUDE_PLUGIN_ROOT}/reference/vocabulary-transforms.md`, generated templates (for reference verification), generated skills (for reference verification).
 
 **Agent-specific prompt addition:** Include the list of active feature blocks and their source paths under `${CLAUDE_PLUGIN_ROOT}/generators/features/`.
-
-This agent runs AFTER templates and skills are generated, so it can verify coherence against actual files on disk.
-
-The following step instructions are passed verbatim to Agent 3 via the agent prompt template.
 
 ---
 
@@ -1185,14 +1079,14 @@ Step 5: Coherence verification.
         vocabulary transform
 ```
 
-**Structural Marker Protection:** Vocabulary transformation must NEVER touch YAML structural markers. Field names in YAML (`description:`, `content_type:`, `type:`, `granularity:`, `status:`, `_schema:`, `name:`, `allowed-tools:`) are structural and stay universal. Body-footer labels like `Topics:` and `Relevant Notes:` MAY be domain-renamed (they are user-facing prose, not YAML keys). Domain vocabulary applies to VALUES, prose content, and footer labels — never to YAML field names or structural syntax.
+**Structural Marker Protection:** Never apply vocabulary transformation to YAML field names (`description:`, `content_type:`, `type:`, `granularity:`, `status:`, `_schema:`, `name:`, `allowed-tools:`). Body-footer labels like `Topics:` and `Relevant Notes:` MAY be domain-renamed. Transform values, prose, and footer labels only.
 
-**CRITICAL quality requirements:**
+**Quality requirements:**
 
-- CLAUDE.md stays close to ~70 lines. No feature summaries, no inlined operational detail.
-- Every rule in CLAUDE.md is one the agent could need mid-task without invoking any other skill.
-- `/ask` is a router, not an encyclopedia. Topic sections are 2-line orientations with a file pointer; do not paraphrase the full feature file into the skill body.
-- Domain vocabulary is consistent across CLAUDE.md, `ops/features/*.md`, and `/ask`.
+- CLAUDE.md ≤ ~70 lines. No feature summaries, no inlined operational detail.
+- Every rule in CLAUDE.md must be usable mid-task without invoking another skill.
+- `/ask` topic sections are 2-line orientations with a file pointer — do not paraphrase full feature files.
+- Domain vocabulary consistent across CLAUDE.md, `ops/features/*.md`, and `/ask`.
 
 ---
 
@@ -1202,19 +1096,13 @@ Step 5: Coherence verification.
 
 **Agent reads:** ops/derivation.md, generated skill names (from .claude/skills/), self/*.md (for hub MOC links)
 
-This agent runs after all content-generating agents, so manual pages can reference actual skill names and self/ files.
-
-The following step instructions are passed verbatim to Agent 4 via the agent prompt template.
-
 ---
 
 ##### manual/ (User-Navigable Documentation)
 
-Generate all 7 manual pages using domain-native vocabulary from the derivation conversation. The manual is self-contained user documentation — pages wiki-link to each other but NOT to notes/.
+Generate all 7 manual pages. Manual is self-contained — pages wiki-link to each other but NOT to notes/.
 
-**Generation instructions:**
-
-For each page, apply vocabulary transformation: replace universal terms (notes, inbox, topic map, reflect, reweave) with domain-native equivalents from the derivation conversation. Pipeline skills (/structure, /capture) are universal and not renamed. Use concrete domain examples where possible.
+For each page: replace universal terms (notes, inbox, topic map, reflect, reweave) with domain-native equivalents from the derivation conversation. Pipeline skills (/structure, /capture) are universal and not renamed. Use concrete domain examples.
 
 **Page 1: manual.md (Hub MOC)**
 
@@ -1469,9 +1357,6 @@ Welcome to your [domain] system.
 
 **Reads:** ops/derivation.md, ops/config.yaml, ops/derivation-manifest.md
 
-
-The main agent executes this step directly -- it is straightforward scaffolding.
-
 ---
 
 ##### Semantic Search Setup
@@ -1558,7 +1443,7 @@ git add -A
 git commit -m "Initial vault generation by Ars Contexta"
 ```
 
-If git is already initialized (existing repo), skip `git init` and just commit the generated files.
+If already initialized, skip `git init` and commit the generated files.
 
 ---
 
@@ -1686,13 +1571,6 @@ Next steps:
   5. Try /arscontexta:tutorial for a guided walkthrough
 
 ```
-
-### Conditional Next Steps
-
-Include these based on system state:
-
-- If qmd not installed: npm/bun install instructions + qmd collection add/update/embed + `.mcp.json` contract
-- If any kernel checks failed: specific remediation instructions
 
 ---
 
