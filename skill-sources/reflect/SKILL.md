@@ -2,7 +2,7 @@
 name: reflect
 description: Internal pipeline skill — finds connections for a newly created note and updates topic maps. Invoked by /pipeline as a subagent; do not invoke directly.
 context: fork
-allowed-tools: Read, Write, Edit, Grep, Glob, Bash, mcp__qmd__query
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 ---
 
 ### Vocabulary
@@ -10,6 +10,11 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash, mcp__qmd__query
 All output must use domain-native terms.
 Derivation manifest for vocabulary mapping:
 !`cat ops/derivation-manifest.md`
+
+### Task Queue
+
+Current task queue:
+!`cat ops/queue/queue.json`
 
 ## Granularity-Aware Processing
 
@@ -24,7 +29,15 @@ After reading the target {vocabulary.note}, check its `granularity` frontmatter 
 
 **Target: $ARGUMENTS**
 
-Parse the {vocabulary.note} path from arguments. If no argument is provided, end immediately with: report `ERROR: reflect requires {vocabulary.note} path`
+Parse the note task file path from arguments (e.g. `ops/queue/my-source-010.md`). The argument IS the full path to the task file — do NOT `find`/`ls` to relocate it; Read it directly. If no argument is provided, end immediately with: report `ERROR: reflect requires note task file path`.
+
+Read the task file's YAML frontmatter to obtain:
+- `id` — this entry's queue id (e.g. `note-010`)
+- `target_path` — the path to the {vocabulary.note} being connected
+- `batch` — the batch id this note belongs to
+- `granularity` — routes connection-finding depth
+
+All subsequent references to "the {vocabulary.note}" use the `target_path` value from the task file.
 
 **START NOW.** Reference below explains methodology — use to guide, not as output.
 
@@ -91,9 +104,11 @@ If you know the topic (check the {vocabulary.note}'s Topics footer), start with 
 
 **Path 2: Semantic Search** — find what {vocabulary.topic_map_plural} might miss
 
-Use `mcp__qmd__query` (hybrid search with expansion + reranking):
-- query: "[{vocabulary.note}'s core concepts and mechanisms]"
-- limit: 15
+Use `qmd query` via Bash (hybrid search with auto-expansion + reranking):
+
+```bash
+qmd query "[{vocabulary.note}'s core concepts and mechanisms]" --collection {vocabulary.notes_collection} -n 15
+```
 
 Evaluate results by relevance — read any result where title or snippet suggests genuine connection. Semantic search finds {vocabulary.note_plural} that share MEANING even when vocabulary differs. A {vocabulary.note} about "iteration cycles" might connect to "learning from friction" despite sharing no words.
 
@@ -385,92 +400,63 @@ If you find {vocabulary.note_plural} with no connections:
 2. Attempt to connect them
 3. If genuinely orphaned, note in relevant {vocabulary.topic_map} Gaps
 
-## Output Format
+## Queue Self-Update
 
-Write the structure below to the task file's `## {vocabulary.reflect}` section. No chat output.
+Before emitting the Output Block, update `ops/queue/queue.json`:
 
-Structure:
+1. Read the file.
+2. Locate the entry with `id` matching the task file's `id`.
+3. Append `"reflect"` to `completed_phases`.
+4. Set `current_phase: "reweave"` (the next phase per `phase_order.note` / `phase_order.enrichment`).
+5. Write the file back.
 
-```markdown
-## Reflection Complete
-
-### Discovery Trace
-
-**Why this matters:** Shows methodology was followed. Blind delegation hides whether dual discovery happened. Trace enables verification.
-
-**{vocabulary.topic_map} exploration:**
-- Read [[moc-name]] — found candidates: [[note A]], [[note B]], [[note C]]
-- Followed link from [[note A]] to [[note D]]
-
-**Semantic search:**
-- query "[core concept from note]" — top hits:
-  - [[note E]] (0.74) — evaluated: strong match, mechanism overlap
-  - [[note F]] (0.61) — evaluated: weak, only surface vocabulary
-  - [[note G]] (0.58) — evaluated: skip, different domain
-
-**Keyword search:**
-- grep "specific term" — found [[note H]] (already in {vocabulary.topic_map} candidates)
-
-### Connections Added
-
-**[[source note]]**
-- -> [[target]] — [relationship type]: [why]
-- <- [[incoming]] — [relationship type]: [why]
-- inline: added link to [[note]] in paragraph about X
-
-### {vocabulary.topic_map} Updates
-
-**[[moc-name]]**
-- Added [[note]] to Core Ideas — [contribution]
-- Updated Tensions: [[A]] vs [[B]] now includes [[C]]
-- Removed from Gaps: [what was filled]
-- Agent note: [what was learned]
-
-### Synthesis Opportunities
-
-[{vocabulary.note_plural} that could be combined into higher-order insights, with proposed claim]
-
-### Flagged for Attention
-
-- [[orphan note]] — could not find connections
-- [[broad note]] — might benefit from splitting
-- Tension between [[X]] and [[Y]] needs resolution
-```
+If reading or writing fails, do NOT emit a successful Output Block. Emit `Status: error: queue write failed` with `Queue: no change (error)` and stop.
 
 ---
 
-## HANDOFF Output
+## Output Block
 
-Always output this structured format at the END of the session. This enables /pipeline to parse results and update the task queue.
-
-**Format:**
+After finishing connection work, emit the canonical block below. Write the same block into the task file's `## Reflect` section (replacing any placeholder) AND echo it as the final chat message. This is the ONLY chat output.
 
 ```
-=== HANDOFF: {vocabulary.reflect} ===
-Target: [[note name]]
+## Reflect
 
-Work Done:
-- Discovery: {vocabulary.topic_map} [[moc-name]], query "[query]" (MCP|bash|grep-only), grep "[term]"
-- Connections added: N (articulation test: PASS)
-- {vocabulary.topic_map} updates: [[moc-name]] Core Ideas section
-- Synthesis opportunities: [count or NONE]
+**Target:** [[{target note title}]]
+**Status:** ok | error: {short message}
+**Queue:** advanced {id}: reflect -> reweave
 
-Files Modified:
+### Work
+
+**Discovery trace:**
+- {vocabulary.topic_map} exploration: [[moc-name]] — candidates: [[note A]], [[note B]]
+- Semantic search: "[query]" — top hits: [[note E]] (0.74, mechanism overlap), [[note F]] (0.61, surface only)
+- Keyword search: grep "specific term" — [[note H]]
+
+**Connections added:**
+- [[source note]] -> [[target]] — [relationship]: [why]
+- inline: added link to [[note]] in paragraph about X
+
+**{vocabulary.topic_map} updates:**
+- [[moc-name]]: added [[note]] to Core Ideas — [contribution]; updated Tensions: [[A]] vs [[B]]
+
+**Synthesis opportunities:** [list or NONE]
+
+**Flagged for attention:** [orphans, broad notes, unresolved tensions — or NONE]
+
+### Files Modified
 - {vocabulary.note_collection}/[note name].md (inline links added)
 - {vocabulary.note_collection}/[moc-name].md (Core Ideas updated)
-- [task file path] ({vocabulary.reflect} section)
+- {task file path} (## Reflect section)
+- ops/queue/queue.json (advanced {id})
 
-Learnings:
+### Learnings
 - [Friction]: [description] | NONE
 - [Surprise]: [description] | NONE
 - [Methodology]: [description] | NONE
 - [Process gap]: [description] | NONE
-
-Queue Updates:
-- Advance phase: {vocabulary.reflect} -> {vocabulary.reweave}
-- Reweave candidates (if any pass filter): [[note]] | NONE (filtered: hub/tension/recent)
-=== END HANDOFF ===
 ```
+
+On error, set `Status: error: <message>`, `Queue: no change (error)`, write the partial `### Work` content for audit, and leave `queue.json` unchanged.
 
 ---
 

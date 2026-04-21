@@ -143,7 +143,7 @@ Questions the engine must answer when generating the self/ space:
 
 #### Self/ loads through CLAUDE.md references and session-start hooks
 
-**Summary:** In Claude Code, the context file (CLAUDE.md) is loaded at every session start automatically. Self/ files are loaded by: (1) CLAUDE.md containing explicit instructions to read self/ files, and (2) session-start hooks that inject file tree and potentially pre-load key self/ files. The hook can automate the orientation sequence: inject tree, load self/identity.md, load self/goals.md, display any pending reminders. This automation makes the session rhythm invisible — the agent starts every session already oriented, without needing to follow manual instructions.
+**Summary:** In Claude Code, the context file (CLAUDE.md) is loaded at every session start automatically. Self/ files are loaded by: (1) CLAUDE.md containing explicit instructions to read self/ files, and (2) session-start hooks that inject file tree and potentially pre-load key self/ files. The hook can automate the orientation sequence: inject tree, load self/identity.md, load self/goals.md, surface condition-based maintenance signals. This automation makes the session rhythm invisible — the agent starts every session already oriented, without needing to follow manual instructions.
 
 **Derivation Implication:** Generate: (1) CLAUDE.md sections that reference self/ files and explain their purpose, (2) a session-start hook configuration that loads orientation files, (3) self/ file templates pre-filled with generated content from the derivation conversation. The CLAUDE.md should explain what the hook does so the agent does not duplicate the orientation.
 

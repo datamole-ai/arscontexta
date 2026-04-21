@@ -196,45 +196,6 @@ Every kernel primitive includes `cognitive_grounding` linking to specific resear
 
 ---
 
-## Semantic Search
-
-[qmd](https://github.com/tobi/qmd) provides concept matching across vocabularies and is part of the kernel — every generated vault expects it. `/arscontexta:setup` configures the collection, `.mcp.json`, and a SessionStart sync hook automatically when qmd is installed.
-
-If you skipped the Prerequisites step, install qmd and run the manual setup below to activate search:
-
-```bash
-npm install -g @tobilu/qmd
-# or
-bun install -g @tobilu/qmd
-
-cd your-vault/
-qmd collection add . --name <notes_directory_name> --mask "<notes_directory_name>/**/*.md"
-qmd update && qmd embed
-```
-
-Create or merge `.mcp.json` in the vault root:
-
-```json
-{
-  "mcpServers": {
-    "qmd": {
-      "command": "qmd",
-      "args": ["mcp"],
-      "autoapprove": [
-        "mcp__qmd__query",
-        "mcp__qmd__get",
-        "mcp__qmd__multi_get",
-        "mcp__qmd__status"
-      ]
-    }
-  }
-}
-```
-
-Keep qmd MCP configuration and tool preapproval in `.mcp.json`.
-
----
-
 ## Project Structure
 
 ```
@@ -290,7 +251,7 @@ Every time you make changes, re-install the plugin:
 
 ### Key Files for Contributors
 
-- `reference/kernel.yaml` -- 13 primitives every system must include
+- `reference/kernel.yaml` -- 14 primitives every system must include
 - `generators/features/*.md` -- composable feature blocks
 - `skill-sources/*/SKILL.md` -- generated command templates
 - `skills/setup/SKILL.md` -- the derivation engine

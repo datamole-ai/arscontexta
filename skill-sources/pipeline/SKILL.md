@@ -71,165 +71,70 @@ Report: `$ Seeded: {source-name}`
 
 ## Phase 2: Process Source (Granularity-Routed) and claims
 
-Process the source via the appropriate skill based on granularity, producing notes from the source and creating task entries in the queue.
+Process the source via the appropriate producer, then drive each resulting note/enrichment through the phase sequence. Each sub-skill is self-owning: it updates its own entry in `ops/queue/queue.json` and echoes its canonical output block to chat. The orchestrator parses the chat return for Status / Queue / Learnings and holds the iteration state in memory.
 
-### Phase 2 configuration
+### Phase 2.1: Invoke the producer
 
-| Phase | Skill Invoked | Purpose |
-|-------|---------------|---------|
-| process | /structure or /capture (based on task.granularity) | Produce finished notes and apply enrichments from source material |
-| reflect | /reflect | Find connections, update {DOMAIN:topic map}s |
-| reweave | /reweave | Update older {DOMAIN:note_plural} with new connections |
-| verify | /verify | Description quality + schema + health checks |
+Use the Skill tool to invoke `/structure` or `/capture` (based on `task.granularity` of the process task) passing the full task file path as argument:
 
-### Phase 2.1 Queue State
+- `ops/queue/<task.file>` — the process task file, e.g. `ops/queue/<source-basename>.md`. Always include the `ops/queue/` prefix.
 
-Read the queue file. `ops/queue/queue.json`
+Parse the producer's chat return:
+- **Status:** must be `ok`; otherwise stop the pipeline and surface the error.
+- **Queue:** should read `marked <batch-id>: process -> done; created <N> note entries ...`.
+- **Learnings:** capture non-NONE entries for the final report.
 
-Parse the queue. Identify ALL pending tasks.
+### Phase 2.2: Re-read queue to discover new entries
 
-### Queue Schema
+Read `ops/queue/queue.json` ONCE. Filter entries where `batch == <batch-id>` and `status == "pending"`. Order by `id` ascending. This is the "work list" for the remainder of Phase 2. The pipeline does not re-read `queue.json` during the per-phase loop.
 
-```yaml
-phase_order:
-  note: [reflect, reweave, verify]
-  enrichment: [reflect, reweave, verify]
+If the list is empty, report `Processing produced zero notes` and stop.
 
-tasks:
-  - id: source-name
-    type: process
-    granularity: structure
-    status: pending
-    source: ops/queue/archive/2026-01-30-source/source.md
-    file: source-name.md
-    created: "2026-01-30T10:00:00Z"
+### Phase 2.3: Drive each entry through its phase sequence
 
-  - id: note-010
-    type: note
-    status: pending
-    target: "note title here"
-    target_path: "{DOMAIN:note_collection}/path/to/note.md"
-    batch: source-name
-    file: source-name-010.md
-    current_phase: reflect
-    completed_phases: [structure]
-```
-
-If the queue file is empty, report: "Queue is empty. Use /pipeline to add sources."
-
-### Phase 2.2 Filter Tasks
-
-Build a list of **actionable tasks** — tasks where `status == "pending"`. Order by position in the tasks array (first = highest priority).
-
-The `phase_order` header defines the phase sequence:
-- `note`: reflect -> reweave -> verify
-- `enrichment`: reflect -> reweave -> verify
-
-Note tasks exit /structure with `current_phase: reflect` and `completed_phases: [structure]` — the materialization (create/enrich) has already been done by /structure, so the pipeline never routes to `create` or `enrich` directly.
-
-### Phase 2.3 Loop
-
-Process the filtered tasks in a loop. For each iteration:
-
-### Phase 2.3.1 Select Next Task
-
-Pick the first pending task from the filtered list. Read its queue metadata.
+For each entry in the work list (index `i`, total `N`):
 
 Report:
 ```
-=== Processing task {i}/{N}: {id} — phase: {current_phase} ===
-Target: {target}
-File: {file}
+=== Processing task {i}/{N}: {id} — {target} ===
 ```
 
-### Phase 2.3.2 Invoke Skill
+Look up `phase_order` for the entry's `type` (`note` or `enrichment`) from the queue file header. The sequence is `[reflect, reweave, verify]` for both types.
 
-| Current Phase | Skill to invoke |
-|-------|-----------------|
-| process | /structure or /capture based on granularity |
-| reflect | /{vocabulary.reflect} |
-| reweave | /{vocabulary.reweave} |
-| verify | /{vocabulary.verify} |
+For each phase in the sequence, in order:
 
-Use Skill tool to invoke the appropriate skill based on the task's `current_phase` and `granularity`.
+1. **Invoke the phase skill** via the Skill tool, passing `ops/queue/<entry.file>` (the full task file path) as argument. Always include the `ops/queue/` prefix — downstream skills rely on the argument being a complete path and will NOT `find`/`ls` to relocate it.
+2. **Parse the chat return:**
+   - Extract the `**Status:**` line. If not `ok`, stop the pipeline and surface the error with the current task id and phase.
+   - Extract the `**Queue:**` line for the progress log.
+   - Extract non-NONE Learnings entries and append them to the batch's Learnings accumulator.
+3. **Report phase completion:**
+   ```
+   {id}: {phase} done — queue: {queue-line}
+   ```
 
-Pass the `task.file` as argument to the skill.
+The sub-skill has already updated `queue.json` by the time its chat return lands. The orchestrator trusts the chat signal and does not re-read the file.
 
-### Phase 2.3.3 Evaluate Return
+### Phase 2.4: Post-batch cross-connect
 
-When the subagent returns:
+After all entries in the work list have completed their phase sequences, if the batch contains 2 or more completed note entries:
 
-1. **Look for HANDOFF block** — search for `=== HANDOFF:` and `=== END HANDOFF ===` markers
-2. **Parse handoff block:** Parse the Work Done, Learnings, and Queue Updates sections
-3. **Capture learnings:** If Learnings section has non-NONE entries, note them for the final report
+Collect all note paths from the in-memory work list (each entry's `target_path`). Then verify sibling connections exist between batch notes — add any that were missed because sibling notes did not exist yet when the earlier claim's reflect ran. Check backward link gaps.
 
-### Phase 2.3.4 Update Queue (Phase Progression)
-
-After evaluating the return, advance the task to the next phase.
-
-**Phase progression logic:**
-
-Look up `phase_order` from the queue header to determine the next phase. Find `current_phase` in the array.
-
-**If NOT the last phase** — advance to next:
-- Set `current_phase` to the next phase in the sequence
-- Append the completed phase to `completed_phases`
-
-**If the last phase** (verify) — mark task done:
-- Set `status: done`
-- Set `completed` to current UTC timestamp
-- Set `current_phase` to null
-- Append the completed phase to `completed_phases`
-
-**For process tasks ONLY:** Re-read the queue after marking done. The processing skill (/structure or /capture) writes new task entries (1 entry per materialized note/enrichment with `current_phase: reflect` and `completed_phases: [structure]`) to the queue during execution. The lead must pick these up for subsequent iterations.
-
-### Phase 2.3.6 Report Progress
-
-```
-=== Task {id} complete ({i}/{N}) ===
-Phase: {current_phase} -> {next_phase or "done"}
-```
-
-If learnings were captured, show a brief summary.
-If more unblocked tasks exist, show the next one.
-
-### Phase 2.3.7 Re-filter Tasks
-
-Before the next iteration, re-read the queue and re-filter tasks. Phase advancement may have changed eligibility.
-
----
-
-## Phase 2.4: Post-Batch Cross-Connect
-
-After advancing a task to "done" (Phase 2.3.4), check if ALL tasks in that batch now have `status: "done"`. If yes and the batch has 2 or more completed claims:
-
-1. **Collect all note paths** from completed batch tasks. For each note task with `status: "done"`, read the task's `target_path` field from the queue entry.
-
-2. **Do cross-connect validation**:
-
-Notes created in this batch:
-{list of ALL note titles + paths from completed batch tasks}
-
-Verify sibling connections exist between batch notes. Add any that were missed
-because sibling notes did not exist yet when the earlier claim's reflect ran.
-Check backward link gaps.
-
-**Skip if:** batch has only 1 claim (no siblings) or tasks from the batch are still pending.
+**Skip if:** the batch has only 1 note (no siblings possible).
 
 ---
 
 ## Phase 3: Verify Completion
 
-After Phase 2 finishes, verify all tasks for this batch are done.
+Re-read `ops/queue/queue.json` once. Count entries where `batch == <batch-id>` AND `status != "done"`.
 
-Check the queue: count tasks for this batch that are NOT done.
+**If any remain:**
+- Report which tasks are incomplete and at which phase (from the queue).
+- Show the specific task ids and their `current_phase`.
+- Do NOT proceed to archive.
 
-**If tasks remain pending:**
-- Report which tasks are incomplete and at which phase
-- Show the specific task IDs and their current_phase
-- Do NOT proceed to archive
-
-**If all tasks are done:** Proceed to Phase 4.
+**If all done:** proceed to Phase 4.
 
 ---
 
@@ -281,15 +186,11 @@ Files Modified:
 - {DOMAIN:note_collection}/ ({N} new {DOMAIN:note_plural})
 - ops/queue/archive/{date}-{batch_id}/ (archived)
 
-Learnings:
+Learnings (aggregated from all phases):
 - [Friction]: {description} | NONE
 - [Surprise]: {description} | NONE
 - [Methodology]: {description} | NONE
 - [Process gap]: {description} | NONE
-
-Queue Updates:
-- All tasks for batch {batch_id} marked done and archived
-=== END HANDOFF ===
 ```
 
 ---

@@ -12,7 +12,7 @@
 | Generated CLAUDE.md composition | `generators/claude-md.md`  |
 | Generated `/ask` skill | `generators/ask-router.md`  |
 | Feature reference generation | `generators/features/*.md` → `ops/features/*.md` |
-| Architectural invariants (13 primitives) | `reference/kernel.yaml` |
+| Architectural invariants (14 primitives) | `reference/kernel.yaml` |
 | Research graph (242 claims) | `methodology/*.md` — indexed via `reference/claim-map.md` |
 | Hook behavior | `hooks/hooks.json` + `hooks/scripts/*.sh` |
 | Plugin manifest / version | `.claude-plugin/plugin.json` |
@@ -33,7 +33,7 @@ docs/             superpowers/{plans,specs}          design specs
 
 ## Core Concepts
 
-1. **Kernel** — 13 invariant primitives every generated vault must satisfy. `reference/kernel.yaml`.
+1. **Kernel** — 14 invariant primitives every generated vault must satisfy. `reference/kernel.yaml`.
 2. **Three-space architecture** — `self/` (agent mind) · `notes/` (knowledge graph) · `ops/` (coordination). Names adapt per domain; separation is invariant. `reference/three-spaces.md`.
 3. **Derivation, not templating** — engine reasons from claims to architecture. Every dimension choice traces to research. `reference/dimension-claim-map.md`.
 4. **5 Rs pipeline** — Record, Reduce, Reflect, Reweave, Verify. One skill per R.
@@ -57,7 +57,7 @@ Each `SKILL.md` uses `{DOMAIN:…}` placeholders that the derivation engine rewr
 
 | File | Content |
 |---|---|
-| `kernel.yaml` | 13 invariants |
+| `kernel.yaml` | 14 invariants |
 | `three-spaces.md` | self/notes/ops architecture |
 | `components.md` | per-component build blueprints |
 | `methodology.md` | portable TFT research distillation |
@@ -71,8 +71,6 @@ Each `SKILL.md` uses `{DOMAIN:…}` placeholders that the derivation engine rewr
 | `session-lifecycle.md` | orient / work / persist spec |
 | `self-space.md` | agent-identity generation guide |
 | `semantic-vs-keyword.md` | search modality selection |
-| `derivation-validation.md` | 9 coherence tests |
-| `testing-milestones.md` | 7 validation layers |
 | `templates/` | `moc.md`, `note.md` |
 
 ## generators/features/ (composable CLAUDE.md blocks)
@@ -91,7 +89,7 @@ One file per feature; `skills/setup/` enables a subset based on derived config:
 ## Working in This Repo
 
 - **Do not scaffold a vault here.** Hooks are gated by `vaultguard.sh`; leave it that way.
-- **Derivation changes are high blast radius.** After touching `skills/setup/SKILL.md`, `reference/interaction-constraints.md`, or `reference/tradition-presets.md`, rerun the tests in `reference/derivation-validation.md`.
+- **Derivation changes are high blast radius.** `skills/setup/SKILL.md`, `reference/interaction-constraints.md`, and `reference/use-case-presets.md` shape every generated vault — change them carefully.
 - **Research claims are the source of truth.** Back configuration decisions via `reference/claim-map.md` + `methodology/`. New claims: one file per claim, prose-as-title, wiki-linked.
 - **Don't duplicate `README.md`.** Product pitch and install steps live there only.
 - **Check `todo.md`** before proposing overlapping changes.

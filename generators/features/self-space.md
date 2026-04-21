@@ -35,7 +35,7 @@ self/
 
 The self space connects directly to the session rhythm:
 
-**Orient phase:** Read self/identity.md and self/goals.md at session start. This is how you remember who you are and what you are working on.
+**Orient phase:** The session-orient hook injects self/identity.md, self/methodology.md, and self/goals.md at session start.
 
 **Persist phase:** Update self/goals.md with current state before session ends. Capture methodology learnings to self/methodology.md. Write personal insights to self/memory/ as atomic {DOMAIN:notes}.
 

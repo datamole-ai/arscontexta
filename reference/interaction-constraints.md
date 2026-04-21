@@ -51,7 +51,7 @@ These constraints apply to the 13 kernel primitives and their INVARIANT/CONFIGUR
    → BLOCK: "Self space is INVARIANT. self/ with identity.md, methodology.md, and goals.md is required in every vault; the agent's persistent memory cannot be disabled at the config level."
 
 6. `semantic_search == false` (Primitive 10)
-   → BLOCK: "Semantic search is INVARIANT. Processing skills (/reflect, /verify, /structure, /seed, /reweave) call mcp__qmd__query directly. It cannot be disabled at the config level; if qmd is not installed, the wiring is still generated and the install is surfaced as a required next step."
+   → BLOCK: "Semantic search is INVARIANT. Processing skills (/reflect, /verify, /structure, /seed, /reweave) call `qmd query` via Bash directly. It cannot be disabled at the config level; if qmd is not installed, the wiring is still generated and the install is surfaced as a required next step."
 
 **Condition-based maintenance constraints:**
 

@@ -109,26 +109,8 @@ These hold across all generated systems:
 |-----------|----------|-----------|
 | `derivation.md` | The original derivation rationale — dimension positions, tradition mapping, vocabulary choices, rationale for each decision | Semi-permanent — rarely updated |
 | `derivation-manifest.md` | Version tracking — arscontexta version, research snapshot date, feature blocks enabled, coherence validation results | Semi-permanent |
-| `reminders.md` | User-delegated time-bound actions — flat markdown, checked at orient, items removed on completion | Active rotation — items added and removed regularly |
 | `health/` | Schema validation results, orphan lists, link health metrics — point-in-time snapshots | Superseding — yesterday's report is superseded by today's |
 | `queue/` | Processing queue state — what needs extraction, connection, verification | Flowing — items move through and complete |
-
-### Reminders Specification
-
-`ops/reminders.md` is a flat markdown file for user-delegated time-bound actions:
-
-```markdown
-# Reminders
-
-- [ ] 2026-02-15: Follow up with Sarah about the new job
-- [ ] 2026-03-01: Follow up with Sarah about job offer
-- [x] 2026-02-10: Send reading list to Alex (done 2026-02-10)
-```
-
-**Behavior:**
-- Checked at orient (session start) — due items surface in the morning briefing
-- Completed items are marked with `[x]` and date, then archived when the list grows long
-- No complex scheduling — if the user needs recurring reminders, that's a different tool
 
 ### Content Promotion Rule
 
@@ -210,7 +192,6 @@ project-root/
 └── ops/
     ├── derivation.md
     ├── derivation-manifest.md
-    ├── reminders.md
     ├── health/
     └── queue/
 ```
@@ -283,7 +264,6 @@ Is this about the agent itself?
 | "Queue has 12 items" | ops/queue/ | Temporal coordination state |
 | "Schema validation passed" | ops/health/ | Point-in-time diagnostic |
 | "My goal this quarter is..." | self/goals.md | Agent orientation |
-| "Remember to follow up by Friday" | ops/reminders.md | Time-bound action |
 
 ---
 

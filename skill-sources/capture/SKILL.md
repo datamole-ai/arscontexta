@@ -42,8 +42,16 @@ All graph participation happens OUTSIDE the fenced block:
 
 **Target: $ARGUMENTS**
 
-Parse the source file path from arguments. If no argument is provided, end immediately with: report
-`ERROR: capture requires source file path from /pipeline`.
+Parse the process task file path from arguments (e.g. `ops/queue/my-source.md`). If no argument is provided, end immediately with: report
+`ERROR: capture requires process task file path`.
+
+Read the task file's YAML frontmatter to obtain:
+- `id` — the batch id (source basename)
+- `source` — the archived source file path
+- `granularity` — must equal `capture` (error out otherwise)
+- `next_claim_start` — first claim number to use
+
+All subsequent references to "the source" use the `source` value from the task file.
 
 **START NOW.** Capture the source.
 
@@ -135,54 +143,102 @@ Topics:
 - All five required fields present in frontmatter: `content_type`, `granularity: capture`, `description`, `created_at`, `tags`
 - File written to flat `{vocabulary.note_collection}/[title].md` — routing is by `granularity` frontmatter, not by subdirectory
 
+### 6.5. Create Per-Note Task File
+
+Capture creates exactly one note per invocation so downstream phases (reflect, reweave, verify) have a place to write their section.
+
+Task file filename: `ops/queue/{batch}-{NNN}.md` where `NNN` = `next_claim_start` (zero-padded 3 digits).
+
+Frontmatter:
+
+```yaml
+---
+id: note-{NNN}
+batch: {batch}
+file: {batch}-{NNN}.md
+granularity: capture
+type: note
+source_task: {batch}
+target_path: {vocabulary.note_collection}/{note title}.md
+current_phase: reflect
+---
+```
+
+Body:
+
+```markdown
+# Note {NNN}: {note title}
+
+Source: [[{source filename}]]
+
+## Capture
+(filled by /capture in the Output Block below)
+
+## {vocabulary.cmd_reflect}
+(to be filled by {vocabulary.cmd_reflect} phase)
+
+## {vocabulary.cmd_reweave}
+(to be filled by {vocabulary.cmd_reweave} phase)
+
+## {vocabulary.cmd_verify}
+(to be filled by {vocabulary.cmd_verify} phase)
+```
+
 ### 7. Create Queue Entry
 
 Create one queue entry:
 
 ```json
 {
-  "id": "[batch]-cap-001",
+  "id": "note-{NNN}",
   "type": "note",
   "granularity": "capture",
   "status": "pending",
   "target": "[note title]",
-  "batch": "[source-name]",
+  "target_path": "{vocabulary.note_collection}/{note title}.md",
+  "batch": "{batch}",
+  "file": "{batch}-{NNN}.md",
   "created": "[UTC timestamp]",
   "current_phase": "reflect",
-  "completed_phases": ["create"]
+  "completed_phases": ["capture"]
 }
 ```
+
+Additionally: set the process task entry's status to "done" and add a "completed" timestamp before writing the file.
 
 No enrichment tasks — capture does not analyze content deeply enough to spot enrichment opportunities.
 
 ---
 
-## HANDOFF Output
+## Output Block
 
-After creating the queue entry, always output the HANDOFF block:
+After materializing the note, writing the per-note task file, and updating `ops/queue/queue.json` (mark process task done + append the note entry), emit the canonical block below. Write the same block into the per-note task file's `## Capture` section AND echo it as the final chat message. This is the ONLY chat output.
 
 ```
-=== HANDOFF: capture ===
-Target: [source file]
+## Capture
 
-Work Done:
-- Captured [source] as verbatim note
-- Created queue entry: [id]
+**Target:** {batch-id}
+**Status:** ok | error: {short message}
+**Queue:** marked {batch-id}: process -> done; created 1 note entry (current_phase: reflect)
 
-Files Modified:
-- {vocabulary.note_collection}/[note title].md
+### Work
+- Captured {source} verbatim as [[{note title}]]
+- Created queue entry: note-{NNN}
+- Created per-note task file: ops/queue/{batch}-{NNN}.md
+
+### Files Modified
+- {vocabulary.note_collection}/{note title}.md
+- ops/queue/{batch}-{NNN}.md
 - ops/queue/queue.json
 
-Learnings:
-- [Friction]: [description] | NONE
-- [Surprise]: [description] | NONE
-- [Methodology]: [description] | NONE
-- [Process gap]: [description] | NONE
-
-Queue Updates:
-- Create: [id] (current_phase: "reflect")
-=== END HANDOFF ===
+### Learnings
+- [Friction]: {description} | NONE
+- [Surprise]: {description} | NONE
+- [Methodology]: {description} | NONE
+- [Process gap]: {description} | NONE
 ```
+
+On error, set `Status: error: <message>`, `Queue: no change (error)`, and leave `queue.json` and the target filesystem unchanged.
 
 ---
 

@@ -2,7 +2,7 @@
 name: verify
 description: Internal pipeline skill — runs recite + validate + review quality gate on a note. Invoked by /pipeline as a subagent; do not invoke directly.
 context: fork
-allowed-tools: Read, Write, Edit, Grep, Glob, mcp__qmd__query
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 ---
 
 ## Runtime Configuration
@@ -12,6 +12,11 @@ allowed-tools: Read, Write, Edit, Grep, Glob, mcp__qmd__query
 All output must use domain-native terms.
 Derivation manifest for vocabulary mapping:
 !`cat ops/derivation-manifest.md`
+
+### Task Queue
+
+Current task queue:
+!`cat ops/queue/queue.json`
 
 ### Templates
 
@@ -29,8 +34,16 @@ After reading the target {vocabulary.note}, check its `granularity` frontmatter 
 
 **Target: $ARGUMENTS**
 
-Parse the {vocabulary.note} path from arguments. If no argument is provided, end immediately with: report
-`ERROR: verify requires {vocabulary.note} path`.
+Parse the note task file path from arguments (e.g. `ops/queue/<basename>-NNN.md`). The argument IS the full path to the task file — do NOT `find`/`ls` to relocate it; Read it directly. If no argument is provided, end immediately with: report
+`ERROR: verify requires note task file path`.
+
+Read the task file's YAML frontmatter to obtain:
+- `id` — this entry's queue id
+- `target_path` — the path to the {vocabulary.note} being verified
+- `batch` — the batch id
+- `granularity` — routes verification depth
+
+All subsequent references to "the {vocabulary.note}" use the `target_path` value from the task file.
 
 **START NOW.**
 
@@ -78,7 +91,9 @@ NOW read the complete note. Compare against your prediction.
 
 Test whether the description enables semantic retrieval:
 
-- `mcp__qmd__query` with query = "[the note's description text]", collection = "{vocabulary.notes_collection}", limit = 10
+```bash
+qmd query $'vec: [the note description text]' --collection {vocabulary.notes_collection} -n 10
+```
 
 Check where the note appears in results:
 - Top 3: description works well for semantic retrieval
@@ -229,36 +244,50 @@ Apply fixes for clear-cut issues:
 
 ### Step 5: Compile Results
 
-Combine all checks and resuslts into the HANDOFF output.
+Combine all checks and results into the Output Block.
 
-## HANDOFF Output
+## Queue Self-Update
 
-Always output this structured format at the END of the session:
+Before emitting the Output Block, update `ops/queue/queue.json`:
+
+1. Read the file.
+2. Locate the entry with `id` matching the task file's `id`.
+3. Append `"verify"` to `completed_phases`.
+4. Set `status: "done"`, `current_phase: null`, `completed: "<ISO UTC now>"`.
+5. Write the file back.
+
+If reading or writing fails, do NOT emit a successful Output Block. Emit `Status: error: queue write failed` with `Queue: no change (error)` and stop.
+
+## Output Block
+
+After finishing verification (recite + validate + review + any auto-fixes), perform queue self-update (next subsection — final phase, so mark done) and then emit the canonical block below. Write the same block into the task file's `## Verify` section AND echo it as the final chat message. This is the ONLY chat output.
 
 ```
-=== HANDOFF: verify ===
-Target: [[note name]]
+## Verify
 
-Work Done:
-- Recite: prediction N/5, retrieval #N, [pass/fail]
-- Validate: [PASS/WARN/FAIL] (N checks, M warnings, K failures)
-- Review: [PASS/WARN/FAIL] (N checks, M issues)
+**Target:** [[{target note title}]]
+**Status:** ok | error: {short message}
+**Queue:** marked {id}: verify -> done
+
+### Work
+- Recite: prediction {N}/5, retrieval #{N}, [pass/fail]
+- Validate: [PASS/WARN/FAIL] ({N} checks, {M} warnings, {K} failures)
+- Review: [PASS/WARN/FAIL] ({N} checks, {M} issues)
 - Description improved: [yes/no]
 
-Files Modified:
-- {DOMAIN:note_collection}/[note].md (description improved, if applicable)
-- [task file path] (Verify section updated, if applicable)
+### Files Modified
+- {vocabulary.note_collection}/[note].md (description improved, if applicable)
+- {task file path} (## Verify section)
+- ops/queue/queue.json (marked {id} done)
 
-Learnings:
+### Learnings
 - [Friction]: [description] | NONE
 - [Surprise]: [description] | NONE
 - [Methodology]: [description] | NONE
 - [Process gap]: [description] | NONE
-
-Queue Updates:
-- Mark: verify done for this task
-=== END HANDOFF ===
 ```
+
+On error, set `Status: error: <message>`, `Queue: no change (error)`, and leave `queue.json` unchanged.
 
 ---
 

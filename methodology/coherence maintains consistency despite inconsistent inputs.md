@@ -69,7 +69,7 @@ How do I detect contradictions? Currently relying on:
 - memory during reflection
 
 Could add:
-- semantic similarity checks (qmd vsearch for near-duplicates with different conclusions)
+- semantic similarity checks (`qmd query $'vec: …'` for near-duplicates with different conclusions)
 - explicit contradiction flags (tension notes in 04_meta/logs/tensions/)
 - confidence metadata on claims
 - predict-then-verify cycles that surface description-content divergence

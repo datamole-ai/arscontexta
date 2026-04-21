@@ -3,7 +3,7 @@ name: structure
 description: Internal pipeline skill — groups claims from source material into structured notes. Invoked by /pipeline as a subagent; do not invoke directly.
 version: "1.0"
 context: fork
-allowed-tools: Read, Write, Grep, Glob, mcp__qmd__query
+allowed-tools: Read, Write, Grep, Glob, Bash
 ---
 
 ### Vocabulary
@@ -19,42 +19,9 @@ Current task queue:
 
 ---
 
-## THE MISSION (READ THIS OR YOU WILL FAIL)
+## Core Principle
 
-You are the structuring engine. Raw source material enters. Finished, schema-valid {vocabulary.note_plural} exit — either newly written or enriched in place. Your job spans five phases: identify topic clusters, classify each against the existing graph, materialize the artifact (new note or enrichment to an existing note), queue it for downstream processing, and emit a single handoff block.
-
-### The Core Principle
-
-**Structure is the only producer in the Reduce phase.** No separate create or enrich skill runs after you — the pipeline hands newly materialized artifacts directly to /reflect. Your job is to find the best groupings AND produce the resulting notes with full schema compliance. The default is to group. Split only when keeping claims together actively confuses or misleads.
-
-### The Grouping Principle
-
-**For every source, COMPREHENSIVE STRUCTURING is the default.** This means:
-
-1. **Identify ALL topic clusters** — groups of claims that share context, evidence, or argument threads.
-2. **Keep related claims together** — claims that share evidence base, form a sequential argument, need each other for context, or address the same question from different angles.
-3. **Split unrelated topics** — when claims are genuinely independent (different evidence, different questions, no shared context), they become separate structure notes.
-
-### The Grouping Question (ask for EVERY cluster)
-
-**"Would keeping these claims together confuse or mislead the reader?"**
-
-If NO -> keep together in one structure note (this is the default)
-If YES -> split into separate structure notes
-
-### Grouping Signals (the default)
-
-- They share the same evidence base
-- They form a sequential argument (A leads to B leads to C)
-- They provide mutual context (understanding one deepens the other)
-- They address the same question from different angles
-- They come from the same analytical framework applied to the same subject
-
-### Split Only When Grouping Hurts
-
-- Sections would actively confuse if someone linked to the whole note
-- Topics are so unrelated that a reader would wonder why they're together
-- The combined note obscures rather than illuminates each claim
+**Structure is the only producer in the Reduce phase.** No separate create or enrich skill runs after you — the pipeline hands newly materialized artifacts directly to /reflect. Your job is to find the best groupings AND produce the resulting notes with full schema compliance. Default to grouping; split only when keeping claims together actively confuses. (Full philosophy, grouping signals, and split signals are below under `# Structure` and `## Workflow`.)
 
 ---
 
@@ -62,8 +29,17 @@ If YES -> split into separate structure notes
 
 **Target: $ARGUMENTS**
 
-Parse the source file path from arguments. If no argument is provided, report
-`ERROR: structure requires source file path` and stop.
+Parse the process task file path from arguments (e.g. `ops/queue/my-source.md`). The argument IS the full path to the task file — do NOT `find`/`ls` to relocate it; Read it directly. If no argument is provided, report
+`ERROR: structure requires process task file path` and stop.
+
+Read the task file's YAML frontmatter to obtain:
+- `id` — the batch id (source basename)
+- `source` — the archived source file path to process
+- `archive_folder` — where the source lives
+- `next_claim_start` — first claim number to use
+- `granularity` — must equal `structure` (error out otherwise)
+
+All subsequent references to "the source" use the `source` value from the task file.
 
 **START NOW.** Reference below explains methodology — use to guide, not as output.
 
@@ -193,6 +169,8 @@ done
 
 Scan descriptions to understand current {vocabulary.note_plural}. This prevents duplicate structuring and helps identify enrichment opportunities.
 
+**Classification-only reading.** Descriptions scanned here inform routing (new note vs. enrichment, which topic applies). Neighbor content does not flow into a new note's body — bodies draw from the source file alone.
+
 ### 2. Read Source Fully
 
 Read the ENTIRE source. Understand what it contains, what topics it covers, what claims are related.
@@ -222,40 +200,18 @@ Group candidates by shared context, evidence, or argument thread. Default to gro
 
 For each cluster, check if existing notes already cover the topic:
 
-```
-mcp__qmd__query  query="[cluster scope as sentence]"  collection="{vocabulary.notes_collection}"  limit=5
-```
-
-If MCP is unavailable (e.g. running inside a subagent that does not inherit MCP access), use the CLI:
 ```bash
-qmd vsearch "[cluster scope as sentence]" --collection {vocabulary.notes_collection} -n 5
+qmd query $'vec: [cluster scope as sentence]' --collection {vocabulary.notes_collection} -n 5
 ```
 If qmd itself is not installed, stop and tell the user to install it — semantic search is an invariant kernel primitive and duplicate detection cannot safely run on keyword grep alone.
 
 **Enrichment check:** If an existing note covers similar scope, does the source add new claims or detail? If YES, create enrichment task rather than new note.
 
-### 5. Present Findings
+**Classification-only.** Search results drive enrichment-vs-new-note routing. On the new-note path, results do NOT contribute content to the new note's body. (The enrichment path is different by design — it reads the target note's body because it is modifying that note.)
 
-Append the grouping structure below to the source task file's `## Outputs` section. No chat output.
+### 5. Proposed Groupings
 
-Grouping structure:
-
-```
-## Proposed Structure Notes
-
-### 1. [proposed title]
-Sub-claims:
-- [claim A]
-- [claim B]
-- [claim C]
-Rationale: [why these belong together]
-
-### 2. [proposed title]
-...
-
-### Enrichments
-- [[existing note]] — [what new detail to add]
-```
+Keep the grouping analysis in working memory — it becomes the `### Work` section of the Output Block written after materialization. Do not write a separate `## Outputs` section to the task file; the `## Structure` block is the single record.
 
 ### 6. Write Notes
 
@@ -417,8 +373,9 @@ The `_schema` block is metadata ABOUT the template; it is NOT included in the ou
 **Body (prescriptive rules):**
 - Develop the claim. Do not just assert it. Show WHY, provide context, show the reasoning chain.
 - Use connective words: because, therefore, this suggests, however, in contrast, building on.
-- Use inline wiki-links as prose where genuine connections exist: "Since [[other note]], the question becomes..." or "This contradicts [[existing claim]] because..."
+- Do not include wiki-links in the body. Connection-finding belongs to `/reflect`, which runs semantic search and verifies targets before writing links. Pre-seeding links here produces dangling links and duplicates reflect's work without its verification.
 - Reference the source material's evidence and reasoning — do not invent unsupported claims.
+- Body is sourced from the input file only. Neighbor notes read during Orient or Semantic Search inform classification, not composition. Do not import their claims, framings, or evidence into this note. If it is not in the source, do not write it.
 - If the cluster is "open" (needs investigation), acknowledge what remains unresolved.
 - If the reasoning is not provided in the source, do not make it up.
 
@@ -431,20 +388,17 @@ For structure notes, body sections each develop one sub-claim within the shared 
 
 Source: [[source filename]]
 
-Relevant Notes:
-- [[related note]] — relationship context explaining WHY to follow the link
-
 Topics:
 - [[parent-topic-map]]
 ```
 
-Derive `Source:` from the structure task's source. `Relevant Notes:` includes the semantic neighbor (if classification found one) as the first entry with a context phrase ("extends this by...", "contradicts because...", "provides the evidence base for..."); add other genuine connections discovered while writing. Bare links are not allowed. `Topics:` lists the {vocabulary.topic_map}(s) identified in M2 — at least one entry, used as orientation for readers (the MOC's `## Core Ideas` list remains the canonical membership index).
+Derive `Source:` from the structure task's source. `Topics:` lists the {vocabulary.topic_map}(s) identified in M2 — at least one entry, used as orientation for readers (the MOC's `## Core Ideas` list remains the canonical membership index). Reflect adds a `Relevant Notes:` section after running semantic search on the finished note; structure does not produce that section.
 
 ### M4. Schema Validation (run in order)
 
-See the Shared Helpers appendix for the full 6-check validation procedure. Severity rules:
-- **FAIL** — missing required field, invalid enum, constraint violation, empty description, empty Topics footer. FIX INLINE (edit the note) and re-validate. No FAIL-state notes get written.
-- **WARN** — broken wiki-link to a note that does not exist yet, missing optional field. Log and continue.
+See the Shared Helpers appendix for the full 7-check validation procedure. Severity rules:
+- **FAIL** — missing required field, invalid enum, constraint violation, empty description, empty Topics footer, any wiki-link in the body. FIX INLINE (edit the note) and re-validate. No FAIL-state notes get written.
+- **WARN** — broken footer wiki-link (typically a `Topics:` link to a not-yet-existent MOC, which `/reflect` creates), missing optional field. Log and continue.
 
 If validation FAILs cannot be resolved after one fix attempt, quarantine the artifact (see Shared Helpers) and continue with the next cluster.
 
@@ -477,16 +431,9 @@ tags: []
 
 Source: [[source filename]]
 
-Relevant Notes:
-- [[related claim]] — [why it relates: extends, contradicts, builds on]
-
 Topics:
 - [[relevant {vocabulary.topic_map}]]
 ```
-
-### Titles
-
-See "The Prose-as-Title Pattern (Scope Variant)" above for full guidance. The scope test: "someone linking to this note would expect to find [sections you wrote]"
 
 ### Description
 
@@ -510,17 +457,11 @@ Each section develops one sub-claim within the shared context. Sections should:
 
 Source: [[source filename]]
 
-Relevant Notes:
-- [[related note]] — extends this by adding the temporal dimension
-
 Topics:
 - [[relevant {vocabulary.topic_map}]]
 ```
 
-The relationship context explains WHY to follow the link:
-- Bad: "-- related"
-- Good: "-- contradicts by arguing for explicit structure"
-- Good: "-- provides the foundation this challenges"
+Reflect adds a `Relevant Notes:` section after running semantic search on the finished note. Structure does not produce that section; relationship-context guidance lives in `skill-sources/reflect/SKILL.md`.
 
 ---
 
@@ -561,7 +502,14 @@ TOTAL: ?
 
 ## Queue Management
 
-Structure produces the note and writes the queue entry in the same run. Task files exist only to carry downstream-phase output (reflect → reweave → verify → rethink) — they are created pre-populated with the work already done.
+Structure is self-serving: it writes per-artifact task files, appends queue entries for each artifact, and marks the process task done — all before emitting the Output Block. Task files carry downstream-phase output (reflect → reweave → verify); the queue carries lifecycle state.
+
+**Queue mutation sequence (run in order before emitting the Output Block):**
+
+1. Read `ops/queue/queue.json`.
+2. Set the process task entry's `status: "done"` and add `completed: "<ISO UTC now>"`.
+3. Append one new entry per artifact with the shape shown in "Queue Updates" below.
+4. Write the file back.
 
 ### Per-Artifact Task Files
 
@@ -575,6 +523,9 @@ After materializing each new note OR enrichment, create a task file in `ops/queu
 
 ```markdown
 ---
+id: note-NNN | enrich-EEE
+batch: [source-basename]
+file: [source-basename]-NNN.md | [source-basename]-EEE.md
 claim: "[the scope as a sentence]"
 classification: closed | open
 granularity: structure
@@ -582,6 +533,7 @@ type: note | enrichment
 source_task: [source-basename]
 semantic_neighbor: "[related note title]" | null
 target_path: [full path to the materialized or enriched note]
+current_phase: reflect
 ---
 
 # {Note NNN | Enrichment EEE}: [title or target name]
@@ -650,43 +602,40 @@ After creating task files, update `ops/queue/queue.json`:
 - Every task MUST have `"file"` pointing to its uniquely-named task file and `"target_path"` pointing to the materialized note.
 - Every task MUST have `"batch"` identifying which source batch it belongs to.
 
-### Handoff Output Format
+### Output Block
 
-After materializing all artifacts, creating task files, and updating the queue, output a single handoff block:
+After materializing all artifacts, writing per-artifact task files, and updating `ops/queue/queue.json` (mark process task done + append one pending entry per artifact), emit the canonical block below. Write the same block into the process task file's `## Structure` section (creating the section if absent) AND echo it as the final chat message. This is the ONLY chat output.
 
 ```
-=== HANDOFF: structure ===
-Target: [source file]
+## Structure
 
-Work Done:
-- Identified N topic clusters from [source]
-- Classified: {written} new, {enriched} enrichment, {skipped} duplicates
-- New notes written: {source}-NNN.md through {source}-NNN.md → paths: [list target_paths]
-- Enrichments applied: {source}-EEE.md through {source}-EEE.md → targets: [list target note titles with chosen mode]
+**Target:** {batch-id}
+**Status:** ok | error: {short message}
+**Queue:** marked {batch-id}: process -> done; created {W} note entries and {E} enrichment entries (current_phase: reflect)
+
+### Work
+- Identified {N} topic clusters from {source}
+- Classified: {W} new, {E} enrichment, {S} skipped as duplicates
+- New notes: [{list of note target_paths}]
+- Enrichments: [{list of target note titles with chosen mode}]
 - Quarantined: [list artifacts + reason, or "none"]
-- Descriptions flagged for refresh: [list target notes whose scope drifted, or "none"]
+- Descriptions flagged for refresh: [list target notes, or "none"]
 
-Files Modified:
-- {vocabulary.note_collection}/ ({written} new notes + {enriched} modified notes)
-- ops/queue/{source}-NNN.md (note task files)
-- ops/queue/{source}-EEE.md (enrichment task files)
-- ops/queue/queue.json (1 entry per materialized artifact, current_phase: "reflect")
-- ops/quarantine/ (any quarantined artifacts with .reason sidecars)
-- ops/tensions/ (any tension notes created during append-with-tension enrichments)
+### Files Modified
+- {vocabulary.note_collection}/ ({W} new notes + {E} modified notes)
+- ops/queue/ ({W+E} per-artifact task files)
+- ops/queue/queue.json (marked process task done, created {W+E} entries)
+- ops/quarantine/ (if any quarantined)
+- ops/tensions/ (if any append-with-tension enrichments)
 
-Summary: {written: N, enriched: M, quarantined: K}
-
-Learnings:
-- [Friction]: [description] | NONE
-- [Surprise]: [description] | NONE
-- [Methodology]: [description] | NONE
-- [Process gap]: [description] | NONE
-
-Queue Updates:
-- Mark: {source} done
-- Create: {written + enriched} entries (current_phase: "reflect", completed_phases: ["structure"])
-=== END HANDOFF ===
+### Learnings
+- [Friction]: {description} | NONE
+- [Surprise]: {description} | NONE
+- [Methodology]: {description} | NONE
+- [Process gap]: {description} | NONE
 ```
+
+On error, set `Status: error: <message>`, `Queue: no change (error)`, fill `### Work` with what got done before the failure, and leave `queue.json` unchanged.
 
 ---
 
@@ -726,7 +675,7 @@ After structuring completes, the created {vocabulary.note_plural} proceed throug
 
 Appendix referenced by both Materialize paths. Do not invoke independently.
 
-### Schema Validation (6 checks, run in order)
+### Schema Validation (7 checks, run in order)
 
 | # | Check | Severity | Action on Failure |
 |---|-------|----------|-------------------|
@@ -735,11 +684,12 @@ Appendix referenced by both Materialize paths. Do not invoke independently.
 | 3 | **Constraint compliance** — each field satisfies `_schema.constraints` (`max_length`, `format`, `fixed`) | FAIL | Fix violation, re-validate |
 | 4 | **Description quality** — adds info beyond the title (not a restatement, not empty) | FAIL | Rewrite description, re-validate |
 | 5 | **Topics footer present** — at least one wiki-link in the body-level `Topics:` footer | FAIL | Add topic link, re-validate |
-| 6 | **Wiki-link health** — `[[links]]` in body/footer point to files that exist | WARN | Log, continue |
+| 6 | **Body has no wiki-links** — body (content between the H1 heading and the `---` separator that precedes the footer) contains no `[[...]]` | FAIL | Remove body wiki-links, re-validate |
+| 7 | **Footer wiki-link health** — `[[links]]` in the `Source:` and `Topics:` footers resolve to existing files | WARN | Log, continue |
 
 **Severity levels:**
-- **FAIL** — missing required field, invalid enum, constraint violation, empty description, empty Topics footer. Fix inline (edit the content in memory) and re-validate. If a FAIL cannot be resolved after one fix attempt, quarantine the artifact.
-- **WARN** — broken wiki-link to a note that does not exist yet, missing optional field. Log the warning and continue. Broken links are common during batch creation — sibling notes may not exist yet.
+- **FAIL** — missing required field, invalid enum, constraint violation, empty description, empty Topics footer, any wiki-link present in the body. Fix inline (edit the content in memory) and re-validate. If a FAIL cannot be resolved after one fix attempt, quarantine the artifact.
+- **WARN** — broken footer wiki-link (most often a `Topics:` link to a not-yet-existent MOC), missing optional field. Log the warning and continue. Topic-map creation happens in `/reflect`; structure flags missing MOCs rather than blocking on them.
 
 ### Quarantine Procedure
 

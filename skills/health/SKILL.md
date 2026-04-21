@@ -3,7 +3,7 @@ name: health
 description: Run condition-based vault health diagnostics. 8 categories — schema compliance, orphan detection, link health, description quality, three-space boundaries, processing throughput, stale notes, MOC coherence. Returns actionable FAIL/WARN/PASS report with specific fixes ranked by impact. Triggers on "/health", "check vault health", "maintenance report", "what needs fixing".
 version: "1.0"
 context: fork
-allowed-tools: Read, Grep, Glob, Bash, mcp__qmd__query
+allowed-tools: Read, Grep, Glob, Bash
 ---
 
 ## Runtime Configuration (Step 0 — before any processing)
@@ -577,7 +577,7 @@ Recommended Actions (top 3, ranked by impact):
 
 Write every health report to `ops/health/YYYY-MM-DD-report.md`. If multiple reports are run on the same day, append a counter: `YYYY-MM-DD-report-2.md`.
 
-This creates a health history that /architect can reference when proposing evolution. Trends across reports reveal systemic patterns that individual reports miss.
+This creates a health history. Trends across reports reveal systemic patterns that individual reports miss.
 
 ---
 
@@ -656,11 +656,11 @@ Health report findings feed into other skills:
 | Schema violations | /verify | Run verification to fix specific schema issues |
 | Boundary violations | Manual restructuring | Move files to correct space |
 | Processing throughput | /structure, /capture, or /pipeline | Process inbox items to improve ratio |
-| {vocabulary.topic_map} oversized | Manual split or /architect | Split oversized {vocabulary.topic_maps} into sub-{vocabulary.topic_maps} |
+| {vocabulary.topic_map} oversized | Manual split | Split oversized {vocabulary.topic_maps} into sub-{vocabulary.topic_maps} |
 
 **The health-to-action loop:**
 ```
 /health (diagnose) -> specific findings -> specific skill invocation -> /health (verify fix)
 ```
 
-Health is diagnostic only — it measures state without prescribing changes. /architect reads health reports and proposes changes with research backing. The separation matters: health tells you WHAT is wrong, architect tells you WHY and HOW to fix it.
+Health is diagnostic only — it measures state without prescribing changes. The user, or the agent acting with user approval, decides which fixes to apply based on the report's ranked recommendations.

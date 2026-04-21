@@ -31,7 +31,7 @@ Guide the derivation engine in composing search modalities at query time. Semant
 
 **Summary:** Vector embeddings project text into a high-dimensional space where semantic similarity corresponds to geometric proximity. Two notes about "friction in learning systems" and "errors as pedagogical feedback" share no significant keywords but occupy nearby regions in embedding space. This is the core value proposition of semantic search: it finds connections that keyword search structurally cannot, because keyword search requires vocabulary overlap that semantic relatedness does not guarantee.
 
-**Derivation Implication:** Semantic search (`vector_search`) is always enabled and contributes most where vocabulary divergence is largest — typically in cross-domain systems and in pipelines with heavy processing that reformulates source material. The derivation engine does not toggle vector search on or off; it weights how much signal the vector component carries relative to BM25.
+**Derivation Implication:** Vector search (`qmd query $'vec: …'`) is always enabled and contributes most where vocabulary divergence is largest — typically in cross-domain systems and in pipelines with heavy processing that reformulates source material. The derivation engine does not toggle vector search on or off; it weights how much signal the vector component carries relative to BM25.
 
 **Source:** Mikolov et al., "Efficient Estimation of Word Representations in Vector Space" (2013). Operationally confirmed: the vault's qmd vector-search catches duplicates that BM25 misses entirely.
 
@@ -41,7 +41,7 @@ Guide the derivation engine in composing search modalities at query time. Semant
 
 **Summary:** Query expansion takes the user's original query and generates alternative formulations before searching. "Knowledge management friction" might expand to "obstacles in personal knowledge systems," "note-taking workflow bottlenecks," and "PKM failure patterns." Each expanded query runs against the embedding index, and results are merged. This compensates for the single-query blind spot where the searcher's phrasing might not match the embedding space's optimal representation of the concept.
 
-**Derivation Implication:** Query expansion is a feature of hybrid search mode (the qmd `deep_search` tool). It adds latency (~5-15 seconds) but significantly improves recall for exploratory searches. Generated systems should use expansion for connection-finding and deep exploration, not for quick lookups.
+**Derivation Implication:** Query expansion is a feature of hybrid search mode (the default `qmd query "…"` form). It adds latency (~5-15 seconds) but significantly improves recall for exploratory searches. Generated systems should use expansion for connection-finding and deep exploration, not for quick lookups.
 
 **Source:** Operational experience with qmd's expansion pipeline. Grounded in Rocchio relevance feedback (1971) adapted for neural retrieval.
 
@@ -53,7 +53,7 @@ Guide the derivation engine in composing search modalities at query time. Semant
 
 **Derivation Implication:** LLM reranking is the highest-quality search mode and should be reserved for tasks where connection quality matters most: reflect (finding connections for new notes), reweave (updating old notes), and exploratory research. It should NOT be the default for routine lookups.
 
-**Source:** Nogueira & Cho, "Passage Re-ranking with BERT" (2019). Operationally validated in the vault's qmd `deep_search` mode, which uses LLM reranking as the final stage.
+**Source:** Nogueira & Cho, "Passage Re-ranking with BERT" (2019). Operationally validated in the vault's default `qmd query "…"` mode, which uses LLM reranking as the final stage.
 
 ---
 
@@ -73,7 +73,7 @@ Guide the derivation engine in composing search modalities at query time. Semant
 
 **Summary:** When the agent is exploring a concept without knowing which notes are relevant, semantic search finds candidates that keyword search misses. Searching for "how agents maintain identity across sessions" might surface notes titled "session handoff creates continuity without persistent memory" and "closure rituals create clean breaks" — neither of which contains the words "identity" or "maintain" but both are deeply relevant. This is the canonical use case for embedding-based retrieval.
 
-**Derivation Implication:** Generated systems should route conceptual exploration to semantic search (`vector_search`). This applies to: the reflect phase (finding connections for a new note), pre-creation duplicate detection (does this claim already exist under different words?), and ad-hoc research queries. The context file should teach the agent when to switch from keyword to semantic.
+**Derivation Implication:** Generated systems should route conceptual exploration to semantic search (`qmd query $'vec: …'`, or the default `qmd query "…"` when reranking helps). This applies to: the reflect phase (finding connections for a new note), pre-creation duplicate detection (does this claim already exist under different words?), and ad-hoc research queries. The context file should teach the agent when to switch from keyword to semantic.
 
 **Source:** Vault operational experience. The claim "vector proximity measures surface overlap not deep connection" documents both the value and limitations of this modality.
 
@@ -85,7 +85,7 @@ Guide the derivation engine in composing search modalities at query time. Semant
 
 **Derivation Implication:** Every generated system runs hybrid retrieval (BM25 + vector) for connection-finding phases such as reflect and reweave. LLM reranking is added on top of the always-on hybrid pipeline when connection quality justifies the latency; it is a scoring refinement, not an enablement decision.
 
-**Source:** Vault operational experience. The reflect skill uses `mcp__qmd__query` (hybrid) because connection quality justifies the ~20s latency.
+**Source:** Vault operational experience. The reflect skill calls `qmd query` (bare form — full hybrid with expansion and reranking) because connection quality justifies the ~20s latency.
 
 ---
 
@@ -95,7 +95,7 @@ Guide the derivation engine in composing search modalities at query time. Semant
 
 **Derivation Implication:** Any generated system with a processing pipeline (reduce phase) should include semantic duplicate detection. The reduce skill should check each extracted claim against the existing note corpus via semantic search before creating a new note. This is a quality gate, not an optional convenience.
 
-**Source:** Vault operational experience. The reduce skill uses `mcp__qmd__query` for duplicate detection, and regularly catches duplicates that would be invisible to keyword search.
+**Source:** Vault operational experience. The reduce skill calls `qmd query $'vec: …'` (pure vector, no reranking) for duplicate detection, and regularly catches duplicates that would be invisible to keyword search.
 
 ---
 
@@ -103,9 +103,9 @@ Guide the derivation engine in composing search modalities at query time. Semant
 
 **Summary:** Testing whether a note's description enables retrieval means searching for the note using only its description, without the title. If semantic search (without LLM reranking) finds the note from its description alone, the description is doing its job as a retrieval filter. If it fails, the description needs improvement. Using reranking would hide bad descriptions behind the LLM's ability to infer relevance — the test must use raw vector similarity to expose weak descriptions.
 
-**Derivation Implication:** Generated systems with a verify or recite phase should use semantic search (`vector_search`, not `deep_search`) for description quality testing. The absence of reranking is intentional — it tests what agents will actually encounter during routine search.
+**Derivation Implication:** Generated systems with a verify or recite phase should use pure vector search (`qmd query $'vec: …'`, not the bare `qmd query "…"` form that reranks) for description quality testing. The absence of reranking is intentional — it tests what agents will actually encounter during routine search.
 
-**Source:** Vault operational experience. The recite and verify skills use `mcp__qmd__query` to test description findability, specifically avoiding the deep_search tool's reranking.
+**Source:** Vault operational experience. The recite and verify skills call `qmd query $'vec: …'` to test description findability, specifically avoiding the rerank stage that a bare `qmd query` would apply.
 
 ---
 
@@ -123,23 +123,23 @@ Guide the derivation engine in composing search modalities at query time. Semant
 
 #### Fallback chains prevent search failures from blocking work
 
-**Summary:** Search infrastructure can fail: MCP servers crash, embedding models fail to load, vector indices become corrupt. A system that depends entirely on semantic search for connection-finding will be blocked when semantic search fails. Dual discovery paths — semantic search plus structural navigation (MOC traversal + keyword search) — ensure that work continues regardless of search infrastructure state. The fallback is not a degraded mode; it is a parallel path that is always available.
+**Summary:** Search infrastructure can fail: the qmd CLI may be missing from PATH, embedding models may fail to load, vector indices may become corrupt or stale. A system that depends entirely on semantic search for connection-finding will be blocked when semantic search fails. Dual discovery paths — semantic search plus structural navigation (MOC traversal + keyword search) — ensure that work continues regardless of search infrastructure state. The fallback is not a degraded mode; it is a parallel path that is always available.
 
-**Derivation Implication:** Every generated system must include a fallback chain in its context file. The pattern: try semantic search first (MCP tool -> CLI tool with locking), fall back to keyword search + MOC traversal if semantic fails. Never let search failure block work.
+**Derivation Implication:** Every generated system must include a fallback chain in its context file. The pattern: try semantic search first (`qmd query` via Bash), fall back to keyword search + MOC traversal if qmd is unavailable or its index is stale. Never let search failure block work.
 
-**Source:** Vault operational experience. The three-tier fallback pattern (MCP -> bash with lock -> grep) was developed after MCP server crashes blocked pipeline processing.
+**Source:** Vault operational experience. The two-tier fallback pattern (qmd CLI -> grep/MOC) collapsed from an earlier three-tier MCP-based fallback once every invocation standardized on the CLI, which works uniformly from the main agent and subagents.
 
 ---
 
-### Semantic Search via MCP
+### Semantic Search via CLI
 
-#### Persistent semantic search via MCP servers
+#### Invoke qmd as a CLI subprocess
 
-**Summary:** Claude Code's MCP (Model Context Protocol) integration allows semantic search to run as a persistent server process. The qmd MCP server keeps embedding models loaded in memory between requests, eliminating the 5-10 second cold-start penalty of spawning a new process per query. This makes semantic search practical for interactive use and for pipeline phases that issue multiple queries. The MCP server also solves the parallel worker problem: a singleton LlamaCpp instance with reference-counted sessions prevents multiple workers from loading duplicate models into RAM.
+**Summary:** Every processing skill calls `qmd query` via Bash. The CLI standardizes behavior across contexts: the main agent, custom subagents spawned via Agent tool, and hook scripts all invoke the binary the same way, so there is no MCP-in-subagents limitation to work around. Model cold-start cost is real (roughly 5-10 seconds on first query per session) but is paid once per worker, not per query, because qmd keeps its embedding process warm for the duration of a batch.
 
-**Derivation Implication:** Generate MCP configuration (`.mcp.json`) that points to the semantic search server. Include collection definitions matching the system's folder structure. Document the MCP tool names in the context file so the agent knows which tools to call. Note the MCP-in-subagents limitation: custom agents spawned via Agent tool do not inherit MCP access, requiring the CLI fallback.
+**Derivation Implication:** No `.mcp.json` is generated and no MCP autoapprove list is needed. Processing skills declare `Bash` in `allowed-tools` and call `qmd query "…"` directly. The context file documents the structured query grammar (`lex:`, `vec:`, `hyde:`, `expand:`) and records which mode each skill uses.
 
-**Source:** Vault operational experience with qmd MCP server. The `.mcp.json` configuration and collection definitions are proven patterns.
+**Source:** Vault operational experience. The MCP-based invocation pattern was replaced with CLI calls to eliminate the subagent permission gap and the `.mcp.json` + autoapprove maintenance burden.
 
 ---
 
@@ -151,7 +151,7 @@ Guide the derivation engine in composing search modalities at query time. Semant
 
 **Derivation Implication:** Generated context files should include a search quality warning: "High similarity scores do not guarantee genuine connections. When using semantic search results, evaluate each candidate: does this note's argument actually relate to what you are searching for, or does it just use similar vocabulary?" This is especially important for the reflect phase where false connections degrade graph quality.
 
-**Source:** Research claim: "vector proximity measures surface overlap not deep connection." Vault operational experience: reflect phases using vector_search without reranking occasionally propose surface-similar but conceptually unrelated connections.
+**Source:** Research claim: "vector proximity measures surface overlap not deep connection." Vault operational experience: reflect phases using `qmd query $'vec: …'` without reranking occasionally propose surface-similar but conceptually unrelated connections.
 
 ---
 
@@ -171,7 +171,7 @@ Guide the derivation engine in composing search modalities at query time. Semant
 
 **Derivation Implication:** Generated context files that instruct agents on search usage should distinguish between query formulation for keyword search (short, focused terms) and query formulation for semantic search (natural language descriptions). A single instruction like "search for your concept" is insufficient — the agent needs to know how to phrase queries differently for each modality.
 
-**Source:** Vault operational experience. Full-length descriptions used as BM25 queries via `mcp__qmd__query` frequently returned zero results, while the same descriptions used via `mcp__qmd__query` returned accurate matches.
+**Source:** Vault operational experience. Full-length descriptions used as BM25 queries via `qmd query $'lex: …'` frequently returned zero results, while the same descriptions used via `qmd query $'vec: …'` returned accurate matches.
 
 ---
 

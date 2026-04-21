@@ -117,9 +117,9 @@ primitives:
     layer: convention
     requires: wiki-links
     enforcement: invariant
-    implementation: "Embedding tool (qmd >= 2, registered as MCP server). Always generated. If qmd is absent at generation time, the vault is scaffolded with full semantic-search wiring and the user is told to install qmd; skills degrade (not disable) until it is present."
+    implementation: "Embedding tool (qmd >= 2, invoked via CLI from Bash). Always generated. If qmd is absent at generation time, the vault is scaffolded with the SessionStart sync hook and the user is told to install qmd; skills degrade (not disable) until it is present."
     validation:
-      check: ".mcp.json declares the qmd MCP server with autoapprove entries. ops/config.yaml does not expose semantic-search as a toggle. Context file and processing skills reference mcp__qmd__query."
+      check: "ops/config.yaml does not expose semantic-search as a toggle. Context file and processing skills invoke `qmd query` via Bash. `.claude/hooks/qmd-sync.sh` is wired into SessionStart to keep the index current."
     cognitive_grounding: "Vocabulary divergence — same concept, different words. Structural graph traversal misses these connections. Treating semantic search as optional produced split-brain skills (one path assuming it, one path assuming keyword-only); making it invariant collapses that ambiguity."
 
   - id: unique-addresses

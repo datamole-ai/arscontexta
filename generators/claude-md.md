@@ -45,7 +45,6 @@ If any answer is "no," fix it before saving. Discovery-first is a creation const
 | {DOMAIN:Knowledge} claims, insights | {DOMAIN:note_collection}/ | Research findings, patterns, principles |
 | Raw material to process | {DOMAIN:inbox}/ | Articles, voice dumps, links, imported content |
 | Agent identity, methodology, preferences | self/ | Working patterns, learned preferences, goals |
-| Time-bound user commitments | ops/reminders.md | "Remind me to...", follow-ups, deadlines |
 | Processing state, queue, config | ops/ | Queue state, task files|
 | Friction signals, patterns noticed | ops/observations/ | Search failures, methodology improvements |
 

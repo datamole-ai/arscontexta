@@ -11,10 +11,9 @@ Every session follows three phases. This rhythm prevents context loss across ses
 
 Before doing anything, understand where you are:
 
-1. **Read identity and goals** — If self space is enabled, check self/identity.md and self/goals.md. If self space is off, check ops/ for current threads and the context file for identity. What was the last session working on?
-2. **Check condition-based triggers** — The session-orient hook checks key maintenance conditions (orphans, dangling links, inbox pressure, observation thresholds) and surfaces any that need attention. Run /health for the full diagnostic sweep.
-3. **Check reminders** — Read ops/reminders.md if it exists. Past sessions may have left explicit notes for future sessions.
-4. **Understand current state** — What {DOMAIN:notes} exist? What's in {DOMAIN:inbox/}? What does the graph look like?
+1. The session-orient hook injects your identity, methodology, goals, workspace tree, and maintenance signals at session start (startup, resume, clear). Do not re-read self/identity.md, self/methodology.md, or self/goals.md unless something is missing or stale.
+2. **Check condition-based triggers** — The hook surfaces key maintenance conditions (orphans, dangling links, inbox pressure, observation thresholds). Run /health for the full diagnostic sweep.
+3. **Understand current state** — What {DOMAIN:notes} exist? What's in {DOMAIN:inbox/}? What does the graph look like?
 
 **Orientation shortcuts:**
 - The workspace tree (injected at session start or loaded manually) tells you what files exist
@@ -58,7 +57,6 @@ Before ending a session, externalize what happened:
 1. **Update goals** — If self space is enabled, update self/goals.md with current state. If self space is off, update ops/ with current threads. Did you learn something about your methodology? Capture it.
 2. **Commit changes** — Every change must be committed. Nothing persists without this. `/pipeline` produces a single `Pipeline: {batch_id}` commit at the end of Phase 5; manual work, ad-hoc edits, and standalone `/archive-batch` runs require an explicit `git commit` with a clear message describing what changed and why.
 3. **Log what happened** — If the session produced observations or tensions, capture them as atomic notes in ops/observations/ or ops/tensions/. This is future-you's memory of what current-you learned.
-4. **Leave a handoff** — If work continues in the next session, leave a clear note about where you stopped and what's next. This can be in ops/reminders.md or a comment in the relevant task file.
 
 ### Handoff Protocol
 

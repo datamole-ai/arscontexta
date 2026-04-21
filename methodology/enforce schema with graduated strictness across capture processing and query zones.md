@@ -9,7 +9,7 @@ topics: ["[[schema-enforcement]]"]
 
 Schema enforcement is the data integrity layer that makes a knowledge vault queryable rather than browsable. Without it, the vault degrades from a structured graph database into an unstructured pile of files that happens to have YAML at the top. Since [[markdown plus YAML plus ripgrep implements a queryable graph database without infrastructure]], schema enforcement is what keeps that database functional — the YAML fields are the columns, and enforcement is what ensures the columns are populated.
 
-This doc tells the plugin WHEN to enforce, HOW strictly, and WHAT to enforce for each domain. It is consulted by /ask when users ask about schema compliance, by /architect when designing new note types, and by /recommend when diagnosing retrieval failures.
+This doc tells the plugin WHEN to enforce, HOW strictly, and WHAT to enforce for each domain. It is consulted by /setup when deriving note-type schemas, by /ask when users ask about schema compliance, and by /health when diagnosing retrieval failures.
 
 ## Why Non-Negotiable
 
@@ -162,14 +162,14 @@ When generating a new vault, the plugin:
 3. Creates validation hooks appropriate to the user's platform tier
 4. Explains the enforcement gradient: "Your notes will be checked for [critical fields]. Missing fields get flagged during processing, not blocked at capture."
 
-### For /architect (Extension)
+### For Manual Extension
 
-When a user adds a new note type:
-1. The plugin proposes a schema based on similar domains (since [[novel domains derive by mapping knowledge type to closest reference domain then adapting]])
+When a user adds a new note type by editing `ops/templates/note.md` or adding a new template:
+1. Propose a schema based on similar domains (since [[novel domains derive by mapping knowledge type to closest reference domain then adapting]])
 2. Critical fields are identified by asking: "What will you query this note type for?"
 3. The schema starts minimal and grows — since schema evolution follows observe-then-formalize not design-then-enforce
 
-### For /recommend (Maintenance)
+### For /health (Maintenance)
 
 When checking vault health:
 1. Count notes per type missing critical fields — report as "schema compliance"

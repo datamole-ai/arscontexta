@@ -205,16 +205,6 @@ Hooks automate session rhythm. A SessionStart hook injects the file tree and loa
 
 ---
 
-#### Reminders bridge time-bound commitments across sessions
-
-**Summary:** Goals.md tracks work threads; reminders.md tracks time-bound actions. "Follow up with Sarah by Friday" is not a goal — it is a deadline-bound action that should surface at the right time and disappear when completed. The reminders mechanism (ops/reminders.md as a simple checkbox list with dates) provides a lightweight way for the user to delegate time-sensitive actions to the agent without polluting goals.md with one-off items. At session start, the agent checks reminders.md for due items and surfaces them. This is not a calendar — it is a delegation mechanism for actions the user wants the agent to remind them about.
-
-**Derivation Implication:** Generated systems should include ops/reminders.md with a simple format: `- [ ] YYYY-MM-DD: action description`. The orient phase should include "check reminders.md for due items" as a standard step. This is lightweight enough for all configurations.
-
-**Source:** `three-spaces.md` — reminders specification. Time-bound actions and knowledge work goals serve different purposes and require different tracking mechanisms.
-
----
-
 #### Condition-based trigger evaluation replaces time-based scheduling in the orient phase
 
 **Summary:** At session start, the system evaluates a set of declared conditions against the current vault state. When a condition fires, it is surfaced in the orient output; /health provides the full on-demand diagnostic. This replaces all time-based scheduling (weekly health checks, monthly reviews, quarterly audits). Conditions respond to actual state: "topic MOC exceeds 50 notes" fires when it is true, not on a Tuesday. "Stale nodes exceed 20%" fires when graph metrics warrant it, not monthly. "Unprocessed sessions exceed N" fires when transcripts accumulate. Conditions do not stack during periods of inactivity — if the vault has not changed since the last session, no conditions fire.

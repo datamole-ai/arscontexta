@@ -3,7 +3,7 @@ name: seed
 description: Add a source file to the processing queue. Checks for duplicates, creates archive folder, moves source from inbox, creates process task, and updates queue. Triggers on "/seed", "/seed [file]", "queue this for processing".
 version: "1.0"
 context: fork
-allowed-tools: Read, Write, Edit, Grep, Glob, Bash, mcp__qmd__query
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 ---
 
 ## EXECUTE NOW
@@ -61,8 +61,8 @@ ls -d ops/queue/archive/*-${SOURCE_NAME}* 2>/dev/null
 
 Check for content overlap:
 
-```
-mcp__qmd__query query="claims from {source filename}" limit=5
+```bash
+qmd query $'vec: claims from {source filename}' --collection {vocabulary.notes_collection} -n 5
 ```
 
 Or via keyword search in the {DOMAIN:note_collection}/ directory:

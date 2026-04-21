@@ -2,7 +2,7 @@
 name: reweave
 description: Internal pipeline skill — updates older notes with connections to a newly created note. Invoked by /pipeline as a subagent; do not invoke directly.
 context: fork
-allowed-tools: Read, Write, Edit, Grep, Glob, Bash, mcp__qmd__query
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 ---
 
 ## Runtime Configuration
@@ -13,6 +13,11 @@ All output must use domain-native terms.
 Derivation manifest for vocabulary mapping:
 !`cat ops/derivation-manifest.md`
 
+### Task Queue
+
+Current task queue:
+!`cat ops/queue/queue.json`
+
 ## Granularity-Aware Reweaving
 
 After reading the target {vocabulary.note}, check its `granularity` frontmatter field:
@@ -22,9 +27,7 @@ After reading the target {vocabulary.note}, check its `granularity` frontmatter 
 
 ### Early Exit Check
 
-If `granularity: capture`, output:
-"Capture {vocabulary.note} — reweaving skipped (no new claims to propagate)."
-Mark phase complete in task file and return.
+If `granularity: capture`, skip the substantive reweave work but still perform queue self-update (advance reweave -> verify) and emit a minimal Output Block with `Status: ok`, `Queue: advanced {id}: reweave -> verify`, and `### Work: capture note — reweaving skipped (no new claims to propagate)`.
 
 **Reweave behavior:** Full reconsideration. Search extensively for newer related {vocabulary.note_plural}. Consider rewrites, challenges. Evaluate claim sharpening. Multiple search passes.
 
@@ -32,8 +35,16 @@ Mark phase complete in task file and return.
 
 **Target: $ARGUMENTS**
 
-Parse the {vocabulary.note} path from arguments. If no argument is provided, end immediately with: report
-`ERROR: reweave requires {vocabulary.note} path`.
+Parse the note task file path from arguments (e.g. `ops/queue/<basename>-NNN.md`). The argument IS the full path to the task file — do NOT `find`/`ls` to relocate it; Read it directly. If no argument is provided, end immediately with: report
+`ERROR: reweave requires note task file path`.
+
+Read the task file's YAML frontmatter to obtain:
+- `id` — this entry's queue id
+- `target_path` — the path to the {vocabulary.note} being reweaved
+- `batch` — the batch id
+- `granularity` — `capture` short-circuits (see Early Exit Check below)
+
+All subsequent references to "the {vocabulary.note}" use the `target_path` value from the task file.
 
 **START NOW.**
 
@@ -104,9 +115,11 @@ From the {vocabulary.note}'s Topics footer, identify which {vocabulary.topic_map
 
 **Path 2: Semantic Search** — find what {vocabulary.topic_map_plural} might miss
 
-Use `mcp__qmd__query` (hybrid search with expansion + reranking):
-- query: "[{vocabulary.note}'s core concepts and mechanisms]"
-- limit: 15
+Use `qmd query` via Bash (hybrid search with auto-expansion + reranking):
+
+```bash
+qmd query "[{vocabulary.note}'s core concepts and mechanisms]" --collection {vocabulary.notes_collection} -n 15
+```
 
 Evaluate results by relevance — read any result where title or snippet suggests genuine connection.
 
@@ -272,70 +285,60 @@ This note originally claimed [X]. Based on [[evidence]], the claim is revised: [
 
 ---
 
-## Output Format
+## Queue Self-Update
 
-```markdown
-## Reweave Complete: [[target note]]
+Before emitting the Output Block, update `ops/queue/queue.json`:
 
-### Changes Applied
+1. Read the file.
+2. Locate the entry with `id` matching the task file's `id`.
+3. Append `"reweave"` to `completed_phases`.
+4. Set `current_phase: "verify"`.
+5. Write the file back.
 
+If reading or writing fails, do NOT emit a successful Output Block. Emit `Status: error: queue write failed` with `Queue: no change (error)` and stop.
+
+## Output Block
+
+After finishing reweave work, perform queue self-update (next subsection) and then emit the canonical block below. Write the same block into the task file's `## Reweave` section AND echo it as the final chat message. This is the ONLY chat output.
+
+```
+## Reweave
+
+**Target:** [[{target note title}]]
+**Status:** ok | error: {short message}
+**Queue:** advanced {id}: reweave -> verify
+
+### Work
+
+**Changes applied:**
 | Type | Description |
 |------|-------------|
 | connection | added [[note A]] inline, [[note B]] to footer |
 | rewrite | clarified reasoning in paragraph 2 |
 | sharpen | title unchanged, description updated |
 
-### Claim Status
+**Claim status:** unchanged | sharpened | challenged
 
-[unchanged | sharpened | challenged]
+**Network effect:** outgoing links {N} -> {M}; this {vocabulary.note} now bridges [[domain A]] and [[domain B]]
 
-### Network Effect
+**Cascade recommendations:** [[related note]] might benefit from reweave (similar vintage)
 
-- Outgoing links: 3 -> 5
-- This {vocabulary.note} now bridges [[domain A]] and [[domain B]]
+**Observations:** [patterns noticed, insights for future — or NONE]
 
-### Cascade Recommendations
-
-- [[related note]] might benefit from reweave (similar vintage)
-- {vocabulary.topic_map} [[topic]] should be updated to reflect changes
-
-### Observations
-
-[Patterns noticed, insights for future]
-```
-
----
-
-## HANDOFF Output
-
-Always output this structured format at the END of the session. This enables /pipeline to parse results and update the task queue.
-
-**Format:**
-
-```
-=== HANDOFF: {vocabulary.reweave} ===
-Target: [[note name]]
-
-Work Done:
-- Older {vocabulary.note_plural} updated: N
-- Claim status: unchanged | sharpened | challenged
-- Network effect: M new traversal paths
-
-Files Modified:
+### Files Modified
 - {vocabulary.note_collection}/[older note 1].md (inline link added)
 - {vocabulary.note_collection}/[older note 2].md (footer connection added)
-- [task file path] ({vocabulary.reweave} section)
+- {task file path} (## Reweave section)
+- ops/queue/queue.json (advanced {id})
 
-Learnings:
+### Learnings
 - [Friction]: [description] | NONE
 - [Surprise]: [description] | NONE
 - [Methodology]: [description] | NONE
 - [Process gap]: [description] | NONE
-
-Queue Updates:
-- Advance phase: {vocabulary.reweave} -> {vocabulary.verify}
-=== END HANDOFF ===
 ```
+
+On error, set `Status: error: <message>`, `Queue: no change (error)`, and leave `queue.json` unchanged.
 
 ---
 
