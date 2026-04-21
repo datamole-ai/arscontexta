@@ -67,7 +67,6 @@ Each `SKILL.md` uses `{DOMAIN:…}` placeholders that the derivation engine rewr
 | `use-case-presets.md` | pre-validated starting configs |
 | `tradition-presets.md` | Zettelkasten / PARA / GTD / Cornell anchors |
 | `vocabulary-transforms.md` | universal → domain-native maps |
-| `conversation-patterns.md` | worked derivation examples |
 | `failure-modes.md` | how vaults die (warnings injected into vaults) |
 | `session-lifecycle.md` | orient / work / persist spec |
 | `self-space.md` | agent-identity generation guide |

@@ -5,13 +5,12 @@
 ```markdown
 ## {DOMAIN:Note} Schema — One Schema for Every {DOMAIN:Note}
 
-Every {DOMAIN:note} has the same YAML frontmatter. One schema, six required fields, no optional fields. Schema enforcement is an INVARIANT because without it, frontmatter drifts and queries break. Validation catches errors at creation time.
+Every {DOMAIN:note} has the same YAML frontmatter. One schema, five required fields, no optional fields. Schema enforcement is an INVARIANT because without it, frontmatter drifts and queries break. Validation catches errors at creation time.
 
-### The Six Required Fields
+### The Five Required Fields
 
 ```yaml
 ---
-title: <string>               # prose-as-title, unique identifier
 content_type: <enum>          # vault-specific category (derived during setup)
 granularity: structure | capture
 description: <string>         # one sentence, <=200 chars, no trailing period
@@ -22,7 +21,6 @@ tags: [<free-form strings>]   # may be empty []
 
 | Field | Reader | Use |
 |-------|--------|-----|
-| `title` | every skill | wiki-link target, search, display |
 | `content_type` | routing + filtering skills | "show me all decisions" |
 | `granularity` | /structure, /capture pipelines | selects pipeline behavior |
 | `description` | /{DOMAIN:verify}, progressive disclosure | filter-before-read |
@@ -75,4 +73,4 @@ Enforcement is template-driven: skills that create {DOMAIN:notes} copy `ops/temp
 
 ### The `_schema` Block
 
-`ops/templates/note.md` contains the authoritative `_schema` block. Skills and hooks read it to check compliance. Every vault's `_schema` block contains the same six required fields plus whatever survived Filter A during setup.
+`ops/templates/note.md` contains the authoritative `_schema` block. Skills and hooks read it to check compliance. Every vault's `_schema` block contains the same five required fields plus whatever survived Filter A during setup.

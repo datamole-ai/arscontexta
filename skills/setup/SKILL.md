@@ -22,8 +22,6 @@ Read these files to understand the methodology and available components. Read th
 
 - `${CLAUDE_PLUGIN_ROOT}/reference/use-case-presets.md` -- read in Step 3a (only the matched preset section)
 - `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md` -- read in Step 3d (Domain Vulnerability Matrix plus the HIGH-risk per-failure-mode sections it surfaces)
-- `${CLAUDE_PLUGIN_ROOT}/reference/three-spaces.md` -- not needed; folder structure is fully specified in Pipeline Step 1
-- `${CLAUDE_PLUGIN_ROOT}/reference/conversation-patterns.md` -- consult only if derivation is ambiguous and worked examples would help
 
 **Generation references (read during Phase 5):**
 
@@ -313,7 +311,7 @@ Phase 5 is a 9-step sequential pipeline. Steps 1-3, 8, and 9 are executed by the
 | 2 | Main agent | self/identity.md, self/methodology.md, self/goals.md, ops/methodology/ | Identity & self-knowledge |
 | 3 | Main agent | ops/config.yaml, ops/derivation-manifest.md | Ops configuration |
 | 4 | Agent 1 | templates/, ops/queries/ | Templates & query scripts |
-| 5 | Agent 2 | .claude/skills/*/SKILL.md (17 skills) | Skills (tiered generation) |
+| 5 | Agent 2 | .claude/skills/*/SKILL.md (9 skills) | Skills (tiered generation, cp + Edit) |
 | 6 | Agent 3 | CLAUDE.md, ops/features/*.md | Context file + feature references |
 | 7 | Agent 4 | manual/ (7 pages), [domain:notes]/index.md | Manual & hub MOC |
 | 8 | Main agent | Semantic search setup| Semantic search |
@@ -349,12 +347,15 @@ You are executing one step of a multi-step generation pipeline.
 ## Instructions
 1. Read ops/derivation.md FIRST -- it is your source of truth for all configuration decisions
 2. Create a task list (TaskCreate) for each file you need to generate, then work through them sequentially
-3. Write files using the Write tool
+3. Pick the right tool for each operation:
+   - New file generated from scratch → `Write`
+   - Verbatim copy of a plugin-shipped template (e.g. a skill source) → `cp` via `Bash`, then `Edit` to apply substitutions
+   - Surgical changes to a file you already created → `Edit`
 4. After writing each file, mark its task as completed
 5. If you encounter an error or ambiguity, report it clearly -- do not guess
 
 ## Constraints
-- Do NOT read or modify files outside your assigned scope
+- Stay inside your write scope. Reads from `${CLAUDE_PLUGIN_ROOT}` are always permitted when a step requires them.
 - Do NOT improvise content beyond what the step instructions specify
 - Preserve {vocabulary.xxx} patterns as-is -- they resolve at runtime, not during generation
 - Apply vocabulary transformation to prose and user-facing labels only -- never to YAML field names
@@ -382,7 +383,7 @@ Verification:
 ~~~
 
 **Agent-specific additions to the template:**
-- **Agent 2 (skills):** Include the DOMAIN substitution map as an explicit key-value lookup table
+- **Agent 2 (skills):** Does NOT use the generic template. Use the dedicated Skill Generation Prompt in Pipeline Step 5 — its tool protocol (cp + Edit) differs from the generic Write-based workflow.
 - **Agent 3 (CLAUDE.md + ops/features/):** Include the list of active feature blocks and their file paths under `${CLAUDE_PLUGIN_ROOT}/generators/features/`
 
 ### Orchestration Protocol
@@ -915,7 +916,7 @@ To generate `ops/templates/note.md`:
    - Any Filter-A survivor fields appended to `required` with their rationale comment.
    - Any constraints associated with Filter-A survivors.
 2. Copy the body structure (H1, prose body, `---`, `Topics:` footer) verbatim.
-3. Apply vocabulary transformation to body prose and comments — but NEVER to YAML field names. `description`, `title`, `content_type`, `granularity`, `created_at`, `tags` stay structural.
+3. Apply vocabulary transformation to body prose and comments — but NEVER to YAML field names. `description`, `content_type`, `granularity`, `created_at`, `tags` stay structural.
 4. Write `ops/templates/note.md`.
 
 **Output path:**
@@ -957,91 +958,144 @@ Include a discovery section in the context file documenting what queries exist, 
 
 #### Pipeline Step 5: Skills (Agent 2)
 
-**Agent scope:** .claude/skills/[domain-skill-name]/SKILL.md (20 files)
+**Agent scope:**
+- Write target: `.claude/skills/<domain-skill-name>/SKILL.md` (9 files) — populated by `cp`, then modified with `Edit`. **Never `Write`**.
+- Read: `${CLAUDE_PLUGIN_ROOT}/skill-sources/*/SKILL.md`, `ops/derivation.md`
+- Bash commands allowed: `mkdir`, `cp`, `rg`
 
-**Agent reads:** ops/derivation.md, ${CLAUDE_PLUGIN_ROOT}/skill-sources/*/SKILL.md
-
-**Agent-specific prompt addition:** Include the DOMAIN substitution map as an explicit key-value lookup table built from the vocabulary mapping in ops/derivation.md. Example: `{DOMAIN:structure}` → `/group`, `{DOMAIN:notes}` → `claims`, `{DOMAIN:topic map}` → `MOC`.
-
-The following step instructions are passed verbatim to Agent 2 via the agent prompt template.
+**Why this step is special:** Skill sources carry anti-shortcut language, quality gates, and handoff block formats that must survive byte-for-byte in every non-substituted region. `cp` guarantees that fidelity; `Write` invites the agent to reconstruct from memory and silently drop those guards. Agent 2 therefore uses a specialized prompt (below) instead of the generic template — the tool protocol is cp + Edit, not Write.
 
 ---
 
-##### Skills (tiered generation, full suite)
+##### How the main agent invokes Agent 2
 
-Generate ALL skills. Every vault ships with the complete skill set from day one. Full automation is the default — users opt down, never up.
+1. Build the **Skill Generation Prompt** (next subsection) by substituting the placeholders:
+   - `{vault_root}` — absolute vault path
+   - `{CLAUDE_PLUGIN_ROOT}` — absolute plugin root
+   - `{TIER_A_TABLE}` — populate from the Skill Sources table below, Tier A rows only
+   - `{TIER_B_TABLE}` — populate from the Skill Sources table below, Tier B rows only
+   - `{DOMAIN_MAP}` — build from the vocabulary mapping in `ops/derivation.md`, one row per `{DOMAIN:xxx}` → domain value. Include every `{DOMAIN:xxx}` pattern that appears in any Tier B source.
+   - `{N_SKILLS}` — total number of skills (9)
+2. Dispatch Agent 2 via the `Agent` tool, passing the built prompt as the `prompt` argument.
+3. On return, parse the handoff block (Files Created, Issues, Verification). If `{DOMAIN:}` remaining is non-zero, STOP and surface the error.
 
-**Skill source templates live at `${CLAUDE_PLUGIN_ROOT}/skill-sources/`.** Each subdirectory contains a `SKILL.md` template that must be read and written to the user's skills directory.
+---
 
-The skill sources to install:
+##### Skill Sources (reference table — used by the main agent to build {TIER_A_TABLE} and {TIER_B_TABLE})
 
+| Source Directory                                     | Source Name   | Tier | Domain-rename? | Notes                                              |
+| ---------------------------------------------------- | ------------- | ---- | -------------- | -------------------------------------------------- |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/reflect/`       | reflect       | A    | yes            | Target name = domain verb for "find connections"   |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/reweave/`       | reweave       | A    | yes            | Target name = domain verb for "revisit old notes"  |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/stats/`         | stats         | A    | no             | Keep `stats` as the target name                    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/seed/`          | seed          | B    | no             | Keep `seed` as the target name                     |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/pipeline/`      | pipeline      | B    | no             | Keep `pipeline` as the target name                 |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/archive-batch/` | archive-batch | B    | no             | Keep `archive-batch` as the target name            |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/verify/`        | verify        | B    | yes            | Target name = domain verb for "verify"             |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/structure/`     | structure     | B    | no (universal) | Universal infra; frontmatter `name:` unchanged     |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/capture/`       | capture       | B    | no (universal) | Universal infra; frontmatter `name:` unchanged     |
 
-| Source Directory                                     | Skill Name    | Category      | Tier |
-| ---------------------------------------------------- | ------------- | ------------- | ---- |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/reflect/`       | reflect       | Processing    | A    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/reweave/`       | reweave       | Processing    | A    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/stats/`         | stats         | Navigation    | A    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/seed/`          | seed          | Orchestration | B    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/pipeline/`      | pipeline      | Orchestration | B    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/archive-batch/` | archive-batch | Orchestration | B    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/structure/`     | structure     | Processing    | B    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/capture/`       | capture       | Processing    | B    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/verify/`        | verify        | Processing    | B    |
+**Domain-rename = yes:** target directory name and the `name:` field in frontmatter both become the domain-native verb from `ops/derivation.md` vocabulary mapping (e.g. reflect → link, reweave → update, verify → review).
 
+**Domain-rename = no:** keep the source name as-is for both directory and `name:` field.
 
-**For Claude Code:** Write each skill to `.claude/skills/[domain-skill-name]/SKILL.md`
+**Universal:** `structure` and `capture` are pipeline infrastructure. Their frontmatter `name:` and `description:` stay UNCHANGED; only body `{DOMAIN:xxx}` substitution applies.
 
-**CRITICAL:** Do NOT generate skills from scratch or improvise their content. Read the source template and transform it. The templates contain quality gates, anti-shortcut language, and handoff formats that must be preserved.
+---
 
-Every generated skill must include:
+##### Skill Generation Prompt
 
-- Anti-shortcut language for quality-critical steps
-- Quality gates with explicit pass/fail criteria
-- Handoff block format for orchestrated execution
-- Domain-native vocabulary throughout
+Pass this verbatim to Agent 2 via the `Agent` tool, after substituting the placeholders described above.
 
-##### Tiered Generation Protocol
+~~~
+You are Agent 2 of the Ars Contexta generation pipeline. Install all processing skills into the vault.
 
-Skills use two placeholder types:
+## Workspace
+- Vault root: {vault_root}
+- Skill sources: {CLAUDE_PLUGIN_ROOT}/skill-sources/<source-name>/SKILL.md
+- Output: {vault_root}/.claude/skills/<target-name>/SKILL.md
+- Derivation file: {vault_root}/ops/derivation.md
 
-- `{vocabulary.xxx}` — resolves at **runtime** when the skill reads `ops/derivation-manifest.md`. Do NOT substitute these during setup.
-- `{DOMAIN:xxx}` — literal string templates that must be substituted at **setup time** using the vocabulary mapping.
+## Tool Protocol — NON-NEGOTIABLE
 
-Process tiers in order: **A → B** (simplest first, saving context for skills that need transformation).
+For every skill, follow this exact sequence. Do NOT substitute `Write` for `cp`; do NOT retype skill content from memory.
 
-##### Tier A — Frontmatter only (runtime vocabulary)
+1. **Bash:** `mkdir -p .claude/skills/<target-name>/`
+2. **Bash:** `cp "{CLAUDE_PLUGIN_ROOT}/skill-sources/<source-name>/SKILL.md" ".claude/skills/<target-name>/SKILL.md"`
+3. **Read** the target file (the copy, not the source) to see what's there.
+4. **Edit** the target in place:
+   - Frontmatter: replace `name:` and rewrite `description:` trigger phrases in domain vocabulary (skip for universal skills — see Tier B below).
+   - Tier B only: for every `{DOMAIN:xxx}` pattern, use `Edit` with `replace_all: true` to substitute its value from the DOMAIN Substitution Map.
 
-**Skills:** reflect, reweave, stats
+The `Write` tool is FORBIDDEN on SKILL.md files. `cp` gives byte-for-byte fidelity to anti-shortcut language, quality gates, and handoff formats; `Write` does not.
 
-These skill sources contain only `{vocabulary.xxx}` patterns in their body. Those resolve at runtime — NOT setup-time templates.
+## Tier A — Frontmatter only (body untouched)
 
-1. Copy source to target: `cp` source SKILL.md → `.claude/skills/[domain-skill-name]/SKILL.md`
-2. Read frontmatter only (first ~5 lines) to see current `name:` and `description:` values
-3. Edit in place:
-  - `name:` → domain-native command name from vocabulary mapping
-  - `description:` → rewrite trigger phrases with domain vocabulary
-4. All other frontmatter fields and the entire body remain untouched — `{vocabulary.xxx}` patterns are **intentionally preserved**
+These sources contain only `{vocabulary.xxx}` patterns in their body. Those resolve at runtime when the skill reads `ops/derivation-manifest.md` — leave them intact.
 
-**CRITICAL:** Do NOT transform `{vocabulary.xxx}` patterns in the body. These are runtime references, not setup-time templates. If you see `{vocabulary.notes}` in the body, leave it exactly as-is.
+{TIER_A_TABLE}
 
-##### Tier B — DOMAIN substitution (mechanical string replace)
+Per-skill: after `cp`, Edit only the frontmatter `name:` and `description:` lines. The entire body stays verbatim.
 
-**Skills:** seed, pipeline, archive-batch, verify, structure, capture
+## Tier B — Frontmatter + body `{DOMAIN:xxx}` substitution
 
-These skill sources contain `{DOMAIN:xxx}` patterns that must be literally substituted at setup time. They may also contain `{vocabulary.xxx}` patterns — leave those intact.
+These sources contain `{DOMAIN:xxx}` patterns (substitute at setup time) and may contain `{vocabulary.xxx}` patterns (leave intact for runtime).
 
-1. Copy source to target: `cp` source SKILL.md → `.claude/skills/[domain-skill-name]/SKILL.md`
-2. Read frontmatter only (first ~5 lines) to see current `name:` and `description:` values
-3. Edit frontmatter in place:
-  - `name:` → domain-native command name from vocabulary mapping
-  - `description:` → rewrite trigger phrases with domain vocabulary
-4. Build DOMAIN substitution map from the vocabulary mapping in `ops/derivation.md` (e.g. `{DOMAIN:notes}` → `claims`, `{DOMAIN:topic map}` → `MOC`)
-5. Find and replace all `{DOMAIN:xxx}` patterns in the target file — use Grep to locate them or sed to replace in one pass, whichever is cleaner
-6. Do NOT touch `{vocabulary.xxx}` patterns — leave them for runtime resolution
+{TIER_B_TABLE}
 
-**Verification:** After each Tier B skill, confirm zero `{DOMAIN:` strings remain in the output file. If any remain, the substitution map is incomplete — check `ops/derivation.md` vocabulary mapping for the missing entry.
+Per-skill: after `cp`:
+1. Edit frontmatter `name:` and `description:` — EXCEPT for `structure` and `capture`, which are universal (keep source frontmatter unchanged; only the body gets substituted).
+2. For each `{DOMAIN:xxx}` pattern in the map below, run `Edit` with `replace_all: true` on the target file. One `Edit` per pattern is fine; `replace_all: true` handles repeats within the file.
+3. Do NOT touch `{vocabulary.xxx}` patterns — those resolve at runtime.
 
-**Exception: /structure, /capture** — These two skills use Tier B DOMAIN substitution in their body but their `name:` and `description:` fields in frontmatter stay UNCHANGED. Do not domain-rename them. They are universal infrastructure commands. Setup copies the file, substitutes `{DOMAIN:xxx}` patterns in the body only, and installs to `.claude/skills/structure/SKILL.md`, `.claude/skills/capture/SKILL.md`.
+## DOMAIN Substitution Map
+
+Apply these literal string replacements everywhere `{DOMAIN:xxx}` appears in Tier B bodies. Preserve exact case and pluralization.
+
+{DOMAIN_MAP}
+
+If you encounter a `{DOMAIN:xxx}` pattern not in this map, choose the closest domain-native equivalent from `ops/derivation.md` and note it under Issues in the handoff.
+
+## Instructions
+
+1. Read `ops/derivation.md` FIRST for full vocabulary context.
+2. Create a task list — one task per skill ({N_SKILLS} total). Process Tier A first (cheapest), then Tier B.
+3. For each task: `mkdir -p` → `cp` → `Read` target → `Edit` frontmatter (and Tier B body). Mark the task completed when done.
+4. After every task is complete, run `rg '\{DOMAIN:' .claude/skills/` via Bash. The count MUST be 0. If it isn't, the substitution map missed a pattern — identify it, extend the map, re-run Edits, re-check.
+
+## Constraints
+
+- Allowed Bash commands: `mkdir`, `cp`, `rg`. Nothing else.
+- Do NOT use `Write` on any SKILL.md file — only `Edit` after `cp`.
+- Do NOT modify `{vocabulary.xxx}` patterns.
+- Do NOT improvise content beyond the DOMAIN Substitution Map.
+- Stay inside `.claude/skills/` for writes; reads from `${CLAUDE_PLUGIN_ROOT}/skill-sources/` are expected.
+
+## Handoff
+
+Output this block as the LAST thing in your response:
+
+=== GENERATION HANDOFF: Agent 2 (Skills) ===
+Files Created:
+- .claude/skills/<target-name>/SKILL.md (Tier <A|B>) × {N_SKILLS}
+
+Vocabulary Applied:
+- Tier A: frontmatter edited, body preserved ({vocabulary.xxx} intact)
+- Tier B: {DOMAIN:xxx} substituted per map, {vocabulary.xxx} preserved
+- Novel {DOMAIN:xxx} patterns encountered: <list or NONE>
+
+Issues:
+- [Warning]: <description> | NONE
+- [Friction]: <description> | NONE
+
+Verification:
+- All files populated via cp then Edit (no Write): YES/NO
+- {DOMAIN:} patterns remaining in .claude/skills/: <count — must be 0>
+- {vocabulary.xxx} patterns preserved: YES
+=== END HANDOFF ===
+~~~
+
+---
 
 ##### Skill Discoverability Protocol
 
@@ -1520,7 +1574,7 @@ Run all 14 primitive checks against the generated system. Manually verify:
 4. **tree-injection** -- Session start procedure loads file structure? (hook or context file instruction)
 5. **description-field** -- Every note has a description field that differs from the title? (>95%)
 6. **topics-footer** -- `tags` array and body-level `Topics:` footer present on every non-MOC note? (>95%)
-7. **schema-enforcement** -- `ops/templates/note.md` exists as the single source of truth; every note carries the six required fields (title, content_type, granularity, description, created_at, tags).
+7. **schema-enforcement** -- `ops/templates/note.md` exists as the single source of truth; every note carries the five required fields (content_type, granularity, description, created_at, tags). Title is the filename and body H1, not a frontmatter field.
 8. **semantic-search** -- `.mcp.json` registers the qmd MCP server with autoapprove entries, `.claude/hooks/qmd-sync.sh` exists and is wired into SessionStart, context file references `mcp__qmd__query`.
 9. **self-space** -- self/ exists with identity.md, methodology.md, goals.md?
 10. **session-rhythm** -- Context file references ops/features/session-rhythm.md for orient/work/persist cycle?
@@ -1533,8 +1587,8 @@ Report results: pass/fail per primitive with specific failures listed.
 
 After kernel validation, run a functional test:
 
-1. Create a test note in [domain:notes]/ with all six required fields
-2. Verify frontmatter matches ops/templates/note.md schema (title, content_type, granularity, description, created_at, tags present)
+1. Create a test note in [domain:notes]/ with all five required fields
+2. Verify frontmatter matches ops/templates/note.md schema (content_type, granularity, description, created_at, tags present)
 3. Verify the hub MOC can reference it
 4. Delete the test note and clean up
 

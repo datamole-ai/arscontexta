@@ -15,7 +15,7 @@ Every {DOMAIN:note} declares its `granularity` in frontmatter: `structure` or `c
 **Shared invariants across both:**
 - One unified template (`ops/templates/note.md`) — `granularity` is a field, not a directory
 - Every note in the same flat `{DOMAIN:note_collection}/` folder regardless of granularity
-- Every note has the six required fields (title, content_type, granularity, description, created_at, tags)
+- Every note has the five required fields (content_type, granularity, description, created_at, tags)
 - Wiki links connect notes to the graph
 - At least one `{DOMAIN:topic map}` membership
 

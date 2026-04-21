@@ -3,7 +3,7 @@
 ## Context File Block
 
 ```markdown
-## Templates — One Template, Six Fields
+## Templates — One Template, Five Fields
 
 Your vault has exactly one template: `ops/templates/note.md`. Every {DOMAIN:note} regardless of content_type or granularity starts from it.
 

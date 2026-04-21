@@ -74,7 +74,7 @@ primitives:
 
   - id: schema-enforcement
     name: Schema enforcement via templates
-    description: One unified template (`ops/templates/note.md`) defines the six required fields plus any Filter-A survivors. Enforcement is template-driven — skills that create notes copy the template and populate every required field. No runtime validation hook is required. No optional fields exist.
+    description: One unified template (`ops/templates/note.md`) defines the five required fields plus any Filter-A survivors. Enforcement is template-driven — skills that create notes copy the template and populate every required field. The note title is its filename (prose-as-title) and body H1, not a frontmatter field. No runtime validation hook is required. No optional fields exist.
     layer: convention
     requires: markdown-yaml
     enforcement: invariant

@@ -132,7 +132,7 @@ Topics:
 - Description adds information beyond the title
 - Content inside fenced block is IDENTICAL to source (no edits whatsoever)
 - At least one {vocabulary.topic_map} link in the Topics footer
-- All six required fields present in frontmatter: `content_type`, `granularity: capture`, `description`, `created_at`, `tags`
+- All five required fields present in frontmatter: `content_type`, `granularity: capture`, `description`, `created_at`, `tags`
 - File written to flat `{vocabulary.note_collection}/[title].md` — routing is by `granularity` frontmatter, not by subdirectory
 
 ### 7. Create Queue Entry

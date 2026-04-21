@@ -2,7 +2,6 @@
 _schema:
   applies_to: "{vocabulary.note_collection}/**/*.md"
   required:
-    - title
     - content_type
     - granularity
     - description
@@ -16,8 +15,6 @@ _schema:
       # Vault-specific. Populated during setup from the user's domain.
       # Examples: spec, decision, lesson, reflection, observation.
   constraints:
-    title:
-      format: "Prose-as-title. Specific enough for search and linking."
     content_type:
       format: "One of the enum values derived during setup."
     granularity:
@@ -31,11 +28,11 @@ _schema:
       format: "Array of free-form strings. May be []. Escape hatch for emergent attributes — not a substitute for fields that would pass Filter A."
   notes: >
     This is the single canonical template for every note in every vault.
-    Setup derives the content_type enum from the user's domain and MAY add
-    extra fields that pass Filter A (day-one reader + use). No optional
-    fields exist; if a field is in the template, it is required.
+    Setup derives the content_type enum from the user's
+    domain and MAY add extra fields that pass Filter A (day-one reader +
+    use). No optional fields exist; if a field is in the template, it is
+    required.
 
-title: ""
 content_type: ""
 granularity: structure
 description: ""
