@@ -60,9 +60,8 @@ When generating a knowledge system for a specific domain, every universal term i
 | /verify | /verify | /check-resonance | /test | /confirm | /evaluate | /review | /verify |
 | /reweave | /reweave | /revisit | /revise | /reconnect | /rework | /update | /revisit |
 | /stats | /stats | /stats | /stats | /stats | /stats | /stats | /stats |
-| /graph | /graph | /graph | /graph | /graph | /graph | /graph | /graph |
 
-**Note:** /stats provides vault metrics and progress visualization. /graph enables graph query generation. These commands use universal names across all domains.
+**Note:** /stats provides vault metrics and progress visualization. This command uses universal names across all domains.
 
 ---
 

@@ -240,7 +240,6 @@ Check MOC coverage:
 **How to implement:**
 - `ops/scripts/graph/` directory with core analysis scripts
 - At minimum: orphan detection, dangling link detection, backlink counting, link density measurement, forward/backward traversal, synthesis opportunity detection
-- `/graph` skill generated for agent-accessible graph operations
 - Scripts compose with each other — backlinks feeds into orphan detection, link extraction feeds into traversal
 
 **Quality gate:** Can the system answer "what notes link to X?", "what notes have no incoming links?", and "what notes share a topic but aren't connected?" If yes, the graph database is functional.

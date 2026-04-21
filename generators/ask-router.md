@@ -66,7 +66,6 @@ Canonical mapping (source file → `/ask` section heading). Sections appear in t
 | `ethical-guardrails.md` | `### Ethical guardrails` |
 | `self-space.md` | `### Self space` |
 | `helper-functions.md` | `### Helper functions` |
-| `graph-analysis.md` | `### Graph analysis` |
 
 For the 2-line orientation, summarize the feature file's opening paragraph. Do not invent detail that is not in the file. If unsure, reread the feature file and copy its mission sentence with light compression.
 

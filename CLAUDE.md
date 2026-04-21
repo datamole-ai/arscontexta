@@ -49,7 +49,7 @@ docs/             superpowers/{plans,specs}          design specs
 | Reweave | `reweave/` |
 | Verify | `verify/` |
 | Orchestration | `pipeline/` |
-| Reporting | `stats/`, `graph/`, `archive-batch/` |
+| Reporting | `stats/`, `archive-batch/` |
 
 Each `SKILL.md` uses `{DOMAIN:…}` placeholders that the derivation engine rewrites at generation.
 
@@ -80,7 +80,7 @@ Each `SKILL.md` uses `{DOMAIN:…}` placeholders that the derivation engine rewr
 
 One file per feature; `skills/setup/` enables a subset based on derived config:
 
-`ethical-guardrails`, `graph-analysis`, `helper-functions`, `maintenance`, `mocs`, `note-granularity`, `processing-pipeline`, `schema`, `self-space`, `semantic-search`, `session-rhythm`, `templates`, `wiki-links`.
+`ethical-guardrails`, `helper-functions`, `maintenance`, `mocs`, `note-granularity`, `processing-pipeline`, `schema`, `self-space`, `semantic-search`, `session-rhythm`, `templates`, `wiki-links`.
 
 ## Hooks
 

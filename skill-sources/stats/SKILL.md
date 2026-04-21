@@ -21,7 +21,7 @@ Derivation manifest for vocabulary mapping:
 
 The knowledge graph grows silently. Without metrics, the user cannot tell whether their system is healthy, growing, stagnating, or fragmenting. /stats provides a snapshot that makes growth tangible — numbers that show progress, health indicators that catch problems, and trends that reveal trajectory.
 
-The output should make the user feel informed, not overwhelmed. Metrics are evidence, not judgment. "12 orphans" is a fact. What to DO about it belongs to /graph or /{vocabulary.cmd_reflect}.
+The output should make the user feel informed, not overwhelmed. Metrics are evidence, not judgment. "12 orphans" is a fact. What to DO about it belongs to /{vocabulary.cmd_reflect}.
 
 ---
 
@@ -162,17 +162,17 @@ else
   SELF_STATUS="MISSING (invariant primitive)"
 fi
 
-# Observations pending — queried as note-type + status within the note collection.
-# Not all vaults declare a `type: observation` content type; zero is a valid result.
+# Observations pending
+# Not all vaults declare `content_type: observation`; zero is a valid result.
 OBS_PENDING=0
-for f in $(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l '^type: observation' {} + 2>/dev/null); do
+for f in $(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l '^content_type: observation' {} + 2>/dev/null); do
   grep -q '^status: pending' "$f" 2>/dev/null && OBS_PENDING=$((OBS_PENDING + 1))
 done
 
-# Tensions pending — queried as note-type + status within the note collection.
-# Not all vaults declare a `type: tension` content type; zero is a valid result.
+# Tensions pending
+# Not all vaults declare `content_type: tension`; zero is a valid result.
 TENSION_PENDING=0
-for f in $(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l '^type: tension' {} + 2>/dev/null); do
+for f in $(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l '^content_type: tension' {} + 2>/dev/null); do
   grep -qE '^status: (open|pending)' "$f" 2>/dev/null && TENSION_PENDING=$((TENSION_PENDING + 1))
 done
 ```
@@ -235,12 +235,9 @@ After the stats block, add brief interpretation for any notable findings:
 
 | Condition | Note |
 |-----------|------|
-| ORPHAN_COUNT > 0 | "[N] orphan {vocabulary.note_plural} — run `/graph health` for details" |
-| DANGLING_COUNT > 0 | "[N] dangling links — run `/graph health` to identify broken links" |
 | COMPLIANCE < 90 | "Schema compliance below 90% — some {vocabulary.note_plural} missing required fields" |
 | OBS_PENDING >= 10 | "[N] pending observations — run /health for details" |
 | TENSION_PENDING >= 5 | "[N] open tensions — run /health for details" |
-| DENSITY < 0.02 | "Graph density is low — connections are thin. Run /{vocabulary.cmd_reflect} to strengthen the network" |
 | PROCESSED_PCT < 50 | "More content in inbox than in {vocabulary.note_collection}/ — consider processing backlog" |
 | THIS_WEEK_NOTES == 0 | "No new {vocabulary.note_plural} this week" |
 

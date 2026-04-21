@@ -31,7 +31,7 @@ Named points in the configuration space derived from methodology traditions and 
 
 | Category | Blocks |
 |----------|--------|
-| Always | atomic-notes, wiki-links, mocs, processing-pipeline, semantic-search, schema, maintenance, session-rhythm, templates, ethical-guardrails, self-space, helper-functions, graph-analysis |
+| Always | atomic-notes, wiki-links, mocs, processing-pipeline, semantic-search, schema, maintenance, session-rhythm, templates, ethical-guardrails, self-space, helper-functions |
 | Conditional | multi-domain (if needed) |
 | Optional | (none) |
 
@@ -92,7 +92,7 @@ Named points in the configuration space derived from methodology traditions and 
 
 | Category | Blocks |
 |----------|--------|
-| Always | atomic-notes, wiki-links, mocs, processing-pipeline, semantic-search, schema, maintenance, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis, self-space |
+| Always | atomic-notes, wiki-links, mocs, processing-pipeline, semantic-search, schema, maintenance, session-rhythm, templates, ethical-guardrails, helper-functions, self-space |
 | Conditional | multi-domain (if needed) |
 | Optional | (none) |
 | Disabled | (none) |
@@ -153,7 +153,7 @@ Named points in the configuration space derived from methodology traditions and 
 
 | Category | Blocks |
 |----------|--------|
-| Always | wiki-links, processing-pipeline, semantic-search, schema, self-space, maintenance, session-rhythm, templates, ethical-guardrails, helper-functions, graph-analysis |
+| Always | wiki-links, processing-pipeline, semantic-search, schema, self-space, maintenance, session-rhythm, templates, ethical-guardrails, helper-functions |
 | Conditional | atomic-notes, mocs, multi-domain |
 | Optional | (none) |
 | Disabled | (none) |

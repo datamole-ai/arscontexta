@@ -129,7 +129,7 @@ primitives:
     requires: wiki-links, markdown-yaml
     enforcement: invariant
     validation:
-      check: "ops/scripts/graph/ directory exists with core analysis scripts. /graph skill generated. At minimum: orphan detection, dangling link detection, backlink counting, link density measurement, forward/backward traversal, synthesis opportunity detection."
+      check: "ops/scripts/graph/ directory exists with core analysis scripts. At minimum: orphan detection, dangling link detection, backlink counting, link density measurement, forward/backward traversal, synthesis opportunity detection."
     cognitive_grounding: "Structured data enables queries that unstructured files cannot answer. The graph structure emerges from kernel invariants without additional infrastructure."
 
   - id: discovery-first

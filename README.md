@@ -148,7 +148,6 @@ or `decisions/`), but the separation is invariant.
 | Command | What It Does |
 |---------|-------------|
 | `/stats` | Vault metrics |
-| `/graph` | Graph analysis |
 
 ---
 

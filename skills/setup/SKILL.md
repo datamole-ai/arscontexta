@@ -609,7 +609,7 @@ The identity prose encodes a research-backed emotional profile (Sofroniew et al.
 ```markdown
 ---
 description: Who I am and how I approach my work
-content_type: moc
+type: moc
 ---
 
 # identity
@@ -691,7 +691,7 @@ Topics:
 ```markdown
 ---
 description: How I process, connect, and maintain knowledge
-content_type: moc
+type: moc
 ---
 
 # methodology
@@ -723,7 +723,7 @@ This step creates the vault's derivation rationale as documentation. It is not r
 ```markdown
 ---
 description: Why this vault was configured the way it was
-content_type: moc
+type: moc
 ---
 # methodology
 
@@ -759,7 +759,7 @@ Topics:
 ```markdown
 ---
 description: Current active threads and what I am working on
-content_type: moc
+type: moc
 ---
 
 # goals
@@ -981,7 +981,6 @@ The skill sources to install:
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/reflect/`       | reflect       | Processing    | A    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/reweave/`       | reweave       | Processing    | A    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/stats/`         | stats         | Navigation    | A    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/graph/`         | graph         | Navigation    | A    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/seed/`          | seed          | Orchestration | B    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/pipeline/`      | pipeline      | Orchestration | B    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/archive-batch/` | archive-batch | Orchestration | B    |
@@ -1012,7 +1011,7 @@ Process tiers in order: **A → B** (simplest first, saving context for skills t
 
 ##### Tier A — Frontmatter only (runtime vocabulary)
 
-**Skills:** reflect, reweave, stats, graph
+**Skills:** reflect, reweave, stats
 
 These skill sources contain only `{vocabulary.xxx}` patterns in their body. Those resolve at runtime — NOT setup-time templates.
 
@@ -1084,7 +1083,7 @@ Step 1: Select feature blocks.
   Read ops/derivation.md to identify active feature blocks.
   All feature blocks are always included: note-granularity, wiki-links, mocs,
     processing-pipeline, semantic-search, schema, maintenance, session-rhythm,
-    templates, ethical-guardrails, helper-functions, graph-analysis,
+    templates, ethical-guardrails, helper-functions,
     self-space.
 
 Step 2: Write ops/features/<name>.md for each selected block.
@@ -1132,7 +1131,7 @@ Step 5: Coherence verification.
         vocabulary transform
 ```
 
-**Structural Marker Protection:** Vocabulary transformation must NEVER touch YAML structural markers. Field names in YAML (`description:`, `content_type:`, `granularity:`, `status:`, `_schema:`, `name:`, `allowed-tools:`) are structural and stay universal. Body-footer labels like `Topics:` and `Relevant Notes:` MAY be domain-renamed (they are user-facing prose, not YAML keys). Domain vocabulary applies to VALUES, prose content, and footer labels — never to YAML field names or structural syntax.
+**Structural Marker Protection:** Vocabulary transformation must NEVER touch YAML structural markers. Field names in YAML (`description:`, `content_type:`, `type:`, `granularity:`, `status:`, `_schema:`, `name:`, `allowed-tools:`) are structural and stay universal. Body-footer labels like `Topics:` and `Relevant Notes:` MAY be domain-renamed (they are user-facing prose, not YAML keys). Domain vocabulary applies to VALUES, prose content, and footer labels — never to YAML field names or structural syntax.
 
 **CRITICAL quality requirements:**
 
@@ -1236,7 +1235,6 @@ What pipeline runs for you. Use directly for fine-grained control.
 Vault state and diagnostics.
 
 - /{DOMAIN:stats} — vault metrics
-- /{DOMAIN:graph} — graph analysis
 
 Note: /arscontexta:health (plugin-level) also performs diagnostics but is always available, not generated.
 
