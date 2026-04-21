@@ -24,7 +24,7 @@
 .claude-plugin/   plugin.json, marketplace.json      plugin registration
 skills/           setup/, health/                    plugin-level commands (user-invoked)
 skill-sources/    10 command templates               copied into generated vaults
-generators/       claude-md.md + features/ (14)      composed into generated CLAUDE.md
+generators/       claude-md.md + features/ (13)      composed into generated CLAUDE.md
 hooks/            hooks.json, scripts/*.sh           SessionStart + PostToolUse(Write)
 methodology/      wiki-linked research graph
 reference/        canonical design docs              see index below
@@ -74,13 +74,13 @@ Each `SKILL.md` uses `{DOMAIN:…}` placeholders that the derivation engine rewr
 | `semantic-vs-keyword.md` | search modality selection |
 | `derivation-validation.md` | 9 coherence tests |
 | `testing-milestones.md` | 7 validation layers |
-| `templates/` | `moc.md`, `note.md`, `session-log.md` |
+| `templates/` | `moc.md`, `note.md` |
 
 ## generators/features/ (composable CLAUDE.md blocks)
 
 One file per feature; `skills/setup/` enables a subset based on derived config:
 
-`ethical-guardrails`, `graph-analysis`, `helper-functions`, `maintenance`, `mocs`, `multi-domain`, `note-granularity`, `processing-pipeline`, `schema`, `self-space`, `semantic-search`, `session-rhythm`, `templates`, `wiki-links`.
+`ethical-guardrails`, `graph-analysis`, `helper-functions`, `maintenance`, `mocs`, `note-granularity`, `processing-pipeline`, `schema`, `self-space`, `semantic-search`, `session-rhythm`, `templates`, `wiki-links`.
 
 ## Hooks
 

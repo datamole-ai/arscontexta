@@ -63,14 +63,14 @@ primitives:
 
   - id: topics-footer
     name: Topics footer linking notes to MOCs
-    description: "Every note declares which MOC(s) it belongs to via topics field."
+    description: "Every non-MOC note carries a body-level `Topics:` footer (after a `---` separator) listing the parent MOC(s) as wiki-links. This is human/agent orientation when reading a note cold — not a queryable schema field."
     layer: convention
-    requires: moc-hierarchy, markdown-yaml
+    requires: moc-hierarchy
     enforcement: invariant
     validation:
-      check: "topics field present on every non-MOC note with at least one wiki link"
+      check: "body-level `Topics:` footer present on every non-MOC note with at least one wiki link to a MOC"
       threshold: ">95% of notes"
-    cognitive_grounding: "Bidirectional navigation — MOCs link down to notes, notes link up to MOCs"
+    cognitive_grounding: "Bidirectional orientation — MOCs link down to notes via `## Core Ideas` (the canonical membership index), notes link up to MOCs via the Topics footer (orientation when reading a note alone)"
 
   - id: schema-enforcement
     name: Schema enforcement via templates
@@ -97,8 +97,6 @@ primitives:
       optional:
         - relationships.md
         - memory/
-        - sessions/
-        - journal/
     validation:
       check: "self/ exists with identity.md, methodology.md, goals.md populated"
     cognitive_grounding: "Session handoff — externalized state gives each fresh session a briefing from the previous one"

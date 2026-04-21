@@ -15,7 +15,7 @@ Questions the engine must answer when generating the self/ space:
 1. **What personality dimensions were derived?** Warmth, opinionatedness, formality, and emotional awareness each affect how identity.md is written. A warm, casual agent has a fundamentally different self-voice than a clinical, formal one.
 2. **What domain is the agent working in?** The domain determines methodology.md content: a therapy agent's methodology emphasizes pattern recognition and emotional attunement; a research agent's methodology emphasizes extraction rigor and connection density.
 3. **What is the user relationship?** User signals about desired interaction style inform goals.md seeds and relationships.md content. A user who wants a "thinking partner" gets different relationship framing than one who wants an "organized assistant."
-4. **What self/ extensions are justified?** memory/ (for accumulated self-knowledge beyond core files), journal/ (for reflective writing), relationships.md (for multi-person contexts). Each extension adds maintenance cost — only generate what the domain demands.
+4. **What self/ extensions are justified?** memory/ (for accumulated self-knowledge beyond core files), relationships.md (for multi-person contexts). Each extension adds maintenance cost — only generate what the domain demands.
 5. **How is self/ loaded at session start?** CLAUDE.md references and session-start hooks load self/ files automatically.
 6. **What is the identity evolution model?** Should identity be stable (rarely changing), adaptive (evolving with use), or provisional (explicitly experimental)? Research agents trend stable; companion agents trend adaptive.
 
@@ -181,7 +181,7 @@ Questions the engine must answer when generating the self/ space:
 
 **Derivation Implication:** At generation time, identity.md starts thin — personality prose, basic capability description, domain approach. The context file should instruct the agent to accumulate operational wisdom in identity.md over time: "When you learn something important about how you work, add it to identity.md. This is how your identity grows — not through personality changes, but through deepening self-knowledge."
 
-**Source:** Vault self/identity.md. Over time, identity.md accumulates operational observations that were first captured in self/journal/ or self/sessions/ and then promoted to self/ after proving durable.
+**Source:** Vault self/identity.md. Over time, identity.md accumulates operational observations that were first captured as self/memory/ notes and then promoted into identity.md after proving durable.
 
 ---
 

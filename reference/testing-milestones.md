@@ -21,7 +21,7 @@ Seven validation milestones for the Ars Contexta v1.6 plugin. Each milestone tes
 | Failure | Cause | Fix |
 |---------|-------|-----|
 | FAIL on primitive 1 (YAML frontmatter) | Template generation skipped frontmatter | Check `generators/features/templates.md` — ensure all templates output YAML blocks |
-| FAIL on primitive 3 (MOC hierarchy) | Generated notes lack `type: moc` in frontmatter | Verify MOC template includes `type: moc` in YAML |
+| FAIL on primitive 3 (MOC hierarchy) | Generated MOCs lack `content_type: moc` in frontmatter | Verify MOC template includes `content_type: moc` in YAML |
 | FAIL on primitive 9 (self space) | self/ directory not created | Check that /setup creates self/identity.md, self/methodology.md, self/goals.md — self space is INVARIANT |
 | WARN on primitive 7 (schema enforcement) | Templates exist but no validation script generated | Ensure /setup creates a validate.sh or validate skill |
 | WARN on primitive 11 (discovery-first) | Context file has discovery section but skills lack discovery checks | Add discovery-first check to generated skill templates |
@@ -318,10 +318,10 @@ if [ -n "$NEW_NOTES" ]; then
         else
             echo "  FAIL: $note missing description"
         fi
-        if grep -q "^topics:" "$note"; then
-            echo "  PASS: $note has topics field"
+        if awk '/^---$/{c++; next} c==2' "$note" | grep -q "^Topics:"; then
+            echo "  PASS: $note has Topics footer"
         else
-            echo "  FAIL: $note missing topics"
+            echo "  FAIL: $note missing Topics footer"
         fi
     done
 else

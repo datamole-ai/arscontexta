@@ -47,8 +47,8 @@ rg -L '^description:' {DOMAIN:note_collection}/*.md
 # Find all mentions of a {DOMAIN:note}
 rg '\[\[{DOMAIN:note} title\]\]' --glob '*.md'
 
-# Find {DOMAIN:notes} by {DOMAIN:topic map}
-rg '^topics:.*\[\[methodology\]\]' {DOMAIN:note_collection}/
+# Find {DOMAIN:notes} by {DOMAIN:topic map} (reverse-lookup via wiki-link to the MOC)
+rg -l '\[\[methodology\]\]' {DOMAIN:note_collection}/
 ```
 
 Keyword search is fast, works everywhere, requires no external tools, and is precise for known vocabulary.

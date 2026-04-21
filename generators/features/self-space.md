@@ -39,13 +39,6 @@ The self space connects directly to the session rhythm:
 
 **Persist phase:** Update self/goals.md with current state before session ends. Capture methodology learnings to self/methodology.md. Write personal insights to self/memory/ as atomic {DOMAIN:notes}.
 
-### Optional Extensions
-
-Add these when friction signals the need — not preemptively:
-
-- **sessions/** — Session logs capturing what happened each session. Useful when you want a continuous narrative across sessions rather than just a goals snapshot.
-- **journal/** — Reflective writing and self-directed observations. Functions like a personal {DOMAIN:inbox} for agent insights.
-
 ### The Architecture Principle
 
 Agent identity is not configuration. identity.md reads like self-knowledge ("I pay attention to structure and tend to over-organize before I have enough material"). ops/derivation.md reads like configuration documentation ("warmth: warm, source signal: 'I want something gentle'"). Keeping these separate prevents configuration-as-identity conflation — one of the six failure modes of space conflation.

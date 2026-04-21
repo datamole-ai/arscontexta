@@ -1,6 +1,6 @@
 ---
 description: Brief description of what this topic covers and why it matters
-type: moc
+content_type: moc
 created: YYYY-MM-DD
 ---
 

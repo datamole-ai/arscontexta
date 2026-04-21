@@ -30,8 +30,6 @@ Every generated system divides its workspace into three spaces: self, notes, and
 |---------------|---------------|---------|
 | `relationships.md` | Domain involves multiple people | Key people, preferences, interaction patterns |
 | `memory/` | Agent needs atomic self-knowledge beyond core files | Prose-titled atomic notes mirroring the notes/ pattern |
-| `journal/` | Agent captures raw session observations | Processing input for self-knowledge — analogous to inbox |
-| `sessions/` | Session logs need graduated storage | Session-specific logs that might graduate to memory/ or methodology.md |
 
 ### Design Rule
 
@@ -101,9 +99,9 @@ These hold across all generated systems:
 
 **Growth pattern:** Fluctuating — grows during active work, shrinks during maintenance. Nothing in ops/ is permanent knowledge.
 
-**Load pattern:** Targeted. Queue status, today's session log, latest health report. Never loaded in bulk.
+**Load pattern:** Targeted. Queue status, latest health report. Never loaded in bulk.
 
-**Purpose:** Keep the knowledge graph clean by separating operational scaffolding from durable knowledge. Without ops/, session logs, queue state, and health reports accumulate alongside genuine insights, polluting search results and inflating note counts.
+**Purpose:** Keep the knowledge graph clean by separating operational scaffolding from durable knowledge. Without ops/, queue state, health reports accumulate alongside genuine insights, polluting search results and inflating note counts.
 
 ### Contents
 
@@ -112,7 +110,6 @@ These hold across all generated systems:
 | `derivation.md` | The original derivation rationale — dimension positions, tradition mapping, vocabulary choices, rationale for each decision | Semi-permanent — rarely updated |
 | `derivation-manifest.md` | Version tracking — arscontexta version, research snapshot date, feature blocks enabled, coherence validation results | Semi-permanent |
 | `reminders.md` | User-delegated time-bound actions — flat markdown, checked at orient, items removed on completion | Active rotation — items added and removed regularly |
-| `sessions/` | Session logs — what happened today, handoff notes for next session | Rolling archive — logs older than 30 days can be archived without knowledge loss |
 | `health/` | Schema validation results, orphan lists, link health metrics — point-in-time snapshots | Superseding — yesterday's report is superseded by today's |
 | `queue/` | Processing queue state — what needs extraction, connection, verification | Flowing — items move through and complete |
 
@@ -138,8 +135,7 @@ These hold across all generated systems:
 **Content moves from temporal to durable, never the reverse.** Promotion is one-directional:
 
 ```
-ops/sessions/ -> notes/ (when a session insight proves durable)
-ops/sessions/ -> self/methodology.md (when a session insight is about agent operation)
+inbox/ -> notes/ (when captured material earns a durable claim)
 ```
 
 Content never moves FROM notes/ or self/ INTO ops/. Durable knowledge doesn't become temporal scaffolding.
@@ -157,15 +153,8 @@ Content never moves FROM notes/ or self/ INTO ops/. Durable knowledge doesn't be
 
 Each conflation pattern produces specific, predictable failures:
 
-### 1. Ops into Notes
 
-**What happens:** Processing queue state, session logs, and health reports end up in the notes/ directory alongside genuine insights.
-
-**What breaks:** Search returns processing debris alongside real knowledge. Note counts are inflated with temporal content. MOCs accumulate operational entries that don't belong. The knowledge graph becomes noisy — an agent searching for "learning patterns" finds session log mentions alongside genuine claims.
-
-**Example:** A session log that says "processed 5 papers today, found connection between X and Y" gets filed in notes/. The connection between X and Y should be a note; the processing status should not.
-
-### 2. Self into Notes
+### 1. Self into Notes
 
 **What happens:** Agent identity, preferences, and operational methodology end up in the user's knowledge graph.
 
@@ -173,23 +162,8 @@ Each conflation pattern produces specific, predictable failures:
 
 **Example:** An agent note saying "I work best when processing in small batches" gets filed alongside user's therapy reflections.
 
-### 3. Notes into Ops
 
-**What happens:** Genuine insights stay trapped in session logs or observation files, never becoming permanent notes.
-
-**What breaks:** Insights are lost when ops/ is archived or purged. Knowledge doesn't compound because session-trapped insights can't be linked from other notes. The user has to re-discover insights that were already captured but never promoted. The vault appears thinner than the work invested would suggest.
-
-**Example:** A session log captures "realized that morning anxiety correlates with skipping exercise" but it never becomes a proper note in reflections/. Three months later, the session log is archived and the insight is effectively gone.
-
-### 4. Self into Ops
-
-**What happens:** Agent identity is scattered across 50 session logs instead of curated in self/ files.
-
-**What breaks:** Orientation fails — the agent can't load 50 session logs to remember who it is. Identity drifts because there's no authoritative source. Session logs that mention identity ("I should be more direct") don't accumulate into identity evolution — they're temporal artifacts.
-
-**Example:** The agent's evolving understanding of its voice is spread across session notes instead of living in self/identity.md where it can be loaded, refined, and maintained.
-
-### 5. Ops into Self
+### 2. Ops into Self
 
 **What happens:** Agent identity gets polluted with temporal processing state — today's queue status, current health metrics, in-progress session context.
 
@@ -197,7 +171,7 @@ Each conflation pattern produces specific, predictable failures:
 
 **Example:** self/methodology.md includes "currently processing the Johnson 2026 paper" — which is ops state, not methodology.
 
-### 6. Notes into Self
+### 3. Notes into Self
 
 **What happens:** Domain knowledge gets stored in self/ because it felt personally relevant to the agent.
 
@@ -225,8 +199,7 @@ project-root/
 │   ├── methodology.md
 │   ├── goals.md
 │   ├── relationships.md         # optional
-│   ├── memory/                  # optional
-│   └── journal/                 # optional
+│   └── memory/                  # optional
 ├── notes/                       # or domain-specific name (reflections/, concepts/, etc.)
 │   ├── index.md                 # hub MOC
 │   ├── [domain-mocs].md         # domain/topic MOCs
@@ -238,7 +211,6 @@ project-root/
     ├── derivation.md
     ├── derivation-manifest.md
     ├── reminders.md
-    ├── sessions/
     ├── health/
     └── queue/
 ```
@@ -289,7 +261,7 @@ When the agent captures something, this decision tree determines where it belong
 Is this about the agent itself?
 ├── YES: Is it durable self-knowledge?
 │   ├── YES -> self/ (identity, methodology, goals, memory)
-│   └── NO -> ops/ (session log, current processing state)
+│   └── NO -> ops/ (observations, current processing state)
 │
 └── NO: Is this domain knowledge?
     ├── YES: Is it durable, composable, worth finding again?

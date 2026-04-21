@@ -62,15 +62,12 @@ for f in $(find {vocabulary.note_collection}/ -name "*.md" -type f); do
   head -1 "$f" | grep -q '^---$' || echo "FAIL: $f — no YAML frontmatter"
   # Check: description field present
   rg -q '^description:' "$f" || echo "WARN: $f — missing description field"
-  # Check: topics field present and links to at least one topic map
-  rg -q '^topics:' "$f" || echo "WARN: $f — missing topics field"
 done
 ```
 
 **Additional checks:**
 - Domain-specific enum fields have valid values (check against template `_schema` blocks if templates exist)
 - `description` field is non-empty (not just present)
-- `topics` field contains at least one wiki link
 
 **Thresholds:**
 
@@ -78,7 +75,6 @@ done
 |-----------|-------|
 | Any note missing YAML frontmatter | FAIL |
 | Any note missing `description` field | WARN |
-| Any note missing `topics` field | WARN |
 | Any invalid enum value | WARN |
 | All notes pass all checks | PASS |
 
@@ -88,9 +84,7 @@ done
     2 notes missing description:
       - notes/example-note.md
       - notes/another-note.md
-    1 note missing topics:
-      - notes/orphaned-claim.md
-    12/15 notes fully compliant
+    13/15 notes fully compliant
 ```
 
 ### Category 2: Orphan Detection
@@ -257,7 +251,7 @@ rg -i '(my methodology|I observed that|agent reflection|session learning|I learn
 
 #### 5c. Notes into Ops (Trapped Knowledge)
 
-Genuine insights trapped in session logs or ops files that should be promoted to {vocabulary.note_collection}/.
+Genuine insights trapped in ops files that should be promoted to {vocabulary.note_collection}/.
 
 **Detection:**
 ```bash
@@ -268,7 +262,7 @@ rg '^description:' ops/methodology/*.md 2>/dev/null
 
 | Found | Level |
 |-------|-------|
-| Content in ops/ with note-like schema (description + topics) | INFO (may be intentional, flag for review) |
+| Content in ops/ with note-like schema (description + content_type) | INFO (may be intentional, flag for review) |
 
 #### 5d. Self into Ops / Ops into Self
 
@@ -288,8 +282,11 @@ Domain knowledge stored in self/ instead of {vocabulary.note_collection}/.
 
 **Detection:**
 ```bash
-# Check self/memory/ for notes that have topics linking to notes-space topic maps
-rg '^topics:.*\[\[' self/memory/*.md 2>/dev/null | grep -v 'identity\|methodology\|goals\|relationships'
+# Check self/memory/ for wiki-links into notes-space MOCs (domain knowledge leaking into self/)
+MOCS=$(find {vocabulary.note_collection}/ -name "*.md" -type f -exec grep -l '^content_type: moc' {} + 2>/dev/null | xargs -n1 basename -s .md 2>/dev/null)
+for moc in $MOCS; do
+  rg -l "\[\[$moc\]\]" self/memory/ --glob '*.md' 2>/dev/null
+done | sort -u
 ```
 
 #### 5f. Self Space Presence Check
@@ -425,7 +422,7 @@ done
 **How to check:**
 
 For each {vocabulary.topic_map} file:
-1. Count notes that link TO this {vocabulary.topic_map} (notes with this in their `topics` footer/field)
+1. Count notes that link TO this {vocabulary.topic_map} (notes with `[[topic-map]]` anywhere — typically in the `Topics:` footer)
 2. Check if there are notes in the same topic area NOT linked to the {vocabulary.topic_map} (coverage gaps)
 3. Verify context phrases exist on Core Ideas links (not bare links)
 
@@ -433,8 +430,8 @@ For each {vocabulary.topic_map} file:
 # For each topic map
 for moc in $(find {vocabulary.note_collection}/ -name "*.md" -type f); do
   [[ -f "$moc" ]] || continue
-  # Check if this is a topic map (has type: moc in frontmatter)
-  rg -q '^type: moc' "$moc" || continue
+  # Check if this is a topic map (has content_type: moc in frontmatter)
+  rg -q '^content_type: moc' "$moc" || continue
 
   moc_name=$(basename "$moc" .md)
 
@@ -460,7 +457,7 @@ done
 ```bash
 # Check for bare links in topic map Core Ideas (links without context phrases)
 for moc in $(find {vocabulary.note_collection}/ -name "*.md" -type f); do
-  rg -q '^type: moc' "$moc" || continue
+  rg -q '^content_type: moc' "$moc" || continue
   # Look for "- [[note]]" without " — " context
   rg '^\s*- \[\[' "$moc" | grep -v ' — ' | grep -v '^\s*- \[\[.*\]\].*—'
 done

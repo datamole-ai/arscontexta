@@ -88,8 +88,7 @@ self/           — agent's persistent mind space
   ├── identity.md
   ├── methodology.md
   ├── goals.md
-  ├── memory/   — atomic insights
-  └── journal/  — reflective writing
+  └── memory/   — atomic insights
 templates/      — note templates per domain
 ```
 
@@ -290,9 +289,7 @@ self/
 ├── methodology.md   — how it works, principles, quality standards
 ├── goals.md         — current threads, active projects
 ├── relationships.md — key people, preferences, context
-├── memory/          — atomic insights (prose-as-title)
-├── sessions/        — session logs (what happened this session)
-└── journal/         — raw capture (processing input)
+└── memory/          — atomic insights (prose-as-title)
 ```
 
 **The pattern:** self/ mirrors the main notes structure — atomic notes with prose titles, linked from MOCs. Journal serves as capture zone for processing into atomic notes.

@@ -65,13 +65,13 @@ Every note has a `description` in its YAML frontmatter — one sentence (~150 ch
 
 ### 6. Topics footer linking notes to MOCs
 
-Every note declares which MOC(s) it belongs to via a `topics` field (YAML array of wiki links). This is the bidirectional link that completes the MOC hierarchy: MOCs link down to notes via Core Ideas, notes link up to MOCs via Topics. The two-way connection ensures that neither direction goes stale independently.
+Every note carries a body-level `Topics:` footer (after a `---` separator) listing the parent MOC(s) as wiki-links. This is reader orientation, not a queryable schema field: the MOC's `## Core Ideas` section remains the canonical membership index, and wiki-link backlinks provide reverse lookup. The footer exists so that a reader opening a note cold — without a backlink-aware tool — can see where it belongs.
 
-**Why universal:** Without Topics, notes can drift away from their MOCs — the MOC links to the note, but there's no record in the note of where it belongs. Adding topics to a second MOC becomes guesswork. More fundamentally, topics enable the query `rg '^topics:.*\[\[topic-name\]\]'` which instantly finds all notes in a topic area without reading any MOC file. This turns a navigation structure into a queryable relationship.
+**Why universal:** Without Topics, a note read in isolation has no pointer back to its context. The MOC links down to the note via `## Core Ideas`, but a bare note file alone can't tell you which MOC it came from without crawling the whole graph. The footer is cheap orientation. Querying membership, by contrast, should go through the MOC (read `## Core Ideas`) or through wiki-link backlinks (`rg -l '\[\[topic-name\]\]'`) — not through parsing the footer.
 
-**Minimum viable version:** Every note has a `topics` field containing at least one wiki link to a MOC.
+**Minimum viable version:** Every note has a body-level `Topics:` footer containing at least one wiki link to a MOC.
 
-**Validation:** `topics` field present on every non-MOC note. Every wiki link in `topics` resolves to a file with `type: moc`.
+**Validation:** `Topics:` footer present on every non-MOC note. Every wiki link under it resolves to a file with `content_type: moc`.
 
 ### 7. Schema enforcement via validation
 

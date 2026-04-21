@@ -1,39 +1,17 @@
 ---
 name: stats
-description: Show vault statistics and knowledge graph metrics. Provides a shareable snapshot of vault health, growth, and progress. Triggers on "/stats", "vault stats", "show metrics", "how big is my vault".
+description: Show vault statistics and knowledge graph metrics. Provides a snapshot of vault health, growth, and progress. Triggers on "/stats", "vault stats", "how big is my vault".
 version: "1.0"
 allowed-tools: Read, Grep, Glob, Bash
-argument-hint: "[--share] — optional flag for compact shareable output"
 ---
 
-## Runtime Configuration (Step 0 — before any processing)
+## Runtime Configuration
 
-Read these files to configure domain-specific behavior:
+### Vocabulary
 
-1. **`ops/derivation-manifest.md`** — vocabulary mapping
-   - Use `vocabulary.note_collection` for the note collection directory
-   - If `entity_directories` section exists in manifest, read it for entity-type routing
-   - Use `vocabulary.note` / `vocabulary.note_plural` for note type references
-   - Use `vocabulary.topic_map` / `vocabulary.topic_map_plural` for MOC references
-   - Use `vocabulary.inbox` for the inbox folder name
-   - Use `vocabulary.notes_collection` for semantic search collection name
-
-2. **`ops/config.yaml`** — dimension and feature settings
-
-If no derivation file exists, use universal terms (notes, MOCs, etc.).
-
----
-
-## EXECUTE NOW
-
-**Target: $ARGUMENTS**
-
-Parse immediately:
-- If target contains `--share`: output compact shareable format after full stats
-- If target is empty: output full stats display
-- If target names a specific category (e.g., "health", "growth", "pipeline"): show only that category
-
-**START NOW.** Collect metrics and present them.
+All output must use domain-native terms.
+Derivation manifest for vocabulary mapping:
+!`cat ops/derivation-manifest.md`
 
 ---
 
@@ -58,7 +36,7 @@ NOTES_DIR="{vocabulary.note_collection}"
 
 # Note count (excluding MOCs)
 TOTAL_FILES=$(find "$NOTES_DIR"/ -name "*.md" -type f | wc -l | tr -d ' ')
-MOC_COUNT=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l '^type: moc' {} + 2>/dev/null | wc -l | tr -d ' ')
+MOC_COUNT=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l '^content_type: moc' {} + 2>/dev/null | wc -l | tr -d ' ')
 NOTE_COUNT=$((TOTAL_FILES - MOC_COUNT))
 
 # Connection count (all wiki links across notes/)
@@ -70,9 +48,6 @@ if [[ "$NOTE_COUNT" -gt 0 ]]; then
 else
   AVG_LINKS="0"
 fi
-
-# Topic count (unique values in topics: fields)
-TOPIC_COUNT=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -ohP '^\s*-\s*"\[\[([^\]]+)\]\]"' {} + 2>/dev/null | sort -u | wc -l | tr -d ' ')
 
 # Link density
 if [[ "$NOTE_COUNT" -gt 1 ]]; then
@@ -90,7 +65,7 @@ fi
 ORPHAN_COUNT=0
 for f in $(find "$NOTES_DIR"/ -name "*.md" -type f); do
   NAME=$(basename "$f" .md)
-  grep -q '^type: moc' "$f" 2>/dev/null && continue
+  grep -q '^content_type: moc' "$f" 2>/dev/null && continue
   INCOMING=$(grep -rl "\[\[$NAME\]\]" "$NOTES_DIR"/ 2>/dev/null | grep -v "$f" | wc -l | tr -d ' ')
   [[ "$INCOMING" -eq 0 ]] && ORPHAN_COUNT=$((ORPHAN_COUNT + 1))
 done
@@ -101,12 +76,10 @@ DANGLING_COUNT=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -ohP '\[\[([
   ! find "$NOTES_DIR"/ -name "$NAME.md" -type f | grep -q . && echo "$NAME"
 done | wc -l | tr -d ' ')
 
-# Schema compliance (% of notes with required fields: description, topics)
+# Schema compliance — % of notes with a description field (required by the schema).
+# This is a rough signal; /health runs the full per-field schema check.
 MISSING_DESC=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -L '^description:' {} + 2>/dev/null | wc -l | tr -d ' ')
-MISSING_TOPICS=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -L '^topics:' {} + 2>/dev/null | wc -l | tr -d ' ')
-SCHEMA_ISSUES=$((MISSING_DESC + MISSING_TOPICS))
 if [[ "$TOTAL_FILES" -gt 0 ]]; then
-  # Notes with BOTH required fields
   COMPLIANT=$((TOTAL_FILES - MISSING_DESC))
   COMPLIANCE=$(echo "scale=0; $COMPLIANT * 100 / $TOTAL_FILES" | bc)
 else
@@ -117,8 +90,8 @@ fi
 COVERED=0
 for f in $(find "$NOTES_DIR"/ -name "*.md" -type f); do
   NAME=$(basename "$f" .md)
-  grep -q '^type: moc' "$f" 2>/dev/null && continue
-  if find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l '^type: moc' {} + 2>/dev/null | xargs grep -l "\[\[$NAME\]\]" >/dev/null 2>&1; then
+  grep -q '^content_type: moc' "$f" 2>/dev/null && continue
+  if find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l '^content_type: moc' {} + 2>/dev/null | xargs grep -l "\[\[$NAME\]\]" >/dev/null 2>&1; then
     COVERED=$((COVERED + 1))
   fi
 done
@@ -135,16 +108,10 @@ fi
 # Inbox items
 INBOX_COUNT=$(find {vocabulary.inbox}/ -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
 
-# Queue pending (check both YAML and JSON formats)
-QUEUE_FILE=""
-if [[ -f "ops/queue/queue.yaml" ]]; then
-  QUEUE_FILE="ops/queue/queue.yaml"
-  QUEUE_PENDING=$(grep -c 'status: pending' "$QUEUE_FILE" 2>/dev/null || echo 0)
-  QUEUE_DONE=$(grep -c 'status: done' "$QUEUE_FILE" 2>/dev/null || echo 0)
-elif [[ -f "ops/queue/queue.json" ]]; then
-  QUEUE_FILE="ops/queue/queue.json"
-  QUEUE_PENDING=$(grep -c '"status": "pending"' "$QUEUE_FILE" 2>/dev/null || echo 0)
-  QUEUE_DONE=$(grep -c '"status": "done"' "$QUEUE_FILE" 2>/dev/null || echo 0)
+# Queue pending
+if [[ -f "ops/queue/queue.json" ]]; then
+  QUEUE_PENDING=$(jq '[.tasks[] | select(.status=="pending")] | length' ops/queue/queue.json 2>/dev/null || echo 0)
+  QUEUE_DONE=$(jq '[.tasks[] | select(.status=="done")] | length' ops/queue/queue.json 2>/dev/null || echo 0)
 else
   QUEUE_PENDING=0
   QUEUE_DONE=0
@@ -162,11 +129,11 @@ fi
 ### 1d. Growth Metrics
 
 ```bash
-# This week's growth (notes with created: date within last 7 days)
+# This week's growth (notes with created_at: date within last 7 days).
 WEEK_AGO=$(date -v-7d +%Y-%m-%d 2>/dev/null || date -d '7 days ago' +%Y-%m-%d 2>/dev/null)
 if [[ -n "$WEEK_AGO" ]]; then
-  THIS_WEEK_NOTES=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l "^created: " {} + 2>/dev/null | while read -r f; do
-    CREATED=$(grep '^created:' "$f" | head -1 | awk '{print $2}')
+  THIS_WEEK_NOTES=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l "^created_at: " {} + 2>/dev/null | while read -r f; do
+    CREATED=$(grep '^created_at:' "$f" | head -1 | awk '{print $2}')
     [[ "$CREATED" > "$WEEK_AGO" || "$CREATED" == "$WEEK_AGO" ]] && echo "$f"
   done | wc -l | tr -d ' ')
 else
@@ -175,8 +142,8 @@ fi
 
 # This week's connections (approximate — count links in recently created notes)
 if [[ "$THIS_WEEK_NOTES" -gt 0 && -n "$WEEK_AGO" ]]; then
-  THIS_WEEK_LINKS=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l "^created: " {} + 2>/dev/null | while read -r f; do
-    CREATED=$(grep '^created:' "$f" | head -1 | awk '{print $2}')
+  THIS_WEEK_LINKS=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l "^created_at: " {} + 2>/dev/null | while read -r f; do
+    CREATED=$(grep '^created_at:' "$f" | head -1 | awk '{print $2}')
     [[ "$CREATED" > "$WEEK_AGO" || "$CREATED" == "$WEEK_AGO" ]] && grep -oP '\[\[[^\]]+\]\]' "$f" 2>/dev/null
   done | wc -l | tr -d ' ')
 else
@@ -195,15 +162,19 @@ else
   SELF_STATUS="MISSING (invariant primitive)"
 fi
 
-# Methodology notes
-METHODOLOGY_COUNT=$(ls -1 ops/methodology/*.md 2>/dev/null | wc -l | tr -d ' ')
+# Observations pending — queried as note-type + status within the note collection.
+# Not all vaults declare a `type: observation` content type; zero is a valid result.
+OBS_PENDING=0
+for f in $(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l '^type: observation' {} + 2>/dev/null); do
+  grep -q '^status: pending' "$f" 2>/dev/null && OBS_PENDING=$((OBS_PENDING + 1))
+done
 
-# Observations pending
-OBS_PENDING=$(grep -rl '^status: pending' ops/observations/ 2>/dev/null | wc -l | tr -d ' ')
-
-# Tensions pending
-TENSION_PENDING=$(grep -rl '^status: open\|^status: pending' ops/tensions/ 2>/dev/null | wc -l | tr -d ' ')
-
+# Tensions pending — queried as note-type + status within the note collection.
+# Not all vaults declare a `type: tension` content type; zero is a valid result.
+TENSION_PENDING=0
+for f in $(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l '^type: tension' {} + 2>/dev/null); do
+  grep -qE '^status: (open|pending)' "$f" 2>/dev/null && TENSION_PENDING=$((TENSION_PENDING + 1))
+done
 ```
 
 Adapt all directory names to domain vocabulary. Skip checks for directories that do not exist — report "N/A" instead of errors.
@@ -231,7 +202,6 @@ Progress bar calculation:
   {vocabulary.note_plural}:  [NOTE_COUNT]
   Connections:               [LINK_COUNT] (avg [AVG_LINKS] per {vocabulary.note})
   {vocabulary.topic_map_plural}:   [MOC_COUNT] (covering [COVERAGE]% of {vocabulary.note_plural})
-  Topics:                    [TOPIC_COUNT]
 
   Health
   ======
@@ -253,11 +223,10 @@ Progress bar calculation:
   System
   ======
   Self space:      [SELF_STATUS]
-  Methodology:     [METHODOLOGY_COUNT] learned patterns
   Observations:    [OBS_PENDING] pending
   Tensions:        [TENSION_PENDING] open
 
-  Generated by Ars Contexta v1.6
+  Generated by Ars Contexta
 ```
 
 ### Interpretation Notes
@@ -269,8 +238,8 @@ After the stats block, add brief interpretation for any notable findings:
 | ORPHAN_COUNT > 0 | "[N] orphan {vocabulary.note_plural} — run `/graph health` for details" |
 | DANGLING_COUNT > 0 | "[N] dangling links — run `/graph health` to identify broken links" |
 | COMPLIANCE < 90 | "Schema compliance below 90% — some {vocabulary.note_plural} missing required fields" |
-| OBS_PENDING >= 10 | "[N] pending observations — consider running /{vocabulary.rethink}" |
-| TENSION_PENDING >= 5 | "[N] open tensions — consider running /{vocabulary.rethink}" |
+| OBS_PENDING >= 10 | "[N] pending observations — run /health for details" |
+| TENSION_PENDING >= 5 | "[N] open tensions — run /health for details" |
 | DENSITY < 0.02 | "Graph density is low — connections are thin. Run /{vocabulary.cmd_reflect} to strengthen the network" |
 | PROCESSED_PCT < 50 | "More content in inbox than in {vocabulary.note_collection}/ — consider processing backlog" |
 | THIS_WEEK_NOTES == 0 | "No new {vocabulary.note_plural} this week" |
@@ -279,32 +248,7 @@ Only show interpretation notes when conditions are notable. A healthy vault gets
 
 ---
 
-## Step 3: Shareable Format (--share flag)
-
-If invoked with `--share`, output a compact markdown block suitable for sharing on social media or in documentation:
-
-```markdown
-## My Knowledge Graph
-
-- **[NOTE_COUNT]** {vocabulary.note_plural} with **[LINK_COUNT]** connections (avg [AVG_LINKS] per {vocabulary.note})
-- **[MOC_COUNT]** {vocabulary.topic_map_plural} covering [COVERAGE]% of {vocabulary.note_plural}
-- Schema compliance: [COMPLIANCE]%
-- This week: +[THIS_WEEK_NOTES] {vocabulary.note_plural}, +[THIS_WEEK_LINKS] connections
-- Graph density: [DENSITY]
-
-*Built with [Ars Contexta](https://github.com/arscontexta) v1.6*
-```
-
-The shareable format:
-- Omits health warnings (positive framing for sharing)
-- Omits pipeline state (internal detail)
-- Omits system metrics (internal detail)
-- Includes only growth-positive metrics
-- Always includes the Ars Contexta attribution line
-
----
-
-## Step 4: Trend Analysis (when history exists)
+## Step 3: Trend Analysis (when history exists)
 
 If previous /stats runs are logged in `ops/stats-history.yaml` (or similar), compare current metrics against the last snapshot:
 
@@ -317,49 +261,3 @@ If previous /stats runs are logged in `ops/stats-history.yaml` (or similar), com
 ```
 
 If no history exists, skip trend analysis. Do NOT create the history file — that is /health's responsibility.
-
----
-
-## Edge Cases
-
-### Empty Vault (0 notes)
-
-Show zeros gracefully:
-```
---=={ stats }==--
-
-  Your knowledge graph is new. Start capturing to see it grow.
-
-  Knowledge Graph
-  ===============
-  {vocabulary.note_plural}:  0
-  Connections:               0
-  {vocabulary.topic_map_plural}:   0
-  Topics:                    0
-
-  Generated by Ars Contexta v1.6
-```
-
-Do not show health, pipeline, growth, or system sections for an empty vault — they would all be zeros or N/A.
-
-### No Queue System
-
-Skip the Pipeline section entirely. Do not show an error.
-
-### Missing Self Space
-
-Self space is an invariant primitive — if self/ is missing, surface "MISSING (invariant primitive)" in the system metrics and recommend running /health for remediation guidance.
-
-### No ops/derivation-manifest.md
-
-Use universal vocabulary (notes, MOCs, etc.). All metrics work identically.
-
-### Very Large Vault (500+ notes)
-
-The orphan and MOC coverage checks may be slow for large vaults. If {vocabulary.note_collection}/ has >200 files:
-1. Run orphan detection with a simpler heuristic (check only for presence in any MOC, not full backlink scan)
-2. Note: "Metrics approximate for large vault. Run /graph health for precise analysis."
-
-### Platform-Specific Date Commands
-
-macOS uses `date -v-7d`, Linux uses `date -d '7 days ago'`. The script tries both. If neither works, report "?" for growth metrics instead of failing.

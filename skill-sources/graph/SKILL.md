@@ -59,7 +59,7 @@ Full graph health report: density, orphans, dangling links, coverage.
 # Count total notes (excluding MOCs)
 NOTES_DIR="{vocabulary.note_collection}"
 TOTAL=$(find "$NOTES_DIR"/ -name "*.md" -type f | wc -l | tr -d ' ')
-MOC_COUNT=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l '^type: moc' {} + 2>/dev/null | wc -l | tr -d ' ')
+MOC_COUNT=$(find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l '^content_type: moc' {} + 2>/dev/null | wc -l | tr -d ' ')
 NOTE_COUNT=$((TOTAL - MOC_COUNT))
 
 # Count all wiki links
@@ -88,9 +88,9 @@ COVERED=0
 for f in $(find "$NOTES_DIR"/ -name "*.md" -type f); do
   NAME=$(basename "$f" .md)
   # Skip MOCs themselves
-  grep -q '^type: moc' "$f" 2>/dev/null && continue
+  grep -q '^content_type: moc' "$f" 2>/dev/null && continue
   # Check if any MOC links to this note
-  if find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l '^type: moc' {} + 2>/dev/null | xargs grep -l "\[\[$NAME\]\]" >/dev/null 2>&1; then
+  if find "$NOTES_DIR"/ -name "*.md" -type f -exec grep -l '^content_type: moc' {} + 2>/dev/null | xargs grep -l "\[\[$NAME\]\]" >/dev/null 2>&1; then
     COVERED=$((COVERED + 1))
   fi
 done
@@ -467,12 +467,13 @@ Supported query patterns:
 
 | Query | Ripgrep Pattern | Purpose |
 |-------|----------------|---------|
-| `topics [[X]]` | `rg '^topics:.*\[\[X\]\]'` | Find notes in a topic |
-| `type tension` | `rg '^type: tension'` | Find notes by type |
+| `content_type tension` | `rg '^content_type: tension'` | Find notes by content type |
 | `methodology X` | `rg '^methodology:.*X'` | Find notes by tradition |
 | `status open` | `rg '^status: open'` | Find notes by status |
 | `created 2026-02` | `rg '^created: 2026-02'` | Find notes by date range |
 | `source [[X]]` | `rg '^source:.*\[\[X\]\]'` | Find notes from a source |
+
+To find notes in a topic, read the MOC directly (`## Core Ideas` is the index) or run `rg -l '\[\[topic-name\]\]' {vocabulary.note_collection}/` for the reverse lookup.
 
 **Step 2: Execute query**
 
@@ -494,8 +495,7 @@ For each matching file, extract the description for context.
   ...
 
   Distribution:
-    [If querying topics: how many per sub-topic]
-    [If querying type: breakdown by status]
+    [If querying content_type: breakdown by status]
     [If querying methodology: breakdown by tradition]
 ```
 
@@ -517,7 +517,7 @@ If no arguments provided:
 | "What bridges my topics?" | bridges | Bridge note identification |
 | "What connects to [[X]]?" | backward [[X]] | Backward traversal |
 | "Where does [[X]] lead?" | forward [[X]] | Forward traversal |
-| "Show me notes about [topic]" | query topics [[topic]] | Schema query |
+| "Show me notes about [topic]" | backward [[topic-map]] | Reverse-lookup via MOC wiki-link |
 | "What needs connecting in [topic]?" | siblings [[topic]] | Unconnected sibling pairs |
 
 3. Run the mapped operation

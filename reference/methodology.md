@@ -53,7 +53,7 @@ Structured metadata makes notes queryable. Base fields are universal; domain fie
 ```yaml
 ---
 description: One sentence adding context beyond the title (~150 chars)
-type: insight | pattern | preference | fact | decision | question
+content_type: insight | pattern | preference | fact | decision | question
 created: YYYY-MM-DD
 ---
 ```

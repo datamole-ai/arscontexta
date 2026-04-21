@@ -23,8 +23,8 @@ Graph queries operate at three levels of increasing sophistication:
 Query individual YAML fields across {DOMAIN:notes}:
 
 ```bash
-# Find all {DOMAIN:notes} of a specific type
-rg '^type: pattern' {DOMAIN:note_collection}/
+# Find all {DOMAIN:notes} of a specific content type
+rg '^content_type: pattern' {DOMAIN:note_collection}/
 
 # Scan descriptions for a concept
 rg '^description:.*friction' {DOMAIN:note_collection}/
@@ -32,11 +32,11 @@ rg '^description:.*friction' {DOMAIN:note_collection}/
 # Find {DOMAIN:notes} missing required fields
 rg -L '^description:' {DOMAIN:note_collection}/
 
-# Find {DOMAIN:notes} by {DOMAIN:topic map}
-rg '^topics:.*\[\[methodology\]\]' {DOMAIN:note_collection}/
+# Find {DOMAIN:notes} by {DOMAIN:topic map} (reverse-lookup via wiki-link to the MOC)
+rg -l '\[\[methodology\]\]' {DOMAIN:note_collection}/
 
 # Cross-field queries (combine with xargs)
-rg -l '^type: tension' {DOMAIN:note_collection}/ | xargs rg '^status: pending'
+rg -l '^content_type: tension' {DOMAIN:note_collection}/ | xargs rg '^status: pending'
 ```
 
 Field-level queries answer: "What properties do my {DOMAIN:notes} have?" They are fast, precise, and require no external tools.

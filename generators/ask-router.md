@@ -56,16 +56,15 @@ Canonical mapping (source file → `/ask` section heading). Sections appear in t
 |---|---|
 | `note-granularity.md` | `### {DOMAIN:Note} granularity` |
 | `wiki-links.md` | `### Wiki-links / graph edges` |
-| `mocs.md` (if enabled) | `### {DOMAIN:Topic maps}` |
+| `mocs.md` | `### {DOMAIN:Topic maps}` |
 | `processing-pipeline.md` | `### {DOMAIN:Processing} pipeline` |
 | `semantic-search.md` | `### Semantic search` |
 | `schema.md` | `### Schema / frontmatter` |
 | `maintenance.md` | `### Maintenance checks` |
 | `session-rhythm.md` | `### Session rhythm` |
 | `templates.md` | `### Templates` |
-| `multi-domain.md` (if enabled) | `### Multi-domain routing` |
 | `ethical-guardrails.md` | `### Ethical guardrails` |
-| `self-space.md` (if enabled) | `### Self space` |
+| `self-space.md` | `### Self space` |
 | `helper-functions.md` | `### Helper functions` |
 | `graph-analysis.md` | `### Graph analysis` |
 

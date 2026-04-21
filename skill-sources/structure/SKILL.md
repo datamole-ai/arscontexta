@@ -392,7 +392,9 @@ Parse the selected `_schema` block fully:
 **Fill prescriptive fields** (always present regardless of template):
 
 - **`description`** (required): ~150 characters, no trailing period, adds information beyond the title. Example of a bad description that restates the title: Title "LLM attention degrades as context fills" → Description "Attention in LLMs gets worse as the context window fills up". Example of a good description that adds mechanism: Same title → "Token-level attention scores drop measurably after 60% context utilization, affecting retrieval accuracy for earlier tokens".
-- **`topics`** (required): at least one wiki-link to a {vocabulary.topic_map}. Scan existing topic maps:
+- **`created_at`** (required): today's date in YYYY-MM-DD format.
+
+Identify the parent {vocabulary.topic_map}(s) now — they will be written into the body footer in M3. At least one is required. Scan existing topic maps:
 
 ```bash
 find {vocabulary.note_collection}/ -name "*.md" -type f | head -50 | while read f; do
@@ -403,7 +405,6 @@ done
 ```
 
 If no existing topic map matches, note this — the reflect phase will handle topic map creation.
-- **`created`** (required): today's date in YYYY-MM-DD format.
 
 **Fill template-driven fields:** For each field in `_schema.required` not already filled by the prescriptive step, derive a value from the cluster content that satisfies all constraints. Enum fields use ONLY values from `_schema.enums`. Constrained fields respect `max_length`, `format`, `fixed`. There are no optional fields — every field in `_schema.required` must be filled.
 
@@ -437,12 +438,12 @@ Topics:
 - [[parent-topic-map]]
 ```
 
-Derive `Source:` from the structure task's source. `Relevant Notes:` includes the semantic neighbor (if classification found one) as the first entry with a context phrase ("extends this by...", "contradicts because...", "provides the evidence base for..."); add other genuine connections discovered while writing. Bare links are not allowed. `Topics:` is the topic map(s) identified during frontmatter filling.
+Derive `Source:` from the structure task's source. `Relevant Notes:` includes the semantic neighbor (if classification found one) as the first entry with a context phrase ("extends this by...", "contradicts because...", "provides the evidence base for..."); add other genuine connections discovered while writing. Bare links are not allowed. `Topics:` lists the {vocabulary.topic_map}(s) identified in M2 — at least one entry, used as orientation for readers (the MOC's `## Core Ideas` list remains the canonical membership index).
 
 ### M4. Schema Validation (run in order)
 
 See the Shared Helpers appendix for the full 6-check validation procedure. Severity rules:
-- **FAIL** — missing required field, invalid enum, constraint violation, empty description, no topics. FIX INLINE (edit the note) and re-validate. No FAIL-state notes get written.
+- **FAIL** — missing required field, invalid enum, constraint violation, empty description, empty Topics footer. FIX INLINE (edit the note) and re-validate. No FAIL-state notes get written.
 - **WARN** — broken wiki-link to a note that does not exist yet, missing optional field. Log and continue.
 
 If validation FAILs cannot be resolved after one fix attempt, quarantine the artifact (see Shared Helpers) and continue with the next cluster.
@@ -733,11 +734,11 @@ Appendix referenced by both Materialize paths. Do not invoke independently.
 | 2 | **Enum compliance** — every enum field's value is in `_schema.enums.{field}` | FAIL | Correct to valid value, re-validate |
 | 3 | **Constraint compliance** — each field satisfies `_schema.constraints` (`max_length`, `format`, `fixed`) | FAIL | Fix violation, re-validate |
 | 4 | **Description quality** — adds info beyond the title (not a restatement, not empty) | FAIL | Rewrite description, re-validate |
-| 5 | **Topics present** — at least one wiki-link in the topics field | FAIL | Add topic link, re-validate |
+| 5 | **Topics footer present** — at least one wiki-link in the body-level `Topics:` footer | FAIL | Add topic link, re-validate |
 | 6 | **Wiki-link health** — `[[links]]` in body/footer point to files that exist | WARN | Log, continue |
 
 **Severity levels:**
-- **FAIL** — missing required field, invalid enum, constraint violation, empty description, no topics. Fix inline (edit the content in memory) and re-validate. If a FAIL cannot be resolved after one fix attempt, quarantine the artifact.
+- **FAIL** — missing required field, invalid enum, constraint violation, empty description, empty Topics footer. Fix inline (edit the content in memory) and re-validate. If a FAIL cannot be resolved after one fix attempt, quarantine the artifact.
 - **WARN** — broken wiki-link to a note that does not exist yet, missing optional field. Log the warning and continue. Broken links are common during batch creation — sibling notes may not exist yet.
 
 ### Quarantine Procedure
