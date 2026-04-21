@@ -306,8 +306,8 @@ Write `ops/derivation.md` FIRST, before any other artifact. Every subsequent ste
 | 1 | Main agent | derivation.md, folders, vault marker | Foundation setup |
 | 2 | Main agent | self/identity.md, self/methodology.md, self/goals.md, ops/methodology/ | Identity & self-knowledge |
 | 3 | Main agent | ops/config.yaml, ops/derivation-manifest.md | Ops configuration |
-| 4 | Agent 1 | templates/, ops/queries/ | Templates & query scripts |
-| 5 | Agent 2 | .claude/skills/*/SKILL.md (9 skills) | Skills (tiered generation, cp + Edit) |
+| 4 | Agent 1 | templates/, ops/queries/ | Templates & query starters |
+| 5 | Agent 2 | .claude/skills/*/SKILL.md (9 skills) | Skills (tiered generation, cp + sed + Edit) |
 | 6 | Agent 3 | CLAUDE.md, ops/features/*.md | Context file + feature references |
 | 7 | Agent 4 | manual/ (7 pages), [domain:notes]/index.md | Manual & hub MOC |
 | 8 | Main agent | Semantic search setup| Semantic search |
@@ -819,13 +819,13 @@ vocabulary:
 
 ---
 
-#### Pipeline Step 4: Templates & Query Scripts (Agent 1)
+#### Pipeline Step 4: Templates & Query Starters (Agent 1)
 
-**Agent scope:** templates/*.md, ops/queries/*.sh
+**Agent scope:** templates/*.md, ops/queries/{README.md,orphans.sh,by-tag.sh}
 
 **Agent reads:** ops/derivation.md
 
-Create templates first, then generate query scripts from the template `_schema` blocks.
+Create the template first, then write the three fixed query-starter files.
 
 ---
 
@@ -839,28 +839,51 @@ Read `${CLAUDE_PLUGIN_ROOT}/reference/templates/note.md` for canonical structure
 2. Copy the body structure (H1, prose body, `---`, `Topics:` footer) verbatim.
 3. Apply vocabulary transformation to body prose and comments only — `description`, `content_type`, `granularity`, `created_at`, `tags` YAML field names stay structural.
 
-##### Graph Query Scripts (derived from template schemas)
+##### Query Starters (fixed files)
 
-After creating templates, read the `_schema` blocks and generate 5-10 domain-adapted ripgrep scripts in `ops/queries/`.
+After creating the template, write three fixed files into `ops/queries/`. No per-domain generation — the starters are universal and the README points the user at the agent for anything domain-specific.
 
-**Generation algorithm:**
+Write `ops/queries/README.md` verbatim:
 
-1. Read all `_schema.required` fields from `ops/templates/note.md`.
-2. Identify queryable dimensions: `content_type`, `granularity` (enums), `created_at` (date), `tags` (array), plus Filter-A survivors.
-3. For each meaningful 2-field combination, generate a descriptively-named script covering cross-reference (notes sharing one field value, differing on another), temporal (items older than N days in a given status), density (fields with few entries / gap detection), and backlink (what references an entity) queries.
+```markdown
+# Queries
 
-Examples:
+Ad-hoc ripgrep scripts for vault inspection. Two universal starters ship with
+every vault:
 
+- `orphans.sh` — notes with no incoming wiki links
+- `by-tag.sh <tag>` — notes carrying a given tag
 
-| Domain        | Generated Queries                                                             |
-| ------------- | ----------------------------------------------------------------------------- |
-| Therapy       | `trigger-mood-correlation.sh`, `recurring-triggers.sh`, `stale-patterns.sh`   |
-| Research      | `cross-methodology.sh`, `low-confidence-candidates.sh`, `source-diversity.sh` |
-| Relationships | `neglected-contacts.sh`, `topic-overlap.sh`                                   |
-| PM            | `overdue-items.sh`, `owner-workload.sh`, `priority-distribution.sh`           |
+Need a domain-specific query (e.g., "recent decisions with low confidence")?
+Ask the agent: "Write me a query that finds X." It will read the schema from
+ops/templates/note.md, write the script here, and hand it back.
+```
 
+Write `ops/queries/orphans.sh` — substitute `{vocabulary.note_collection}` at generation time (read the value from `ops/derivation-manifest.md`):
 
-Include a discovery section in the context file documenting what queries exist, when to run them, and what insights they surface.
+```bash
+#!/usr/bin/env bash
+# orphans.sh — notes with no incoming wiki links
+set -euo pipefail
+NOTES_DIR="{vocabulary.note_collection}"
+find "$NOTES_DIR" -name '*.md' -type f | while read -r f; do
+  title=$(basename "$f" .md)
+  if ! rg -q "\[\[$title\]\]" "$NOTES_DIR"; then
+    echo "$f"
+  fi
+done
+```
+
+Write `ops/queries/by-tag.sh` — same substitution:
+
+```bash
+#!/usr/bin/env bash
+# by-tag.sh TAG — notes carrying a given tag
+set -euo pipefail
+if [ $# -ne 1 ]; then echo "usage: $0 TAG" >&2; exit 2; fi
+NOTES_DIR="{vocabulary.note_collection}"
+rg -l "^tags:.*\b$1\b" "$NOTES_DIR" --glob '*.md'
+```
 
 ---
 
@@ -922,20 +945,21 @@ You are Agent 2 of the Ars Contexta generation pipeline. Install all processing 
 
 ## Procedure
 
-Batch filesystem ops across all skills; edit each skill individually. Read `ops/derivation.md` first.
+Batch filesystem ops and body substitution across all skills in one Bash call; Edit only frontmatter per skill. Read `ops/derivation.md` first.
 
-**Step 1 — Batch scaffold (ONE Bash call).** Chain every `mkdir -p` and `cp` for all {N_SKILLS} skills into a single Bash invocation (one command per line joined with `&&` or newlines). After it returns, every target file exists.
+**Step 1 — Batch scaffold + body substitute (ONE Bash call).** Chain for all {N_SKILLS} skills in a single Bash invocation:
+- `mkdir -p <target-dir>` per skill
+- `cp <source> <target>` per skill
+- `sed -i.bak -e 's|{DOMAIN:xxx}|<value>|g' … <target1> <target2> …` — one sed call covering every target, one `-e` per entry in the DOMAIN Substitution Map. Use `|` as the `s` delimiter so `/` characters in domain values do not clash.
+- `rm -f <target1>.bak <target2>.bak …` — delete the transient backup files sed writes (required for BSD/GNU compatibility; `-i.bak` is the portable in-place form).
 
-**Step 2 — Batch read (ONE message).** Issue {N_SKILLS} `Read` tool calls in a single message (parallel reads). Now you have every target's contents in context.
+Universal skills (`structure`, `capture`) are included in the sed pass — their bodies carry `{DOMAIN:xxx}` patterns that need resolution; only their frontmatter is exempt.
 
-**Step 3 — Per-skill edits.** For each target:
-- **Frontmatter:** `Edit` `name:` and `description:` in domain vocabulary. SKIP for universal skills (`structure`, `capture`) — their frontmatter stays unchanged.
-- **Tier B body:** for each `{DOMAIN:xxx}` pattern, `Edit` with `replace_all: true` using the DOMAIN Substitution Map.
-- Never touch `{vocabulary.xxx}` patterns — they resolve at runtime from `ops/derivation-manifest.md`.
+**Step 2 — Per-skill frontmatter edits** For each non-universal skill modify `name:` in the frontmatter to the domain-native verb.
 
-Independent skills' edits can be issued as parallel `Edit` calls in one message when they target different files.
+Never touch `{vocabulary.xxx}` patterns — they resolve at runtime from `ops/derivation-manifest.md`.
 
-**Step 4 — Verify (ONE Bash call).** Run `rg '\{DOMAIN:' .claude/skills/` — count MUST be 0. If not, extend the map, re-run Edits, re-check.
+**Step 3 — Verify (ONE Bash call).** Run `rg '\{DOMAIN:' .claude/skills/` — count MUST be 0. If not, extend the DOMAIN Substitution Map and re-run Step 1's Bash call.
 
 ## Tier A — frontmatter only, body untouched
 
@@ -954,7 +978,7 @@ Literal string replacements. Preserve exact case and pluralization. If a `{DOMAI
 ## Constraints
 
 - `Write` is FORBIDDEN on SKILL.md files — always `cp` then `Edit`.
-- Allowed Bash: `mkdir`, `cp`, `rg`. Nothing else.
+- Allowed Bash: `mkdir`, `cp`, `sed`, `rm`, `rg`. Nothing else.
 - Stay inside `.claude/skills/` for writes; reads from `${CLAUDE_PLUGIN_ROOT}/skill-sources/` are expected.
 - Do NOT modify `{vocabulary.xxx}` patterns or improvise content beyond the map.
 
@@ -1348,16 +1372,16 @@ Welcome to your [domain] system.
 
 ##### Semantic Search Setup
 
-###### Add `notes_collection` to vocabulary
+###### Add `qmd_collection` to vocabulary
 
 Before any qmd configuration, derive and register the collection name:
 
 1. Derive a default collection name from `{vocabulary.note_collection}` (e.g., if notes folder is "claims", default collection name is "claims")
 2. Run `qmd collections list` to check existing collections on the user's system
 3. If the derived name collides with an existing collection, choose an alternative (e.g., append the vault directory name: "claims-myproject") — report the conflict and chosen name in output
-4. Add `notes_collection` to **both** vocabulary stores:
-   - `ops/derivation.md` — add a row to the Vocabulary Mapping table: `| notes_collection | <chosen-name> | qmd collection |`
-   - `ops/derivation-manifest.md` — add `notes_collection: "<chosen-name>"` to the vocabulary section (after Level 6 / before processing_categories)
+4. Add `qmd_collection` to **both** vocabulary stores:
+   - `ops/derivation.md` — add a row to the Vocabulary Mapping table: `| qmd_collection | <chosen-name> | qmd collection |`
+   - `ops/derivation-manifest.md` — add `qmd_collection: "<chosen-name>"` to the vocabulary section (after Level 6 / before processing_categories)
 
 ###### Check qmd installation and version
 
@@ -1369,8 +1393,8 @@ Before any qmd configuration, derive and register the collection name:
 
 Processing skills call `qmd query` via Bash — no MCP server, no `.mcp.json`, no autoapprove list. All that is needed is a registered collection and a fresh index.
 
-1. Configure the qmd collection for `{vocabulary.notes_collection}` pointing at the generated notes directory:
-   - `qmd collection add . --name {vocabulary.notes_collection} --mask "{vocabulary.note_collection}/**/*.md"`
+1. Configure the qmd collection for `{vocabulary.qmd_collection}` pointing at the generated notes directory:
+   - `qmd collection add . --name {vocabulary.qmd_collection} --mask "{vocabulary.note_collection}/**/*.md"`
 2. Run `qmd update && qmd embed` to build the initial index
 
 ###### SessionStart hook for qmd sync
@@ -1415,7 +1439,7 @@ If qmd is not installed or version < 2:
 
 - Add a "Next Steps" section to the Phase 6 summary with install instructions:
   - `npm install -g @tobilu/qmd` (or `bun install -g @tobilu/qmd`)
-  - `qmd collection add . --name {vocabulary.notes_collection} --mask "{vocabulary.note_collection}/**/*.md"`
+  - `qmd collection add . --name {vocabulary.qmd_collection} --mask "{vocabulary.note_collection}/**/*.md"`
   - `qmd update && qmd embed`
 - The hook script (`qmd-sync.sh`) is already generated and will activate automatically once qmd is installed; processing skills will succeed as soon as the CLI is available on PATH
 

@@ -107,7 +107,7 @@ If you know the topic (check the {vocabulary.note}'s Topics footer), start with 
 Use `qmd query` via Bash (hybrid search with auto-expansion + reranking):
 
 ```bash
-qmd query "[{vocabulary.note}'s core concepts and mechanisms]" --collection {vocabulary.notes_collection} -n 15
+qmd query "[{vocabulary.note}'s core concepts and mechanisms]" --collection {vocabulary.qmd_collection} -n 15
 ```
 
 Evaluate results by relevance — read any result where title or snippet suggests genuine connection. Semantic search finds {vocabulary.note_plural} that share MEANING even when vocabulary differs. A {vocabulary.note} about "iteration cycles" might connect to "learning from friction" despite sharing no words.

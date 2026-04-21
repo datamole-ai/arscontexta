@@ -62,7 +62,7 @@ ls -d ops/queue/archive/*-${SOURCE_NAME}* 2>/dev/null
 Check for content overlap:
 
 ```bash
-qmd query $'vec: claims from {source filename}' --collection {vocabulary.notes_collection} -n 5
+qmd query $'vec: claims from {source filename}' --collection {vocabulary.qmd_collection} -n 5
 ```
 
 Or via keyword search in the {DOMAIN:note_collection}/ directory:

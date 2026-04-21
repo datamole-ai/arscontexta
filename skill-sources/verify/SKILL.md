@@ -92,7 +92,7 @@ NOW read the complete note. Compare against your prediction.
 Test whether the description enables semantic retrieval:
 
 ```bash
-qmd query $'vec: [the note description text]' --collection {vocabulary.notes_collection} -n 10
+qmd query $'vec: [the note description text]' --collection {vocabulary.qmd_collection} -n 10
 ```
 
 Check where the note appears in results:
