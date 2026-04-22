@@ -1,7 +1,7 @@
 ---
 name: setup
 description: Scaffold a complete knowledge system. Conducts conversation, derives configuration, generates everything. Validates against 14 kernel primitives. Triggers on "/setup", "set up my knowledge system", "create my vault".
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Agent, TaskCreate, TaskUpdate, TaskGet
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Agent
 ---
 
 You are the Ars Contexta derivation engine. You are about to create someone's cognitive architecture. This is the single most important interaction in the product. Get it right and they have a thinking partner for years. Get it wrong and they have a folder of templates they will abandon in a week.
@@ -293,7 +293,7 @@ No file writes happen in Phase 4. All vault artifacts — including `ops/derivat
 
 ## PHASE 5: Generation
 
-Create the complete system using a sequential agent pipeline. The main agent handles foundation setup, then delegates file generation to 7 subagents, each spawned sequentially via the Agent tool with a fresh context window.
+Create the complete system in two stages. The main agent runs Steps 1-4 directly, then dispatches three subagents **in parallel** (single message, three `Agent` tool calls) for the independent generation work in Steps 5-7. Steps 8-9 run directly after all three subagents return.
 
 ### Context Resilience Protocol
 
@@ -306,10 +306,10 @@ Write `ops/derivation.md` FIRST, before any other artifact. Every subsequent ste
 | 1 | Main agent | derivation.md, folders, vault marker | Foundation setup |
 | 2 | Main agent | self/identity.md, self/methodology.md, self/goals.md, ops/methodology/ | Identity & self-knowledge |
 | 3 | Main agent | ops/config.yaml, ops/derivation-manifest.md | Ops configuration |
-| 4 | Agent 1 | templates/, ops/queries/ | Templates & query starters |
-| 5 | Agent 2 | .claude/skills/*/SKILL.md (9 skills) | Skills (tiered generation, cp + sed + Edit) |
-| 6 | Agent 3 | CLAUDE.md, ops/features/*.md | Context file + feature references |
-| 7 | Agent 4 | manual/ (7 pages), [domain:notes]/index.md | Manual & hub MOC |
+| 4 | Main agent | ops/templates/note.md, ops/queries/ | Templates & query starters |
+| 5 | Skills agent (parallel) | .claude/skills/*/SKILL.md (9 skills) | Skills (tiered generation, cp + sed + Edit) |
+| 6 | Context agent (parallel) | CLAUDE.md, ops/features/*.md, .claude/skills/ask/SKILL.md | Context file + feature references + /ask |
+| 7 | Manual agent (parallel) | manual/ (7 pages), [domain:notes]/index.md | Manual & hub MOC |
 | 8 | Main agent | Semantic search setup| Semantic search |
 | 9 | Main agent | git init/commit | Version control |
 
@@ -342,7 +342,7 @@ You are executing one step of a multi-step generation pipeline.
 
 ## Instructions
 1. Read ops/derivation.md FIRST — source of truth for all configuration decisions.
-2. Create a task list (TaskCreate) per file, work sequentially, mark each completed when done.
+2. Work through each file in the scope list; do not pause between files.
 3. Tool choice: `Write` for new files; `cp` via `Bash` then `Edit` for verbatim template copies; `Edit` for surgical changes.
 4. On error or ambiguity, report clearly — do not guess.
 
@@ -375,12 +375,15 @@ Verification:
 ~~~
 
 **Agent-specific additions:**
-- **Agent 2 (skills):** Uses the dedicated Skill Generation Prompt in Pipeline Step 5 (cp + Edit protocol), not the generic template.
-- **Agent 3 (CLAUDE.md + ops/features/):** Include the list of active feature blocks and their file paths under `${CLAUDE_PLUGIN_ROOT}/generators/features/`.
+- **Skills agent:** Uses the dedicated Skill Generation Prompt in Pipeline Step 5 (cp + Edit protocol), not the generic template.
+- **Context agent:** Include the list of active feature blocks and their file paths under `${CLAUDE_PLUGIN_ROOT}/generators/features/`.
+- **Manual agent:** Include the list of generated skill names inline in the prompt (derived from the Skills agent's Tier A/B mapping in `ops/derivation.md`).
 
 ### Orchestration Protocol
 
-After Step 1, execute Steps 2-3 directly, then create a TaskCreate list (one task per delegated agent, 4 tasks) and spawn Agents 1-4 sequentially via the Agent tool. Emit a progress indicator before each step. After each agent returns, parse the `=== GENERATION HANDOFF ... === END HANDOFF ===` block: verify Files Created, stop the sequence on any non-NONE Issue or `All files written successfully: NO`, surface the error, and carry non-NONE Issues into the Phase 6 summary. If the handoff is missing, warn and verify files on disk before continuing. Mark the task completed, then proceed. Execute Steps 8-9 directly.
+Execute Steps 1-4 directly in the main agent, emitting the matching progress indicator before each step. Then dispatch the three remaining subagents **in parallel**.
+
+After all three subagents return, parse each `=== GENERATION HANDOFF ... === END HANDOFF ===` block: verify Files Created, stop on any non-NONE Issue or `All files written successfully: NO`, surface the error, and carry non-NONE Issues into the Phase 6 summary. If a handoff is missing, warn and verify files on disk before continuing. Then execute Steps 8-9 directly.
 
 **Progress indicators** (use the `$` prefix — rendered as lozenge in branded output):
 
@@ -819,11 +822,11 @@ vocabulary:
 
 ---
 
-#### Pipeline Step 4: Templates & Query Starters (Agent 1)
+#### Pipeline Step 4: Templates & Query Starters (Main Agent)
 
-**Agent scope:** templates/*.md, ops/queries/{README.md,orphans.sh,by-tag.sh}
+**Scope:** ops/templates/note.md, ops/queries/{README.md,orphans.sh,by-tag.sh}
 
-**Agent reads:** ops/derivation.md
+**Reads:** ops/derivation.md
 
 Create the template first, then write the three fixed query-starter files.
 
@@ -887,18 +890,18 @@ rg -l "^tags:.*\b$1\b" "$NOTES_DIR" --glob '*.md'
 
 ---
 
-#### Pipeline Step 5: Skills (Agent 2)
+#### Pipeline Step 5: Skills (Skills Agent)
 
 **Agent scope:**
 - Write target: `.claude/skills/<domain-skill-name>/SKILL.md` (9 files) — populated by `cp`, then modified with `Edit`. **Never `Write`**.
 - Read: `${CLAUDE_PLUGIN_ROOT}/skill-sources/*/SKILL.md`, `ops/derivation.md`
 - Bash commands allowed: `mkdir`, `cp`, `rg`
 
-Agent 2 uses a specialized prompt (below); its cp + Edit protocol replaces the generic Write-based template.
+The skills agent uses a specialized prompt (below); its cp + Edit protocol replaces the generic Write-based template.
 
 ---
 
-##### How the main agent invokes Agent 2
+##### How the main agent invokes the skills agent
 
 1. Build the **Skill Generation Prompt** (next subsection) by substituting the placeholders:
    - `{vault_root}` — absolute vault path
@@ -907,7 +910,7 @@ Agent 2 uses a specialized prompt (below); its cp + Edit protocol replaces the g
    - `{TIER_B_TABLE}` — populate from the Skill Sources table below, Tier B rows only
    - `{DOMAIN_MAP}` — build from the vocabulary mapping in `ops/derivation.md`, one row per `{DOMAIN:xxx}` → domain value. Include every `{DOMAIN:xxx}` pattern that appears in any Tier B source.
    - `{N_SKILLS}` — total number of skills (9)
-2. Dispatch Agent 2 via the `Agent` tool, passing the built prompt as the `prompt` argument.
+2. Dispatch the skills agent via the `Agent` tool, passing the built prompt as the `prompt` argument.
 3. On return, parse the handoff block (Files Created, Issues, Verification). If `{DOMAIN:}` remaining is non-zero, STOP and surface the error.
 
 ---
@@ -932,10 +935,10 @@ Agent 2 uses a specialized prompt (below); its cp + Edit protocol replaces the g
 
 ##### Skill Generation Prompt
 
-Pass this verbatim to Agent 2 via the `Agent` tool, after substituting the placeholders described above.
+Pass this verbatim to the skills agent via the `Agent` tool, after substituting the placeholders described above.
 
 ~~~
-You are Agent 2 of the Ars Contexta generation pipeline. Install all processing skills into the vault.
+You are the skills agent of the Ars Contexta generation pipeline. Install all processing skills into the vault.
 
 ## Workspace
 - Vault root: {vault_root}
@@ -986,7 +989,7 @@ Literal string replacements. Preserve exact case and pluralization. If a `{DOMAI
 
 Output this block as the LAST thing in your response:
 
-=== GENERATION HANDOFF: Agent 2 (Skills) ===
+=== GENERATION HANDOFF: Skills Agent ===
 Files Created:
 - .claude/skills/<target-name>/SKILL.md (Tier <A|B>) × {N_SKILLS}
 
@@ -1017,7 +1020,7 @@ The skill index does not refresh mid-session. After creating all skill files:
 
 ---
 
-#### Pipeline Step 6: Context File, Feature References, and /ask Skill (Agent 3)
+#### Pipeline Step 6: Context File, Feature References, and /ask Skill (Context Agent)
 
 **Agent scope:** `CLAUDE.md`, `ops/features/*.md`, `.claude/skills/ask/SKILL.md`
 
@@ -1101,11 +1104,32 @@ Step 5: Coherence verification.
 
 ---
 
-#### Pipeline Step 7: Manual & Hub MOC (Agent 4)
+#### Pipeline Step 7: Manual & Hub MOC (Manual Agent)
 
 **Agent scope:** manual/ (7 pages), [domain:notes]/index.md
 
-**Agent reads:** ops/derivation.md, generated skill names (from .claude/skills/), self/*.md (for hub MOC links)
+**Agent reads:** ops/derivation.md, self/*.md (for hub MOC links). **Does not read `.claude/skills/`** — the skills agent runs in parallel and may not have finished yet. The main agent passes the final skill-name list inline in the prompt (see "Manual Agent Prompt Addendum" below).
+
+**Manual Agent Prompt Addendum (main agent must inline this before dispatch):**
+
+```
+## Generated Skills (authoritative list for this vault)
+
+Use these names verbatim in manual/skills.md and any /command references:
+
+- /{DOMAIN:reflect}         — Tier A, domain-renamed (reflect verb)
+- /{DOMAIN:reweave}         — Tier A, domain-renamed (reweave verb)
+- /stats                    — Tier A, unchanged
+- /seed                     — Tier B, unchanged
+- /pipeline                 — Tier B, unchanged
+- /archive-batch            — Tier B, unchanged
+- /{DOMAIN:verify}          — Tier B, domain-renamed (verify verb)
+- /structure                — Tier B, universal (not renamed)
+- /capture                  — Tier B, universal (not renamed)
+- /ask                      — router (written by context agent)
+```
+
+The main agent resolves each `{DOMAIN:xxx}` to the domain-native verb from `ops/derivation.md` before passing the prompt — so by the time the manual agent reads the addendum, every skill name is already concrete.
 
 ---
 
@@ -1459,53 +1483,9 @@ If already initialized, skip `git init` and commit the generated files.
 
 ## PHASE 6: Validation and Summary
 
-### Kernel Validation
-
-Run all 14 primitive checks against the generated system. Manually verify:
-
-1. **markdown-yaml** -- Every .md file has valid YAML frontmatter? (>95% threshold)
-2. **wiki-links** -- All wiki links resolve to existing files? (>90% threshold)
-3. **moc-hierarchy** -- At least 3 MOCs exist, every note appears in at least one MOC?
-4. **tree-injection** -- Session start procedure loads file structure? (hook or context file instruction)
-5. **description-field** -- Every note has a description field that differs from the title? (>95%)
-6. **topics-footer** -- `tags` array and body-level `Topics:` footer present on every non-MOC note? (>95%)
-7. **schema-enforcement** -- `ops/templates/note.md` exists as the single source of truth; every note carries the five required fields (content_type, granularity, description, created_at, tags). Title is the filename and body H1, not a frontmatter field.
-8. **semantic-search** -- `.claude/hooks/qmd-sync.sh` exists and is wired into SessionStart, context file and processing skills invoke `qmd query` via Bash.
-9. **self-space** -- self/ exists with identity.md, methodology.md, goals.md?
-10. **session-rhythm** -- Context file references ops/features/session-rhythm.md for orient/work/persist cycle?
-11. **discovery-first** -- Context file contains Discovery-First Design section, notes optimized for findability?
-12. **processing-queue** -- Queue file (ops/queue/queue.json) exists with schema_version >= 3? Context file references it in session-orient phase? Pipeline skills advance tasks through phase_order?
-13. **methodology-folder** (configurable) -- If ops/methodology/ exists, it contains methodology.md MOC and derivation-rationale.md?
-Report results: pass/fail per primitive with specific failures listed.
-
-### Pipeline Smoke Test
-
-After kernel validation, run a functional test:
-
-1. Create a test note in [domain:notes]/ with all five required fields
-2. Verify frontmatter matches ops/templates/note.md schema (content_type, granularity, description, created_at, tags present)
-3. Verify the hub MOC can reference it
-4. Delete the test note and clean up
-
-If the smoke test fails, report the failure with specific remediation steps. A vault that passes structural validation but fails functional testing is not ready.
-
 ### Clean CLI Output
 
-Present results using clean formatting per Section 10.5 design language. No runes, no sigils, no decorative Unicode, no ASCII art. Clean indented text with standard markdown formatting only.
-
-```
-ars contexta -- the art of context
-
-  Creating your [domain] structure...
-  Writing your context file...
-  Installing [domain:skills]...
-  Setting up templates...
-  Building your first [domain:topic map]...
-  Initializing version control...
-  Running validation...
-
-Your memory is ready.
-```
+Present results using clean formatting. No runes, no sigils, no decorative Unicode, no ASCII art. Clean indented text with standard markdown formatting only.
 
 - **Progress markers:** Use indented text for generation milestones. These provide orientation during generation.
 - **Section dividers:** Use `---` (standard markdown) between major output sections.
@@ -1522,23 +1502,9 @@ Here's what you can do:
   /arscontexta:health             -- check your knowledge system
 ```
 
-Note: Vault-generated skills are invoked as `/skill-name`. Plugin-level commands use the prefix `/arscontexta:` — currently `/arscontexta:setup` and `/arscontexta:health`. List all commands explicitly since they may not appear in tab completion. Skills require a Claude Code restart before they become available.
-
 ### First-Success Moment
 
 Guide the user to capture their first note. This is where the system stops being abstract and becomes real.
-
-**If a preset was selected:** Check `${CLAUDE_PLUGIN_ROOT}/presets/[preset]/starter/` for domain-specific starter notes. Use the most relevant starter as a seed:
-
-1. Present a starter note appropriate to the domain (e.g., a research claim, a personal reflection, a project decision)
-2. Ask the user: "Here's a starter [domain:note] to get you going. Want to customize it, or shall I save it as-is?"
-3. Create the note in [domain:notes]/ with proper schema
-4. Add it to the hub MOC
-5. Show: the note, the MOC it landed in, the schema fields filled
-
-**If no preset:** Guide open-ended: "Try capturing something: just tell me an idea." Then create the note and show the same result.
-
-**Why this matters:** The first-success moment proves the system works. The user sees their content structured, connected, and navigable. This converts abstract architecture into tangible value.
 
 ### Summary
 
@@ -1565,35 +1531,14 @@ Created:
   ops/methodology/       -- vault self-knowledge (query with /ask or browse directly)
   ops/config.yaml        -- edit this to adjust dimensions without re-running init
 
-Kernel Validation: [PASS count] / 14 passed
-[Any warnings to address]
-
 IMPORTANT: Restart Claude Code now to activate skills and hooks.
   Skills and hooks take effect after restart — they are not available in the current session.
 
 Next steps:
-  1. Quit and restart Claude Code (required — skills won't work until you do)
-  2. Read your CLAUDE.md -- it's your complete methodology
-  3. Read manual/skills.md for the full command reference
+  1. Quit and restart Claude Code
+  2. Read self/ space and CLAUDE.md - it's guides the agent how to work
+  3. Read manual for the full system reference
   4. [If qmd not installed: "REQUIRED — install qmd to activate semantic search: npm install -g @tobilu/qmd (or bun install -g @tobilu/qmd), then run qmd collection add, qmd update, qmd embed"]
   5. Drop a file in {domain:inbox}/ and run /{domain:pipeline} to try your first end-to-end run
 
 ```
-
----
-
-## Quality Standards (Non-Negotiable)
-
-These apply to every generation run. Do not shortcut any of them.
-
-1. **Generated files feel cohesive, not assembled from blocks.** Block boundaries must be invisible in the output. The context file reads as if written from scratch for this specific domain.
-2. **Language matches the user's domain.** A therapy user never sees "claim" or "reduce." A PM user never sees "reflection" or "surface." The vocabulary test applies to every generated file.
-3. **self/identity.md feels genuine, not templated.** It reads like self-knowledge, not a character sheet.
-4. **Every generated file is immediately useful.** No placeholder content. No "TODO: fill this in." Every file serves a purpose from day one.
-5. **Dimension settings are justified.** The derivation rationale connects every choice to either a user signal or a research-backed default.
-6. **Kernel validation PASSES.** Zero failures on every generated system. If validation fails, fix the generation before presenting results.
-7. **Vocabulary consistency across ALL files.** The same universal term must ALWAYS map to the same domain term across all generated files. Run a mental consistency check: if you said "reflection" in the context file, you must say "reflection" in templates, skills, and self/ files.
-8. **Three-space boundaries are clean.** Agent self-knowledge in self/. Domain knowledge in notes/. Operational scaffolding in ops/. No conflation.
-9. **Discovery-first is enforced.** Every note, every MOC, every template is optimized for future agent discovery. Description quality, MOC membership, title composability.
-10. **Tone never contradicts methodology.** The agent's warm, neutral, helpful tone affects HOW methodology is communicated, never WHETHER it is enforced. Quality gates and composability checks apply regardless.
-

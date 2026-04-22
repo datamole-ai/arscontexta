@@ -84,6 +84,14 @@ Parse the producer's chat return:
 - **Queue:** should read `marked <batch-id>: process -> done; created <N> note entries ...`.
 - **Learnings:** capture non-NONE entries for the final report.
 
+### Phase 2.1.5: Sync semantic index
+
+After the producer reports `ok`, refresh the qmd index. Run:
+
+```bash
+bash .claude/hooks/qmd-sync.sh
+```
+
 ### Phase 2.2: Re-read queue to discover new entries
 
 Read `ops/queue/queue.json` ONCE. Filter entries where `batch == <batch-id>` and `status == "pending"`. Order by `id` ascending. This is the "work list" for the remainder of Phase 2. The pipeline does not re-read `queue.json` during the per-phase loop.

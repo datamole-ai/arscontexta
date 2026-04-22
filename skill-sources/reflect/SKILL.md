@@ -98,7 +98,6 @@ If you know the topic (check the {vocabulary.note}'s Topics footer), start with 
 - Follow curated links in Core Ideas — these are human/agent-curated connections
 - Note what is already connected to similar concepts
 - Check Tensions and Gaps for context
-- What do agent notes reveal about navigation?
 
 {vocabulary.topic_map_plural} tell you what thinking exists and how it is organized. Someone already decided what matters for this topic.
 
@@ -313,11 +312,6 @@ Splitting is a human decision (architectural judgment required), but /reflect sh
 - nothing about X aspect yet
 - need concrete examples of Y
 - missing: comparison with Z approach
-
----
-
-Agent Notes:
-- YYYY-MM-DD: [what was explored]. [the insight or dead end].
 ```
 
 **Updating Core Ideas:**
@@ -343,37 +337,6 @@ Document genuine conflicts. Tensions are valuable, not bugs.
 **Updating Gaps:**
 
 Remove gaps that are now filled. Add new gaps discovered during reflection.
-
-### Phase 6: Add Agent Notes
-
-Agent notes are breadcrumbs for future navigation.
-
-**Add agent notes when:**
-- Non-obvious navigation path discovered
-- Dead end worth documenting
-- Productive {vocabulary.note} combination found
-- Insight about topic cluster emerged
-
-**Format:**
-```markdown
-Agent Notes:
-- YYYY-MM-DD: [what was explored]. [the insight or finding].
-```
-
-**Good agent notes:**
-```markdown
-- 2026-02-15: tried connecting via "learning" — too generic. better path: friction -> verification -> quality. the mechanism chain is tighter.
-- 2026-02-15: [[claim A]] and [[claim B]] form a tight pair. A sets the standard, B teaches the method.
-```
-
-**Bad agent notes:**
-```markdown
-- 2026-02-15: read the {vocabulary.topic_map} and added some links.
-- 2026-02-15: connected [[note A]] to [[note B]].
-```
-
-The test: would this help a future agent navigate more effectively?
-
 
 ## Handling Edge Cases
 
@@ -467,5 +430,4 @@ On error, set `Status: error: <message>`, `Queue: no change (error)`, write the 
 - Explain WHY connections exist
 - Consider bidirectionality
 - Update relevant {vocabulary.topic_map_plural}
-- Add agent notes when navigation insights emerge
 - Capture discovery trace as you work

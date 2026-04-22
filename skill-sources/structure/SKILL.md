@@ -96,12 +96,12 @@ If any check fails, the note needs restructuring — adjust sections or scope, d
 
 ### The Prose-as-Title Pattern
 
-Structure note titles capture the SCOPE of the grouped claims. They work as noun phrases when linked — "building on [[title]]" or "we explored [[title]]" reads naturally — describing territory rather than a single proposition.
+A structure note title is a **sentence** describing the scope of the grouped claims — not a list of topics. When linked into prose, it still reads naturally as a noun phrase ("building on [[title]]", "we explored [[title]]"), but the title itself must parse as a sentence when the completion gate is applied.
 
-**The scope test:** Can you complete this sentence?
-> This note covers [title]
+**The completion gate:** Can you complete this sentence?
+> Since [title], ...
 
-If it works, the title describes a coherent scope. If it doesn't, it's probably a topic label.
+If it parses as a sentence, the title describes a coherent scope. If it reads as a list or trails off incoherently, it is a topic label (too narrow) or a noun bag (too flat) — rewrite before committing.
 
 Good titles (scope descriptions that work as prose when linked):
 - "how caching strategies affect API latency under load"
@@ -118,6 +118,7 @@ Bad titles:
 - No punctuation that breaks filesystems: . * ? + [ ] ( ) { } | \ ^
 - Express the scope fully — there is no character limit
 - Each title must be unique across the entire workspace
+- Must form a sentence after "Since …". A verb or relational preposition (how, why, between, shaped, drives, affects) will typically appear.
 
 ---
 
@@ -258,14 +259,7 @@ Three decisions in order.
 **Entity directory routing:** Place the note in the appropriate directory in the following structure:
 !`tree -L 2 -d {vocabulary.note_collection}`
 
-**Filename:** the cluster's scope expressed as a prose-as-title sentence. Rules:
-- Lowercase with spaces
-- No filesystem-breaking punctuation: `. * ? + [ ] ( ) { } | \ ^`
-- Express the full scope; there is no character limit
-- `.md` extension
-
-The prose-as-title test: can you complete this sentence?
-> This {vocabulary.note} covers [title]
+**Filename:** Title according to the prose-as-title pattern mentioned in the Philosophy section.
 
 ### M2. Select Template and Fill Frontmatter
 
