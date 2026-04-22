@@ -257,7 +257,7 @@ Three decisions in order.
 **Base directory:** `{vocabulary.note_collection}/` is the root for all notes.
 
 **Entity directory routing:** Place the note in the appropriate directory in the following structure:
-!`tree -L 2 -d {vocabulary.note_collection}`
+!`tree -L 2 -d {DOMAIN:note_collection}`
 
 **Filename:** Title according to the prose-as-title pattern mentioned in the Philosophy section.
 
@@ -275,7 +275,7 @@ Parse the selected `_schema` block fully:
 Identify the parent {vocabulary.topic_map}(s) now — they will be written into the body footer in M3. At least one is required. Scan existing topic maps:
 
 ```bash
-grep -rl "^content_type: moc$" {vocabulary.note_collection}/ --include="*.md" | while read f; do
+grep -rl "^content_type: moc$" {DOMAIN:note_collection}/ --include="*.md" | while read f; do
   echo "$(basename "$f" .md)"
 done
 ```
