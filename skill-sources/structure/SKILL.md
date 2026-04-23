@@ -442,13 +442,6 @@ After materializing all artifacts, writing per-artifact task files, and updating
 - Quarantined: [list artifacts + reason, or "none"]
 - Descriptions flagged for refresh: [list target notes, or "none"]
 
-### Files Modified
-- {vocabulary.note_collection}/ ({W} new notes + {E} modified notes)
-- ops/queue/ ({W+E} per-artifact task files)
-- ops/queue/queue.json (marked process task done, created {W+E} entries)
-- ops/quarantine/ (if any quarantined)
-- ops/tensions/ (if any append-with-tension enrichments)
-
 ### Learnings
 - [Friction]: {description} | NONE
 - [Surprise]: {description} | NONE

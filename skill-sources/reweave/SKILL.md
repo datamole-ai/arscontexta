@@ -97,7 +97,7 @@ Read the target {vocabulary.note} completely. Understand:
 - What connections /reflect just added
 - Which {vocabulary.topic_map_plural} were updated
 - What synthesis opportunities were flagged
-- What the discovery trace looked like
+- What was flagged for attention
 
 This context prevents redundant work — you know what /reflect already found, so you can focus on what it missed or what needs deeper reconsideration.
 
@@ -311,25 +311,15 @@ After finishing reweave work, perform queue self-update (next subsection) and th
 ### Work
 
 **Changes applied:**
-| Type | Description |
-|------|-------------|
-| connection | added [[note A]] inline, [[note B]] to footer |
-| rewrite | clarified reasoning in paragraph 2 |
-| sharpen | title unchanged, description updated |
+- [[target]] — {change-type}: {one-line}
 
-**Claim status:** unchanged | sharpened | challenged
+**Claim status:** unchanged | sharpened | challenged | revised
 
-**Network effect:** outgoing links {N} -> {M}; this {vocabulary.note} now bridges [[domain A]] and [[domain B]]
+**Cascade:**
+- [[target]] — {reason} | NONE
 
-**Cascade recommendations:** [[related note]] might benefit from reweave (similar vintage)
-
-**Observations:** [patterns noticed, insights for future — or NONE]
-
-### Files Modified
-- {vocabulary.note_collection}/[older note 1].md (inline link added)
-- {vocabulary.note_collection}/[older note 2].md (footer connection added)
-- {task file path} (## Reweave section)
-- ops/queue/queue.json (advanced {id})
+**Flagged for attention:**
+- {issue — one line} | NONE
 
 ### Learnings
 - [Friction]: [description] | NONE

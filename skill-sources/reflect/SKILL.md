@@ -86,8 +86,6 @@ Read the task file to see what the processing phase discovered. The reduce notes
 
 Use dual discovery: {vocabulary.topic_map} exploration AND semantic search in parallel. These are complementary, not sequential.
 
-**Capture discovery trace as you go.** Note which {vocabulary.topic_map_plural} you read, which queries you ran (with scores), which searches you tried. This becomes the Discovery Trace section in output — proving methodology was followed, not reconstructed after the fact.
-
 **Primary discovery (run in parallel):**
 
 **Path 1: {vocabulary.topic_map} Exploration** — curated navigation
@@ -390,27 +388,20 @@ After finishing connection work, emit the canonical block below. Write the same 
 
 ### Work
 
-**Discovery trace:**
-- {vocabulary.topic_map} exploration: [[moc-name]] — candidates: [[note A]], [[note B]]
-- Semantic search: "[query]" — top hits: [[note E]] (0.74, mechanism overlap), [[note F]] (0.61, surface only)
-- Keyword search: grep "specific term" — [[note H]]
-
 **Connections added:**
-- [[source note]] -> [[target]] — [relationship]: [why]
-- inline: added link to [[note]] in paragraph about X
+- [[target]] — {relationship}: {one-line rationale}
 
 **{vocabulary.topic_map} updates:**
-- [[moc-name]]: added [[note]] to Core Ideas — [contribution]; updated Tensions: [[A]] vs [[B]]
+- [[moc-name]] — {section}: {entry}
 
-**Synthesis opportunities:** [list or NONE]
+**Synthesis opportunities:**
+- {one-line} | NONE
 
-**Flagged for attention:** [orphans, broad notes, unresolved tensions — or NONE]
+**Skipped reverse links:**
+- [[target]] — {one-line reason} | NONE
 
-### Files Modified
-- {vocabulary.note_collection}/[note name].md (inline links added)
-- {vocabulary.note_collection}/[moc-name].md (Core Ideas updated)
-- {task file path} (## Reflect section)
-- ops/queue/queue.json (advanced {id})
+**Flagged for attention:**
+- {orphan | gap | tension — one line} | NONE
 
 ### Learnings
 - [Friction]: [description] | NONE
@@ -430,4 +421,3 @@ On error, set `Status: error: <message>`, `Queue: no change (error)`, write the 
 - Explain WHY connections exist
 - Consider bidirectionality
 - Update relevant {vocabulary.topic_map_plural}
-- Capture discovery trace as you work

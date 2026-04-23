@@ -275,11 +275,6 @@ After finishing verification (recite + validate + review + any auto-fixes), perf
 - Review: [PASS/WARN/FAIL] ({N} checks, {M} issues)
 - Description improved: [yes/no]
 
-### Files Modified
-- {vocabulary.note_collection}/[note].md (description improved, if applicable)
-- {task file path} (## Verify section)
-- ops/queue/queue.json (marked {id} done)
-
 ### Learnings
 - [Friction]: [description] | NONE
 - [Surprise]: [description] | NONE
