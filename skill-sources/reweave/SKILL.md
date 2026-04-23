@@ -65,20 +65,29 @@ A {vocabulary.note} written last month was written with last month's understandi
 - What was one idea might now be three
 - Connections that were not obvious then are obvious now
 
-Reweaving is not just "add backward links." It is completely reconsidering the {vocabulary.note} based on current knowledge. Ask: **"If I wrote this {vocabulary.note} today, what would be different?"**
+Reweaving is not just "add backward links." It is reconsidering the {vocabulary.note} against the current state of the {vocabulary.note_collection}. Ask: **"What does the graph now say that this {vocabulary.note} does not yet cite?"** — not "what do I know now".
 
 > "The {vocabulary.note} you wrote yesterday is a hypothesis. Today's knowledge is the test."
+
+## Fabrication Guardrail
+
+Do not add context, motivation, rationale, mechanism explanations, or implication statements that are not in one of:
+- the source material cited in the {vocabulary.note}'s footer,
+- a linked neighbor {vocabulary.note},
+- the vault's stable reference material (identity files, methodology, {vocabulary.topic_map_plural}).
+
+When tempted to explain, either link a neighbor that already explains, or flag the gap for attention. Model-derived framing that looks plausible is still fabrication; once committed to the graph it becomes indistinguishable from attested claims and compounds through later reweaves.
 
 ## What Reweaving Can Do
 
 | Action | When to Do It |
 |--------|---------------|
 | **Add connections** | Newer {vocabulary.note_plural} exist that should link here |
-| **Rewrite content** | Understanding evolved, prose should reflect it |
-| **Sharpen the claim** | Title is too vague to be useful |
-| **Challenge the claim** | New evidence contradicts the original |
-| **Improve the description** | Better framing emerged |
-| **Update examples** | Better illustrations exist now |
+| **Rewrite content** | Source or a cited neighbor supports a clearer formulation — every sentence still traces to source or a cited neighbor |
+| **Sharpen the claim** | Source or a cited neighbor supports a more specific formulation |
+| **Challenge the claim** | A cited {vocabulary.note} contradicts the original — acknowledge the tension |
+| **Improve the description** | Source or a cited neighbor reveals a better scope framing — description must match cited content |
+| **Update examples** | Source or a cited neighbor carries a better illustration |
 
 Reweaving is a full reconsideration.
 
@@ -130,7 +139,7 @@ Evaluate results by relevance — read any result where title or snippet suggest
 grep -rl '\[\[target note title\]\]' {vocabulary.note_collection}/ --include="*.md"
 ```
 
-**Key question:** What do I know today that I did not know when this {vocabulary.note} was written?
+**Key question:** What does the rest of the {vocabulary.note_collection} now say that this {vocabulary.note} does not yet cite? Reweave adds cited links and realigns the {vocabulary.note} to the current graph. It does not add claims the graph does not support.
 
 ### Phase 3: Evaluate the Claim
 
@@ -233,19 +242,22 @@ relevant_notes:
 
 ### 2. Rewrite Content
 
-Understanding evolved. The prose should reflect current thinking, not historical thinking.
+Prose may need improvement. The constraint: every sentence in the rewrite must cite source or a neighbor {vocabulary.note}. Do not substitute model knowledge for either.
 
 **When to rewrite:**
-- Reasoning is clearer now
-- Better examples exist
-- Phrasing was awkward
-- Important nuance was missing
+- A cited neighbor now supplies the reasoning more clearly
+- Source evidence surfaced that sharpens a claim
+- Phrasing is awkward — prose polish that does not mutate claims
+
+**When NOT to rewrite:**
+- "Reasoning is clearer now" — clearer by whose authority? Unless a cited neighbor or source passage carries that reasoning, the "clarity" is model-generated and fabricates authority.
+- "Important nuance was missing" — missing from whose perspective? If the nuance is in the graph, cite the neighbor. If it is not, do not add it; flag the gap.
 
 **How to rewrite:**
-- Preserve the core claim (unless challenging it)
-- Improve the path to the conclusion
-- Incorporate new connections as prose
-- Maintain the {vocabulary.note}'s voice
+- Preserve the core claim (unless a cited contradiction warrants revision).
+- Every sentence maps to source or a cited neighbor. No connective prose that floats free of both.
+- Integrate new connections as cited inline wiki-links.
+- Maintain the {vocabulary.note}'s voice, not its fabrications.
 
 ### 3. Sharpen the Claim
 
@@ -287,15 +299,19 @@ This note originally claimed [X]. Based on [[evidence]], the claim is revised: [
 
 ## Queue Self-Update
 
-Before emitting the Output Block, update `ops/queue/queue.json`:
+Before emitting the Output Block, advance the entry in `ops/queue/queue.json` via a single `jq` call. Substitute the task file's `id` for `<task-id>`:
 
-1. Read the file.
-2. Locate the entry with `id` matching the task file's `id`.
-3. Append `"reweave"` to `completed_phases`.
-4. Set `current_phase: "verify"`.
-5. Write the file back.
+```bash
+jq --arg id "<task-id>" \
+   'if any(.tasks[]; .id == $id)
+    then (.tasks[] | select(.id == $id)) |= (.completed_phases += ["reweave"] | .current_phase = "verify")
+    else error("task not found: \($id)")
+    end' \
+   ops/queue/queue.json > ops/queue/queue.json.tmp \
+   && mv ops/queue/queue.json.tmp ops/queue/queue.json
+```
 
-If reading or writing fails, do NOT emit a successful Output Block. Emit `Status: error: queue write failed` with `Queue: no change (error)` and stop.
+If the Bash call fails (non-zero exit), resort to the Read and Write tools to read the original queue.json file and write the updated file back.
 
 ## Output Block
 

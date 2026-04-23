@@ -193,21 +193,30 @@ Full document
 
 ## Step 7: Update Queue
 
-Add the process task entry to the queue file.
+Append the process task entry to `ops/queue/queue.json` via a single `jq` call. The snippet assumes the shell variables from prior steps (`SOURCE_BASENAME` from Step 2a/3, `FINAL_SOURCE` from Step 4, `NEXT_CLAIM_START` from Step 5) are set, and derives `GRANULARITY_FLAG` from `$ARGUMENTS` plus `CREATED_TS` from `date`:
 
+```bash
+GRANULARITY_FLAG=$(echo "$ARGUMENTS" | grep -oE -- '--(structure|capture)' | sed 's/^--//')
+CREATED_TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
-**For JSON queues (ops/queue/queue.json):**
-```json
+NEW_ENTRY=$(cat <<JSON
 {
-  "id": "{SOURCE_BASENAME}",
+  "id": "${SOURCE_BASENAME}",
   "type": "process",
-  "granularity": "{GRANULARITY_FLAG}",
+  "granularity": "${GRANULARITY_FLAG}",
   "status": "pending",
-  "source": "{FINAL_SOURCE}",
-  "file": "{SOURCE_BASENAME}.md",
-  "created": "{UTC timestamp}",
-  "next_claim_start": {NEXT_CLAIM_START}
+  "source": "${FINAL_SOURCE}",
+  "file": "${SOURCE_BASENAME}.md",
+  "created": "${CREATED_TS}",
+  "next_claim_start": ${NEXT_CLAIM_START}
 }
+JSON
+)
+
+jq --argjson entry "$NEW_ENTRY" \
+   '.tasks += [$entry]' \
+   ops/queue/queue.json > ops/queue/queue.json.tmp \
+   && mv ops/queue/queue.json.tmp ops/queue/queue.json
 ```
 
 ## Step 8: Report

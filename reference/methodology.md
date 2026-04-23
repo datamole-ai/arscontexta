@@ -254,6 +254,9 @@ Not "related to [[X]]" but "extends [[X]] by adding Y." Articulate WHY notes con
 ### 5. Followed Implications
 Push ideas to second and third order effects. What does this mean? If true, what else must be true?
 
+### 6. Source Fidelity
+Every claim in a processed note traces to the source it was extracted from, or to a cited neighbor note. Model-derived framing — motivation, mechanism explanations, implications, rationale not in the source — must not enter the body. When the source is terse, the note is proportionally terse; inflation is a fidelity failure, not a thoroughness win. Interpretive synthesis belongs at query time (the agent navigating the graph can synthesize from cited evidence), not at pipeline time, where synthesis becomes indistinguishable from attested claims and compounds through later maintenance.
+
 ---
 
 ## Self-Extension Principle

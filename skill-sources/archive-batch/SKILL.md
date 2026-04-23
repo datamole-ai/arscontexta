@@ -55,9 +55,14 @@ mv ops/queue/{batch_id}-*.md "$ARCHIVE_DIR/" 2>/dev/null
 
 ## Step 4: Remove Batch From Queue
 
-Remove all entries for this batch from the queue file.
+Remove all entries for this batch from `ops/queue/queue.json` via a single `jq` call. Substitute the batch id (the source basename) for `<batch-id>`:
 
-Write the updated queue file back. If the queue is now empty of task entries, preserve the file with its schema header (phase_order definitions) intact — do not delete the queue file.
+```bash
+jq --arg batch "<batch-id>" \
+   '.tasks |= map(select(.batch != $batch))' \
+   ops/queue/queue.json > ops/queue/queue.json.tmp \
+   && mv ops/queue/queue.json.tmp ops/queue/queue.json
+```
 
 ## Step 5: Report
 

@@ -248,15 +248,19 @@ Combine all checks and results into the Output Block.
 
 ## Queue Self-Update
 
-Before emitting the Output Block, update `ops/queue/queue.json`:
+Before emitting the Output Block, mark the entry done in `ops/queue/queue.json` via a single `jq` call. Substitute the task file's `id` for `<task-id>`:
 
-1. Read the file.
-2. Locate the entry with `id` matching the task file's `id`.
-3. Append `"verify"` to `completed_phases`.
-4. Set `status: "done"`, `current_phase: null`, `completed: "<ISO UTC now>"`.
-5. Write the file back.
+```bash
+jq --arg id "<task-id>" --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+   'if any(.tasks[]; .id == $id)
+    then (.tasks[] | select(.id == $id)) |= (.completed_phases += ["verify"] | .status = "done" | .current_phase = null | .completed = $now)
+    else error("task not found: \($id)")
+    end' \
+   ops/queue/queue.json > ops/queue/queue.json.tmp \
+   && mv ops/queue/queue.json.tmp ops/queue/queue.json
+```
 
-If reading or writing fails, do NOT emit a successful Output Block. Emit `Status: error: queue write failed` with `Queue: no change (error)` and stop.
+If the Bash call fails (non-zero exit), resort to the Read and Write tools to read the original queue.json file and write the updated file back.
 
 ## Output Block
 

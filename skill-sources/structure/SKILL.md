@@ -84,13 +84,21 @@ If YES -> split into separate structure notes
 
 ---
 
+## Source Fidelity
+
+Every sentence in a {vocabulary.note} body must paraphrase a specific line or paragraph of the source. Do not add connective prose, motivation, mechanism explanations, implications, or rationale that is not in the source. If a claim needs background to make sense, either omit it (the source citation suffices) or flag the gap — do not invent the background. When the source is terse, the {vocabulary.note} is proportionally terse; inflation is a fidelity failure, not a thoroughness win.
+
+Neighbor linking is /reflect's job — /structure does not pre-seed wiki-links in the body. At this phase, source-fidelity means: if it is not in the source, it does not enter the body.
+
+---
+
 ## Scope Coherence
 
 Three quality checks before saving any structure {vocabulary.note}:
 
-1. **Scope coherence** — Do all sections genuinely relate? Would a reader expect these claims together?
-2. **Standalone sense** — Does the note make sense without reading three other notes first?
-3. **Linkability** — Would linking to this note bring useful context to the reader?
+1. **Scope coherence** — Do all sections share evidence, argument, or mechanism from the source? Every section's content must trace to the source.
+2. **Source-bounded standalone sense** — Does the {vocabulary.note} cohere using only source-attested claims? If the only way to make it "stand alone" is to add context not in the source, the scope is too narrow — split, or accept the terseness. /reflect will add neighbor links later.
+3. **Linkability** — The scope is defined clearly enough for other {vocabulary.note_plural} to link to without ambiguity.
 
 If any check fails, the note needs restructuring — adjust sections or scope, don't reflexively split.
 

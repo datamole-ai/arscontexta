@@ -294,7 +294,7 @@ Splitting is a human decision (architectural judgment required), but /reflect sh
 ```markdown
 # [Topic Name]
 
-[Opening synthesis: Claims about the topic. Not "this {vocabulary.topic_map} collects {vocabulary.note_plural}" but "the core insight is Y because Z." This IS thinking, not meta-description.]
+[Brief orientation: what this topic covers, what questions it addresses, where to start reading. Keep to a paragraph or two. Do NOT write free-form synthesis here — {vocabulary.topic_map_plural} are navigation surfaces with cited observations, not places to assert model-derived insights]
 
 ## Core Ideas
 
@@ -363,15 +363,19 @@ If you find {vocabulary.note_plural} with no connections:
 
 ## Queue Self-Update
 
-Before emitting the Output Block, update `ops/queue/queue.json`:
+Before emitting the Output Block, advance the entry in `ops/queue/queue.json` via a single `jq` call. Substitute the task file's `id` for `<task-id>`:
 
-1. Read the file.
-2. Locate the entry with `id` matching the task file's `id`.
-3. Append `"reflect"` to `completed_phases`.
-4. Set `current_phase: "reweave"` (the next phase per `phase_order.note` / `phase_order.enrichment`).
-5. Write the file back.
+```bash
+jq --arg id "<task-id>" \
+   'if any(.tasks[]; .id == $id)
+    then (.tasks[] | select(.id == $id)) |= (.completed_phases += ["reflect"] | .current_phase = "reweave")
+    else error("task not found: \($id)")
+    end' \
+   ops/queue/queue.json > ops/queue/queue.json.tmp \
+   && mv ops/queue/queue.json.tmp ops/queue/queue.json
+```
 
-If reading or writing fails, do NOT emit a successful Output Block. Emit `Status: error: queue write failed` with `Queue: no change (error)` and stop.
+If the Bash call fails (non-zero exit), resort to the Read and Write tools to read the original queue.json file and write the updated file back.
 
 ---
 
