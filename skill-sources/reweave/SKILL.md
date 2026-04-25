@@ -235,9 +235,15 @@ The constraint shifts from capture to curation, as documented in [[quarterly pla
 ```
 
 **Footer connections:**
-```yaml
-relevant_notes:
-  - "[[newer note]] — extends this by adding temporal dimension"
+
+```markdown
+---
+
+Relevant Notes:
+- [[newer note]] — extends this by adding temporal dimension
+
+Topics:
+- [[parent-moc]]
 ```
 
 ### 2. Rewrite Content

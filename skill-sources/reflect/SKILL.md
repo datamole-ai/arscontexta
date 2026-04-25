@@ -221,15 +221,20 @@ See also [[throughput matters more than accumulation]].
 **Where to add links:**
 
 1. Inline in the body where the connection naturally fits the argument
-2. In the relevant_notes YAML field with context phrase
+2. In the body's `Relevant Notes:` footer with a context phrase
 3. BOTH when the connection is strong enough
 
-**Relevant Notes Format:**
+**Relevant Notes Footer Format:**
 
-```yaml
-relevant_notes:
-  - "[[note title]] — extends this by adding the temporal dimension"
-  - "[[another note]] — provides the mechanism this claim depends on"
+```markdown
+---
+
+Relevant Notes:
+- [[note title]] — extends this by adding the temporal dimension
+- [[another note]] — provides the mechanism this claim depends on
+
+Topics:
+- [[parent-moc]]
 ```
 
 Context phrases use standard relationship vocabulary: extends, grounds, contradicts, exemplifies, synthesizes, enables.
