@@ -34,17 +34,22 @@ Available templates:
 
 **Target: $ARGUMENTS**
 
-Parse the process task file path from arguments (e.g. `ops/queue/my-source.md`). Read it directly.
-If no argument is provided, report `ERROR: structure requires process task file path` and stop.
+Parse the batch id from arguments (the source basename, e.g. `my-source`). If no argument is provided, report `ERROR: structure requires batch id` and stop.
 
-Read the task file's YAML frontmatter to obtain:
+Look up the process entry in `ops/queue/queue.json`:
+
+```bash
+jq --arg id "$BATCH_ID" '.tasks[] | select(.id == $id and .type == "process")' ops/queue/queue.json
+```
+
+From that entry, obtain:
 - `id` — the batch id (source basename)
 - `source` — the archived source file path to process
 - `archive_folder` — where the source lives
 - `next_claim_start` — first claim number to use
 - `granularity` — must equal `structure` (error out otherwise)
 
-All subsequent references to "the source" use the `source` value from the task file.
+All subsequent references to "the source" use the `source` value from the queue entry.
 
 **START NOW.** Reference below explains methodology — use to guide, not as output.
 
@@ -169,7 +174,7 @@ qmd query $'vec: [cluster scope as sentence]' --collection {vocabulary.qmd_colle
 
 ### 4. Proposed Groupings
 
-Keep the grouping analysis in working memory — it becomes the `### Work` section of the Output Block written after materialization. Do not write a separate `## Outputs` section to the task file; the `## Structure` block is the single record.
+Keep the grouping analysis in working memory — it becomes the `### Work` section of the Output Block emitted after materialization.
 
 ### 5. Write Notes
 
@@ -215,7 +220,7 @@ For every cluster classified as an *enrichment* (an existing note covers the sco
 
 ### E1. Load the Target
 
-Read the target existing note (the `semantic_neighbor` identified during Classify). Parse:
+Read the target existing note (the semantic neighbor identified during Classify). Parse:
 - Frontmatter (keep the full YAML for later rewrite)
 - Body sections (headings + content)
 - Footer (Source, Relevant Notes, Topics)
@@ -340,69 +345,11 @@ If validation FAILs cannot be resolved after one fix attempt, quarantine the art
 3. Append one new entry per artifact with the shape shown in "Queue Updates" below.
 4. Write the file back.
 
-### Per-Artifact Task Files
-
-After materializing each new note OR enrichment, create a task file in `ops/queue/`:
-
-**Filename:**
-- New notes: `{source}-NNN.md` where NNN starts from `next_claim_start` in the structure task file.
-- Enrichments: `{source}-EEE.md` where EEE starts at 1 and increments per enrichment.
-
-**Structure:**
-
-```markdown
----
-id: note-NNN | enrich-EEE
-batch: [source-basename]
-file: [source-basename]-NNN.md | [source-basename]-EEE.md
-claim: "[the scope as a sentence]"
-classification: closed | open
-granularity: structure
-type: note | enrichment
-source_task: [source-basename]
-semantic_neighbor: "[related note title]" | null
-target_path: [full path to the materialized or enriched note]
-current_phase: reflect
----
-
-# {Note NNN | Enrichment EEE}: [title or target name]
-
-Source: [[source filename]]
-
-## Structure Notes
-
-Extracted from [source_task]. Scope: [scope description].
-
-Sub-claims:
-- [claim A]
-- [claim B]
-
-Rationale: [why these belong together, or — for enrichments — why this strengthens the target note]
-
-Semantic neighbor: [if found, explain the relationship]
-
-## Materialize
-
-{For new notes: path to written file, template used, validation result.}
-{For enrichments: target path, mode chosen (inline-integrate | append-with-tension | append-new-section), validation result.}
-
----
-
-## {vocabulary.cmd_reflect}
-(to be filled by {vocabulary.cmd_reflect} phase)
-
-## {vocabulary.cmd_reweave}
-(to be filled by {vocabulary.cmd_reweave} phase)
-
-## {vocabulary.cmd_verify}
-(to be filled by {vocabulary.cmd_verify} phase)
-```
-
 ### Queue Updates
 
-After creating task files, update `ops/queue/queue.json`:
+Update `ops/queue/queue.json`:
 
-1. Mark the structure task as `"status": "done"` with completion timestamp.
+1. Mark the process queue entry as `"status": "done"` with completion timestamp.
 2. For each materialized artifact (new note OR enrichment), add ONE queue entry:
 
 ```json
@@ -413,9 +360,7 @@ After creating task files, update `ops/queue/queue.json`:
   "status": "pending",
   "target": "[note title or enriched-note title]",
   "target_path": "[full path to the written/modified note]",
-  "classification": "closed|open",
   "batch": "[source-basename]",
-  "file": "[source-basename]-NNN.md | [source-basename]-EEE.md",
   "created": "[ISO timestamp]",
   "current_phase": "reflect",
   "completed_phases": ["structure"]
@@ -428,12 +373,12 @@ After creating task files, update `ops/queue/queue.json`:
 - ONE entry per artifact (NOT one per phase).
 - `current_phase` starts at `"reflect"` for every entry produced by structure — the materialization is already done.
 - `completed_phases` starts as `["structure"]` — reflecting that structure has already produced the finished artifact.
-- Every task MUST have `"file"` pointing to its uniquely-named task file and `"target_path"` pointing to the materialized note.
+- Every task MUST have `"target_path"` pointing to the materialized note.
 - Every task MUST have `"batch"` identifying which source batch it belongs to.
 
 ### Output Block
 
-After materializing all artifacts, writing per-artifact task files, and updating `ops/queue/queue.json` (mark process task done + append one pending entry per artifact), emit the canonical block below. Write the same block into the process task file's `## Structure` section (creating the section if absent) AND echo it as the final chat message. This is the ONLY chat output.
+After materializing all artifacts and updating `ops/queue/queue.json` (mark process task done + append one pending entry per artifact), emit the canonical block below as the final chat message. This is the ONLY chat output — no task file is written.
 
 ```
 ## Structure

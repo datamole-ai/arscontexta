@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-**Ars Contexta** — Claude Code plugin. Conversational derivation engine: a conversation about how the user works produces a bespoke knowledge system (folders, notes, processing skills, hooks, manual) backed by 242 wiki-linked research claims. **This repo is the engine, not a vault** — do not scaffold one here. `README.md` has the product pitch; this file navigates the code.
+**Ars Contexta** — Claude Code plugin. Conversational derivation engine: a conversation about how the user works produces a bespoke knowledge system (folders, notes, processing skills, hooks, manual). **This repo is the engine, not a vault** — do not scaffold one here. `README.md` has the product pitch; this file navigates the code.
 
 ## Quick Map
 
@@ -13,7 +13,6 @@
 | Generated `/ask` skill | `generators/ask-router.md`  |
 | Feature reference generation | `generators/features/*.md` → `ops/features/*.md` |
 | Architectural invariants (14 primitives) | `reference/kernel.yaml` |
-| Research graph (242 claims) | `methodology/*.md` — indexed via `reference/claim-map.md` |
 | Hook behavior | `hooks/hooks.json` + `hooks/scripts/*.sh` |
 | Plugin manifest / version | `.claude-plugin/plugin.json` |
 | Author scratchpad | `todo.md` |
@@ -26,7 +25,6 @@ skills/           setup/, health/                    plugin-level commands (user
 skill-sources/    10 command templates               copied into generated vaults
 generators/       claude-md.md + features/ (13)      composed into generated CLAUDE.md
 hooks/            hooks.json, scripts/*.sh           SessionStart + PostToolUse(Write)
-methodology/      wiki-linked research graph
 reference/        canonical design docs              see index below
 docs/             superpowers/{plans,specs}          design specs
 ```
@@ -35,8 +33,8 @@ docs/             superpowers/{plans,specs}          design specs
 
 1. **Kernel** — 14 invariant primitives every generated vault must satisfy. `reference/kernel.yaml`.
 2. **Three-space architecture** — `self/` (agent mind) · `notes/` (knowledge graph) · `ops/` (coordination). Names adapt per domain; separation is invariant. `reference/three-spaces.md`.
-3. **Derivation, not templating** — engine reasons from claims to architecture. Every dimension choice traces to research. `reference/dimension-claim-map.md`.
-4. **5 Rs pipeline** — Record, Reduce, Reflect, Reweave, Verify. One skill per R.
+3. **Derivation, not templating** — engine reasons from claims to architecture. Every dimension choice traces to research.
+4. **4 Rs pipeline** — Record, Reduce, Reflect, Verify. One skill per R.
 5. **Vocabulary transforms** — universal terms → domain-native. `reference/vocabulary-transforms.md`.
 
 ## skill-sources/ by Pipeline Phase
@@ -46,7 +44,6 @@ docs/             superpowers/{plans,specs}          design specs
 | Reduce | `structure/`, `capture/` |
 | Mutate | `seed/` |
 | Reflect | `reflect/` |
-| Reweave | `reweave/` |
 | Verify | `verify/` |
 | Orchestration | `pipeline/` |
 | Reporting | `stats/`, `archive-batch/` |
@@ -60,9 +57,6 @@ Each `SKILL.md` uses `{DOMAIN:…}` placeholders that the derivation engine rewr
 | `kernel.yaml` | 14 invariants |
 | `three-spaces.md` | self/notes/ops architecture |
 | `components.md` | per-component build blueprints |
-| `methodology.md` | portable TFT research distillation |
-| `claim-map.md` | topic → claim lookup |
-| `dimension-claim-map.md` | dimension → backing claims |
 | `interaction-constraints.md` | incoherent-combination rules |
 | `use-case-presets.md` | pre-validated starting configs |
 | `tradition-presets.md` | Zettelkasten / PARA / GTD / Cornell anchors |
@@ -90,7 +84,6 @@ One file per feature; `skills/setup/` enables a subset based on derived config:
 
 - **Do not scaffold a vault here.** Hooks are gated by `vaultguard.sh`; leave it that way.
 - **Derivation changes are high blast radius.** `skills/setup/SKILL.md`, `reference/interaction-constraints.md`, and `reference/use-case-presets.md` shape every generated vault — change them carefully.
-- **Research claims are the source of truth.** Back configuration decisions via `reference/claim-map.md` + `methodology/`. New claims: one file per claim, prose-as-title, wiki-linked.
 - **Don't duplicate `README.md`.** Product pitch and install steps live there only.
 - **Check `todo.md`** before proposing overlapping changes.
 - **Dev reinstall cycle** (`/plugin uninstall … && /plugin install …`) documented in `README.md § Development`.

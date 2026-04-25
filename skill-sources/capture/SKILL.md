@@ -42,16 +42,22 @@ All graph participation happens OUTSIDE the fenced block:
 
 **Target: $ARGUMENTS**
 
-Parse the process task file path from arguments (e.g. `ops/queue/my-source.md`). If no argument is provided, end immediately with: report
-`ERROR: capture requires process task file path`.
+Parse the batch id from arguments (the source basename, e.g. `my-source`). If no argument is provided, end immediately with: report
+`ERROR: capture requires batch id`.
 
-Read the task file's YAML frontmatter to obtain:
+Look up the process entry in `ops/queue/queue.json`:
+
+```bash
+jq --arg id "$BATCH_ID" '.tasks[] | select(.id == $id and .type == "process")' ops/queue/queue.json
+```
+
+From that entry, obtain:
 - `id` — the batch id (source basename)
 - `source` — the archived source file path
 - `granularity` — must equal `capture` (error out otherwise)
 - `next_claim_start` — first claim number to use
 
-All subsequent references to "the source" use the `source` value from the task file.
+All subsequent references to "the source" use the `source` value from the queue entry.
 
 **START NOW.** Capture the source.
 
@@ -143,47 +149,6 @@ Topics:
 - All five required fields present in frontmatter: `content_type`, `granularity: capture`, `description`, `created_at`, `tags`
 - File written to flat `{vocabulary.note_collection}/[title].md` — routing is by `granularity` frontmatter, not by subdirectory
 
-### 6.5. Create Per-Note Task File
-
-Capture creates exactly one note per invocation so downstream phases (reflect, reweave, verify) have a place to write their section.
-
-Task file filename: `ops/queue/{batch}-{NNN}.md` where `NNN` = `next_claim_start` (zero-padded 3 digits).
-
-Frontmatter:
-
-```yaml
----
-id: note-{NNN}
-batch: {batch}
-file: {batch}-{NNN}.md
-granularity: capture
-type: note
-source_task: {batch}
-target_path: {vocabulary.note_collection}/{note title}.md
-current_phase: reflect
----
-```
-
-Body:
-
-```markdown
-# Note {NNN}: {note title}
-
-Source: [[{source filename}]]
-
-## Capture
-(filled by /capture in the Output Block below)
-
-## {vocabulary.cmd_reflect}
-(to be filled by {vocabulary.cmd_reflect} phase)
-
-## {vocabulary.cmd_reweave}
-(to be filled by {vocabulary.cmd_reweave} phase)
-
-## {vocabulary.cmd_verify}
-(to be filled by {vocabulary.cmd_verify} phase)
-```
-
 ### 7. Create Queue Entry
 
 Create one queue entry:
@@ -197,7 +162,6 @@ Create one queue entry:
   "target": "[note title]",
   "target_path": "{vocabulary.note_collection}/{note title}.md",
   "batch": "{batch}",
-  "file": "{batch}-{NNN}.md",
   "created": "[UTC timestamp]",
   "current_phase": "reflect",
   "completed_phases": ["capture"]
@@ -212,7 +176,7 @@ No enrichment tasks — capture does not analyze content deeply enough to spot e
 
 ## Output Block
 
-After materializing the note, writing the per-note task file, and updating `ops/queue/queue.json` (mark process task done + append the note entry), emit the canonical block below. Write the same block into the per-note task file's `## Capture` section AND echo it as the final chat message. This is the ONLY chat output.
+After materializing the note and updating `ops/queue/queue.json` (mark process task done + append the note entry), emit the canonical block below as the final chat message. This is the ONLY chat output — no task file is written.
 
 ```
 ## Capture
@@ -224,11 +188,9 @@ After materializing the note, writing the per-note task file, and updating `ops/
 ### Work
 - Captured {source} verbatim as [[{note title}]]
 - Created queue entry: note-{NNN}
-- Created per-note task file: ops/queue/{batch}-{NNN}.md
 
 ### Files Modified
 - {vocabulary.note_collection}/{note title}.md
-- ops/queue/{batch}-{NNN}.md
 - ops/queue/queue.json
 
 ### Learnings

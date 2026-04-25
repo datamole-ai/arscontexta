@@ -221,14 +221,14 @@ For each {vocabulary.note}:
 
 #### 5a. Ops into Notes (Infrastructure Creep)
 
-Queue state, health metrics, task files, or processing artifacts appearing in {vocabulary.note_collection}/ directory.
+Queue state, health metrics, or processing artifacts appearing in {vocabulary.note_collection}/ directory.
 
 **Detection:**
 ```bash
 # Check for ops-pattern YAML fields in notes
-rg '^(current_phase|completed_phases|batch|source_task|queue_id):' {vocabulary.note_collection}/ --glob '*.md'
-# Check for task file patterns in notes
-rg '## (Create|Reflect|Reweave|Verify|Enrich)$' {vocabulary.note_collection}/ --glob '*.md'
+rg '^(current_phase|completed_phases|batch|queue_id):' {vocabulary.note_collection}/ --glob '*.md'
+# Check for queue/learnings artifacts misplaced in notes
+rg '^# Learnings — ' {vocabulary.note_collection}/ --glob '*.md'
 ```
 
 | Found | Level |
@@ -412,7 +412,7 @@ done
       - notes/early-claim.md (45d, 1 link) [WARN]
       - notes/setupial-thought.md (38d, 1 link) [WARN]
       - notes/first-draft.md (31d, 0 links) [WARN]
-    Recommendation: run /reweave on these notes to find connections, or archive if no longer relevant
+    Recommendation: run /reflect on these notes to find connections and reconsider, or archive if no longer relevant
 ```
 
 ### Category 8: {vocabulary.topic_map} Coherence
@@ -487,7 +487,7 @@ After running all applicable diagnostic categories, check these condition-based 
 | Inbox items | >= 3 items | Consider /structure, /capture, or /pipeline |
 | Orphan notes | Any persistent (> 7d) | Run /reflect on orphaned notes |
 | Dangling links | Any | Fix broken references immediately |
-| Stale notes | Low links + old | Consider /reweave |
+| Stale notes | Low links + old | Consider /reflect |
 | {vocabulary.topic_map} oversized | > 40 notes | Consider splitting |
 | Queue stalled | Tasks pending > 2 sessions without progress | Surface as blocked |
 | Trigger coverage gap | Known maintenance condition has no configured trigger | Flag gap itself |
@@ -651,7 +651,7 @@ Health report findings feed into other skills:
 | Finding | Feeds Into | How |
 |---------|-----------|-----|
 | Orphan notes | /reflect | Run reflect to find connections for orphaned notes |
-| Stale notes | /reweave | Run reweave to update old notes with new connections |
+| Stale notes | /reflect | Run reflect to revisit old notes against current graph state |
 | Description quality issues | /verify or manual rewrite | Fix descriptions to improve retrieval |
 | Schema violations | /verify | Run verification to fix specific schema issues |
 | Boundary violations | Manual restructuring | Move files to correct space |

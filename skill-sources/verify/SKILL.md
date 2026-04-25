@@ -34,16 +34,22 @@ After reading the target {vocabulary.note}, check its `granularity` frontmatter 
 
 **Target: $ARGUMENTS**
 
-Parse the note task file path from arguments (e.g. `ops/queue/<basename>-NNN.md`). The argument IS the full path to the task file — do NOT `find`/`ls` to relocate it; Read it directly. If no argument is provided, end immediately with: report
-`ERROR: verify requires note task file path`.
+Parse the queue id from arguments (e.g. `note-010`, `enrich-002`). If no argument is provided, end immediately with: report
+`ERROR: verify requires queue id`.
 
-Read the task file's YAML frontmatter to obtain:
+Look up the entry in `ops/queue/queue.json`:
+
+```bash
+jq --arg id "$QUEUE_ID" '.tasks[] | select(.id == $id)' ops/queue/queue.json
+```
+
+From that entry, obtain:
 - `id` — this entry's queue id
 - `target_path` — the path to the {vocabulary.note} being verified
 - `batch` — the batch id
 - `granularity` — routes verification depth
 
-All subsequent references to "the {vocabulary.note}" use the `target_path` value from the task file.
+All subsequent references to "the {vocabulary.note}" use the `target_path` value from the queue entry.
 
 **START NOW.**
 
@@ -82,7 +88,7 @@ Apply fixes for clear-cut issues:
 
 ## Queue Self-Update
 
-Before emitting the Output Block, mark the entry done in `ops/queue/queue.json` via a single `jq` call. Substitute the task file's `id` for `<task-id>`:
+Before emitting the Output Block, mark the entry done in `ops/queue/queue.json` via a single `jq` call. Substitute the queue id (from `$ARGUMENTS`) for `<task-id>`:
 
 ```bash
 jq --arg id "<task-id>" --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
@@ -98,7 +104,7 @@ If the Bash call fails (non-zero exit), resort to the Read and Write tools to re
 
 ## Output Block
 
-After finishing verification (validate + review + any auto-fixes), perform queue self-update (next subsection — final phase, so mark done) and then emit the canonical block below. Write the same block into the task file's `## Verify` section AND echo it as the final chat message. This is the ONLY chat output.
+After finishing verification (validate + review + any auto-fixes), perform queue self-update (final phase — mark done) and then emit the canonical block below as the final chat message. This is the ONLY chat output — no task file is written.
 
 ```
 ## Verify

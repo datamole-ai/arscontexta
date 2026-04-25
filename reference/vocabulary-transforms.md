@@ -58,7 +58,6 @@ When generating a knowledge system for a specific domain, every universal term i
 | /reduce | /reduce | /surface | /break-down | /notice | /discover | /document | /capture |
 | /reflect | /reflect | /find-patterns | /relate | /trace | /combine | /link | /recall |
 | /verify | /verify | /check-resonance | /test | /confirm | /evaluate | /review | /verify |
-| /reweave | /reweave | /revisit | /revise | /reconnect | /rework | /update | /revisit |
 | /stats | /stats | /stats | /stats | /stats | /stats | /stats | /stats |
 
 **Note:** /stats provides vault metrics and progress visualization. This command uses universal names across all domains.

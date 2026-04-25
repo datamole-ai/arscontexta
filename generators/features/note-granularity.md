@@ -21,7 +21,7 @@ Every {DOMAIN:note} declares its `granularity` in frontmatter: `structure` or `c
 
 **Choosing a pipeline:** match the pipeline to the source material, not the other way around. Research papers, meeting notes, and mixed-topic sources → /structure. Verbatim transcripts where exact wording matters → /capture. When unsure, /structure is a safe default.
 
-**The downstream chain is shared.** Both pipelines feed into the same connection-finding (/{DOMAIN:reflect}), backward-maintenance (/{DOMAIN:reweave}), and verification (/{DOMAIN:verify}) phases. These phases select behavior based on the `granularity` field.
+**The downstream chain is shared.** Both pipelines feed into the same connection-finding plus backward-reconsideration (/{DOMAIN:reflect}) and verification (/{DOMAIN:verify}) phases. These phases select behavior based on the `granularity` field.
 ```
 
 ## Dependencies

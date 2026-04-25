@@ -81,7 +81,7 @@ This is a consequence of flat folder architecture with wiki links as the connect
 
 When A links to B, consider whether B should link back to A. Not every link needs reciprocation — if A extends B, then B might reference A, but only if A genuinely adds to B's argument. Forced bidirectionality creates noise. Genuine bidirectionality makes the graph navigable from either direction.
 
-The /{DOMAIN:connect} and /{DOMAIN:maintain} phases handle this systematically. When adding forward connections to a new {DOMAIN:note}, they also check whether the target {DOMAIN:notes} should be updated to link back. This backward pass is how the graph stays bidirectionally coherent without manual effort.
+The /{DOMAIN:connect} phase handles this systematically (forward connection-finding plus a backward sub-phase). When adding forward connections to a new {DOMAIN:note}, it also checks whether the target {DOMAIN:notes} should be updated to link back. This backward pass is how the graph stays bidirectionally coherent without manual effort.
 ```
 
 ## Dependencies

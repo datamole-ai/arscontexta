@@ -1,10 +1,9 @@
 ---
 name: archive-batch
-description: Archive a completed processing batch. Verifies all tasks are done, moves task files to archive folder, generates batch summary, removes queue entries. Triggers on "/archive-batch", "/archive-batch [batch_id]", "archive this batch".
+description: Archive a completed processing batch. Verifies all tasks are done, resolves the archive folder from the queue, removes queue entries. Triggers on "/archive-batch", "/archive-batch [batch_id]", "archive this batch".
 version: "1.0"
 context: fork
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
-argument-hint: "{batch_id} — batch to archive (required)"
 ---
 
 ## EXECUTE NOW
@@ -42,18 +41,7 @@ Check that every entry for this batch has `status: done`.
 If ANY entry does not have `status: done`:
 end immediately with: `ERROR: Batch '{batch_id}' has incomplete tasks.`.
 
-## Step 3: Move Task Files
-
-Move all task files for this batch from the queue directory to the archive folder:
-
-ARCHIVE_DIR="ops/queue/archive/$(date -u +"%Y-%m-%d")-{batch_id}/"
-
-```bash
-mv ops/queue/{batch_id}.md "$ARCHIVE_DIR/"
-mv ops/queue/{batch_id}-*.md "$ARCHIVE_DIR/" 2>/dev/null
-```
-
-## Step 4: Remove Batch From Queue
+## Step 3: Remove Batch From Queue
 
 Remove all entries for this batch from `ops/queue/queue.json` via a single `jq` call. Substitute the batch id (the source basename) for `<batch-id>`:
 
@@ -64,7 +52,7 @@ jq --arg batch "<batch-id>" \
    && mv ops/queue/queue.json.tmp ops/queue/queue.json
 ```
 
-## Step 5: Report
+## Step 4: Report
 
 ```
 --=={ archive-batch }==--
@@ -74,9 +62,6 @@ Archive folder: {ARCHIVE_DIR}
 
 {DOMAIN:note_plural} produced: {claim_count}
 Enrichments: {enrichment_count}
-Task files moved: {files_moved_count}
-
-Summary: {ARCHIVE_DIR}/{batch_id}-summary.md
 
 Created {DOMAIN:note_plural}:
 - [[{title 1}]]

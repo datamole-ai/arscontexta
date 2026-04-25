@@ -1,6 +1,6 @@
 ---
 name: reflect
-description: Internal pipeline skill — finds connections for a newly created note and updates topic maps. Invoked by /pipeline as a subagent; do not invoke directly.
+description: Internal pipeline skill — finds connections for a newly created note, updates topic maps, and reconsiders the note's claim against current graph state. Invoked by /pipeline as a subagent; do not invoke directly.
 context: fork
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 ---
@@ -29,15 +29,21 @@ After reading the target {vocabulary.note}, check its `granularity` frontmatter 
 
 **Target: $ARGUMENTS**
 
-Parse the note task file path from arguments (e.g. `ops/queue/my-source-010.md`). The argument IS the full path to the task file — do NOT `find`/`ls` to relocate it; Read it directly. If no argument is provided, end immediately with: report `ERROR: reflect requires note task file path`.
+Parse the queue id from arguments (e.g. `note-010`, `enrich-002`). If no argument is provided, end immediately with: report `ERROR: reflect requires queue id`.
 
-Read the task file's YAML frontmatter to obtain:
-- `id` — this entry's queue id (e.g. `note-010`)
+Look up the entry in `ops/queue/queue.json`:
+
+```bash
+jq --arg id "$QUEUE_ID" '.tasks[] | select(.id == $id)' ops/queue/queue.json
+```
+
+From that entry, obtain:
+- `id` — this entry's queue id
 - `target_path` — the path to the {vocabulary.note} being connected
 - `batch` — the batch id this note belongs to
 - `granularity` — routes connection-finding depth
 
-All subsequent references to "the {vocabulary.note}" use the `target_path` value from the task file.
+All subsequent references to "the {vocabulary.note}" use the `target_path` value from the queue entry.
 
 **START NOW.** Reference below explains methodology — use to guide, not as output.
 
@@ -61,6 +67,15 @@ Every connection must pass the articulation test: can you say WHY these {vocabul
 
 Bad connections pollute the graph. They create noise that makes real connections harder to find. When uncertain, do not connect.
 
+## Fabrication Guardrail
+
+Do not add context, motivation, rationale, mechanism explanations, or implication statements that are not in one of:
+- the source material cited in the {vocabulary.note}'s footer,
+- a linked neighbor {vocabulary.note},
+- the vault's stable reference material (identity files, methodology, {vocabulary.topic_map_plural}).
+
+When tempted to explain, either link a neighbor that already explains, or flag the gap for attention. Model-derived framing that looks plausible is still fabrication; once committed to the graph it becomes indistinguishable from attested claims and compounds through later reconsiderations.
+
 ## Workflow
 
 ### Phase 1: Understand What You Are Connecting
@@ -80,7 +95,7 @@ For each {vocabulary.note} you are connecting:
 - The scope (when does this apply? When not?)
 - The tensions (what might contradict this?)
 
-Read the task file to see what the processing phase discovered. The reduce notes, semantic neighbor field, and classification provide critical context about why this {vocabulary.note} was produced and what it relates to.
+Read the {vocabulary.note}'s body and footer for context. The producer phase has already placed Topics-footer links and (for structure) section headings stating sub-claims; treat these as priors for what this {vocabulary.note} relates to.
 
 ### Phase 2: Discovery (Find Candidates)
 
@@ -251,24 +266,6 @@ Not always. Relationships are not always symmetric:
 
 Add the reverse link only if following that path would be useful for agent traversal.
 
-**Reweave Task Filtering (when adding bidirectional links):**
-
-When you edit an older {vocabulary.note} to add a reverse link, you MAY flag it for full reconsideration via reweave. But SKIP reweave flagging if ANY of these apply:
-
-| Skip Condition | Rationale |
-|----------------|-----------|
-| Note has >5 incoming links | Already a hub — one more link does not warrant full reconsideration |
-| Note has `type: tension` in YAML | Structural framework, not content that evolves |
-| Note was reweaved in current batch | Do not re-reweave what was just reweaved |
-| Note is a {vocabulary.topic_map} | {vocabulary.topic_map_plural} are navigation, not claims to reconsider |
-
-**Check incoming links:**
-```bash
-find {vocabulary.note_collection}/ -name "*.md" -type f -exec grep -l '\[\[note name\]\]' {} + | wc -l
-```
-
-If >= 5, skip reweave flagging.
-
 ### Phase 5: Update {vocabulary.topic_map_plural}
 
 {vocabulary.topic_map_plural} are synthesis hubs, not just indexes.
@@ -341,6 +338,124 @@ Document genuine conflicts. Tensions are valuable, not bugs.
 
 Remove gaps that are now filled. Add new gaps discovered during reflection.
 
+### Phase 6: Reconsider Target Note (backward sub-phase)
+
+After forward connections and {vocabulary.topic_map} updates, reconsider the target {vocabulary.note} against the current state of the {vocabulary.note_collection}. Ask: **"What does the graph now say that this {vocabulary.note} does not yet cite?"** — not "what do I know now".
+
+This is the backward pass that keeps the network alive. {vocabulary.note_plural} are living documents — they grow, get rewritten, sharpen their claims.
+
+> "The {vocabulary.note} you wrote yesterday is a hypothesis. Today's knowledge is the test."
+
+**Sub-phase 6 Guards.** Skip Phase 6 entirely if ANY of these apply to the target {vocabulary.note}:
+
+| Guard | Rationale |
+|-------|-----------|
+| `granularity: capture` | Raw capture does not produce new claims that change understanding. |
+| Target has >5 incoming links | Already a hub — one more pass does not warrant full reconsideration. |
+| Target has `type: tension` in YAML | Structural framework, not content that evolves. |
+| Target is a {vocabulary.topic_map} | {vocabulary.topic_map_plural} are navigation, not claims to reconsider. |
+| Target was already reconsidered in the current batch | Do not re-reconsider what was just reconsidered. |
+
+**Check incoming links:**
+```bash
+find {vocabulary.note_collection}/ -name "*.md" -type f -exec grep -l '\[\[target note title\]\]' {} + | wc -l
+```
+
+If >= 5, skip Phase 6 — record `Reconsideration: skipped (hub)` in the Output Block.
+
+If any guard fires, set the Output Block's `Reconsideration:` field to `skipped ({reason})` and proceed directly to Phase 7. Otherwise continue with Sub-phases 6.1 and 6.2.
+
+#### Sub-phase 6.1: Evaluate the claim
+
+**Does the original claim still hold?**
+
+| Finding | Action |
+|---------|--------|
+| Claim holds, evidence strengthened | Note in Output Block; Phase 4's connection additions already supply evidence |
+| Claim holds but framing is weak | Rewrite for clarity (Sub-phase 6.2 action: Rewrite Content) |
+| Claim is too vague | Sharpen to be more specific (Sub-phase 6.2 action: Sharpen Claim) |
+| Claim is partially wrong | Revise with nuance (Sub-phase 6.2 action: Challenge Claim) |
+| Claim is contradicted | Flag tension, propose revision (Sub-phase 6.2 action: Challenge Claim) |
+
+**The Sharpening Test:**
+
+Read the title. Ask: could someone disagree with this specific claim?
+- If yes, the claim is sharp enough.
+- If no, it is too vague and needs sharpening.
+
+Example:
+- Vague: "context matters" (who would disagree?)
+- Sharp: "explicit context beats automatic memory" (arguable position)
+
+#### Sub-phase 6.2: Apply changes
+
+Apply changes directly. The pipeline needs to proceed without waiting for approval.
+
+**When applying changes:**
+
+1. Make changes atomically.
+2. Preserve existing valid content.
+3. Maintain prose flow — new wording reads naturally inline.
+4. Verify all link targets exist.
+5. Update description if the claim changed.
+
+**The Reconsideration Actions.**
+
+##### Rewrite Content
+
+Prose may need improvement. The constraint: every sentence in the rewrite must cite source or a neighbor {vocabulary.note}. Do not substitute model knowledge for either.
+
+**When to rewrite:**
+- A cited neighbor now supplies the reasoning more clearly.
+- Source evidence surfaced that sharpens a claim.
+- Phrasing is awkward — prose polish that does not mutate claims.
+
+**When NOT to rewrite:**
+- "Reasoning is clearer now" — clearer by whose authority? Unless a cited neighbor or source passage carries that reasoning, the "clarity" is model-generated and fabricates authority.
+- "Important nuance was missing" — missing from whose perspective? If the nuance is in the graph, cite the neighbor. If it is not, do not add it; flag the gap.
+
+**How to rewrite:**
+- Preserve the core claim (unless a cited contradiction warrants revision).
+- Every sentence maps to source or a cited neighbor. No connective prose that floats free of both.
+- Integrate new connections as cited inline wiki-links.
+- Maintain the {vocabulary.note}'s voice, not its fabrications.
+
+##### Sharpen the Claim
+
+Vague claims cannot be built on. Sharpen means making the claim more specific and arguable.
+
+**Sharpening patterns:**
+
+| Vague | Sharp |
+|-------|-------|
+| "X is important" | "X matters because Y, which enables Z" |
+| "consider doing X" | "X works when [condition] because [mechanism]" |
+| "there are tradeoffs" | "[specific tradeoff]: gaining X costs Y" |
+
+**When sharpening, also update:**
+- Title (if claim changed) — use the rename script if available
+- Description (must match new claim)
+- Body (reasoning must support sharpened claim)
+
+##### Challenge the Claim
+
+New evidence contradicts the original. Do not silently "fix" — acknowledge the evolution.
+
+**Challenge patterns:**
+
+```markdown
+# if partially wrong
+The original insight was [X]. However, [[newer evidence]] suggests [Y]. The refined claim is [Z].
+
+# if tension exists
+This argues [X]. But [[contradicting note]] argues [Y]. The tension remains unresolved — possibly [X] applies in context A while [Y] applies in context B.
+
+# if significantly wrong
+This note originally claimed [X]. Based on [[evidence]], the claim is revised: [new claim].
+```
+
+**Always log challenges:** When a claim is challenged or revised, this is a significant event. Note it in the Output Block's `### Backward → Cascade` field with the original claim, the new evidence, and the revised position.
+
 ## Handling Edge Cases
 
 ### No Connections Found
@@ -368,12 +483,12 @@ If you find {vocabulary.note_plural} with no connections:
 
 ## Queue Self-Update
 
-Before emitting the Output Block, advance the entry in `ops/queue/queue.json` via a single `jq` call. Substitute the task file's `id` for `<task-id>`:
+Before emitting the Output Block, advance the entry in `ops/queue/queue.json` via a single `jq` call. Substitute the queue id (from `$ARGUMENTS`) for `<task-id>`:
 
 ```bash
 jq --arg id "<task-id>" \
    'if any(.tasks[]; .id == $id)
-    then (.tasks[] | select(.id == $id)) |= (.completed_phases += ["reflect"] | .current_phase = "reweave")
+    then (.tasks[] | select(.id == $id)) |= (.completed_phases += ["reflect"] | .current_phase = "verify")
     else error("task not found: \($id)")
     end' \
    ops/queue/queue.json > ops/queue/queue.json.tmp \
@@ -386,16 +501,16 @@ If the Bash call fails (non-zero exit), resort to the Read and Write tools to re
 
 ## Output Block
 
-After finishing connection work, emit the canonical block below. Write the same block into the task file's `## Reflect` section (replacing any placeholder) AND echo it as the final chat message. This is the ONLY chat output.
+After finishing both forward connection work and (if not skipped) backward reconsideration, emit the canonical block below as the final chat message. This is the ONLY chat output — no task file is written.
 
 ```
 ## Reflect
 
 **Target:** [[{target note title}]]
 **Status:** ok | error: {short message}
-**Queue:** advanced {id}: reflect -> reweave
+**Queue:** advanced {id}: reflect -> verify
 
-### Work
+### Forward
 
 **Connections added:**
 - [[target]] — {relationship}: {one-line rationale}
@@ -409,7 +524,17 @@ After finishing connection work, emit the canonical block below. Write the same 
 **Skipped reverse links:**
 - [[target]] — {one-line reason} | NONE
 
-**Flagged for attention:**
+### Backward
+
+**Reconsideration:** ran | skipped (granularity=capture | hub | tension | recent | moc)
+**Claim status:** unchanged | sharpened | challenged | revised | n/a
+**Changes applied:**
+- [[target]] — {change-type}: {one-line} | NONE
+
+**Cascade:**
+- [[target]] — {reason} | NONE
+
+### Flagged for attention
 - {orphan | gap | tension — one line} | NONE
 
 ### Learnings
@@ -419,7 +544,7 @@ After finishing connection work, emit the canonical block below. Write the same 
 - [Process gap]: [description] | NONE
 ```
 
-On error, set `Status: error: <message>`, `Queue: no change (error)`, write the partial `### Work` content for audit, and leave `queue.json` unchanged.
+On error, set `Status: error: <message>`, `Queue: no change (error)`, emit the partial `### Forward` and `### Backward` content in chat, and leave `queue.json` unchanged.
 
 ---
 

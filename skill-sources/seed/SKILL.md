@@ -105,9 +105,9 @@ fi
 FINAL_SOURCE="$FILE"
 ```
 
-Use `$FINAL_SOURCE` in the task file — this is the path all downstream phases reference.
+Use `$FINAL_SOURCE` in the queue entry — this is the path all downstream phases reference.
 
-**Why move immediately:** All references (task files, {DOMAIN:note_plural}' Source footers) use the final archived path from the start. No path updates needed later. If it is in {DOMAIN:inbox}/, it is unclaimed. Claimed sources live in archive.
+**Why move immediately:** All references (queue entries, {DOMAIN:note_plural}' Source footers) use the final archived path from the start. No path updates needed later. If it is in {DOMAIN:inbox}/, it is unclaimed. Claimed sources live in archive.
 
 ## Step 4b: Copy to Domain Archive
 
@@ -139,7 +139,7 @@ QUEUE_MAX=${QUEUE_MAX:-0}
 
 # Check archive for highest claim number
 ARCHIVE_MAX=$(find ops/queue/archive -name "*-[0-9][0-9][0-9].md" 2>/dev/null | \
-  grep -v summary | sed 's/.*-\([0-9][0-9][0-9]\)\.md/\1/' | sort -n | tail -1)
+  sed 's/.*-\([0-9][0-9][0-9]\)\.md/\1/' | sort -n | tail -1)
 ARCHIVE_MAX=${ARCHIVE_MAX:-0}
 
 # Next claim starts after the highest
@@ -148,50 +148,7 @@ NEXT_CLAIM_START=$((QUEUE_MAX > ARCHIVE_MAX ? QUEUE_MAX + 1 : ARCHIVE_MAX + 1))
 
 Claim numbers are globally unique and never reused across batches. This ensures every claim file name (`{source}-{NNN}.md`) is unique vault-wide.
 
-## Step 6: Create Process Task File
-
-Write the task file to `ops/queue/${SOURCE_BASENAME}.md`:
-
-```markdown
----
-id: {SOURCE_BASENAME}
-type: process
-granularity: {GRANULARITY_FLAG}
-source: {FINAL_SOURCE}
-original_path: {original file path before move}
-archive_folder: {ARCHIVE_DIR}
-created: {UTC timestamp}
-next_claim_start: {NEXT_CLAIM_START}
----
-
-# Process {DOMAIN:note_plural} from {source filename}
-
-## Source
-Original: {original file path}
-Archived: {FINAL_SOURCE}
-Size: {line count} lines
-Content type: {detected type}
-
-## Scope
-Full document
-
-## Duplicate Detection
-- Near-duplicate found: (filled from step 2c)
-
-## Acceptance Criteria
-- Process claims, implementation ideas, tensions, and testable hypotheses
-- Duplicate check against {DOMAIN:note_collection}/ during processing
-- Near-duplicates create enrichment tasks (do not skip)
-- Each output type gets appropriate handling
-
-## Execution Notes
-(filled by processing skill)
-
-## Outputs
-(filled by processing skill)
-```
-
-## Step 7: Update Queue
+## Step 6: Update Queue
 
 Append the process task entry to `ops/queue/queue.json` via a single `jq` call. The snippet assumes the shell variables from prior steps (`SOURCE_BASENAME` from Step 2a/3, `FINAL_SOURCE` from Step 4, `NEXT_CLAIM_START` from Step 5) are set, and derives `GRANULARITY_FLAG` from `$ARGUMENTS` plus `CREATED_TS` from `date`:
 
@@ -206,7 +163,7 @@ NEW_ENTRY=$(cat <<JSON
   "granularity": "${GRANULARITY_FLAG}",
   "status": "pending",
   "source": "${FINAL_SOURCE}",
-  "file": "${SOURCE_BASENAME}.md",
+  "archive_folder": "${ARCHIVE_DIR}",
   "created": "${CREATED_TS}",
   "next_claim_start": ${NEXT_CLAIM_START}
 }
@@ -219,7 +176,7 @@ jq --argjson entry "$NEW_ENTRY" \
    && mv ops/queue/queue.json.tmp ops/queue/queue.json
 ```
 
-## Step 8: Report
+## Step 7: Report
 
 ```
 --=={ seed }==--
@@ -231,7 +188,6 @@ Archived copy: {DOMAIN:archive}/{DATE}-{SOURCE_BASENAME}.md
 Size: {line count} lines
 Content type: {detected type}
 
-Task file: ops/queue/{SOURCE_BASENAME}.md
 Claims will start at: {NEXT_CLAIM_START}
 Claim files will be: {SOURCE_BASENAME}-{NNN}.md (unique across vault)
 Queue: updated with process task (granularity: {GRANULARITY_FLAG})
@@ -241,10 +197,8 @@ Queue: updated with process task (granularity: {GRANULARITY_FLAG})
 
 ## Naming Convention
 
-Task files use the source basename for human readability:
-- Task file: `{source-basename}.md`
+The source basename is reused for human readability:
 - Claim files: `{source-basename}-{NNN}.md`
-- Summary: `{source-basename}-summary.md`
 - Archive folder: `{date}-{source-basename}/`
 
 Claim numbers (NNN) are globally unique across all batches, ensuring every filename is unique vault-wide. This is required because wiki links resolve by filename, not path.
@@ -260,7 +214,7 @@ Claim numbers (NNN) are globally unique across all batches, ensuring every filen
 ## Critical Constraints
 
 **always:**
-- Create the archive folder even for living docs (task files need it)
-- Use the archived path (not original) in the task file for {DOMAIN:inbox} sources
+- Create the archive folder even for living docs
+- Use the archived path (not original) in the queue entry for {DOMAIN:inbox} sources
 - Report next steps clearly so the orchestrator knows what to do next
 - Compute next_claim_start from both queue AND archive (not just one)

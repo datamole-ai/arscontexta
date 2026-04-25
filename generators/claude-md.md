@@ -45,7 +45,7 @@ If any answer is "no," fix it before saving. Discovery-first is a creation const
 | {DOMAIN:Knowledge} claims, insights | {DOMAIN:note_collection}/ | Research findings, patterns, principles |
 | Raw material to process | {DOMAIN:inbox}/ | Articles, voice dumps, links, imported content |
 | Agent identity, methodology, preferences | self/ | Working patterns, learned preferences, goals |
-| Processing state, queue, config | ops/ | Queue state, task files|
+| Processing state, queue, config | ops/ | Queue state, batch archives, learnings |
 | Friction signals, patterns noticed | ops/observations/ | Search failures, methodology improvements |
 
 When uncertain, ask: "Is this durable {DOMAIN:knowledge} ({DOMAIN:note_collection}/), agent identity (self/), or temporal coordination (ops/)?" Durable {DOMAIN:knowledge} earns its place in the graph. Agent identity shapes future behavior. Everything else is operational.

@@ -1,6 +1,6 @@
 ---
 name: pipeline
-description: End-to-end source processing -- seed, structure/capture, process all notes through reflect/reweave/verify, archive. The full pipeline in one command. Triggers on "/pipeline", "/pipeline [file]", "process this end to end", "full pipeline".
+description: End-to-end source processing -- seed, structure/capture, process all notes through reflect/verify, archive. The full pipeline in one command. Triggers on "/pipeline", "/pipeline [file]", "process this end to end", "full pipeline".
 version: "1.0"
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 argument-hint: " [file path] [--structure] [--capture]
@@ -43,7 +43,10 @@ Phase 1: /seed --[granularity] — create process task, move source to archive
 Phase 2: Granularity-based processing
     |
     v
-Phase 4: /archive-batch — move task files, generate summary
+Phase 4: /archive-batch — finalize the batch in queue.json and move artifacts to archive
+    |
+    v
+Phase 4.5: Write learnings.md to the archive folder
     |
     v
 Phase 5: Commit — single batch commit if in a git repo
@@ -75,9 +78,9 @@ Process the source via the appropriate producer, then drive each resulting note/
 
 ### Phase 2.1: Invoke the producer
 
-Use the Skill tool to invoke `/structure` or `/capture` (based on `task.granularity` of the process task) passing the full task file path as argument:
+Use the Skill tool to invoke `/structure` or `/capture` (based on the process entry's `granularity` in `queue.json`) passing the batch id as argument:
 
-- `ops/queue/<task.file>` — the process task file, e.g. `ops/queue/<source-basename>.md`. Always include the `ops/queue/` prefix.
+- `<batch-id>` — the source basename, equal to the process entry's `id`.
 
 Parse the producer's chat return:
 - **Status:** must be `ok`; otherwise stop the pipeline and surface the error.
@@ -107,11 +110,11 @@ Report:
 === Processing task {i}/{N}: {id} — {target} ===
 ```
 
-Look up `phase_order` for the entry's `type` (`note` or `enrichment`) from the queue file header. The sequence is `[reflect, reweave, verify]` for both types.
+Look up `phase_order` for the entry's `type` (`note` or `enrichment`) from the queue file header. The sequence is `[reflect, verify]` for both types.
 
 For each phase in the sequence, in order:
 
-1. **Invoke the phase skill** via the Skill tool, passing `ops/queue/<entry.file>` (the full task file path) as argument. Always include the `ops/queue/` prefix — downstream skills rely on the argument being a complete path and will NOT `find`/`ls` to relocate it.
+1. **Invoke the phase skill** via the Skill tool, passing the entry's queue `id` as argument (e.g. `note-007`, `enrich-002`).
 2. **Parse the chat return:**
    - Extract the `**Status:**` line. If not `ok`, stop the pipeline and surface the error with the current task id and phase.
    - Extract the `**Queue:**` line for the progress log.
@@ -144,6 +147,38 @@ When all tasks for the batch are complete, archive the batch by using Skill tool
 
 ---
 
+## Phase 4.5: Write Learnings
+
+After `/archive-batch` returns successfully, write the accumulated Learnings to the batch's archive folder.
+
+Resolve the archive folder from the queue's process entry.
+
+Write `<archive_folder>/learnings.md` with the following shape:
+
+```markdown
+# Learnings — {batch_id}
+
+## Friction
+- {description}
+- ...
+
+## Surprise
+- {description}
+- ...
+
+## Methodology
+- {description}
+- ...
+
+## Process gap
+- {description}
+- ...
+```
+
+If a category has zero non-NONE entries, omit that section entirely. If all four categories are empty, do not write the file.
+
+---
+
 ## Phase 5: Commit
 
 After `/archive-batch` returns successfully, commit all batch artifacts in a single commit.
@@ -169,13 +204,12 @@ Processing:
   Existing {DOMAIN:note_plural} enriched: {M}
   Connections added: {C}
   {DOMAIN:topic map}s updated: {T}
-  Older {DOMAIN:note_plural} updated via reweave: {R}
 
 Quality:
   All verify checks: {PASS/FAIL count}
 
 Archive: ops/queue/archive/{date}-{batch_id}/
-Summary: {batch_id}-summary.md
+Learnings file: ops/queue/archive/{date}-{batch_id}/learnings.md (omitted if no non-NONE learnings)
 
 {DOMAIN:note_plural} created:
 - [[claim title 1]]

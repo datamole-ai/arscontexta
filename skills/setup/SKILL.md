@@ -336,9 +336,9 @@ You are executing one step of a multi-step generation pipeline.
 - Archive folder: {domain:archive}
 - Note type: {domain:note}
 - Topic map: {domain:topic_map}
-- Process verbs: {domain:reflect}, {domain:reweave}, {domain:verify}
+- Process verbs: {domain:reflect}, {domain:verify}
 - Pipeline skills: /structure, /capture (universal — not domain-renamed)
-- Skill names: {DOMAIN:reflect}, {DOMAIN:reweave}, {DOMAIN:verify}
+- Skill names: {DOMAIN:reflect}, {DOMAIN:verify}
 
 ## Instructions
 1. Read ops/derivation.md FIRST — source of truth for all configuration decisions.
@@ -471,7 +471,6 @@ If nothing was deferred, record: "None — every candidate passed its filter."
 | archive | [domain term] | folder |
 | note (type) | [domain term] | note type |
 | reflect | [domain term] | process phase |
-| reweave | [domain term] | process phase |
 | verify | [domain term] | process phase |
 | MOC | [domain term] | navigation |
 | description | [domain term] | schema field |
@@ -527,13 +526,7 @@ Hub MOC (`index.md`) lives at the `{vocabulary.note_collection}/` root. Topic MO
 
 ##### Vault Marker
 
-Create `.arscontexta` in the vault root:
-
-```
-|do (^.^)  henlo, i am a vaultguard
-please dont delete me — i make sure arscontexta hooks only run
-in your vault, even if you installed the plugin globally
-```
+Create empty file called `.arscontexta` in the vault root:
 
 ---
 
@@ -591,11 +584,7 @@ Topics:
 |---|---|
 | Research | I work with claims — pulling them from source material, evaluating them against what's already known, connecting them into a network of understanding that grows more useful over time. |
 | Learning | I work with concepts — breaking them down, relating them to what you already understand, building a web of knowledge that deepens with each session. |
-| Therapy | I work with your reflections — holding space for what you share, surfacing the patterns that emerge across sessions, connecting threads you might not see in the moment. |
-| Relationships | I work with observations about the people in your life — noticing how relationships develop, tracing the connections between what people say and what it reveals over time. |
-| Life Management | I work with your decisions — documenting the reasoning behind them, linking them to their outcomes, building a record that helps you navigate what comes next. |
 | Creative | I work with your ideas — discovering what's there, combining fragments into something new, maintaining a space where half-formed thoughts can develop into real work. |
-| Companion | I work with your memories — remembering the things that matter, recalling them when they're relevant, building a shared understanding of your life that grows richer over time. |
 
 **{DOMAIN:what-i-notice}**
 
@@ -603,11 +592,7 @@ Topics:
 |---|---|
 | Research | the structure beneath claims — how they support each other, where they contradict, what gaps remain |
 | Learning | how concepts relate to each other — where understanding is solid, where it's thin, what connections might strengthen it |
-| Therapy | the patterns that repeat across different areas of your life — the same feeling showing up in different contexts, the same dynamic playing out with different people |
-| Relationships | the small signals in how people interact — what someone remembers to mention, what they avoid, how patterns shift over time |
-| Life Management | the throughlines connecting your decisions — which principles keep showing up, where your instincts are reliable, where blind spots might be |
 | Creative | the unexpected connections between ideas — the overlap between projects that aren't obviously related, the recurring themes worth developing |
-| Companion | the details that matter to you — the things you come back to, the patterns in what makes a good day, the people and moments you care about most |
 
 **{DOMAIN:quality-ethic}**
 
@@ -615,11 +600,7 @@ Topics:
 |---|---|
 | Research | Every claim I produce should be specific enough to be wrong. Vague claims that can't be challenged don't add knowledge — they add noise |
 | Learning | Understanding should be honest — if a concept isn't clear enough to explain simply, it isn't clear enough yet |
-| Therapy | What I surface should be specific enough to revisit — not a vague label, but the specific moment, the tightness in your chest when you saw that email, the thing that actually happened |
-| Relationships | Observations should be precise enough to be useful. "They seemed off" matters less than "they changed the subject twice when I mentioned the trip" |
-| Life Management | Decisions deserve clear reasoning. "It felt right" is worth capturing, but "it felt right because the last three times I trusted that instinct it worked" is more useful next time |
 | Creative | Ideas deserve honest evaluation. Falling in love with every draft means never improving any of them |
-| Companion | What I remember should be worth remembering. Capturing everything without judgment creates noise — attending to what actually matters to you creates something useful |
 
 **{DOMAIN:user-context}**
 
@@ -627,11 +608,7 @@ Topics:
 |---|---|
 | Research | Your research |
 | Learning | What you're working to understand |
-| Therapy | What you bring to these sessions |
-| Relationships | The relationships you're navigating |
-| Life Management | The decisions you're working through |
 | Creative | Your creative work |
-| Companion | What you share with me |
 
 ---
 
@@ -792,12 +769,10 @@ vocabulary:
 
   # Level 5: Process verbs (pipeline skills /structure, /capture are universal — not mapped here)
   reflect: "[domain term]"      # e.g., "reflect", "find patterns", "link decisions"
-  reweave: "[domain term]"      # e.g., "reweave", "revisit", "update"
   verify: "[domain term]"       # e.g., "verify", "check resonance", "validate"
 
   # Level 6: Command names (as users invoke them)
   cmd_reflect: "[/domain-verb]" # e.g., "/reflect", "/find-patterns", "/link-decisions"
-  cmd_reweave: "[/domain-verb]" # e.g., "/reweave", "/revisit", "/update-old"
   cmd_verify: "[/domain-verb]"  # e.g., "/verify", "/check", "/audit"
 
   # Level 7: Processing categories (domain-specific, from conversation)
@@ -919,8 +894,7 @@ The skills agent uses a specialized prompt (below); its cp + Edit protocol repla
 
 | Source Directory                                     | Source Name   | Tier | Domain-rename? | Notes                                              |
 | ---------------------------------------------------- | ------------- | ---- | -------------- | -------------------------------------------------- |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/reflect/`       | reflect       | A    | yes            | Target name = domain verb for "find connections"   |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/reweave/`       | reweave       | A    | yes            | Target name = domain verb for "revisit old notes"  |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/reflect/`       | reflect       | A    | yes            | Target name = domain verb for "find connections and reconsider claims"   |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/stats/`         | stats         | A    | no             | Keep `stats` as the target name                    |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/seed/`          | seed          | B    | no             | Keep `seed` as the target name                     |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/pipeline/`      | pipeline      | B    | no             | Keep `pipeline` as the target name                 |
@@ -1118,7 +1092,6 @@ Step 5: Coherence verification.
 Use these names verbatim in manual/skills.md and any /command references:
 
 - /{DOMAIN:reflect}         — Tier A, domain-renamed (reflect verb)
-- /{DOMAIN:reweave}         — Tier A, domain-renamed (reweave verb)
 - /stats                    — Tier A, unchanged
 - /seed                     — Tier B, unchanged
 - /pipeline                 — Tier B, unchanged
@@ -1137,7 +1110,7 @@ The main agent resolves each `{DOMAIN:xxx}` to the domain-native verb from `ops/
 
 Generate all 7 manual pages. Manual is self-contained — pages wiki-link to each other but NOT to notes/.
 
-For each page: replace universal terms (notes, inbox, topic map, reflect, reweave) with domain-native equivalents from the derivation conversation. Pipeline skills (/structure, /capture) are universal and not renamed. Use concrete domain examples.
+For each page: replace universal terms (notes, inbox, topic map, reflect) with domain-native equivalents from the derivation conversation. Pipeline skills (/structure, /capture) are universal and not renamed. Use concrete domain examples.
 
 **Page 1: manual.md (Hub MOC)**
 
@@ -1193,7 +1166,7 @@ type: manual
 
 The primary workflow. One command for end-to-end source processing.
 
-- /{DOMAIN:pipeline} — end-to-end processing: seed, structure/capture, reflect, reweave, verify, archive
+- /{DOMAIN:pipeline} — end-to-end processing: seed, structure/capture, reflect, verify, archive
 
 ## Pipeline Sub-Skills
 
@@ -1202,8 +1175,7 @@ Internal machinery the pipeline orchestrates. Prefer /{DOMAIN:pipeline} as the i
 - /{DOMAIN:seed} — create queue entry with duplicate detection
 - /structure — grouped note production (related claims in one {DOMAIN:note})
 - /capture — verbatim capture (no transformation)
-- /{DOMAIN:reflect} — find connections, update {DOMAIN:topic map}s
-- /{DOMAIN:reweave} — update older {DOMAIN:note_plural} with new context
+- /{DOMAIN:reflect} — find connections, update {DOMAIN:topic map}s, and reconsider {DOMAIN:note_plural} against current graph state
 - /{DOMAIN:verify} — description + schema + health check
 - /archive-batch — archive completed batch
 
@@ -1248,7 +1220,7 @@ inbox -> /{DOMAIN:pipeline} -> connected knowledge. This is the primary workflow
 
 ## Processing Pipeline
 
-The 6 Rs: Record (capture into {DOMAIN:inbox}), Reduce (/structure or /capture), Reflect (find connections), Reweave (update older {DOMAIN:note_plural}), Verify (quality checks), Rethink (challenge assumptions). Link to [[pipeline]] for the deep-dive.
+The 5 Rs: Record (capture into {DOMAIN:inbox}), Reduce (/structure or /capture), Reflect (find connections and reconsider older {DOMAIN:note_plural}), Verify (quality checks), Rethink (challenge assumptions). Link to [[pipeline]] for the deep-dive.
 
 ## Session Rhythm
 
@@ -1280,7 +1252,7 @@ type: manual
 
 ## What Pipeline Does
 
-One command, full processing: {DOMAIN:seed} -> structure/capture -> {DOMAIN:reflect} -> {DOMAIN:reweave} -> {DOMAIN:verify} -> archive. Drop a file in {DOMAIN:inbox}/, run /{DOMAIN:pipeline}, get connected knowledge.
+One command, full processing: {DOMAIN:seed} -> structure/capture -> {DOMAIN:reflect} -> {DOMAIN:verify} -> archive. Drop a file in {DOMAIN:inbox}/, run /{DOMAIN:pipeline}, get connected knowledge.
 
 ## Two Granularity Modes
 
@@ -1292,7 +1264,7 @@ Present both as equal choices:
 
 ## Processing Phases
 
-Brief explanation of each phase: seed (duplicate detection, queue entry), processing (granularity-routed), reflect (forward connections and {DOMAIN:topic map} updates), reweave (backward updates to older {DOMAIN:note_plural}), verify (quality gate), archive (cleanup and summary). What each does and why it matters.
+Brief explanation of each phase: seed (duplicate detection, queue entry), processing (granularity-routed), reflect (forward connections, {DOMAIN:topic map} updates, and backward reconsideration of older {DOMAIN:note_plural}), verify (quality gate), archive (cleanup and summary). What each does and why it matters.
 
 ## Resumability
 
@@ -1343,7 +1315,7 @@ type: manual
 {Generate content covering:}
 - Orphan {DOMAIN:notes} — {DOMAIN:note_plural} with no incoming links (run /{DOMAIN:reflect})
 - Dangling links — wiki links to non-existent {DOMAIN:note_plural} (check after renames)
-- Stale content — {DOMAIN:note_plural} not updated in 30+ days with sparse connections (run /{DOMAIN:reweave})
+- Stale content — {DOMAIN:note_plural} not updated in 30+ days with sparse connections (run /{DOMAIN:reflect})
 - Inbox overflow — too many items accumulating (run /{DOMAIN:pipeline} to process inbox items)
 - Pipeline stalls — tasks stuck in queue (inspect `ops/queue/queue.json` directly, resume with /{DOMAIN:pipeline} --batch {id}). See [[pipeline]] resumability section.
 - Common mistakes table with corrections

@@ -48,18 +48,18 @@ Missing descriptions mean the {DOMAIN:note} can't be filtered during search.
 **5. Stale Content**
 {DOMAIN:Notes} that haven't been touched in a long time may contain outdated claims. Check modification dates and review oldest notes first.
 
-### Reweaving — The Backward Pass
+### The Backward Sub-phase
 
-New {DOMAIN:notes} create connections going forward. But older {DOMAIN:notes} don't automatically know about newer ones. Reweaving is the practice of revisiting old {DOMAIN:notes} and asking: "If I wrote this today, what would be different?"
+New {DOMAIN:notes} create connections going forward. But older {DOMAIN:notes} don't automatically know about newer ones. The backward sub-phase is the practice of revisiting old {DOMAIN:notes} and asking: "If I wrote this today, what would be different?"
 
-**Reweaving can:**
+**The backward sub-phase can:**
 - Add connections to newer {DOMAIN:notes} that didn't exist when the original was written
 - Sharpen a claim that's become clearer with more context
 - Split a {DOMAIN:note} that actually contains multiple ideas
 - Challenge a claim that new evidence contradicts
 - Rewrite prose to incorporate new links inline
 
-**When to reweave:**
+**When the backward sub-phase fires:**
 - After creating a batch of new {DOMAIN:notes} — check what older {DOMAIN:notes} should link to them
 - When a health check flags sparse {DOMAIN:notes} with few connections
 - When {DOMAIN:notes} have not been touched since N new notes were added to the graph
@@ -90,7 +90,7 @@ Before ending a work session:
 
 ### The Maintenance Mindset
 
-Maintenance is not cleanup — it's cultivation. Each pass through old {DOMAIN:notes} is an opportunity to deepen the graph. Reweaving discovers connections that weren't visible when the {DOMAIN:notes} were first written. Health checks reveal structural gaps that point toward missing insights.
+Maintenance is not cleanup — it's cultivation. Each pass through old {DOMAIN:notes} is an opportunity to deepen the graph. The backward sub-phase discovers connections that weren't visible when the {DOMAIN:notes} were first written. Health checks reveal structural gaps that point toward missing insights.
 
 The graph doesn't just get maintained. It gets better.
 

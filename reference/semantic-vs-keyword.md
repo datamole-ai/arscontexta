@@ -51,7 +51,7 @@ Guide the derivation engine in composing search modalities at query time. Semant
 
 **Summary:** After BM25 and vector search produce candidate results, an LLM evaluates each candidate against the original query for genuine conceptual relevance. This is the most expensive step but also the most valuable for connection-finding. Vector similarity can be fooled by topical overlap — two notes about "context windows" might score high even if one is about UI design and the other about LLM architecture. The LLM reranker distinguishes surface overlap from deep connection by reasoning about the semantic relationship.
 
-**Derivation Implication:** LLM reranking is the highest-quality search mode and should be reserved for tasks where connection quality matters most: reflect (finding connections for new notes), reweave (updating old notes), and exploratory research. It should NOT be the default for routine lookups.
+**Derivation Implication:** LLM reranking is the highest-quality search mode and should be reserved for tasks where connection quality matters most: reflect (finding connections for new notes and reconsidering older ones) and exploratory research. It should NOT be the default for routine lookups.
 
 **Source:** Nogueira & Cho, "Passage Re-ranking with BERT" (2019). Operationally validated in the vault's default `qmd query "…"` mode, which uses LLM reranking as the final stage.
 
@@ -83,7 +83,7 @@ Guide the derivation engine in composing search modalities at query time. Semant
 
 **Summary:** Finding genuine connections between notes is the highest-value search task in a knowledge system. It requires the full pipeline: BM25 for exact-term matches, vector search for vocabulary-divergent matches, query expansion for coverage, and LLM reranking to evaluate which candidates represent genuine conceptual connections rather than surface similarity. Each layer catches what the previous one misses. Skipping the reranking step produces connection suggestions that are topically related but not genuinely connected — the difference between "both mention context windows" and "this note's argument depends on that note's claim."
 
-**Derivation Implication:** Every generated system runs hybrid retrieval (BM25 + vector) for connection-finding phases such as reflect and reweave. LLM reranking is added on top of the always-on hybrid pipeline when connection quality justifies the latency; it is a scoring refinement, not an enablement decision.
+**Derivation Implication:** Every generated system runs hybrid retrieval (BM25 + vector) for connection-finding work in the reflect phase. LLM reranking is added on top of the always-on hybrid pipeline when connection quality justifies the latency; it is a scoring refinement, not an enablement decision.
 
 **Source:** Vault operational experience. The reflect skill calls `qmd query` (bare form — full hybrid with expansion and reranking) because connection quality justifies the ~20s latency.
 
@@ -197,7 +197,7 @@ Both modalities always run. Disagreement between them is a signal, not a problem
 
 #### Processing intensity amplifies vocabulary divergence
 
-**Summary:** Heavy processing (extraction, reformulation, synthesis) generates more varied phrasings of the same concepts than light processing. Each reduce pass produces notes that reformulate source material in the agent's own words. Each reweave pass may further rephrase claims as understanding deepens. This compounding reformulation means heavy-processing systems accumulate vocabulary divergence faster than light-processing systems, increasing the weight the hybrid scorer should place on the vector component.
+**Summary:** Heavy processing (extraction, reformulation, synthesis) generates more varied phrasings of the same concepts than light processing. Each reduce pass produces notes that reformulate source material in the agent's own words. Each reflect pass's backward sub-phase may further rephrase claims as understanding deepens. This compounding reformulation means heavy-processing systems accumulate vocabulary divergence faster than light-processing systems, increasing the weight the hybrid scorer should place on the vector component.
 
 **Derivation Implication:** Processing intensity shifts where semantic search contributes most within the always-on hybrid pipeline. Heavy processing produces more reformulations, so the vector component carries more signal relative to BM25; light processing keeps vocabulary closer to source material, so BM25 hits more often dominate. Both modalities still run; the hybrid scorer's weighting reflects this shift.
 
@@ -211,7 +211,7 @@ Both modalities always run. Disagreement between them is a signal, not a problem
 
 **Summary:** Keyword search costs O(n) where n is corpus size — essentially free on modern hardware. Semantic search (vector similarity) costs O(1) per query against a pre-built index, but building and maintaining the index costs O(n) per update and requires ~2GB of model memory. Hybrid search with LLM reranking adds O(k) where k is the number of candidates reranked — each candidate requires an LLM inference pass. The practical costs: keyword ~0.2s, semantic ~5s, hybrid ~20s. The quality improvement at each step is diminishing: keyword to semantic is a large jump, semantic to hybrid is a smaller jump, but hybrid catches connections that semantic alone misses in ~15% of cases.
 
-**Derivation Implication:** The cost-quality tradeoff informs which search mode to default to. For routine operations (file lookup, YAML queries), keyword is the only rational choice. For standard discovery (exploring related notes), semantic provides the best cost-quality ratio. For high-stakes connection finding (reflect, reweave), hybrid is justified by the quality premium. Generated context files should encode this cost awareness so agents do not default to the most expensive mode for routine tasks.
+**Derivation Implication:** The cost-quality tradeoff informs which search mode to default to. For routine operations (file lookup, YAML queries), keyword is the only rational choice. For standard discovery (exploring related notes), semantic provides the best cost-quality ratio. For high-stakes connection finding (reflect — both forward and backward sub-phases), hybrid is justified by the quality premium. Generated context files should encode this cost awareness so agents do not default to the most expensive mode for routine tasks.
 
 **Source:** Vault operational measurements. The 0.2s / 5s / 20s benchmarks are from qmd running on Apple Silicon with models kept warm.
 
@@ -245,4 +245,4 @@ Both modalities always run. Disagreement between them is a signal, not a problem
 - Sources reviewed: 22
 - Claims included: 23
 - Claims excluded: 5
-- Cross-references: `kernel.yaml` (semantic-search primitive), `interaction-constraints.md` (linking dimension), `components.md` (Search component blueprint), `methodology.md` (key research claims on retrieval), `claim-map.md` (discovery-retrieval topic)
+- Cross-references: `kernel.yaml` (semantic-search primitive), `interaction-constraints.md` (linking dimension), `components.md` (Search component blueprint)

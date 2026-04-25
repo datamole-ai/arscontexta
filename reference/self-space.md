@@ -39,7 +39,7 @@ Questions the engine must answer when generating the self/ space:
 
 **Derivation Implication:** When generating methodology.md, start from the domain's quality standards and processing patterns (from `use-case-presets.md`), then adapt the universal quality standards from `methodology.md` to the specific domain. Do not simply copy the universal standards and replace "claim" with "reflection." Instead, reason about what each standard means in the domain context. "Claims must be specific enough to be wrong" becomes, for a therapy domain, "Reflections should be specific enough to revisit — 'I felt anxious' is less useful than 'I felt chest tightness when I saw the email notification from my boss.'"
 
-**Source:** `vocabulary-transforms.md` for vocabulary mapping. `use-case-presets.md` for domain-specific configuration. `methodology.md` for universal quality standards that require domain adaptation.
+**Source:** `vocabulary-transforms.md` for vocabulary mapping. `use-case-presets.md` for domain-specific configuration.
 
 ---
 
@@ -169,7 +169,7 @@ Questions the engine must answer when generating the self/ space:
 
 **Derivation Implication:** Do not generate methodology.md by applying vocabulary transforms to a generic template. Instead, reason about what quality means in the specific domain, then write methodology.md from that domain-specific understanding. The generic quality standards (specificity, visible reasoning, acknowledged uncertainty) serve as a checklist to ensure coverage, but the prose should be domain-native throughout.
 
-**Source:** `methodology.md` — universal quality standards. `vocabulary-transforms.md` — domain-specific vocabulary. The combination requires synthesis, not substitution.
+**Source:** `vocabulary-transforms.md` — domain-specific vocabulary.
 
 ---
 
@@ -234,4 +234,4 @@ Questions the engine must answer when generating the self/ space:
 - Sources reviewed: 18
 - Claims included: 20
 - Claims excluded: 5
-- Cross-references: `three-spaces.md` (self space specification, failure modes of conflation, memory type routing), `session-lifecycle.md` (session orientation, goals.md as handoff), `kernel.yaml` (self-space and session-rhythm primitives), `methodology.md` (session rhythm, self/ structure), `components.md` (self/ space blueprint), `vocabulary-transforms.md` (domain-specific self/ vocabulary)
+- Cross-references: `three-spaces.md` (self space specification, failure modes of conflation, memory type routing), `session-lifecycle.md` (session orientation, goals.md as handoff), `kernel.yaml` (self-space and session-rhythm primitives), `components.md` (self/ space blueprint), `vocabulary-transforms.md` (domain-specific self/ vocabulary)

@@ -53,27 +53,26 @@ After {DOMAIN:processing} creates new {DOMAIN:notes}, connection finding integra
 
 **Connection quality standard:** Not just "related to" but "extends X by adding Y" or "contradicts X because Z." Every connection must articulate the relationship.
 
-#### The Reweaving Philosophy
+#### The Backward Sub-phase
 
-The backward pass is not about adding links. It is about asking: **"If I wrote this {DOMAIN:note} today, what would be different?"**
+After forward connections, the same skill reconsiders the target {DOMAIN:note} against the current graph. The question is: **"If I wrote this {DOMAIN:note} today, what would be different?"**
 
-{DOMAIN:Notes} are living documents, not finished artifacts. A {DOMAIN:note} written last month was written with last month's understanding. Since then: new {DOMAIN:notes} exist, understanding deepened, the claim might need sharpening, what was one idea might now be three. Reweaving is completely reconsidering a {DOMAIN:note} based on current knowledge.
+{DOMAIN:Notes} are living documents, not finished artifacts. A {DOMAIN:note} written last month was written with last month's understanding. Since then: new {DOMAIN:notes} exist, understanding deepened, the claim might need sharpening, what was one idea might now be three. The backward sub-phase is completely reconsidering a {DOMAIN:note} based on current knowledge.
 
-**What reweaving can do:**
+**What the backward sub-phase can do:**
 
 | Action | When |
 |--------|------|
 | Add connections | Newer {DOMAIN:notes} exist that should link here |
-| Rewrite content | Understanding evolved, prose should reflect it |
+| Rewrite content | A cited neighbor or source now supplies clearer reasoning |
 | Sharpen the claim | Title is too vague to be useful |
-| Split the {DOMAIN:note} | Multiple claims bundled together |
 | Challenge the claim | New evidence contradicts the original |
 
-Without reweaving, the vault becomes a graveyard of outdated thinking that happens to be organized. With reweaving, every {DOMAIN:note} stays current — reflecting today's understanding, not historical understanding.
+The backward sub-phase is gated by guards (hub notes, framework notes, capture-granularity notes skip it). Without it, the vault becomes a graveyard of outdated thinking that happens to be organized. With it, every {DOMAIN:note} stays current — reflecting today's understanding, not historical understanding.
 
 **The complete maintenance cycle:**
 ~~~
-CREATE -> CONNECT FORWARD (/{DOMAIN:connect}) -> REVISIT -> QUESTION/REWRITE/SPLIT (/{DOMAIN:maintain}) -> EVOLVE
+CREATE -> CONNECT FORWARD AND BACKWARD (/{DOMAIN:connect}) -> EVOLVE
 ~~~
 
 #### Phase 4: {DOMAIN:Verify}
@@ -143,41 +142,20 @@ The task queue tracks every {DOMAIN:note} being processed through the pipeline. 
 | Type | Purpose | Phase Sequence |
 |------|---------|---------------|
 | process | Process source through chosen granularity skill (/structure or /capture) — materializes all notes and enrichments inline | (single phase) |
-| note | A newly materialized {DOMAIN:note} flows through downstream phases | {DOMAIN:connect} -> {DOMAIN:maintain} -> {DOMAIN:verify} |
-| enrichment | An existing {DOMAIN:note} was modified inline during process; still flows through downstream phases | {DOMAIN:connect} -> {DOMAIN:maintain} -> {DOMAIN:verify} |
+| note | A newly materialized {DOMAIN:note} flows through downstream phases | {DOMAIN:connect} -> {DOMAIN:verify} |
+| enrichment | An existing {DOMAIN:note} was modified inline during process; still flows through downstream phases | {DOMAIN:connect} -> {DOMAIN:verify} |
 
-**Recovery:** If you crash mid-phase, the queue still shows `current_phase` at the failed phase. The task file confirms the corresponding section is empty. Re-running the pipeline picks it up automatically — no manual intervention needed.
+**Recovery:** If you crash mid-phase, the queue still shows `current_phase` at the failed phase. Re-running the pipeline picks it up automatically — no manual intervention needed.
 
-#### Per-{DOMAIN:Note} Task Files
+#### Queue As Sole State Surface
 
-Each {DOMAIN:note} gets its own task file that accumulates notes across all phases. The task file is the shared state between phases — it is how one phase communicates what it found to the next phase.
+Each phase skill reads its entry from `ops/queue/queue.json` by id, executes the phase, updates its own queue entry (`current_phase`, `completed_phases`, `status`), and emits a canonical Output Block as its final chat message. The orchestrator parses that chat block to drive the next phase. State transfers through the queue and the chat return.
 
-~~~markdown
-# {DOMAIN:Note} 001: {title}
-
-## {DOMAIN:Process} Notes
-{Processing rationale, duplicate judgment}
-
-## Materialize
-{Note path, template used, validation result — OR for enrichments: target path and integration mode}
-
-## {DOMAIN:Connect}
-{Connections found, {DOMAIN:topic maps} updated}
-
-## {DOMAIN:Maintain}
-{Older {DOMAIN:notes} updated with backward connections}
-
-## {DOMAIN:Verify}
-{Description quality result, schema result, health result}
-~~~
-
-**Why task files matter:** Each phase reads the task file in fresh context. Downstream phases see what upstream phases discovered. Without this, context would be lost between sessions. The task file IS the memory of the pipeline.
-
-**Batch archival:** When all {DOMAIN:notes} from a source reach `"done"`, the batch is archivable. Archival moves task files to `ops/queue/archive/{date}-{source}/`, generates a summary capturing what the batch produced, and cleans the queue.
+**Batch archival:** When all {DOMAIN:notes} from a source reach `"done"`, the batch is archivable. /archive-batch removes the batch's queue entries; /pipeline then writes `<archive_folder>/learnings.md` aggregating non-NONE learnings from each phase's Output Block.
 
 #### Maintenance via /health (Diagnostic, On-Demand)
 
-Maintenance is diagnostic, not queued. The pipeline queue holds pipeline tasks only (process, reflect, reweave, verify). Vault health is evaluated on demand by /health, which reports fired conditions with specific files and ranked actions.
+Maintenance is diagnostic, not queued. The pipeline queue holds pipeline tasks only (process, reflect, verify). Vault health is evaluated on demand by /health, which reports fired conditions with specific files and ranked actions.
 
 **Maintenance conditions (evaluated by /health):**
 
@@ -210,23 +188,21 @@ The pipeline's quality depends on each phase getting your best attention. Your c
 
 ~~~
 Orchestrator reads queue -> picks next task -> invokes phase skill for one phase
-  Phase skill (forked context): reads task file, executes phase, writes results to task file
-  Phase skill returns -> Orchestrator reads results -> advances queue -> invokes next phase skill
+  Phase skill (forked context): reads its queue entry by id, executes phase, updates queue.json, emits canonical Output Block as final chat message
+  Phase skill returns -> Orchestrator parses chat Output Block -> invokes next phase skill
 ~~~
 
 **Why fresh context matters:**
 - {DOMAIN:Process} needs full attention on the source material
-- {DOMAIN:Connect} needs full attention on the existing knowledge graph
-- {DOMAIN:Maintain}/reweave needs full attention on older {DOMAIN:notes}
+- {DOMAIN:Connect} needs full attention on the knowledge graph (both forward connections and backward reconsideration of the target {DOMAIN:note})
 - {DOMAIN:Verify} needs neutral perspective, unbiased by creation
 
 If all phases run in one session, the verify phase runs on degraded attention — you have already decided this {DOMAIN:note} is good during materialization, and confirmation bias sets in. Fresh context prevents this.
 
-**Handoff through files, not context:**
-- Each phase writes its findings to the task file
-- The next phase reads the task file in fresh context
-- State transfers through persistent files, not accumulated conversation
-- This makes crashes recoverable and processing auditable
+**Handoff through queue + chat:**
+- Each phase updates its entry in `ops/queue/queue.json` (status, current_phase, completed_phases)
+- Each phase emits a canonical Output Block as its final chat message (Status / Queue / Learnings)
+- The orchestrator parses that chat block to drive the next phase
 
 **Processing is orchestrated by default.** /pipeline orchestrates the full sequence. The queue drives what happens next.
 
@@ -238,7 +214,7 @@ Every vault ships with the complete pipeline active from the first session. All 
 
 The philosophy: it is easier to disable features you do not need than to discover and enable features you did not know existed. If a feature exists, it works on day one.
 
-**All skills are available from day one.** /structure, /capture, /{DOMAIN:connect}, /{DOMAIN:maintain}, /{DOMAIN:verify}, /{DOMAIN:health}, and all other skills are ready to invoke on the first source you process. The full pipeline runs on the first {DOMAIN:note} you create.
+**All skills are available from day one.** /structure, /capture, /{DOMAIN:connect}, /{DOMAIN:verify}, /{DOMAIN:health}, and all other skills are ready to invoke on the first source you process. The full pipeline runs on the first {DOMAIN:note} you create.
 
 ### Quality Gates Summary
 
@@ -252,7 +228,7 @@ Every phase has specific gates. Failing a gate does not block progress — it tr
 | {DOMAIN:Process} | Duplicate check — semantic search run? | Run search, merge if duplicate |
 | {DOMAIN:Connect} | Genuine relationship — can you say WHY? | Do not force the connection |
 | {DOMAIN:Connect} | {DOMAIN:Topic map} updated | Add {DOMAIN:note} to relevant {DOMAIN:topic maps} |
-| {DOMAIN:Connect} | Backward pass — older {DOMAIN:notes} updated? | Update or log for maintenance |
+| {DOMAIN:Connect} | Backward sub-phase — target {DOMAIN:note} reconsidered (or guard fired)? | Apply changes or record skip reason |
 | {DOMAIN:Verify} | Description predicts content (cold-read test) | Improve description |
 | {DOMAIN:Verify} | Schema valid | Fix schema violations |
 | {DOMAIN:Verify} | No broken links | Fix or remove broken links |
@@ -268,7 +244,7 @@ If a {DOMAIN:skill} exists for a task, use the {DOMAIN:skill}. Do not manually r
 |---------|------------------------|
 | New content to {DOMAIN:process} | /structure or /capture |
 | New {DOMAIN:notes} need connections | /{DOMAIN:connect} |
-| Old {DOMAIN:notes} may need updating | /{DOMAIN:maintain} |
+| Old {DOMAIN:notes} may need updating | /{DOMAIN:connect} |
 | Quality verification needed | /{DOMAIN:verify} |
 | System health check | /{DOMAIN:health} |
 | User asks to find connections | /{DOMAIN:connect} (not manual grep) |
@@ -282,10 +258,10 @@ Each session focuses on ONE task. Discoveries become future tasks, not immediate
 
 Your attention degrades as context fills. The first ~40% of context is the "smart zone" — sharp, capable, good decisions. Beyond that, context rot sets in. Structure each task so critical information lands early. When processing multiple {DOMAIN:notes}, use fresh context per {DOMAIN:note} — never chain phases in one session.
 
-**The handoff protocol:** Every phase writes its findings to the task file. The next phase reads the task file in fresh context. State transfers through files, not through accumulated conversation. This ensures:
+**The handoff protocol:** Every phase updates its queue entry and emits a canonical Output Block as its final chat message. The orchestrator parses that block to drive the next phase. State transfers through the queue (durable) and chat Output Blocks (within a pipeline run), not through accumulated conversation across phases. This ensures:
 - No context contamination between phases
 - Each phase gets your best attention
-- Crashes are recoverable (the task file shows where processing stopped)
+- Crashes are recoverable (`queue.json` shows `current_phase` where processing stopped)
 - Multiple {DOMAIN:notes} can be processed without degradation
 
 ## Dependencies
@@ -294,8 +270,7 @@ Requires: yaml-schema, wiki-links, atomic-notes, mocs
 ## Skills Referenced
 - structure (group related claims into structured notes)
 - capture (preserve source verbatim with frontmatter)
-- {DOMAIN:connect} (find connections, update topic maps)
-- {DOMAIN:maintain} (backward pass, update old notes)
+- {DOMAIN:connect} (find connections, update topic maps, reconsider target note against current graph state)
 - {DOMAIN:verify} (combined quality gate: description, schema, links)
 - {DOMAIN:health} (systematic health checks)
 - {DOMAIN:rethink} (review accumulated observations and tensions)

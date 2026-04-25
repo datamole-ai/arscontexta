@@ -255,7 +255,7 @@ Check MOC coverage:
 **How to implement:**
 - `ops/queue/queue.json` (or `queue.yaml`) — machine-readable queue for pipeline orchestration
 - Context file references it in the session-orient phase
-- Tasks track phase progression: each note (or enrichment) moves through reflect, reweave, verify (or domain-appropriate equivalents). Materialization happens inside /structure during the process phase — there is no separate create or enrich phase.
+- Tasks track phase progression: each note (or enrichment) moves through reflect, verify (or domain-appropriate equivalents). Materialization happens inside /structure during the process phase — there is no separate create or enrich phase.
 
 **Quality gate:** Can the pipeline answer "what processing is pending?" by reading the queue? If yes, lifecycle visibility is achieved.
 

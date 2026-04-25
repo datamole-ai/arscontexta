@@ -59,7 +59,7 @@ Questions the engine must answer when generating session configuration:
 
 #### Processing sessions orient from queue state and persist phase completion
 
-**Summary:** Processing sessions follow the pipeline: read queue.json to find the next unblocked task, execute one or more phases (reduce, reflect, reweave, verify), and update queue state with completion. Orientation is minimal and targeted — the agent needs queue state, the specific task file, and the relevant skill instructions. It does NOT need full self/ orientation because processing is methodological, not identity-dependent. The persist phase must advance the queue entry (mark phases complete, update status) — without this, the pipeline stalls.
+**Summary:** Processing sessions follow the pipeline: read queue.json to find the next unblocked task, execute one or more phases (reduce, reflect, verify), and update queue state with completion. Orientation is minimal and targeted — the agent needs queue state, the specific task file, and the relevant skill instructions. It does NOT need full self/ orientation because processing is methodological, not identity-dependent. The persist phase must advance the queue entry (mark phases complete, update status) — without this, the pipeline stalls.
 
 **Derivation Implication:** Generated systems with processing pipelines should include a processing session template in the context file. This template specifies: (1) read queue state, (2) identify next task, (3) load task-specific context, (4) execute phase, (5) update task file, (6) advance queue. Skip heavy orientation — processing sessions are mechanical, not exploratory.
 
@@ -245,4 +245,4 @@ Hooks automate session rhythm. A SessionStart hook injects the file tree and loa
 - Sources reviewed: 20
 - Claims included: 22
 - Claims excluded: 5
-- Cross-references: `kernel.yaml` (session-rhythm and self-space primitives), `three-spaces.md` (self/ space specification, session rhythm integration), `components.md` (hooks component blueprint), `methodology.md` (session rhythm section), `failure-modes.md` (temporal staleness)
+- Cross-references: `kernel.yaml` (session-rhythm and self-space primitives), `three-spaces.md` (self/ space specification, session rhythm integration), `components.md` (hooks component blueprint), `failure-modes.md` (temporal staleness)

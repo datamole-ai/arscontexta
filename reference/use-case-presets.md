@@ -21,7 +21,7 @@ Named points in the configuration space derived from methodology traditions and 
 | Atomicity | 0.8 | One claim per note maximizes composability and cross-source comparison |
 | Organization | 0.3 | Flat-associative with semantic search |
 | Linking | 0.7 | Explicit typed connections + semantic discovery |
-| Processing | 0.8 | Full pipeline: structure, connect, verify, reweave |
+| Processing | 0.8 | Full pipeline: structure, connect, verify |
 | Session | 0.7 | Fresh per task |
 | Maintenance | 0.6 | Event-driven |
 | Search | 0.8 | Semantic primary |

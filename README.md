@@ -138,8 +138,7 @@ or `decisions/`), but the separation is invariant.
 | `/seed` | Create processing task with duplicate detection |
 | `/structure` | Group claims into finished notes and apply enrichments to existing notes |
 | `/capture` | Verbatim capture — preserves source without transformation |
-| `/reflect` | Find connections, update MOCs |
-| `/reweave` | Update older notes with new connections |
+| `/reflect` | Find connections, update MOCs, reconsider older notes |
 | `/verify` | Combined quality check: description + schema + health |
 | `/archive-batch` | Archive batch of notes |
 
@@ -153,14 +152,12 @@ or `decisions/`), but the separation is invariant.
 
 ## Processing Pipeline
 
-The vault implements the **5 Rs**, mirroring Cornell Note-Taking's 5 Rs:
 
 | Phase | What Happens | Command |
 |-------|-------------|---------|
 | **Record** | Zero-friction capture into inbox/ | Manual |
 | **Reduce** | Extract insights with domain-native categories | `/structure`, `/capture` |
-| **Reflect** | Find connections, update MOCs | `/reflect` |
-| **Reweave** | Update older notes with new context | `/reweave` |
+| **Reflect** | Find connections, update MOCs, reconsider older notes | `/reflect` |
 | **Verify** | Description + schema + health checks | `/verify` |
 
 ---
@@ -170,29 +167,6 @@ The vault implements the **5 Rs**, mirroring Cornell Note-Taking's 5 Rs:
 | Hook | Event | What It Does |
 |------|-------|-------------|
 | **Session Orient** | `SessionStart` | Injects workspace tree, loads identity, surfaces maintenance signals |
-
----
-
-## The Research Graph
-
-The `methodology/` directory contains **242 interconnected research claims**
-about tools for thought, knowledge management, and agent-native cognitive
-architecture. These claims back every configuration decision.
-
-### Synthesizes
-
-Zettelkasten -- Cornell Note-Taking -- Evergreen Notes -- PARA -- GTD -- Memory
-Palaces -- Cognitive Science (extended mind, spreading activation, generation
-effect) -- Network Theory (small-world topology, betweenness centrality) --
-Agent Architecture (context windows, session boundaries, multi-agent patterns)
-
-### How Claims Back Decisions
-
-Every kernel primitive includes `cognitive_grounding` linking to specific research:
-
-- **MOC hierarchy** -- context-switching cost research (Leroy 2009)
-- **Description field** -- progressive disclosure principles
-- **Wiki links** -- spreading activation theory
 
 ---
 
@@ -208,8 +182,7 @@ arscontexta/
 |   +-- health/                  # Diagnostic checks
 |-- skill-sources/               # 10 generated command templates
 |   |-- structure/               # Extract insights
-|   |-- reflect/                 # Find connections
-|   |-- reweave/                 # Backward pass
+|   |-- reflect/                 # Find connections, update MOCs, reconsider older notes
 |   |-- verify/                  # Combined quality check
 |   +-- ...                      # 6 more processing commands
 |-- hooks/
@@ -218,7 +191,6 @@ arscontexta/
 |-- generators/
 |   |-- claude-md.md             # CLAUDE.md template
 |   +-- features/                # 14 composable feature blocks
-|-- methodology/                 # 242 research claims
 |-- reference/                   # Core reference documents
 |   |-- kernel.yaml              # 13 kernel primitives
 |   |-- three-spaces.md          # Architecture spec
