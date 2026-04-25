@@ -123,14 +123,6 @@ For each phase in the sequence, in order:
 
 The sub-skill has already updated `queue.json` by the time its chat return lands. The orchestrator trusts the chat signal and does not re-read the file.
 
-### Phase 2.4: Post-batch cross-connect
-
-After all entries in the work list have completed their phase sequences, if the batch contains 2 or more completed note entries:
-
-Collect all note paths from the in-memory work list (each entry's `target_path`). Then verify sibling connections exist between batch notes — add any that were missed because sibling notes did not exist yet when the earlier claim's reflect ran. Check backward link gaps.
-
-**Skip if:** the batch has only 1 note (no siblings possible).
-
 ---
 
 ## Phase 3: Verify Completion
