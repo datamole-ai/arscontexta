@@ -336,9 +336,9 @@ You are executing one step of a multi-step generation pipeline.
 - Archive folder: {domain:archive}
 - Note type: {domain:note}
 - Topic map: {domain:topic_map}
-- Process verbs: {domain:reflect}, {domain:verify}
+- Process verbs: {domain:verify}
 - Pipeline skills: /structure, /capture (universal — not domain-renamed)
-- Skill names: {DOMAIN:reflect}, {DOMAIN:verify}
+- Skill names: {DOMAIN:verify}
 
 ## Instructions
 1. Read ops/derivation.md FIRST — source of truth for all configuration decisions.
@@ -470,7 +470,6 @@ If nothing was deferred, record: "None — every candidate passed its filter."
 | inbox | [domain term] | folder |
 | archive | [domain term] | folder |
 | note (type) | [domain term] | note type |
-| reflect | [domain term] | process phase |
 | verify | [domain term] | process phase |
 | MOC | [domain term] | navigation |
 | description | [domain term] | schema field |
@@ -767,12 +766,10 @@ vocabulary:
   topic_map: "[domain term]"    # e.g., "topic map", "theme", "decision register"
   hub: "[domain term]"          # e.g., "hub", "home", "overview"
 
-  # Level 5: Process verbs (pipeline skills /structure, /capture are universal — not mapped here)
-  reflect: "[domain term]"      # e.g., "reflect", "find patterns", "link decisions"
+  # Level 5: Process verbs (pipeline skills /structure, /capture, /connect are universal — not mapped here)
   verify: "[domain term]"       # e.g., "verify", "check resonance", "validate"
 
   # Level 6: Command names (as users invoke them)
-  cmd_reflect: "[/domain-verb]" # e.g., "/reflect", "/find-patterns", "/link-decisions"
   cmd_verify: "[/domain-verb]"  # e.g., "/verify", "/check", "/audit"
 
   # Level 7: Processing categories (domain-specific, from conversation)
@@ -892,18 +889,18 @@ The skills agent uses a specialized prompt (below); its cp + Edit protocol repla
 
 ##### Skill Sources (reference table — used by the main agent to build {TIER_A_TABLE} and {TIER_B_TABLE})
 
-| Source Directory                                     | Source Name   | Tier | Domain-rename? | Notes                                              |
-| ---------------------------------------------------- | ------------- | ---- | -------------- | -------------------------------------------------- |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/reflect/`       | reflect       | A    | yes            | Target name = domain verb for "find connections and reconsider claims"   |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/stats/`         | stats         | A    | no             | Keep `stats` as the target name                    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/seed/`          | seed          | B    | no             | Keep `seed` as the target name                     |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/pipeline/`      | pipeline      | B    | no             | Keep `pipeline` as the target name                 |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/archive-batch/` | archive-batch | B    | no             | Keep `archive-batch` as the target name            |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/verify/`        | verify        | B    | yes            | Target name = domain verb for "verify"             |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/structure/`     | structure     | B    | no (universal) | Universal infra; frontmatter `name:` unchanged     |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/capture/`       | capture       | B    | no (universal) | Universal infra; frontmatter `name:` unchanged     |
+| Source Directory                                     | Source Name   | Tier | Domain-rename? | Has scripts/? | Notes                                              |
+| ---------------------------------------------------- | ------------- | ---- | -------------- | ------------- | -------------------------------------------------- |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/connect/`       | connect       | A    | no (universal) | no            | Universal infra; frontmatter `name:` and `description:` unchanged       |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/stats/`         | stats         | A    | no             | **yes**       | Keep `stats` as the target name                    |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/seed/`          | seed          | B    | no             | **yes**       | Keep `seed` as the target name                     |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/pipeline/`      | pipeline      | B    | no             | no            | Keep `pipeline` as the target name                 |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/archive-batch/` | archive-batch | B    | no             | no            | Keep `archive-batch` as the target name            |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/verify/`        | verify        | B    | yes            | **yes**       | Target name = domain verb for "verify"             |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/structure/`     | structure     | B    | no (universal) | no            | Universal infra; frontmatter `name:` unchanged     |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/capture/`       | capture       | B    | no (universal) | no            | Universal infra; frontmatter `name:` unchanged     |
 
-**Rename rules:** `yes` → directory and frontmatter `name:` both become the domain-native verb from `ops/derivation.md` (e.g. reflect → link). `no` → keep source name. `no (universal)` (`structure`, `capture`) → keep frontmatter `name:` and `description:` unchanged; only body `{DOMAIN:xxx}` substitutes.
+**Rename rules:** `yes` → directory and frontmatter `name:` both become the domain-native verb from `ops/derivation.md` (e.g. verify → audit). `no` → keep source name. `no (universal)` (`structure`, `capture`, `connect`) → keep frontmatter `name:` and `description:` unchanged; only body `{DOMAIN:xxx}` substitutes.
 
 ---
 
@@ -927,6 +924,10 @@ Batch filesystem ops and body substitution across all skills in one Bash call; E
 **Step 1 — Batch scaffold + body substitute (ONE Bash call).** Chain for all {N_SKILLS} skills in a single Bash invocation:
 - `mkdir -p <target-dir>` per skill
 - `cp <source> <target>` per skill
+- For each skill whose source has a `scripts/` subdir, append:
+  - `cp -r <source-skill-dir>/scripts <target-skill-dir>/scripts`
+  - `chmod +x <target-skill-dir>/scripts/*.sh`
+  Skills with `scripts/`: `stats`, `seed`, `verify` (per Skill Sources table). Other skills omit these two commands.
 - `sed -i.bak -e 's|{DOMAIN:xxx}|<value>|g' … <target1> <target2> …` — one sed call covering every target, one `-e` per entry in the DOMAIN Substitution Map. Use `|` as the `s` delimiter so `/` characters in domain values do not clash.
 - `rm -f <target1>.bak <target2>.bak …` — delete the transient backup files sed writes (required for BSD/GNU compatibility; `-i.bak` is the portable in-place form).
 
@@ -936,7 +937,9 @@ Universal skills (`structure`, `capture`) are included in the sed pass — their
 
 Never touch `{vocabulary.xxx}` patterns — they resolve at runtime from `ops/derivation-manifest.md`.
 
-**Step 3 — Verify (ONE Bash call).** Run `rg '\{DOMAIN:' .claude/skills/` — count MUST be 0. If not, extend the DOMAIN Substitution Map and re-run Step 1's Bash call.
+**Step 3 — Verify (ONE Bash call).** Run two checks:
+1. `rg '\{DOMAIN:' .claude/skills/ --include='*.md'` — count MUST be 0. If not, extend the DOMAIN Substitution Map and re-run Step 1's Bash call.
+2. `find .claude/skills -name '*.sh' -not -perm -u=x` — output MUST be empty. If any script lacks the executable bit, re-run `chmod +x` on the offending files.
 
 ## Tier A — frontmatter only, body untouched
 
@@ -955,7 +958,7 @@ Literal string replacements. Preserve exact case and pluralization. If a `{DOMAI
 ## Constraints
 
 - `Write` is FORBIDDEN on SKILL.md files — always `cp` then `Edit`.
-- Allowed Bash: `mkdir`, `cp`, `sed`, `rm`, `rg`. Nothing else.
+- Allowed Bash: `mkdir`, `cp`, `sed`, `rm`, `rg`, `chmod`. Nothing else.
 - Stay inside `.claude/skills/` for writes; reads from `${CLAUDE_PLUGIN_ROOT}/skill-sources/` are expected.
 - Do NOT modify `{vocabulary.xxx}` patterns or improvise content beyond the map.
 
@@ -979,6 +982,7 @@ Issues:
 Verification:
 - All files populated via cp then Edit (no Write): YES/NO
 - {DOMAIN:} patterns remaining in .claude/skills/: <count — must be 0>
+- All script files (.sh) executable: YES/NO (must be YES)
 - {vocabulary.xxx} patterns preserved: YES
 === END HANDOFF ===
 ~~~
@@ -1091,7 +1095,7 @@ Step 5: Coherence verification.
 
 Use these names verbatim in manual/skills.md and any /command references:
 
-- /{DOMAIN:reflect}         — Tier A, domain-renamed (reflect verb)
+- /connect                  — Tier A, universal (not renamed)
 - /stats                    — Tier A, unchanged
 - /seed                     — Tier B, unchanged
 - /pipeline                 — Tier B, unchanged
@@ -1110,7 +1114,7 @@ The main agent resolves each `{DOMAIN:xxx}` to the domain-native verb from `ops/
 
 Generate all 7 manual pages. Manual is self-contained — pages wiki-link to each other but NOT to notes/.
 
-For each page: replace universal terms (notes, inbox, topic map, reflect) with domain-native equivalents from the derivation conversation. Pipeline skills (/structure, /capture) are universal and not renamed. Use concrete domain examples.
+For each page: replace universal terms (notes, inbox, topic map) with domain-native equivalents from the derivation conversation. Pipeline skills (/structure, /capture, /connect) are universal and not renamed. Use concrete domain examples.
 
 **Page 1: manual.md (Hub MOC)**
 
@@ -1166,7 +1170,7 @@ type: manual
 
 The primary workflow. One command for end-to-end source processing.
 
-- /{DOMAIN:pipeline} — end-to-end processing: seed, structure/capture, reflect, verify, archive
+- /{DOMAIN:pipeline} — end-to-end processing: seed, structure/capture, connect, verify, archive
 
 ## Pipeline Sub-Skills
 
@@ -1175,7 +1179,7 @@ Internal machinery the pipeline orchestrates. Prefer /{DOMAIN:pipeline} as the i
 - /{DOMAIN:seed} — create queue entry with duplicate detection
 - /structure — grouped note production (related claims in one {DOMAIN:note})
 - /capture — verbatim capture (no transformation)
-- /{DOMAIN:reflect} — find connections, update {DOMAIN:topic map}s, and reconsider {DOMAIN:note_plural} against current graph state
+- /connect — find connections, update {DOMAIN:topic map}s, and reconsider {DOMAIN:note_plural} against current graph state
 - /{DOMAIN:verify} — description + schema + health check
 - /archive-batch — archive completed batch
 
@@ -1252,7 +1256,7 @@ type: manual
 
 ## What Pipeline Does
 
-One command, full processing: {DOMAIN:seed} -> structure/capture -> {DOMAIN:reflect} -> {DOMAIN:verify} -> archive. Drop a file in {DOMAIN:inbox}/, run /{DOMAIN:pipeline}, get connected knowledge.
+One command, full processing: {DOMAIN:seed} -> structure/capture -> /connect -> {DOMAIN:verify} -> archive. Drop a file in {DOMAIN:inbox}/, run /{DOMAIN:pipeline}, get connected knowledge.
 
 ## Two Granularity Modes
 
@@ -1264,7 +1268,7 @@ Present both as equal choices:
 
 ## Processing Phases
 
-Brief explanation of each phase: seed (duplicate detection, queue entry), processing (granularity-routed), reflect (forward connections, {DOMAIN:topic map} updates, and backward reconsideration of older {DOMAIN:note_plural}), verify (quality gate), archive (cleanup and summary). What each does and why it matters.
+Brief explanation of each phase: seed (duplicate detection, queue entry), processing (granularity-routed), connect (forward connections, {DOMAIN:topic map} updates, and backward reconsideration of older {DOMAIN:note_plural}), verify (quality gate), archive (cleanup and summary). What each does and why it matters.
 
 ## Resumability
 
@@ -1313,9 +1317,9 @@ type: manual
 # Troubleshooting
 
 {Generate content covering:}
-- Orphan {DOMAIN:notes} — {DOMAIN:note_plural} with no incoming links (run /{DOMAIN:reflect})
+- Orphan {DOMAIN:notes} — {DOMAIN:note_plural} with no incoming links (run /connect)
 - Dangling links — wiki links to non-existent {DOMAIN:note_plural} (check after renames)
-- Stale content — {DOMAIN:note_plural} not updated in 30+ days with sparse connections (run /{DOMAIN:reflect})
+- Stale content — {DOMAIN:note_plural} not updated in 30+ days with sparse connections (run /connect)
 - Inbox overflow — too many items accumulating (run /{DOMAIN:pipeline} to process inbox items)
 - Pipeline stalls — tasks stuck in queue (inspect `ops/queue/queue.json` directly, resume with /{DOMAIN:pipeline} --batch {id}). See [[pipeline]] resumability section.
 - Common mistakes table with corrections

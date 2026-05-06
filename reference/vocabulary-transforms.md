@@ -12,7 +12,6 @@ When generating a knowledge system for a specific domain, every universal term i
 |---------------|----------|---------|----------|---------------|----------|-----|-----------|
 | note | claim | reflection | concept note | observation | idea | decision | memory |
 | reduce | reduce | surface | break down | notice | discover | document | remember |
-| connect / reflect | reflect | find patterns | relate concepts | trace connections | combine ideas | link decisions | recall together |
 | verify | verify | check resonance | test understanding | confirm accuracy | evaluate draft | review quality | verify memory |
 | MOC | topic map | theme | study guide | relationship map | project hub | decision register | memory collection |
 | description field | claim context | reflection summary | concept explanation | observation context | idea sketch | decision rationale | memory context |
@@ -56,7 +55,6 @@ When generating a knowledge system for a specific domain, every universal term i
 | Universal Skill | Research | Therapy | Learning | Relationships | Creative | PM | Companion |
 |----------------|----------|---------|----------|---------------|----------|-----|-----------|
 | /reduce | /reduce | /surface | /break-down | /notice | /discover | /document | /capture |
-| /reflect | /reflect | /find-patterns | /relate | /trace | /combine | /link | /recall |
 | /verify | /verify | /check-resonance | /test | /confirm | /evaluate | /review | /verify |
 | /stats | /stats | /stats | /stats | /stats | /stats | /stats | /stats |
 

@@ -101,6 +101,6 @@ When users ask about system structure, schema, methodology, or any meta-question
 3. **Compressed pitfalls.** Use the `one_line_rule:` field from `reference/failure-modes.md`; do not synthesize new prevention guidance at generation time.
 4. **Terse over complete.** Every sentence must carry information that would not be obvious from section headings alone.
 5. **No inlined feature content.** If a concept belongs to a feature (schema, {DOMAIN:topic maps}, pipeline mechanics), it belongs in `ops/features/` and is reached via `/ask`.
-6. **Structural markers are invariant.** Vocabulary transformation never touches YAML field names (`description:`, `topics:`, `type:`, `status:`) or markdown structure.
+6. **Structural markers are invariant.** Vocabulary transformation never touches YAML field names (`content_type:`, `granularity:`, `description:`, `created_at:`, `tags:`) or markdown structure.
 
 The vocabulary test: read the generated CLAUDE.md as the domain user would. If any term feels imported from a different discipline, transform it.

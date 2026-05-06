@@ -51,7 +51,7 @@ Guide the derivation engine in composing search modalities at query time. Semant
 
 **Summary:** After BM25 and vector search produce candidate results, an LLM evaluates each candidate against the original query for genuine conceptual relevance. This is the most expensive step but also the most valuable for connection-finding. Vector similarity can be fooled by topical overlap — two notes about "context windows" might score high even if one is about UI design and the other about LLM architecture. The LLM reranker distinguishes surface overlap from deep connection by reasoning about the semantic relationship.
 
-**Derivation Implication:** LLM reranking is the highest-quality search mode and should be reserved for tasks where connection quality matters most: reflect (finding connections for new notes and reconsidering older ones) and exploratory research. It should NOT be the default for routine lookups.
+**Derivation Implication:** LLM reranking is the highest-quality search mode and should be reserved for tasks where connection quality matters most: connect (finding connections for new notes and reconsidering older ones) and exploratory research. It should NOT be the default for routine lookups.
 
 **Source:** Nogueira & Cho, "Passage Re-ranking with BERT" (2019). Operationally validated in the vault's default `qmd query "…"` mode, which uses LLM reranking as the final stage.
 
@@ -63,7 +63,7 @@ Guide the derivation engine in composing search modalities at query time. Semant
 
 **Summary:** When the agent knows what it is looking for — a specific filename, a known term, a particular YAML field value — keyword search is strictly superior. It is faster (0.2s vs 5-20s), deterministic (same query always returns same results), and more precise (no false positives from embedding noise). Semantic search adds latency and potential noise when the target is lexically identifiable.
 
-**Derivation Implication:** Generated context files should instruct agents to use keyword search (grep/ripgrep) for: checking if a filename exists, querying YAML fields (`rg '^type: tension'`), finding exact phrases, and looking up known note titles. The search modality instruction should be task-specific, not "always use the best search."
+**Derivation Implication:** Generated context files should instruct agents to use keyword search (grep/ripgrep) for: checking if a filename exists, querying YAML fields (`rg '^content_type: tension'`), finding exact phrases, and looking up known note titles. The search modality instruction should be task-specific, not "always use the best search."
 
 **Source:** Operational pattern in the vault: `/seed` uses keyword search to check if a source was already processed. No semantic search needed — filenames are exact-match targets.
 
@@ -73,7 +73,7 @@ Guide the derivation engine in composing search modalities at query time. Semant
 
 **Summary:** When the agent is exploring a concept without knowing which notes are relevant, semantic search finds candidates that keyword search misses. Searching for "how agents maintain identity across sessions" might surface notes titled "session handoff creates continuity without persistent memory" and "closure rituals create clean breaks" — neither of which contains the words "identity" or "maintain" but both are deeply relevant. This is the canonical use case for embedding-based retrieval.
 
-**Derivation Implication:** Generated systems should route conceptual exploration to semantic search (`qmd query $'vec: …'`, or the default `qmd query "…"` when reranking helps). This applies to: the reflect phase (finding connections for a new note), pre-creation duplicate detection (does this claim already exist under different words?), and ad-hoc research queries. The context file should teach the agent when to switch from keyword to semantic.
+**Derivation Implication:** Generated systems should route conceptual exploration to semantic search (`qmd query $'vec: …'`, or the default `qmd query "…"` when reranking helps). This applies to: the connect phase (finding connections for a new note), pre-creation duplicate detection (does this claim already exist under different words?), and ad-hoc research queries. The context file should teach the agent when to switch from keyword to semantic.
 
 **Source:** Vault operational experience. The claim "vector proximity measures surface overlap not deep connection" documents both the value and limitations of this modality.
 
@@ -83,9 +83,9 @@ Guide the derivation engine in composing search modalities at query time. Semant
 
 **Summary:** Finding genuine connections between notes is the highest-value search task in a knowledge system. It requires the full pipeline: BM25 for exact-term matches, vector search for vocabulary-divergent matches, query expansion for coverage, and LLM reranking to evaluate which candidates represent genuine conceptual connections rather than surface similarity. Each layer catches what the previous one misses. Skipping the reranking step produces connection suggestions that are topically related but not genuinely connected — the difference between "both mention context windows" and "this note's argument depends on that note's claim."
 
-**Derivation Implication:** Every generated system runs hybrid retrieval (BM25 + vector) for connection-finding work in the reflect phase. LLM reranking is added on top of the always-on hybrid pipeline when connection quality justifies the latency; it is a scoring refinement, not an enablement decision.
+**Derivation Implication:** Every generated system runs hybrid retrieval (BM25 + vector) for connection-finding work in the connect phase. LLM reranking is added on top of the always-on hybrid pipeline when connection quality justifies the latency; it is a scoring refinement, not an enablement decision.
 
-**Source:** Vault operational experience. The reflect skill calls `qmd query` (bare form — full hybrid with expansion and reranking) because connection quality justifies the ~20s latency.
+**Source:** Vault operational experience. The connect skill calls `qmd query` (bare form — full hybrid with expansion and reranking) because connection quality justifies the ~20s latency.
 
 ---
 
@@ -117,7 +117,7 @@ Guide the derivation engine in composing search modalities at query time. Semant
 
 **Derivation Implication:** When generating semantic search configuration, always include: (1) the embedding tool or service, (2) index update commands, (3) a freshness check protocol (compare indexed document count against actual file count), and (4) instructions for what to do when the index is stale. The vault's Phase 0 freshness check pattern should be adapted for the generated system.
 
-**Source:** Vault operational experience. The Phase 0 freshness check was added after search results missed recently created notes, causing reflect to miss connections.
+**Source:** Vault operational experience. The Phase 0 freshness check was added after search results missed recently created notes, causing connect to miss connections.
 
 ---
 
@@ -149,9 +149,9 @@ Guide the derivation engine in composing search modalities at query time. Semant
 
 **Summary:** Embedding similarity has a fundamental limitation: it measures vocabulary and topic similarity, not genuine conceptual connection. Two notes about "context windows" — one about LLM architecture, one about UI design — may score high vector similarity because they share vocabulary, but they are not meaningfully connected. Conversely, a note about "friction in learning" and a note about "errors as pedagogical feedback" are deeply connected but may score low because they share few terms. This is why LLM reranking exists: to evaluate what vector similarity cannot — whether the conceptual relationship is genuine.
 
-**Derivation Implication:** Generated context files should include a search quality warning: "High similarity scores do not guarantee genuine connections. When using semantic search results, evaluate each candidate: does this note's argument actually relate to what you are searching for, or does it just use similar vocabulary?" This is especially important for the reflect phase where false connections degrade graph quality.
+**Derivation Implication:** Generated context files should include a search quality warning: "High similarity scores do not guarantee genuine connections. When using semantic search results, evaluate each candidate: does this note's argument actually relate to what you are searching for, or does it just use similar vocabulary?" This is especially important for the connect phase where false connections degrade graph quality.
 
-**Source:** Research claim: "vector proximity measures surface overlap not deep connection." Vault operational experience: reflect phases using `qmd query $'vec: …'` without reranking occasionally propose surface-similar but conceptually unrelated connections.
+**Source:** Research claim: "vector proximity measures surface overlap not deep connection." Vault operational experience: connect phases using `qmd query $'vec: …'` without reranking occasionally propose surface-similar but conceptually unrelated connections.
 
 ---
 
@@ -161,7 +161,7 @@ Guide the derivation engine in composing search modalities at query time. Semant
 
 **Derivation Implication:** Every generated system with semantic search must include an index staleness detection mechanism. The minimum viable implementation: compare the count of indexed documents against the count of actual files. If they differ, run index update before trusting search results. The context file should frame this as a mandatory pre-search step, not an optional maintenance task. The vault's Phase 0 freshness check is the reference pattern.
 
-**Source:** Vault operational failure. Notes created during a processing batch were invisible to reflect phases that ran before index sync, producing duplicate notes and missing connections.
+**Source:** Vault operational failure. Notes created during a processing batch were invisible to connect phases that ran before index sync, producing duplicate notes and missing connections.
 
 ---
 
@@ -197,7 +197,7 @@ Both modalities always run. Disagreement between them is a signal, not a problem
 
 #### Processing intensity amplifies vocabulary divergence
 
-**Summary:** Heavy processing (extraction, reformulation, synthesis) generates more varied phrasings of the same concepts than light processing. Each reduce pass produces notes that reformulate source material in the agent's own words. Each reflect pass's backward sub-phase may further rephrase claims as understanding deepens. This compounding reformulation means heavy-processing systems accumulate vocabulary divergence faster than light-processing systems, increasing the weight the hybrid scorer should place on the vector component.
+**Summary:** Heavy processing (extraction, reformulation, synthesis) generates more varied phrasings of the same concepts than light processing. Each reduce pass produces notes that reformulate source material in the agent's own words. Each connect pass's backward sub-phase may further rephrase claims as understanding deepens. This compounding reformulation means heavy-processing systems accumulate vocabulary divergence faster than light-processing systems, increasing the weight the hybrid scorer should place on the vector component.
 
 **Derivation Implication:** Processing intensity shifts where semantic search contributes most within the always-on hybrid pipeline. Heavy processing produces more reformulations, so the vector component carries more signal relative to BM25; light processing keeps vocabulary closer to source material, so BM25 hits more often dominate. Both modalities still run; the hybrid scorer's weighting reflects this shift.
 
@@ -211,7 +211,7 @@ Both modalities always run. Disagreement between them is a signal, not a problem
 
 **Summary:** Keyword search costs O(n) where n is corpus size — essentially free on modern hardware. Semantic search (vector similarity) costs O(1) per query against a pre-built index, but building and maintaining the index costs O(n) per update and requires ~2GB of model memory. Hybrid search with LLM reranking adds O(k) where k is the number of candidates reranked — each candidate requires an LLM inference pass. The practical costs: keyword ~0.2s, semantic ~5s, hybrid ~20s. The quality improvement at each step is diminishing: keyword to semantic is a large jump, semantic to hybrid is a smaller jump, but hybrid catches connections that semantic alone misses in ~15% of cases.
 
-**Derivation Implication:** The cost-quality tradeoff informs which search mode to default to. For routine operations (file lookup, YAML queries), keyword is the only rational choice. For standard discovery (exploring related notes), semantic provides the best cost-quality ratio. For high-stakes connection finding (reflect — both forward and backward sub-phases), hybrid is justified by the quality premium. Generated context files should encode this cost awareness so agents do not default to the most expensive mode for routine tasks.
+**Derivation Implication:** The cost-quality tradeoff informs which search mode to default to. For routine operations (file lookup, YAML queries), keyword is the only rational choice. For standard discovery (exploring related notes), semantic provides the best cost-quality ratio. For high-stakes connection finding (connect — both forward and backward sub-phases), hybrid is justified by the quality premium. Generated context files should encode this cost awareness so agents do not default to the most expensive mode for routine tasks.
 
 **Source:** Vault operational measurements. The 0.2s / 5s / 20s benchmarks are from qmd running on Apple Silicon with models kept warm.
 

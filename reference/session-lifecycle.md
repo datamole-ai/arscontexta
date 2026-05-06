@@ -59,7 +59,7 @@ Questions the engine must answer when generating session configuration:
 
 #### Processing sessions orient from queue state and persist phase completion
 
-**Summary:** Processing sessions follow the pipeline: read queue.json to find the next unblocked task, execute one or more phases (reduce, reflect, verify), and update queue state with completion. Orientation is minimal and targeted — the agent needs queue state, the specific task file, and the relevant skill instructions. It does NOT need full self/ orientation because processing is methodological, not identity-dependent. The persist phase must advance the queue entry (mark phases complete, update status) — without this, the pipeline stalls.
+**Summary:** Processing sessions follow the pipeline: read queue.json to find the next unblocked task, execute one or more phases (reduce, connect, verify), and update queue state with completion. Orientation is minimal and targeted — the agent needs queue state, the specific task file, and the relevant skill instructions. It does NOT need full self/ orientation because processing is methodological, not identity-dependent. The persist phase must advance the queue entry (mark phases complete, update status) — without this, the pipeline stalls.
 
 **Derivation Implication:** Generated systems with processing pipelines should include a processing session template in the context file. This template specifies: (1) read queue state, (2) identify next task, (3) load task-specific context, (4) execute phase, (5) update task file, (6) advance queue. Skip heavy orientation — processing sessions are mechanical, not exploratory.
 
@@ -217,7 +217,7 @@ Hooks automate session rhythm. A SessionStart hook injects the file tree and loa
 
 #### The morning briefing pattern gives each session a purpose statement
 
-**Summary:** Systems with processing pipelines or maintenance schedules benefit from a "morning briefing" at session start: a summary of what happened since the last session, what conditions have fired, and what the system's health looks like. This is richer than just reading goals.md — it synthesizes queue state, fired conditions, health metrics, and recent observations into a single orientation snapshot. The briefing gives the session a purpose statement: "Today: 3 queue items ready for reflect, 2 conditions fired (orphan notes detected, pending observations threshold exceeded), inbox has 5 new items."
+**Summary:** Systems with processing pipelines or maintenance schedules benefit from a "morning briefing" at session start: a summary of what happened since the last session, what conditions have fired, and what the system's health looks like. This is richer than just reading goals.md — it synthesizes queue state, fired conditions, health metrics, and recent observations into a single orientation snapshot. The briefing gives the session a purpose statement: "Today: 3 queue items ready for connect, 2 conditions fired (orphan notes detected, pending observations threshold exceeded), inbox has 5 new items."
 
 **Derivation Implication:** Generated systems with processing = moderate or heavy should include a morning briefing mechanism. The session-start hook aggregates condition evaluation results with queue status and inbox count. The briefing pattern transforms "what should I do?" into "here is what needs doing" — reducing the orientation cost.
 

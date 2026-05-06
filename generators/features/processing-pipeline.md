@@ -155,7 +155,7 @@ Each phase skill reads its entry from `ops/queue/queue.json` by id, executes the
 
 #### Maintenance via /health (Diagnostic, On-Demand)
 
-Maintenance is diagnostic, not queued. The pipeline queue holds pipeline tasks only (process, reflect, verify). Vault health is evaluated on demand by /health, which reports fired conditions with specific files and ranked actions.
+Maintenance is diagnostic, not queued. The pipeline queue holds pipeline tasks only (process, connect, verify). Vault health is evaluated on demand by /health, which reports fired conditions with specific files and ranked actions.
 
 **Maintenance conditions (evaluated by /health):**
 
@@ -188,14 +188,16 @@ The pipeline's quality depends on each phase getting your best attention. Your c
 
 ~~~
 Orchestrator reads queue -> picks next task -> invokes phase skill for one phase
-  Phase skill (forked context): reads its queue entry by id, executes phase, updates queue.json, emits canonical Output Block as final chat message
+  Phase skill (forked context): reads all queue entries for the current batch, executes the phase across the batch, updates queue.json atomically, emits canonical Output Block as final chat message
   Phase skill returns -> Orchestrator parses chat Output Block -> invokes next phase skill
 ~~~
 
 **Why fresh context matters:**
 - {DOMAIN:Process} needs full attention on the source material
-- {DOMAIN:Connect} needs full attention on the knowledge graph (both forward connections and backward reconsideration of the target {DOMAIN:note})
+- {DOMAIN:Connect} needs full attention on the knowledge graph (both forward connections and backward reconsideration of the target {DOMAIN:notes})
 - {DOMAIN:Verify} needs neutral perspective, unbiased by creation
+
+Within a phase, the fork sees the full batch — sibling cross-linking and shared graph discovery happen in one pass.
 
 If all phases run in one session, the verify phase runs on degraded attention — you have already decided this {DOMAIN:note} is good during materialization, and confirmation bias sets in. Fresh context prevents this.
 
@@ -206,7 +208,7 @@ If all phases run in one session, the verify phase runs on degraded attention �
 
 **Processing is orchestrated by default.** /pipeline orchestrates the full sequence. The queue drives what happens next.
 
-**Orchestration uses the Skill tool** with `context: fork` on each invoked skill, giving each phase a fresh forked context window and true context isolation. The task queue IS the orchestration — {DOMAIN:skills} read from it, write to it, and the queue state drives what happens next. When you say "process this source through the full pipeline," follow the pattern: read queue, pick task, execute phase, advance queue, repeat.
+**Orchestration uses the Skill tool** with `context: fork` on each invoked skill, giving each phase a fresh forked context window and true context isolation. The task queue IS the orchestration — {DOMAIN:skills} read from it, write to it, and the queue state drives what happens next. When you say "process this source through the full pipeline," follow the pattern: invoke each phase skill once with the batch id; the phase skill reads the queue, executes across the batch, advances the queue atomically, and returns.
 
 ### Full Automation From Day One
 
@@ -256,13 +258,13 @@ If a {DOMAIN:skill} exists for a task, use the {DOMAIN:skill}. Do not manually r
 
 Each session focuses on ONE task. Discoveries become future tasks, not immediate tangents.
 
-Your attention degrades as context fills. The first ~40% of context is the "smart zone" — sharp, capable, good decisions. Beyond that, context rot sets in. Structure each task so critical information lands early. When processing multiple {DOMAIN:notes}, use fresh context per {DOMAIN:note} — never chain phases in one session.
+Your attention degrades as context fills. The first ~40% of context is the "smart zone" — sharp, capable, good decisions. Beyond that, context rot sets in. Structure each task so critical information lands early. When processing multiple {DOMAIN:notes}, use fresh context per phase — never chain phases in one session. Each phase fork covers the full batch.
 
-**The handoff protocol:** Every phase updates its queue entry and emits a canonical Output Block as its final chat message. The orchestrator parses that block to drive the next phase. State transfers through the queue (durable) and chat Output Blocks (within a pipeline run), not through accumulated conversation across phases. This ensures:
+**The handoff protocol:** Every phase updates its queue entries (atomically, across the whole batch) and emits a canonical Output Block as its final chat message. The orchestrator parses that block to drive the next phase. State transfers through the queue (durable) and chat Output Blocks (within a pipeline run), not through accumulated conversation across phases. This ensures:
 - No context contamination between phases
 - Each phase gets your best attention
-- Crashes are recoverable (`queue.json` shows `current_phase` where processing stopped)
-- Multiple {DOMAIN:notes} can be processed without degradation
+- Crashes are recoverable (`queue.json` shows `current_phase` for any entries the phase did not advance)
+- Multiple {DOMAIN:notes} are processed in one fork per phase, without per-note context resets and without per-phase narration accumulating across notes
 
 ## Dependencies
 Requires: yaml-schema, wiki-links, atomic-notes, mocs

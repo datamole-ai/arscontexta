@@ -52,6 +52,8 @@ jq --arg batch "<batch-id>" \
    && mv ops/queue/queue.json.tmp ops/queue/queue.json
 ```
 
+**Do not re-read after update.** A zero-exit on the `jq | mv` chain means the file was rewritten. Do NOT follow up with `jq` reads to "inspect" what was removed — it adds tokens but provides nothing the skill consumes before emitting the report.
+
 ## Step 4: Report
 
 ```

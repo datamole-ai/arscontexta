@@ -46,7 +46,6 @@ Named points in the configuration space derived from methodology traditions and 
 |-------|-----------|----------|
 | Note type | note | claim |
 | Processing verb | reduce | reduce |
-| Connection verb | reflect/connect | reflect |
 | Navigation unit | MOC | topic map |
 | Note collection | note_collection/ | notes/ |
 | Capture zone | inbox/ | inbox/ |
@@ -108,7 +107,6 @@ Named points in the configuration space derived from methodology traditions and 
 |-------|-----------|-------------------|
 | Note type | note | reflection |
 | Processing verb | reduce | surface |
-| Connection verb | reflect/connect | find patterns |
 | Navigation unit | MOC | life area |
 | Note collection | note_collection/ | reflections/ |
 | Capture zone | inbox/ | journal/ |

@@ -22,9 +22,9 @@
 ```
 .claude-plugin/   plugin.json, marketplace.json      plugin registration
 skills/           setup/, health/                    plugin-level commands (user-invoked)
-skill-sources/    10 command templates               copied into generated vaults
-generators/       claude-md.md + features/ (13)      composed into generated CLAUDE.md
-hooks/            hooks.json, scripts/*.sh           SessionStart + PostToolUse(Write)
+skill-sources/    8 command templates                copied into generated vaults
+generators/       claude-md.md + features/ (12)      composed into generated CLAUDE.md
+hooks/            hooks.json, scripts/*.sh           SessionStart
 reference/        canonical design docs              see index below
 docs/             superpowers/{plans,specs}          design specs
 ```
@@ -34,7 +34,7 @@ docs/             superpowers/{plans,specs}          design specs
 1. **Kernel** — 14 invariant primitives every generated vault must satisfy. `reference/kernel.yaml`.
 2. **Three-space architecture** — `self/` (agent mind) · `notes/` (knowledge graph) · `ops/` (coordination). Names adapt per domain; separation is invariant. `reference/three-spaces.md`.
 3. **Derivation, not templating** — engine reasons from claims to architecture. Every dimension choice traces to research.
-4. **4 Rs pipeline** — Record, Reduce, Reflect, Verify. One skill per R.
+4. **4-phase pipeline** — Record, Reduce, Connect, Verify.
 5. **Vocabulary transforms** — universal terms → domain-native. `reference/vocabulary-transforms.md`.
 
 ## skill-sources/ by Pipeline Phase
@@ -43,7 +43,7 @@ docs/             superpowers/{plans,specs}          design specs
 |---|---|
 | Reduce | `structure/`, `capture/` |
 | Mutate | `seed/` |
-| Reflect | `reflect/` |
+| Connect | `connect/` |
 | Verify | `verify/` |
 | Orchestration | `pipeline/` |
 | Reporting | `stats/`, `archive-batch/` |

@@ -163,12 +163,14 @@ Create one queue entry:
   "target_path": "{vocabulary.note_collection}/{note title}.md",
   "batch": "{batch}",
   "created": "[UTC timestamp]",
-  "current_phase": "reflect",
+  "current_phase": "connect",
   "completed_phases": ["capture"]
 }
 ```
 
 Additionally: set the process task entry's status to "done" and add a "completed" timestamp before writing the file.
+
+**Do not re-read after update.** A successful write means the new state is on disk. Do NOT follow up with `jq` reads to "inspect" what you just wrote — it adds tokens but provides nothing the skill consumes before emitting the Output Block.
 
 No enrichment tasks — capture does not analyze content deeply enough to spot enrichment opportunities.
 
@@ -183,7 +185,7 @@ After materializing the note and updating `ops/queue/queue.json` (mark process t
 
 **Target:** {batch-id}
 **Status:** ok | error: {short message}
-**Queue:** marked {batch-id}: process -> done; created 1 note entry (current_phase: reflect)
+**Queue:** marked {batch-id}: process -> done; created 1 note entry (current_phase: connect)
 
 ### Work
 - Captured {source} verbatim as [[{note title}]]

@@ -89,7 +89,7 @@ domain needs and why.
 | **Derivation** | Maps signals to eight configuration dimensions with confidence scoring |
 | **Proposal** | Shows what will be generated and why, in your vocabulary |
 | **Generation** | Produces all files: context file, folders, templates, skills, hooks, manual |
-| **Validation** | Checks all 13 kernel primitives, runs pipeline smoke test |
+| **Validation** | Checks all 14 kernel primitives, runs pipeline smoke test |
 
 The whole process takes about 20 minutes. It's token-intensive because the engine
 reads research claims, reasons about your domain, and generates substantial output.
@@ -138,7 +138,7 @@ or `decisions/`), but the separation is invariant.
 | `/seed` | Create processing task with duplicate detection |
 | `/structure` | Group claims into finished notes and apply enrichments to existing notes |
 | `/capture` | Verbatim capture — preserves source without transformation |
-| `/reflect` | Find connections, update MOCs, reconsider older notes |
+| `/connect` | Find connections, update MOCs, reconsider older notes |
 | `/verify` | Combined quality check: description + schema + health |
 | `/archive-batch` | Archive batch of notes |
 
@@ -157,7 +157,7 @@ or `decisions/`), but the separation is invariant.
 |-------|-------------|---------|
 | **Record** | Zero-friction capture into inbox/ | Manual |
 | **Reduce** | Extract insights with domain-native categories | `/structure`, `/capture` |
-| **Reflect** | Find connections, update MOCs, reconsider older notes | `/reflect` |
+| **Connect** | Find connections, update MOCs, reconsider older notes | `/connect` |
 | **Verify** | Description + schema + health checks | `/verify` |
 
 ---
@@ -180,19 +180,19 @@ arscontexta/
 |-- skills/                      # Plugin-level commands
 |   |-- setup/                   # Conversational onboarding
 |   +-- health/                  # Diagnostic checks
-|-- skill-sources/               # 10 generated command templates
+|-- skill-sources/               # 8 generated command templates
 |   |-- structure/               # Extract insights
-|   |-- reflect/                 # Find connections, update MOCs, reconsider older notes
+|   |-- connect/                 # Find connections, update MOCs, reconsider older notes
 |   |-- verify/                  # Combined quality check
-|   +-- ...                      # 6 more processing commands
+|   +-- ...                      # 5 more processing commands
 |-- hooks/
 |   |-- hooks.json               # Hook configuration
 |   +-- scripts/                 # Hook implementations
 |-- generators/
 |   |-- claude-md.md             # CLAUDE.md template
-|   +-- features/                # 14 composable feature blocks
+|   +-- features/                # 12 composable feature blocks
 |-- reference/                   # Core reference documents
-|   |-- kernel.yaml              # 13 kernel primitives
+|   |-- kernel.yaml              # 14 kernel primitives
 |   |-- three-spaces.md          # Architecture spec
 |   +-- use-case-presets.md      # Pre-validated configs
 +-- README.md

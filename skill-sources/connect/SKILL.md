@@ -1,6 +1,6 @@
 ---
-name: reflect
-description: Internal pipeline skill — finds connections for a newly created note, updates topic maps, and reconsiders the note's claim against current graph state. Invoked by /pipeline as a subagent; do not invoke directly.
+name: connect
+description: Internal pipeline skill — runs forward connection-finding, topic-map updates, sibling cross-linking, and per-note reconsideration across all notes in a batch in one pass. Invoked by /pipeline as a subagent; do not invoke directly.
 context: fork
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 ---
@@ -29,27 +29,34 @@ After reading the target {vocabulary.note}, check its `granularity` frontmatter 
 
 **Target: $ARGUMENTS**
 
-Parse the queue id from arguments (e.g. `note-010`, `enrich-002`). If no argument is provided, end immediately with: report `ERROR: reflect requires queue id`.
+Parse the batch id from arguments (e.g. `my-source`). If no argument is provided, end immediately with: report `ERROR: connect requires batch id`.
 
-Look up the entry in `ops/queue/queue.json`:
+### Work-list discovery
+
+Read the queue and find every pending entry for this batch awaiting connect:
 
 ```bash
-jq --arg id "$QUEUE_ID" '.tasks[] | select(.id == $id)' ops/queue/queue.json
+BATCH_ID="$ARGUMENTS"
+jq --arg batch "$BATCH_ID" \
+   '[.tasks[] | select(.batch == $batch and .status == "pending" and .current_phase == "connect")]' \
+   ops/queue/queue.json
 ```
 
-From that entry, obtain:
-- `id` — this entry's queue id
-- `target_path` — the path to the {vocabulary.note} being connected
-- `batch` — the batch id this note belongs to
-- `granularity` — routes connection-finding depth
+If the work list is empty, end immediately with `Status: ok`, `Queue: no entries to advance`, and an empty per-note results section.
 
-All subsequent references to "the {vocabulary.note}" use the `target_path` value from the queue entry.
+For each work-list entry, the relevant fields are:
+- `id` — queue id (e.g. `note-007`, `enrich-002`)
+- `target_path` — path to the {vocabulary.note}
+- `granularity` — routes connection-finding depth (`structure` | `capture`)
+- `type` — `note` or `enrichment`
+
+All subsequent references to "the {vocabulary.note}" inside per-note steps use the entry's `target_path`. Where this skill says "for each note" it means iterating the work list in queue id order.
 
 **START NOW.** Reference below explains methodology — use to guide, not as output.
 
 ---
 
-# Reflect
+# Connect
 
 Find connections, weave the knowledge graph, update {vocabulary.topic_map_plural}. This is the forward-connection phase of the processing pipeline.
 
@@ -78,7 +85,11 @@ When tempted to explain, either link a neighbor that already explains, or flag t
 
 ## Workflow
 
-### Phase 1: Understand What You Are Connecting
+Cross-cutting pass. Order is fixed: shared discovery first, then per-note evaluation and linking, then per-note reconsideration. Mutations only happen in Steps 6-9. Steps 1-5 read and plan.
+
+### Step 1: Understand each note (per-note)
+
+For each entry in the work list, do the following on the entry's `target_path`:
 
 Before searching for connections, deeply understand the source material.
 
@@ -95,38 +106,52 @@ For each {vocabulary.note} you are connecting:
 - The scope (when does this apply? When not?)
 - The tensions (what might contradict this?)
 
-Read the {vocabulary.note}'s body and footer for context. The producer phase has already placed Topics-footer links and (for structure) section headings stating sub-claims; treat these as priors for what this {vocabulary.note} relates to.
+Read the {vocabulary.note}'s body and footer for context. **Two sources are authoritative priors — not hints to verify, but starting points to extend:**
 
-### Phase 2: Discovery (Find Candidates)
+1. The note's `Topics:` footer — every {vocabulary.topic_map} listed there was chosen by the producer phase; those topic maps and their members are in scope by default.
+2. The queue entry's `semantic_neighbors` field (when present) — qmd results structure already gathered while routing this cluster. Treat each entry as a candidate connection that has already passed semantic-similarity threshold.
 
-Use dual discovery: {vocabulary.topic_map} exploration AND semantic search in parallel. These are complementary, not sequential.
+Connect's job is to **extend** these priors — find what structure could not have seen (sibling notes created in this batch, neighbors with shared mechanism but unshared vocabulary, recently-added notes outside structure's view) — not to re-derive them.
+
+### Step 2: Aggregate discovery candidates (shared)
+
+Build the candidate set in this order:
+
+1. **Seed from priors (no search needed).** For each note in the work list, add its Topics-footer entries and its queue entry's `semantic_neighbors` directly to the candidate set. These are already validated — they enter Step 4 as candidates without re-derivation.
+2. **Extract gap-fill targets.** For each note, identify concepts mentioned in the body but not represented in the priors. These become the qmd/grep query set in Step 3.
+3. **Deduplicate semantically across notes.** If two notes pointed at the same gap concept, that's one query, not two.
+
+The output of this step is the input to Step 3: priors that flow straight through (no search), plus a smaller set of gap-fill queries to issue.
+
+### Step 3: Fill gaps via dual discovery (shared)
+
+Step 2's priors are already in the candidate set. Step 3 runs ONE consolidated pass to fill the gaps Step 2 identified. Use dual discovery: {vocabulary.topic_map} exploration AND semantic search in parallel. These are complementary, not sequential. **qmd and grep are gap-filling — not primary discovery — when priors have already supplied candidates.**
 
 **Primary discovery (run in parallel):**
 
 **Path 1: {vocabulary.topic_map} Exploration** — curated navigation
 
-If you know the topic (check the {vocabulary.note}'s Topics footer), start with the {vocabulary.topic_map}:
+Read every {vocabulary.topic_map} listed in any work-list note's Topics footer (these are mandatory; the producer phase already chose them):
 
-- Read the relevant {vocabulary.topic_map}(s)
 - Follow curated links in Core Ideas — these are human/agent-curated connections
 - Note what is already connected to similar concepts
 - Check Tensions and Gaps for context
 
 {vocabulary.topic_map_plural} tell you what thinking exists and how it is organized. Someone already decided what matters for this topic.
 
-**Path 2: Semantic Search** — find what {vocabulary.topic_map_plural} might miss
+**Path 2: Semantic Search** — find what priors and {vocabulary.topic_map_plural} miss
 
-Use `qmd query` via Bash (hybrid search with auto-expansion + reranking):
+Use `qmd query` via Bash (hybrid search with auto-expansion + reranking) for the gap-fill query set from Step 2. Skip queries that would re-derive what `semantic_neighbors` or Topics-footer entries already cover — issue one query per unique gap concept, not one query per note:
 
 ```bash
-qmd query "[{vocabulary.note}'s core concepts and mechanisms]" --collection {vocabulary.qmd_collection} -n 15
+qmd query "[aggregated core concept or mechanism]" --collection {vocabulary.qmd_collection} -n 15
 ```
 
 Evaluate results by relevance — read any result where title or snippet suggests genuine connection. Semantic search finds {vocabulary.note_plural} that share MEANING even when vocabulary differs. A {vocabulary.note} about "iteration cycles" might connect to "learning from friction" despite sharing no words.
 
 **Secondary discovery (after primary):**
 
-**Step 3: Keyword Search**
+**Keyword Search**
 
 For specific terms and exact matches:
 ```bash
@@ -139,7 +164,7 @@ Use grep when:
 - Finding all uses of a named concept
 - The vocabulary is stable and predictable
 
-**Step 4: Description Scan**
+**Description Scan**
 
 Use ripgrep to scan {vocabulary.note} frontmatter descriptions for edge cases:
 - Does this extend the source {vocabulary.note}?
@@ -148,18 +173,22 @@ Use ripgrep to scan {vocabulary.note} frontmatter descriptions for edge cases:
 
 Flag candidates with a reason (not just "related").
 
-**Step 5: Link Following**
+**Link Following**
 
 From promising candidates, follow their existing links:
 - What do THEY connect to?
 - Are there clusters of related {vocabulary.note_plural}?
-- Do chains emerge that your source {vocabulary.note} should join?
+- Do chains emerge that any source {vocabulary.note} should join?
 
-This is graph traversal. You are exploring the neighborhood.
+This is graph traversal. You are exploring the neighborhood once for the whole batch.
 
-### Phase 3: Evaluate Connections
+### Step 4: Build the candidate-connection map (shared)
 
-For each candidate connection, apply the articulation test.
+For each note in the work list, filter Step 3's results down to the candidates relevant to that note's claim. The output is a map `{note-id → [candidate connection, ...]}` with each candidate tagged by source (which discovery path surfaced it) and any preliminary relationship hint. Step 4 produces structure, not text — no files mutate yet.
+
+### Step 5: Evaluate connections per note (per-note)
+
+For each note, evaluate its candidate-connection map from Step 4. Apply the articulation test to each candidate.
 
 **The Articulation Test:**
 
@@ -199,9 +228,85 @@ Ask: **"If an agent follows this link, what do they gain?"**
 
 The vault is built for agent traversal. Every connection should help an agent DECIDE or UNDERSTAND something. Connections that exist only because they feel "interesting" without operational value are noise.
 
-### Phase 4: Add Inline Connections
+### Step 6: Topic-map management (shared)
 
-Connections live in the prose, not just footers.
+Identify every {vocabulary.topic_map} the batch's notes belong to. For new MOCs, create them once. For existing MOCs, apply all batch additions in one pass. {vocabulary.topic_map_plural} are synthesis hubs, not just indexes.
+
+**When to update a {vocabulary.topic_map}:**
+
+- New {vocabulary.note} belongs in Core Ideas
+- New tension discovered
+- Gap has been filled
+- Synthesis insight emerged
+- Navigation path worth documenting
+
+**{vocabulary.topic_map} Size Check:**
+
+After updating Core Ideas, count the links:
+
+```bash
+find {vocabulary.note_collection}/ -name "[moc-name].md" -type f -exec grep -c '^\- \[\[' {} +
+```
+
+If approaching the split threshold (configurable, default ~40): note in output "{vocabulary.topic_map} approaching split threshold (N links)"
+If exceeding: warn "{vocabulary.topic_map} exceeds recommended size — consider splitting"
+
+Splitting is a human decision (architectural judgment required), but /connect should surface the signal.
+
+**{vocabulary.topic_map} Structure:**
+
+```markdown
+# [Topic Name]
+
+[Brief orientation: what this topic covers, what questions it addresses, where to start reading. Keep to a paragraph or two. Do NOT write free-form synthesis here — {vocabulary.topic_map_plural} are navigation surfaces with cited observations, not places to assert model-derived insights]
+
+## Core Ideas
+
+- [[claim note]] — what it contributes to understanding
+- [[another claim]] — how it fits or challenges existing ideas
+
+## Tensions
+
+- [[claim A]] and [[claim B]] conflict because... [genuine unresolved tension]
+
+## Gaps
+
+- nothing about X aspect yet
+- need concrete examples of Y
+- missing: comparison with Z approach
+```
+
+**Updating Core Ideas:**
+
+Add new {vocabulary.note_plural} with context phrase explaining contribution:
+```markdown
+- [[new note]] — extends the quality argument by showing how friction teaches you what to check
+```
+
+Order matters. Place {vocabulary.note_plural} where they fit the logical flow, not alphabetically.
+
+**Updating Tensions:**
+
+If the new {vocabulary.note} creates or resolves tension:
+```markdown
+## Tensions
+
+- [[composability]] demands small notes, but [[context limits]] means traversal has overhead. [[new note]] suggests the tradeoff depends on expected traversal depth.
+```
+
+Document genuine conflicts. Tensions are valuable, not bugs.
+
+**Updating Gaps:**
+
+Remove gaps that are now filled. Add new gaps discovered during this step.
+
+### Step 7: Sibling cross-linking (cross-cutting)
+
+For any pair of notes (A, B) in the batch where A's evaluated connections include B (or vice versa), apply the Bidirectional Consideration rule (see Step 8 reference material) and add the link(s) inline and in the Relevant Notes footer. Sibling-ness alone does not force a bidirectional link — relationship type controls direction. This step replaces the work the deleted pipeline Phase 2.4 (cross-connect) used to do; there is no separate cross-connect phase.
+
+### Step 8: Apply inline connections + Relevant Notes footer (per-note)
+
+For each note, apply its evaluated connections from Step 5. Sibling links from Step 7 are already in place; do not duplicate. Connections live in the prose, not just footers.
 
 **Inline Links as Prose:**
 
@@ -266,79 +371,9 @@ Not always. Relationships are not always symmetric:
 
 Add the reverse link only if following that path would be useful for agent traversal.
 
-### Phase 5: Update {vocabulary.topic_map_plural}
+### Step 9: Reconsider each note (per-note)
 
-{vocabulary.topic_map_plural} are synthesis hubs, not just indexes.
-
-**When to update a {vocabulary.topic_map}:**
-
-- New {vocabulary.note} belongs in Core Ideas
-- New tension discovered
-- Gap has been filled
-- Synthesis insight emerged
-- Navigation path worth documenting
-
-**{vocabulary.topic_map} Size Check:**
-
-After updating Core Ideas, count the links:
-
-```bash
-find {vocabulary.note_collection}/ -name "[moc-name].md" -type f -exec grep -c '^\- \[\[' {} +
-```
-
-If approaching the split threshold (configurable, default ~40): note in output "{vocabulary.topic_map} approaching split threshold (N links)"
-If exceeding: warn "{vocabulary.topic_map} exceeds recommended size — consider splitting"
-
-Splitting is a human decision (architectural judgment required), but /reflect should surface the signal.
-
-**{vocabulary.topic_map} Structure:**
-
-```markdown
-# [Topic Name]
-
-[Brief orientation: what this topic covers, what questions it addresses, where to start reading. Keep to a paragraph or two. Do NOT write free-form synthesis here — {vocabulary.topic_map_plural} are navigation surfaces with cited observations, not places to assert model-derived insights]
-
-## Core Ideas
-
-- [[claim note]] — what it contributes to understanding
-- [[another claim]] — how it fits or challenges existing ideas
-
-## Tensions
-
-- [[claim A]] and [[claim B]] conflict because... [genuine unresolved tension]
-
-## Gaps
-
-- nothing about X aspect yet
-- need concrete examples of Y
-- missing: comparison with Z approach
-```
-
-**Updating Core Ideas:**
-
-Add new {vocabulary.note_plural} with context phrase explaining contribution:
-```markdown
-- [[new note]] — extends the quality argument by showing how friction teaches you what to check
-```
-
-Order matters. Place {vocabulary.note_plural} where they fit the logical flow, not alphabetically.
-
-**Updating Tensions:**
-
-If the new {vocabulary.note} creates or resolves tension:
-```markdown
-## Tensions
-
-- [[composability]] demands small notes, but [[context limits]] means traversal has overhead. [[new note]] suggests the tradeoff depends on expected traversal depth.
-```
-
-Document genuine conflicts. Tensions are valuable, not bugs.
-
-**Updating Gaps:**
-
-Remove gaps that are now filled. Add new gaps discovered during reflection.
-
-### Phase 6: Reconsider Target Note (backward sub-phase)
+For each note, apply the guards. If guards fire, record `Reconsideration: skipped ({reason})` in the Output Block's per-note line. Otherwise run Sub-phases 6.1 and 6.2.
 
 After forward connections and {vocabulary.topic_map} updates, reconsider the target {vocabulary.note} against the current state of the {vocabulary.note_collection}. Ask: **"What does the graph now say that this {vocabulary.note} does not yet cite?"** — not "what do I know now".
 
@@ -346,7 +381,7 @@ This is the backward pass that keeps the network alive. {vocabulary.note_plural}
 
 > "The {vocabulary.note} you wrote yesterday is a hypothesis. Today's knowledge is the test."
 
-**Sub-phase 6 Guards.** Skip Phase 6 entirely if ANY of these apply to the target {vocabulary.note}:
+**Sub-phase 6 Guards.** Skip reconsideration entirely if ANY of these apply to the target {vocabulary.note}:
 
 | Guard | Rationale |
 |-------|-----------|
@@ -361,9 +396,9 @@ This is the backward pass that keeps the network alive. {vocabulary.note_plural}
 find {vocabulary.note_collection}/ -name "*.md" -type f -exec grep -l '\[\[target note title\]\]' {} + | wc -l
 ```
 
-If >= 5, skip Phase 6 — record `Reconsideration: skipped (hub)` in the Output Block.
+If >= 5, skip reconsideration — record `Reconsideration: skipped (hub)` in the Output Block's per-note line.
 
-If any guard fires, set the Output Block's `Reconsideration:` field to `skipped ({reason})` and proceed directly to Phase 7. Otherwise continue with Sub-phases 6.1 and 6.2.
+If any guard fires, set the per-note line's `Reconsideration:` field to `skipped ({reason})` and proceed directly to the next note. Otherwise continue with Sub-phases 6.1 and 6.2.
 
 #### Sub-phase 6.1: Evaluate the claim
 
@@ -371,7 +406,7 @@ If any guard fires, set the Output Block's `Reconsideration:` field to `skipped 
 
 | Finding | Action |
 |---------|--------|
-| Claim holds, evidence strengthened | Note in Output Block; Phase 4's connection additions already supply evidence |
+| Claim holds, evidence strengthened | Note in Output Block; Step 8's connection additions already supply evidence |
 | Claim holds but framing is weak | Rewrite for clarity (Sub-phase 6.2 action: Rewrite Content) |
 | Claim is too vague | Sharpen to be more specific (Sub-phase 6.2 action: Sharpen Claim) |
 | Claim is partially wrong | Revise with nuance (Sub-phase 6.2 action: Challenge Claim) |
@@ -454,7 +489,15 @@ This argues [X]. But [[contradicting note]] argues [Y]. The tension remains unre
 This note originally claimed [X]. Based on [[evidence]], the claim is revised: [new claim].
 ```
 
-**Always log challenges:** When a claim is challenged or revised, this is a significant event. Note it in the Output Block's `### Backward → Cascade` field with the original claim, the new evidence, and the revised position.
+**Always log challenges:** When a claim is challenged or revised, this is a significant event. Note it in the Output Block's `### Cascades` section with the original claim, the new evidence, and the revised position.
+
+### Step 10: Update queue (shared)
+
+After all per-note work for the batch is complete, advance every successfully processed entry's `current_phase` from `connect` to `verify` in `ops/queue/queue.json` via a single batched jq call. See the [Queue Self-Update](#queue-self-update) section below for the exact command.
+
+### Step 11: Emit Output Block (shared)
+
+Emit a single canonical Output Block as the final chat message — one block for the whole batch, regardless of N. See the [Output Block](#output-block) section below for the exact format.
 
 ## Handling Edge Cases
 
@@ -483,68 +526,77 @@ If you find {vocabulary.note_plural} with no connections:
 
 ## Queue Self-Update
 
-Before emitting the Output Block, advance the entry in `ops/queue/queue.json` via a single `jq` call. Substitute the queue id (from `$ARGUMENTS`) for `<task-id>`:
+Before emitting the Output Block, advance every successfully processed entry in `ops/queue/queue.json` via a single `jq` call. Build `$COMPLETED_IDS_JSON` as a JSON array of the queue ids that completed (on a clean run, this equals the full work-list ids):
 
 ```bash
-jq --arg id "<task-id>" \
-   'if any(.tasks[]; .id == $id)
-    then (.tasks[] | select(.id == $id)) |= (.completed_phases += ["reflect"] | .current_phase = "verify")
-    else error("task not found: \($id)")
-    end' \
+COMPLETED_IDS_JSON='["note-007","note-008","note-009","note-010"]'  # example — populate from successful completions
+BATCH_ID="$ARGUMENTS"
+
+jq --arg batch "$BATCH_ID" --argjson ids "$COMPLETED_IDS_JSON" \
+   '(.tasks[] | select(.batch == $batch and (.id | IN($ids[])))) |=
+    (.completed_phases += ["connect"] | .current_phase = "verify")' \
    ops/queue/queue.json > ops/queue/queue.json.tmp \
    && mv ops/queue/queue.json.tmp ops/queue/queue.json
 ```
 
 If the Bash call fails (non-zero exit), resort to the Read and Write tools to read the original queue.json file and write the updated file back.
 
+**Do not re-read after update.** A zero-exit on the `jq | mv` chain means the file was rewritten. Do NOT follow up with `jq '.tasks[] | select(.id == ...)'` or any other read of `queue.json` to "inspect" what you just wrote — it adds tokens but provides nothing the skill consumes before emitting the Output Block.
+
+On a system-level error before the queue update, do not write the file — `queue.json` stays untouched and pipeline failure semantics handle the rest.
+
 ---
 
 ## Output Block
 
-After finishing both forward connection work and (if not skipped) backward reconsideration, emit the canonical block below as the final chat message. This is the ONLY chat output — no task file is written.
+After finishing all steps for every note in the work list (or after a system-level error), emit the canonical block below as the final chat message. This is the ONLY chat output — no task file is written.
 
 ```
-## Reflect
+## Connect
 
-**Target:** [[{target note title}]]
+**Batch:** {batch-id}
 **Status:** ok | error: {short message}
-**Queue:** advanced {id}: reflect -> verify
+**Queue:** advanced {N} entries: connect -> verify
 
-### Forward
+### Discovery (shared)
+- Topics scanned: [{list of topic ids}]
+- Existing topic maps consulted: [{list of moc filenames}]
+- Topic maps created: [{list of new moc filenames}] | NONE
+- qmd queries issued: {Q}
+- grep passes: {G}
 
-**Connections added:**
-- [[target]] — {relationship}: {one-line rationale}
+### Per-note results
+- [[note-1 title]] ({queue-id}) — {C1} connections, reconsidered ({status: unchanged|sharpened|challenged|revised}) | reconsideration skipped ({reason: granularity=capture | hub | tension | recent | moc})
+- [[note-2 title]] ({queue-id}) — {C2} connections, reconsidered ({status}) | reconsideration skipped ({reason})
+- ...
 
-**{vocabulary.topic_map} updates:**
-- [[moc-name]] — {section}: {entry}
+### Sibling cross-links
+- [[note-A]] ↔ [[note-B]] — {relationship}: {one-line rationale}
+- ...
+| NONE
 
-**Synthesis opportunities:**
+### Synthesis opportunities
 - {one-line} | NONE
 
-**Skipped reverse links:**
+### Skipped reverse links
 - [[target]] — {one-line reason} | NONE
 
-### Backward
-
-**Reconsideration:** ran | skipped (granularity=capture | hub | tension | recent | moc)
-**Claim status:** unchanged | sharpened | challenged | revised | n/a
-**Changes applied:**
-- [[target]] — {change-type}: {one-line} | NONE
-
-**Cascade:**
+### Cascades
 - [[target]] — {reason} | NONE
 
 ### Flagged for attention
 - {orphan | gap | tension — one line} | NONE
 
 ### Learnings
-- [Friction]: [description] | NONE
-- [Surprise]: [description] | NONE
-- [Methodology]: [description] | NONE
-- [Process gap]: [description] | NONE
+- [Friction]: {description} | NONE
+- [Surprise]: {description} | NONE
+- [Methodology]: {description} | NONE
+- [Process gap]: {description} | NONE
 ```
 
-On error, set `Status: error: <message>`, `Queue: no change (error)`, emit the partial `### Forward` and `### Backward` content in chat, and leave `queue.json` unchanged.
+The orchestrator parses only `Status:`, `Queue:`, and the Learnings section. Per-note details and discovery narration are human-readable.
+
+On error, set `Status: error: <message>`, `Queue: no change (error)`, emit partial per-note results for audit, and leave `queue.json` unchanged.
 
 ---
 

@@ -35,138 +35,25 @@ If these files don't exist (pre-init invocation or standalone use), use universa
 
 **Execute these steps:**
 
-1. **Scan the vault** — inventory all note files, {vocabulary.topic_map} files, inbox items, ops files
-2. **Run each diagnostic category** in order (1-8)
-3. **Classify each result** as PASS, WARN, or FAIL using the thresholds below
-4. **Surface condition-based maintenance signals** (check against threshold table)
-5. **Generate the health report** with specific file paths, counts, and recommended actions
-6. **Write report to** `ops/health/YYYY-MM-DD-report.md`
+1. Run health-check.sh:
+   ```bash
+   bash "${CLAUDE_PLUGIN_ROOT}/skills/health/scripts/health-check.sh"
+   ```
+   The script covers Categories 1, 2, 3, 5, 6, 7, 8 plus Maintenance Signals and a leading scan summary.
 
-**START NOW.** Reference below explains each diagnostic category in detail.
+2. Run **Category 4 (Description Quality)** yourself — it is semantic judgment the script cannot perform. See "## Category 4 — Description Quality" below for the heuristic.
+
+3. Compose the report using the master template under "## Output Format". Replace the script's `[4] PENDING` line with your Cat 4 verdict.
+
+4. Rank the **top 3 recommended actions** by impact (see "Prioritize by Impact" tier table) and append.
+
+5. Write the full report to `ops/health/YYYY-MM-DD-report.md`. If a report already exists for today, append a counter: `YYYY-MM-DD-report-2.md`.
+
+If `health-check.sh` exits nonzero, emit `ERROR: health-check.sh failed (exit <code>)` and stop. Do not attempt recovery.
 
 ---
 
-## The 8 Diagnostic Categories
-
-### Category 1: Schema Compliance
-
-**What it checks:** Every {vocabulary.note} in {vocabulary.note_collection}/ and self/memory/ (if self/ is enabled) has valid YAML frontmatter with required fields.
-
-**How to check:**
-
-```bash
-# Find all note files (exclude topic maps)
-for f in $(find {vocabulary.note_collection}/ -name "*.md" -type f); do
-  [[ -f "$f" ]] || continue
-  # Check: YAML frontmatter exists
-  head -1 "$f" | grep -q '^---$' || echo "FAIL: $f — no YAML frontmatter"
-  # Check: description field present
-  rg -q '^description:' "$f" || echo "WARN: $f — missing description field"
-done
-```
-
-**Additional checks:**
-- Domain-specific enum fields have valid values (check against template `_schema` blocks if templates exist)
-- `description` field is non-empty (not just present)
-
-**Thresholds:**
-
-| Condition | Level |
-|-----------|-------|
-| Any note missing YAML frontmatter | FAIL |
-| Any note missing `description` field | WARN |
-| Any invalid enum value | WARN |
-| All notes pass all checks | PASS |
-
-**Output format:**
-```
-[1] Schema Compliance ............ WARN
-    2 notes missing description:
-      - notes/example-note.md
-      - notes/another-note.md
-    13/15 notes fully compliant
-```
-
-### Category 2: Orphan Detection
-
-**What it checks:** Every {vocabulary.note} has at least one incoming wiki link from another file.
-
-**How to check:**
-
-```bash
-# For each note file, check if ANY other file links to it
-for f in $(find {vocabulary.note_collection}/ -name "*.md" -type f); do
-  [[ -f "$f" ]] || continue
-  basename=$(basename "$f" .md)
-  # Search for [[basename]] in all other files
-  count=$(rg -l "\[\[$basename\]\]" --glob '*.md' | grep -v "$f" | wc -l | tr -d ' ')
-  if [[ "$count" -eq 0 ]]; then
-    echo "WARN: $f — no incoming links (orphan)"
-  fi
-done
-```
-
-**Nuance:** Orphans are not automatically failures. A note created today that hasn't been through /{vocabulary.cmd_reflect} yet is expected to be orphaned temporarily. Check file age:
-
-| Condition | Level |
-|-----------|-------|
-| Orphan note created < 24 hours ago | INFO (expected — awaiting reflect phase) |
-| Orphan note created 1-7 days ago | WARN |
-| Orphan note older than 7 days | FAIL (persistent orphan needs attention) |
-| No orphans detected | PASS |
-
-**Output format:**
-```
-[2] Orphan Detection ............. WARN
-    3 orphan notes detected:
-      - notes/new-claim.md (created 2h ago — awaiting reflect) [INFO]
-      - notes/old-observation.md (created 5d ago) [WARN]
-      - notes/forgotten-insight.md (created 14d ago) [FAIL]
-    Recommendation: run /reflect on forgotten-insight.md and old-observation.md
-```
-
-### Category 3: Link Health
-
-**What it checks:** Every wiki link `[[target]]` in every file resolves to an existing file.
-
-**How to check:**
-
-```bash
-# Extract all wiki links from all markdown files
-# For each unique link target, verify a file with that name exists
-rg -oN '\[\[([^\]]+)\]\]' --glob '*.md' -r '$1' | sort -u | while read target; do
-  # Search for file matching this name
-  found=$(find . -name "$target.md" -not -path "./.git/*" 2>/dev/null | head -1)
-  if [[ -z "$found" ]]; then
-    echo "FAIL: dangling link [[${target}]] — no file found"
-    # Show which files contain this dangling link
-    rg -l "\[\[$target\]\]" --glob '*.md'
-  fi
-done
-```
-
-**Thresholds:**
-
-| Condition | Level |
-|-----------|-------|
-| Any dangling link (target does not exist) | FAIL |
-| All links resolve | PASS |
-
-**Why FAIL not WARN:** Dangling links are broken promises. Every `[[link]]` a reader follows that leads nowhere erodes trust in the graph. Fix these immediately.
-
-**Output format:**
-```
-[3] Link Health .................. FAIL
-    2 dangling links found:
-      - [[nonexistent-note]] referenced in:
-        - notes/some-claim.md (line 14)
-        - notes/another-claim.md (line 8)
-      - [[removed-topic]] referenced in:
-        - notes/old-note.md (line 22)
-    Recommendation: create missing notes or remove broken links
-```
-
-### Category 4: Description Quality
+## Category 4 — Description Quality
 
 **What it checks:** Every {vocabulary.note}'s description adds genuine information beyond the title — not just a restatement.
 
@@ -211,271 +98,6 @@ For each {vocabulary.note}:
     Recommendation: rewrite descriptions to add scope, mechanism, or implication
 ```
 
-### Category 5: Three-Space Boundary Check
-
-**What it checks:** Content respects the boundaries between self/, {vocabulary.note_collection}/, and ops/. Each space has a purpose — conflating them degrades search quality, navigation, and trust.
-
-**Before running this check:** Read `${CLAUDE_PLUGIN_ROOT}/reference/three-spaces.md` for the full boundary specification.
-
-**Six conflation patterns to detect:**
-
-#### 5a. Ops into Notes (Infrastructure Creep)
-
-Queue state, health metrics, or processing artifacts appearing in {vocabulary.note_collection}/ directory.
-
-**Detection:**
-```bash
-# Check for ops-pattern YAML fields in notes
-rg '^(current_phase|completed_phases|batch|queue_id):' {vocabulary.note_collection}/ --glob '*.md'
-# Check for queue/learnings artifacts misplaced in notes
-rg '^# Learnings — ' {vocabulary.note_collection}/ --glob '*.md'
-```
-
-| Found | Level |
-|-------|-------|
-| Any ops-pattern content in {vocabulary.note_collection}/ | WARN |
-
-#### 5b. Self into Notes (Identity Pollution)
-
-Agent identity or methodology content mixed into user's knowledge graph. Agent's operational observations appearing in user's {vocabulary.note_collection}/ space.
-
-**Detection:**
-```bash
-# Check for agent-reflection patterns in notes (methodology observations, workflow assessments)
-rg -i '(my methodology|I observed that|agent reflection|session learning|I learned)' {vocabulary.note_collection}/ --glob '*.md'
-```
-
-| Found | Level |
-|-------|-------|
-| Any agent-reflection content in {vocabulary.note_collection}/ | WARN |
-
-#### 5c. Notes into Ops (Trapped Knowledge)
-
-Genuine insights trapped in ops files that should be promoted to {vocabulary.note_collection}/.
-
-**Detection:**
-```bash
-# Check for claim-like content in ops that could be notes
-# Look for files with description fields in ops/methodology/
-rg '^description:' ops/methodology/*.md 2>/dev/null
-```
-
-| Found | Level |
-|-------|-------|
-| Content in ops/ with note-like schema (description + content_type) | INFO (may be intentional, flag for review) |
-
-#### 5d. Self into Ops / Ops into Self
-
-Temporal state stored in self/ (should be in ops/), or identity content stored in ops/ (should be in self/).
-
-**Detection:**
-```bash
-# Check for temporal/queue content in self/
-rg '^(current_phase|status|queue):' self/ --glob '*.md' 2>/dev/null
-# Check for identity content in ops/
-rg -i '(my identity|I am|who I am|my personality)' ops/ --glob '*.md' 2>/dev/null
-```
-
-#### 5e. Notes into Self
-
-Domain knowledge stored in self/ instead of {vocabulary.note_collection}/.
-
-**Detection:**
-```bash
-# Check self/memory/ for wiki-links into notes-space MOCs (domain knowledge leaking into self/)
-MOCS=$(find {vocabulary.note_collection}/ -name "*.md" -type f -exec grep -l '^content_type: moc' {} + 2>/dev/null | xargs -n1 basename -s .md 2>/dev/null)
-for moc in $MOCS; do
-  rg -l "\[\[$moc\]\]" self/memory/ --glob '*.md' 2>/dev/null
-done | sort -u
-```
-
-#### 5f. Self Space Presence Check
-
-Self space is an invariant kernel primitive — self/ must exist with identity.md, methodology.md, and goals.md populated.
-
-**Detection:**
-```bash
-if [[ ! -d "self/" ]]; then
-  echo "MISSING: self/ directory — self space is invariant"
-elif [[ ! -f "self/identity.md" || ! -f "self/methodology.md" || ! -f "self/goals.md" ]]; then
-  echo "INCOMPLETE: self/ exists but is missing required files (identity, methodology, goals)"
-fi
-```
-
-**Thresholds:**
-
-| Condition | Level |
-|-----------|-------|
-| Any boundary violation (5a, 5b, 5d, 5e) | WARN |
-| Trapped knowledge in ops (5c) | INFO |
-| Missing or incomplete self/ (5f) | FAIL |
-| All boundaries intact | PASS |
-
-**Output format:**
-```
-[5] Three-Space Boundaries ....... WARN
-    1 boundary violation detected:
-      Ops into Notes (infrastructure creep):
-        - notes/task-tracking.md contains queue state fields (current_phase, batch)
-        - Should be in ops/queue/ not notes/
-    1 potential trapped knowledge:
-      - ops/methodology/interesting-pattern.md has note-like schema
-        Consider promoting to notes/ via /structure or direct creation
-    Recommendation: move task-tracking.md to ops/queue/
-```
-
-### Category 6: Processing Throughput
-
-**What it checks:** The inbox-to-knowledge ratio. High ratios indicate collector's fallacy — capturing more than processing.
-
-**How to check:**
-
-```bash
-# Count items in each space
-INBOX_COUNT=$(find {vocabulary.inbox}/ -name '*.md' -not -path '*/archive/*' 2>/dev/null | wc -l | tr -d ' ')
-NOTES_COUNT=$(find {vocabulary.note_collection}/ -name '*.md' -type f 2>/dev/null | wc -l | tr -d ' ')
-QUEUE_COUNT=$(find ops/queue/ -name '*.md' -not -path '*/archive/*' 2>/dev/null | wc -l | tr -d ' ')
-
-# Calculate ratio
-if [[ $((INBOX_COUNT + NOTES_COUNT)) -gt 0 ]]; then
-  RATIO=$((INBOX_COUNT * 100 / (INBOX_COUNT + NOTES_COUNT)))
-else
-  RATIO=0
-fi
-
-echo "Inbox: $INBOX_COUNT | Notes: $NOTES_COUNT | In-progress: $QUEUE_COUNT | Ratio: ${RATIO}%"
-```
-
-**Thresholds:**
-
-| Condition | Level |
-|-----------|-------|
-| Inbox-to-total ratio > 75% (3:1 inbox to notes) | FAIL |
-| Inbox-to-total ratio > 50% | WARN |
-| Inbox items > 20 | WARN (regardless of ratio) |
-| Inbox-to-total ratio <= 50% AND inbox <= 20 | PASS |
-
-**Output format:**
-```
-[6] Processing Throughput ........ WARN
-    inbox: 12 | notes: 8 | in-progress: 3 | ratio: 60%
-    Inbox items outnumber processed notes — collector's fallacy risk
-    Recommendation: run /structure or /capture on oldest inbox items, or /pipeline for end-to-end processing
-```
-
-### Category 7: Stale Note Detection
-
-**What it checks:** Notes not modified recently AND with low link density. Staleness is condition-based (low link density + no activity since N new notes were added), not purely calendar-based.
-
-**How to check:**
-
-For each {vocabulary.note}:
-1. Check last modified date (`stat` or `git log`)
-2. Count incoming links (same as orphan detection, but counting instead of boolean)
-3. Flag notes with: modified > 30 days ago AND < 2 incoming links
-
-```bash
-for f in $(find {vocabulary.note_collection}/ -name "*.md" -type f); do
-  [[ -f "$f" ]] || continue
-  basename=$(basename "$f" .md)
-
-  # Last modified (days ago)
-  mod_days=$(( ($(date +%s) - $(stat -f %m "$f" 2>/dev/null || stat -c %Y "$f" 2>/dev/null)) / 86400 ))
-
-  # Incoming link count
-  incoming=$(rg -l "\[\[$basename\]\]" --glob '*.md' | grep -v "$f" | wc -l | tr -d ' ')
-
-  if [[ $mod_days -gt 30 ]] && [[ $incoming -lt 2 ]]; then
-    echo "STALE: $f — $mod_days days old, $incoming incoming links"
-  fi
-done
-```
-
-**Thresholds:**
-
-| Condition | Level |
-|-----------|-------|
-| Any note > 30 days old with < 2 incoming links | WARN |
-| Any note > 90 days old with 0 incoming links | FAIL |
-| All notes either recent or well-connected | PASS |
-
-**Prioritization:** Sort stale notes by:
-1. Age (oldest first)
-2. Link density (least connected first)
-3. Topic relevance (notes in active topic areas are higher priority)
-
-**Output format:**
-```
-[7] Stale Notes .................. WARN
-    4 stale notes detected (>30d old, <2 incoming links):
-      - notes/old-observation.md (92d, 0 links) [FAIL — consider archiving or reweaving]
-      - notes/early-claim.md (45d, 1 link) [WARN]
-      - notes/setupial-thought.md (38d, 1 link) [WARN]
-      - notes/first-draft.md (31d, 0 links) [WARN]
-    Recommendation: run /reflect on these notes to find connections and reconsider, or archive if no longer relevant
-```
-
-### Category 8: {vocabulary.topic_map} Coherence
-
-**What it checks:** Each {vocabulary.topic_map} has a healthy number of linked notes, and notes in the same topic area are actually linked.
-
-**How to check:**
-
-For each {vocabulary.topic_map} file:
-1. Count notes that link TO this {vocabulary.topic_map} (notes with `[[topic-map]]` anywhere — typically in the `Topics:` footer)
-2. Check if there are notes in the same topic area NOT linked to the {vocabulary.topic_map} (coverage gaps)
-3. Verify context phrases exist on Core Ideas links (not bare links)
-
-```bash
-# For each topic map
-for moc in $(find {vocabulary.note_collection}/ -name "*.md" -type f); do
-  [[ -f "$moc" ]] || continue
-  # Check if this is a topic map (has content_type: moc in frontmatter)
-  rg -q '^content_type: moc' "$moc" || continue
-
-  moc_name=$(basename "$moc" .md)
-
-  # Count notes linking to this topic map
-  note_count=$(rg -l "\[\[$moc_name\]\]" {vocabulary.note_collection}/ --glob '*.md' | grep -v "$moc" | wc -l | tr -d ' ')
-
-  echo "$moc_name: $note_count notes"
-done
-```
-
-**Thresholds:**
-
-| Condition | Level |
-|-----------|-------|
-| {vocabulary.topic_map} with < 5 notes | WARN (underdeveloped — consider merging into parent) |
-| {vocabulary.topic_map} with > 50 notes | WARN (oversized — consider splitting into sub-{vocabulary.topic_maps}) |
-| {vocabulary.topic_map} with > 40 notes | INFO (approaching threshold) |
-| Notes exist in topic area but not linked to {vocabulary.topic_map} | WARN (coverage gap) |
-| All {vocabulary.topic_maps} in 5-50 range with good coverage | PASS |
-
-**Context phrase check:**
-
-```bash
-# Check for bare links in topic map Core Ideas (links without context phrases)
-for moc in $(find {vocabulary.note_collection}/ -name "*.md" -type f); do
-  rg -q '^content_type: moc' "$moc" || continue
-  # Look for "- [[note]]" without " — " context
-  rg '^\s*- \[\[' "$moc" | grep -v ' — ' | grep -v '^\s*- \[\[.*\]\].*—'
-done
-```
-
-Bare links without context phrases are address book entries, not navigation. Every link in a {vocabulary.topic_map} should explain WHY to follow it.
-
-**Output format:**
-```
-[8] MOC Coherence ................ WARN
-    3 topic maps checked:
-      - knowledge-work: 28 notes [PASS]
-      - graph-structure: 52 notes [WARN — oversized, consider splitting]
-        3 bare links without context phrases
-      - agent-cognition: 3 notes [WARN — underdeveloped, consider merging]
-    Recommendation: split graph-structure into sub-topic-maps; add context phrases to bare links
-```
-
 ---
 
 ## Condition-Based Maintenance Signals
@@ -485,9 +107,9 @@ After running all applicable diagnostic categories, check these condition-based 
 | Condition | Threshold | Recommendation |
 |-----------|-----------|---------------|
 | Inbox items | >= 3 items | Consider /structure, /capture, or /pipeline |
-| Orphan notes | Any persistent (> 7d) | Run /reflect on orphaned notes |
+| Orphan notes | Any persistent (> 7d) | Run /connect on orphaned notes |
 | Dangling links | Any | Fix broken references immediately |
-| Stale notes | Low links + old | Consider /reflect |
+| Stale notes | Low links + old | Consider /connect |
 | {vocabulary.topic_map} oversized | > 40 notes | Consider splitting |
 | Queue stalled | Tasks pending > 2 sessions without progress | Surface as blocked |
 | Trigger coverage gap | Known maintenance condition has no configured trigger | Flag gap itself |
@@ -650,8 +272,8 @@ Health report findings feed into other skills:
 
 | Finding | Feeds Into | How |
 |---------|-----------|-----|
-| Orphan notes | /reflect | Run reflect to find connections for orphaned notes |
-| Stale notes | /reflect | Run reflect to revisit old notes against current graph state |
+| Orphan notes | /connect | Run connect to find connections for orphaned notes |
+| Stale notes | /connect | Run connect to revisit old notes against current graph state |
 | Description quality issues | /verify or manual rewrite | Fix descriptions to improve retrieval |
 | Schema violations | /verify | Run verification to fix specific schema issues |
 | Boundary violations | Manual restructuring | Move files to correct space |

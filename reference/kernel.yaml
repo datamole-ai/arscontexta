@@ -113,7 +113,7 @@ primitives:
 
   - id: semantic-search
     name: Semantic search capability
-    description: Meaning-based discovery across vocabularies. Complements structural navigation. Processing skills (reflect, verify, structure, seed) call it directly — the system is designed around its presence.
+    description: Meaning-based discovery across vocabularies. Complements structural navigation. Processing skills (connect, verify, structure, seed) call it directly — the system is designed around its presence.
     layer: convention
     requires: wiki-links
     enforcement: invariant
@@ -149,7 +149,7 @@ primitives:
 
   - id: processing-queue
     name: Processing queue
-    description: "The lifecycle backbone. Every note flows through phase states tracked in ops/queue/ — the unified queue holding pipeline tasks (claims, enrichments) and their phase progression (create, reflect, verify)."
+    description: "The lifecycle backbone. Every note flows through phase states tracked in ops/queue/ — the unified queue holding pipeline tasks (claims, enrichments) and their phase progression (create, connect, verify)."
     layer: convention
     requires: markdown-yaml, session-rhythm
     enforcement: invariant

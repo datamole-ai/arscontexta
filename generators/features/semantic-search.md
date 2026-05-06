@@ -27,7 +27,7 @@ Three modes serve different needs. Choose based on what you are looking for:
 | Duplicate detection before creating a {DOMAIN:note} | Semantic | Catches same-idea-different-words that keywords miss |
 | Finding connections for a new {DOMAIN:note} | Hybrid | Maximum quality — runs once per {DOMAIN:note}, time justified |
 | Testing description findability | Semantic | Tests what agents actually search with |
-| Quick field lookup | Keyword | `rg '^type: pattern' {DOMAIN:note_collection}/` is instant and precise |
+| Quick field lookup | Keyword | `rg '^content_type: pattern' {DOMAIN:note_collection}/` is instant and precise |
 | Exploring what exists on a topic | Hybrid | Finds meaning across vocabularies |
 
 ### Keyword Search Patterns
@@ -35,8 +35,8 @@ Three modes serve different needs. Choose based on what you are looking for:
 Keyword search (ripgrep) is your workhorse for structured queries:
 
 ```bash
-# Find {DOMAIN:notes} by type
-rg '^type: pattern' {DOMAIN:note_collection}/
+# Find {DOMAIN:notes} by content_type
+rg '^content_type: pattern' {DOMAIN:note_collection}/
 
 # Scan all descriptions
 rg '^description:' {DOMAIN:note_collection}/

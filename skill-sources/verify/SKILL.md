@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Internal pipeline skill — runs validate + review quality gate on a note. Invoked by /pipeline as a subagent; do not invoke directly.
+description: Internal pipeline skill — runs validate + review quality gate across all notes in a batch in one pass, with shared vault-scope checks. Invoked by /pipeline as a subagent; do not invoke directly.
 context: fork
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 ---
@@ -34,97 +34,83 @@ After reading the target {vocabulary.note}, check its `granularity` frontmatter 
 
 **Target: $ARGUMENTS**
 
-Parse the queue id from arguments (e.g. `note-010`, `enrich-002`). If no argument is provided, end immediately with: report
-`ERROR: verify requires queue id`.
+Parse the batch id from arguments (e.g. `my-source` — the source basename). If no argument is provided, end immediately with: report `ERROR: verify requires batch id`.
 
-Look up the entry in `ops/queue/queue.json`:
-
-```bash
-jq --arg id "$QUEUE_ID" '.tasks[] | select(.id == $id)' ops/queue/queue.json
-```
-
-From that entry, obtain:
-- `id` — this entry's queue id
-- `target_path` — the path to the {vocabulary.note} being verified
-- `batch` — the batch id
-- `granularity` — routes verification depth
-
-All subsequent references to "the {vocabulary.note}" use the `target_path` value from the queue entry.
-
-**START NOW.**
-
-### Step 1: VALIDATE (auto-fixable schema checks)
-
-
-| Check | Rule | Severity |
-|-------|------|----------|
-| Frontmatter delimiters | Must start with `---` and close with `---` | FAIL |
-| Description trailing period | Description must not end with `.` | WARN |
-| Topics footer presence | Topics field must be present and non-empty | FAIL |
-
-### Step 2: REVIEW (light health checks)
-
-Two quick checks only:
-
-**1. Link resolution**
-- Scan ALL wiki links in the note — body prose, the `Relevant Notes:` footer, and the `Topics:` footer
-- For each `[[link]]`, confirm a matching file exists in the vault
-- **Exclude** wiki links inside backtick-wrapped code blocks (single backtick or triple backtick) — these are syntax examples, not real links
-- A single dangling link = FAIL with the specific broken link identified
-
-**2. {DOMAIN:topic map} connection**
-- The note's Topics footer references at least one valid {DOMAIN:topic map}
-- Note appears in at least one {DOMAIN:topic map}'s Core Ideas section (grep for `[[note title]]` in topic map files)
-- A note with no {DOMAIN:topic map} mention is orphaned — FAIL
-
-### Step 3: APPLY FIXES
-
-Apply fixes for clear-cut issues:
-
-**Auto-fix (safe to apply):**
-- Missing `---` frontmatter delimiters
-- Trailing period on description
-- Missing Topics footer (if obvious which {DOMAIN:topic map} applies)
-
-## Queue Self-Update
-
-Before emitting the Output Block, mark the entry done in `ops/queue/queue.json` via a single `jq` call. Substitute the queue id (from `$ARGUMENTS`) for `<task-id>`:
+### Step 1: Structural pass
 
 ```bash
-jq --arg id "<task-id>" --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-   'if any(.tasks[]; .id == $id)
-    then (.tasks[] | select(.id == $id)) |= (.completed_phases += ["verify"] | .status = "done" | .current_phase = null | .completed = $now)
-    else error("task not found: \($id)")
-    end' \
-   ops/queue/queue.json > ops/queue/queue.json.tmp \
-   && mv ops/queue/queue.json.tmp ops/queue/queue.json
+bash .claude/skills/{DOMAIN:verify}/scripts/verify-batch.sh "$BATCH_ID"
 ```
 
-If the Bash call fails (non-zero exit), resort to the Read and Write tools to read the original queue.json file and write the updated file back.
+The script:
+- Discovers the work-list (pending entries with `current_phase=verify` for this batch).
+- Runs vault-scope link health and orphan checks across the batch.
+- Runs per-note structural checks (frontmatter delimiters, trailing-period description, Topics footer presence, capture verbatim integrity).
+- Emits the partial `## Verify` block with each per-note line ending in `Review: TBD`.
+
+If the work-list is empty, the script exits 0 with an explicit "no entries" line. Print its output and stop — there is nothing to do.
+
+### Step 2: Semantic per-note checks (LLM judgment)
+
+For each work-list note with `granularity == "structure"`, perform the semantic checks listed in **## Granularity-Aware Verification** above:
+- **Scope coherence** — do all sections of the {vocabulary.note} belong to one claim?
+- **Section development** — does each section develop its sub-claim, not just state it?
+
+For each note, replace its `Review: TBD` substring with `Review: PASS | WARN ({issue}) | FAIL ({issue})`.
+
+### Step 3: Auto-fixes
+
+Apply auto-fixes only where judgment is required (the script does not):
+- A missing Topics footer where the correct {vocabulary.topic_map} is obvious from the note's content — add it.
+- Other fixes from the structural pass (missing `---`, trailing period) are already deterministic; the script reports them and the LLM applies them inline if it has the file open.
+
+Record each fix in the Output Block's `### Auto-fixes applied` section.
+
+### Step 4: Mark queue done
+
+Once every successful entry has a `Review:` verdict, build a JSON array of completed ids and call:
+
+```bash
+bash .claude/skills/{DOMAIN:verify}/scripts/verify-complete.sh "$BATCH_ID" "$COMPLETED_IDS_JSON"
+```
+
+Append the script's confirmation line to the Output Block's `**Queue:**` field.
+
+If either script exits nonzero, emit `ERROR: <script-name> failed (exit <code>)` and stop. Do not attempt recovery.
 
 ## Output Block
 
-After finishing verification (validate + review + any auto-fixes), perform queue self-update (final phase — mark done) and then emit the canonical block below as the final chat message. This is the ONLY chat output — no task file is written.
+After finishing all steps for every note in the work list (or after a system-level error), perform queue self-update (mark every successfully verified entry done) and then emit the canonical block below as the final chat message. This is the ONLY chat output — no task file is written.
 
 ```
 ## Verify
 
-**Target:** [[{target note title}]]
+**Batch:** {batch-id}
 **Status:** ok | error: {short message}
-**Queue:** marked {id}: verify -> done
+**Queue:** marked {N} entries: verify -> done
 
-### Work
-- Validate: [PASS/WARN/FAIL] ({N} checks, {M} warnings, {K} failures)
-- Review: [PASS/WARN/FAIL] ({N} checks, {M} issues)
+### Vault-scope checks
+- Link health: [PASS/WARN/FAIL] ({K} links scanned across {N} notes, {M} broken)
+- Orphan check: [PASS/WARN/FAIL] ({O} orphans found)
+
+### Per-note checks
+- [[note-1 title]] ({queue-id}) — Validate: PASS | WARN ({issue}) | FAIL ({issue}); Review: PASS | WARN | FAIL
+- [[note-2 title]] ({queue-id}) — ...
+- ...
+
+### Auto-fixes applied
+- [[note]] — {fix description} | NONE
 
 ### Learnings
-- [Friction]: [description] | NONE
-- [Surprise]: [description] | NONE
-- [Methodology]: [description] | NONE
-- [Process gap]: [description] | NONE
+- [Friction]: {description} | NONE
+- [Surprise]: {description} | NONE
+- [Methodology]: {description} | NONE
+- [Process gap]: {description} | NONE
 ```
 
-On error, set `Status: error: <message>`, `Queue: no change (error)`, and leave `queue.json` unchanged.
+The orchestrator parses only `Status:`, `Queue:`, and the Learnings section. Per-note check results and vault-scope summaries are human-readable.
+
+On error, set `Status: error: <message>`, `Queue: no change (error)`, emit partial per-note results for audit, and leave `queue.json` unchanged.
 
 ---
 

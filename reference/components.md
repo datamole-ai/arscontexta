@@ -26,12 +26,12 @@ How to build each component of a knowledge system. Each blueprint explains WHAT 
 
 **What:** YAML frontmatter that makes notes queryable like a database.
 
-**Why:** Metadata reduces entropy. Pre-computed low-entropy representations (type, domain, mastery level) shrink the search space. An agent scanning 500 notes can filter by `type: pattern` before reading anything — this is retrieval utility driving design.
+**Why:** Metadata reduces entropy. Pre-computed low-entropy representations (content_type, domain, mastery level) shrink the search space. An agent scanning 500 notes can filter by `content_type: pattern` before reading anything — this is retrieval utility driving design.
 
 **How to implement:**
-- Universal base: `description`, `type`, `created`
+- Universal base: `content_type`, `granularity`, `description`, `created_at`, `tags`
 - Domain extensions: add fields relevant to the use case
-- Query via ripgrep: `rg '^type: pattern' notes/`
+- Query via ripgrep: `rg '^content_type: pattern' notes/`
 - Templates define valid schemas per domain
 
 **Evolution:** Schemas are living structures. Add fields when a genuine querying need emerges. Remove fields nobody queries. The template is the single source of truth.
@@ -255,7 +255,7 @@ Check MOC coverage:
 **How to implement:**
 - `ops/queue/queue.json` (or `queue.yaml`) — machine-readable queue for pipeline orchestration
 - Context file references it in the session-orient phase
-- Tasks track phase progression: each note (or enrichment) moves through reflect, verify (or domain-appropriate equivalents). Materialization happens inside /structure during the process phase — there is no separate create or enrich phase.
+- Tasks track phase progression: each note (or enrichment) moves through connect, verify (or domain-appropriate equivalents). Materialization happens inside /structure during the process phase — there is no separate create or enrich phase.
 
 **Quality gate:** Can the pipeline answer "what processing is pending?" by reading the queue? If yes, lifecycle visibility is achieved.
 

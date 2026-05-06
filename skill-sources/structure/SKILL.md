@@ -93,7 +93,7 @@ If YES -> split into separate structure notes
 
 Every sentence in a {vocabulary.note} body must paraphrase a specific line or paragraph of the source. Do not add connective prose, motivation, mechanism explanations, implications, or rationale that is not in the source. If a claim needs background to make sense, either omit it (the source citation suffices) or flag the gap — do not invent the background. When the source is terse, the {vocabulary.note} is proportionally terse; inflation is a fidelity failure, not a thoroughness win.
 
-Neighbor linking is /reflect's job — /structure does not pre-seed wiki-links in the body. At this phase, source-fidelity means: if it is not in the source, it does not enter the body.
+Neighbor linking is /connect's job — /structure does not pre-seed wiki-links in the body. At this phase, source-fidelity means: if it is not in the source, it does not enter the body.
 
 ---
 
@@ -102,7 +102,7 @@ Neighbor linking is /reflect's job — /structure does not pre-seed wiki-links i
 Three quality checks before saving any structure {vocabulary.note}:
 
 1. **Scope coherence** — Do all sections share evidence, argument, or mechanism from the source? Every section's content must trace to the source.
-2. **Source-bounded standalone sense** — Does the {vocabulary.note} cohere using only source-attested claims? If the only way to make it "stand alone" is to add context not in the source, the scope is too narrow — split, or accept the terseness. /reflect will add neighbor links later.
+2. **Source-bounded standalone sense** — Does the {vocabulary.note} cohere using only source-attested claims? If the only way to make it "stand alone" is to add context not in the source, the scope is too narrow — split, or accept the terseness. /connect will add neighbor links later.
 3. **Linkability** — The scope is defined clearly enough for other {vocabulary.note_plural} to link to without ambiguity.
 
 If any check fails, the note needs restructuring — adjust sections or scope, don't reflexively split.
@@ -170,7 +170,9 @@ qmd query $'vec: [cluster scope as sentence]' --collection {vocabulary.qmd_colle
 
 **Enrichment check:** If an existing note covers similar scope, does the source add new claims or detail? If YES, create enrichment task rather than new note.
 
-**Classification-only.** Search results drive enrichment-vs-new-note routing. On the new-note path, results do NOT contribute content to the new note's body.
+**Classification-only — for body composition.** Search results drive enrichment-vs-new-note routing. On the new-note path, results do NOT contribute content to the new note's body.
+
+**Persist results for connect.** Capture the qmd hits for each cluster — note title (or path) plus a brief reason — and carry them through Materialize. They become the queue entry's `semantic_neighbors` field (see Queue Updates below). This hands connect a validated set of priors so it does not re-derive what structure already discovered.
 
 ### 4. Proposed Groupings
 
@@ -254,7 +256,7 @@ Enrichment writes are atomic:
 
 1. Compose the full modified note content in memory (frontmatter + body + footer).
 2. Run the 6-check schema validation from Shared Helpers on the in-memory content.
-3. **On PASS:** overwrite the target note file. Emit a queue entry (see Queue Management) with `type: enrichment`, `current_phase: reflect`, `target_path` set to the modified note's path.
+3. **On PASS:** overwrite the target note file. Emit a queue entry (see Queue Management) with `type: enrichment`, `current_phase: connect`, `target_path` set to the modified note's path.
 4. **On FAIL:** the target note file is NOT modified. Write the proposed content to `ops/quarantine/{target-basename}-enrichment-{YYYY-MM-DD-HHMM}.md` with a sidecar `.reason` file containing the failure detail. Skip emitting a queue entry for this enrichment. Log in the handoff as quarantined.
 
 ---
@@ -293,7 +295,7 @@ grep -rl "^content_type: moc$" {DOMAIN:note_collection}/ --include="*.md" | whil
 done
 ```
 
-If no existing topic map matches, note this — the reflect phase will handle topic map creation.
+If no existing topic map matches, note this — the connect phase will handle topic map creation.
 
 **Fill template-driven fields:** For each field in `_schema.required` not already filled by the prescriptive step, derive a value from the cluster content that satisfies all constraints. Enum fields use ONLY values from `_schema.enums`. Constrained fields respect `max_length`, `format`, `fixed`.
 
@@ -309,7 +311,7 @@ Do not include the `_schema` block in the output note's frontmatter.
 - If the reasoning is not provided in the source, do not make it up.
 - Reference the source material's evidence and reasoning — do not invent unsupported claims.
 - Use connective words: because, therefore, this suggests, however, in contrast, building on.
-- Do not include wiki-links in the body. Connection-finding belongs to `/reflect`, which runs semantic search and verifies targets before writing links. Pre-seeding links here produces dangling links and duplicates reflect's work without its verification.
+- Do not include wiki-links in the body. Connection-finding belongs to `/connect`, which runs semantic search and verifies targets before writing links. Pre-seeding links here produces dangling links and duplicates connect's work without its verification.
 
 For structure notes, body sections each develop one sub-claim within the shared context. Section headings state the claim or argument thread, not a vague topic label.
 
@@ -330,7 +332,7 @@ Derive `Source:` from the structure task's source. `Topics:` lists the {vocabula
 
 See the Shared Helpers appendix for the full 7-check validation procedure. Severity rules:
 - **FAIL** — missing required field, invalid enum, constraint violation, empty description, empty Topics footer, any wiki-link in the body. FIX INLINE (edit the note) and re-validate. No FAIL-state notes get written.
-- **WARN** — broken footer wiki-link (typically a `Topics:` link to a not-yet-existent MOC, which `/reflect` creates), missing optional field. Log and continue.
+- **WARN** — broken footer wiki-link (typically a `Topics:` link to a not-yet-existent MOC, which `/connect` creates), missing optional field. Log and continue.
 
 If validation FAILs cannot be resolved after one fix attempt, quarantine the artifact (see Shared Helpers) and continue with the next cluster.
 
@@ -344,6 +346,8 @@ If validation FAILs cannot be resolved after one fix attempt, quarantine the art
 2. Set the process task entry's `status: "done"` and add `completed: "<ISO UTC now>"`.
 3. Append one new entry per artifact with the shape shown in "Queue Updates" below.
 4. Write the file back.
+
+**Do not re-read after update.** A successful write means the new state is on disk. Do NOT follow up with `jq` reads to "inspect" what you just wrote — it adds tokens but provides nothing the skill consumes before emitting the Output Block.
 
 ### Queue Updates
 
@@ -362,8 +366,11 @@ Update `ops/queue/queue.json`:
   "target_path": "[full path to the written/modified note]",
   "batch": "[source-basename]",
   "created": "[ISO timestamp]",
-  "current_phase": "reflect",
-  "completed_phases": ["structure"]
+  "current_phase": "connect",
+  "completed_phases": ["structure"],
+  "semantic_neighbors": [
+    {"title": "[neighbor note title]", "path": "[full path]", "reason": "[short context phrase]"}
+  ]
 }
 ```
 
@@ -371,10 +378,11 @@ Update `ops/queue/queue.json`:
 
 **Critical queue rules:**
 - ONE entry per artifact (NOT one per phase).
-- `current_phase` starts at `"reflect"` for every entry produced by structure — the materialization is already done.
+- `current_phase` starts at `"connect"` for every entry produced by structure — the materialization is already done.
 - `completed_phases` starts as `["structure"]` — reflecting that structure has already produced the finished artifact.
 - Every task MUST have `"target_path"` pointing to the materialized note.
 - Every task MUST have `"batch"` identifying which source batch it belongs to.
+- `semantic_neighbors` is the qmd-hit set captured in Step 3, expressed as `[{title, path, reason}, ...]`. Empty array if Step 3 returned no hits. These flow forward as priors for connect — do NOT include them in the note's body or footer (connect places links after evaluation).
 
 ### Output Block
 
@@ -385,7 +393,7 @@ After materializing all artifacts and updating `ops/queue/queue.json` (mark proc
 
 **Target:** {batch-id}
 **Status:** ok | error: {short message}
-**Queue:** marked {batch-id}: process -> done; created {W} note entries and {E} enrichment entries (current_phase: reflect)
+**Queue:** marked {batch-id}: process -> done; created {W} note entries and {E} enrichment entries (current_phase: connect)
 
 ### Work
 - Identified {N} topic clusters from {source}
@@ -422,4 +430,4 @@ Appendix referenced by both Materialize paths. Do not invoke independently.
 
 **Severity levels:**
 - **FAIL** — missing required field, invalid enum, constraint violation, empty description, empty Topics footer, any wiki-link present in the body. Fix inline (edit the content in memory) and re-validate. If a FAIL cannot be resolved after one fix attempt, quarantine the artifact.
-- **WARN** — broken footer wiki-link (most often a `Topics:` link to a not-yet-existent MOC), missing optional field. Log the warning and continue. Topic-map creation happens in `/reflect`; structure flags missing MOCs rather than blocking on them.
+- **WARN** — broken footer wiki-link (most often a `Topics:` link to a not-yet-existent MOC), missing optional field. Log the warning and continue. Topic-map creation happens in `/connect`; structure flags missing MOCs rather than blocking on them.

@@ -32,12 +32,12 @@ How knowledge systems die. The init wizard uses this to include domain-specific 
 
 **one_line_rule:** Every new note joins at least one MOC and earns at least one incoming link before you move on.
 
-**Why it happens:** Creation feels complete without connection. The reflect phase gets skipped "just this once" which becomes always.
+**Why it happens:** Creation feels complete without connection. The connect phase gets skipped "just this once" which becomes always.
 
 **Vulnerable domains:** Research, Learning — high creation rate without mandatory connection.
 
 **Prevention:**
-- Mandatory reflect phase after every note creation
+- Mandatory connect phase after every note creation
 - MOC maintenance as part of the creation workflow
 - Periodic orphan detection (health check)
 - Topics footer as minimum connection requirement

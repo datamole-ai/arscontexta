@@ -1,6 +1,6 @@
 ---
 name: pipeline
-description: End-to-end source processing -- seed, structure/capture, process all notes through reflect/verify, archive. The full pipeline in one command. Triggers on "/pipeline", "/pipeline [file]", "process this end to end", "full pipeline".
+description: End-to-end source processing -- seed, structure/capture, process all notes through connect/verify, archive. The full pipeline in one command. Triggers on "/pipeline", "/pipeline [file]", "process this end to end", "full pipeline".
 version: "1.0"
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 argument-hint: " [file path] [--structure] [--capture]
@@ -95,36 +95,47 @@ After the producer reports `ok`, refresh the qmd index. Run:
 bash .claude/hooks/qmd-sync.sh
 ```
 
-### Phase 2.2: Re-read queue to discover new entries
+### Phase 2.2: Sanity check
 
-Read `ops/queue/queue.json` ONCE. Filter entries where `batch == <batch-id>` and `status == "pending"`. Order by `id` ascending. This is the "work list" for the remainder of Phase 2. The pipeline does not re-read `queue.json` during the per-phase loop.
+Confirm at least one new pending entry exists for `<batch-id>` (a quick `jq` count is sufficient — the orchestrator does not enumerate the work list, the batched skills do):
 
-If the list is empty, report `Processing produced zero notes` and stop.
+```bash
+jq --arg batch "<batch-id>" \
+   '[.tasks[] | select(.batch == $batch and .status == "pending")] | length' \
+   ops/queue/queue.json
+```
 
-### Phase 2.3: Drive each entry through its phase sequence
+If the count is `0`, report `Processing produced zero notes` and stop.
 
-For each entry in the work list (index `i`, total `N`):
+### Phase 2.3: Drive the batch through connect, then verify
+
+Two skill invocations total. Both batched skills self-discover their work lists from `ops/queue/queue.json` using the batch id. The orchestrator does not iterate.
+
+#### Phase 2.3.1: Batched connect
+
+Use the Skill tool to invoke `/connect` with the batch id as the only argument:
+- `<batch-id>` — the source basename, equal to the process entry's `id`.
+
+Parse the chat return:
+- **Status:** must be `ok`; otherwise stop the pipeline and surface the error.
+- **Queue:** should read `advanced N entries: connect -> verify`.
+- **Learnings:** capture non-NONE entries for the final report.
 
 Report:
 ```
-=== Processing task {i}/{N}: {id} — {target} ===
+{batch-id}: connect done — queue: {queue-line}
 ```
 
-Look up `phase_order` for the entry's `type` (`note` or `enrichment`) from the queue file header. The sequence is `[reflect, verify]` for both types.
+#### Phase 2.3.2: Batched verify
 
-For each phase in the sequence, in order:
+Use the Skill tool to invoke `/verify` with the same batch id. Same return-parsing rules.
 
-1. **Invoke the phase skill** via the Skill tool, passing the entry's queue `id` as argument (e.g. `note-007`, `enrich-002`).
-2. **Parse the chat return:**
-   - Extract the `**Status:**` line. If not `ok`, stop the pipeline and surface the error with the current task id and phase.
-   - Extract the `**Queue:**` line for the progress log.
-   - Extract non-NONE Learnings entries and append them to the batch's Learnings accumulator.
-3. **Report phase completion:**
-   ```
-   {id}: {phase} done — queue: {queue-line}
-   ```
+Report:
+```
+{batch-id}: verify done — queue: {queue-line}
+```
 
-The sub-skill has already updated `queue.json` by the time its chat return lands. The orchestrator trusts the chat signal and does not re-read the file.
+The batched skills have already updated `queue.json` atomically by the time their chat returns land. The orchestrator trusts the chat signal and does not re-read the file mid-Phase 2.3.
 
 ---
 
