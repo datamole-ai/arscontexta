@@ -42,7 +42,7 @@ jq --arg batch "$BATCH_ID" \
    ops/queue/queue.json
 ```
 
-If the work list is empty, end immediately with `Status: ok`, `Queue: no entries to advance`, and an empty per-note results section.
+If the work list is empty, end immediately by emitting the JSON Output Contract with `"status": "ok"`, `"queue": "no entries to advance"`, and `"per_note": []`.
 
 For each work-list entry, the relevant fields are:
 - `id` — queue id (e.g. `note-007`, `enrich-002`)
@@ -118,14 +118,24 @@ Connect's job is to **extend** these priors — find what structure could not ha
 Build the candidate set in this order:
 
 1. **Seed from priors (no search needed).** For each note in the work list, add its Topics-footer entries and its queue entry's `semantic_neighbors` directly to the candidate set. These are already validated — they enter Step 4 as candidates without re-derivation.
-2. **Extract gap-fill targets.** For each note, identify concepts mentioned in the body but not represented in the priors. These become the qmd/grep query set in Step 3.
-3. **Deduplicate semantically across notes.** If two notes pointed at the same gap concept, that's one query, not two.
+2. **Add batch siblings.** Every other entry in the work list is a candidate for cross-linking. Sibling discovery does not require qmd — siblings live in `queue.json`.
+3. **Name the residual gaps.** For each note, list concepts mentioned in the body that are NOT represented in priors or siblings. Each gap must be a concrete concept you can write a query for; "feels under-connected" is not a gap.
+4. **Deduplicate gaps across notes.** If two notes pointed at the same gap concept, that's one query, not two.
 
-The output of this step is the input to Step 3: priors that flow straight through (no search), plus a smaller set of gap-fill queries to issue.
+The output of this step is the input to Step 3: priors and siblings that flow straight through (no search), plus a *named* set of gap-fill query candidates.
 
 ### Step 3: Fill gaps via dual discovery (shared)
 
-Step 2's priors are already in the candidate set. Step 3 runs ONE consolidated pass to fill the gaps Step 2 identified. Use dual discovery: {vocabulary.topic_map} exploration AND semantic search in parallel. These are complementary, not sequential. **qmd and grep are gap-filling — not primary discovery — when priors have already supplied candidates.**
+Step 2's priors and siblings are already in the candidate set. Step 3 runs only when there are real gaps to fill. **qmd is gap-filling, not primary discovery.**
+
+**Skip Step 3 entirely when ANY of these hold:**
+
+- Step 2's gap list is empty.
+- Every named gap is covered by an existing topic map already in the priors (read the topic map's Core Ideas instead of querying).
+
+If the skip rule fires, log `qmd queries issued: 0 (priors covered the candidate set)` in the Output Block and proceed to Step 4 with the priors-only candidate set.
+
+If the skip rule does not fire, run ONE consolidated pass with dual discovery — {vocabulary.topic_map} exploration AND semantic search in parallel — over the *named* gap set from Step 2.
 
 **Primary discovery (run in parallel):**
 
@@ -547,56 +557,38 @@ On a system-level error before the queue update, do not write the file — `queu
 
 ---
 
-## Output Block
+## Output Contract
 
-After finishing all steps for every note in the work list (or after a system-level error), emit the canonical block below as the final chat message. This is the ONLY chat output — no task file is written.
+After finishing all steps for every note in the work list (or after a system-level error), emit a single fenced JSON block as the final chat message. No prose, no headings, no progress narration — the JSON is the entire output.
 
-```
-## Connect
-
-**Batch:** {batch-id}
-**Status:** ok | error: {short message}
-**Queue:** advanced {N} entries: connect -> verify
-
-### Discovery (shared)
-- Topics scanned: [{list of topic ids}]
-- Existing topic maps consulted: [{list of moc filenames}]
-- Topic maps created: [{list of new moc filenames}] | NONE
-- qmd queries issued: {Q}
-- grep passes: {G}
-
-### Per-note results
-- [[note-1 title]] ({queue-id}) — {C1} connections, reconsidered ({status: unchanged|sharpened|challenged|revised}) | reconsideration skipped ({reason: granularity=capture | hub | tension | recent | moc})
-- [[note-2 title]] ({queue-id}) — {C2} connections, reconsidered ({status}) | reconsideration skipped ({reason})
-- ...
-
-### Sibling cross-links
-- [[note-A]] ↔ [[note-B]] — {relationship}: {one-line rationale}
-- ...
-| NONE
-
-### Synthesis opportunities
-- {one-line} | NONE
-
-### Skipped reverse links
-- [[target]] — {one-line reason} | NONE
-
-### Cascades
-- [[target]] — {reason} | NONE
-
-### Flagged for attention
-- {orphan | gap | tension — one line} | NONE
-
-### Learnings
-- [Friction]: {description} | NONE
-- [Surprise]: {description} | NONE
-- [Methodology]: {description} | NONE
-- [Process gap]: {description} | NONE
+```json
+{
+  "skill": "connect",
+  "status": "ok",
+  "batch": "<batch-id>",
+  "queue": "advanced <N> entries: connect -> verify",
+  "qmd_queries": <int>,
+  "topic_maps_consulted": ["<moc title>", "..."],
+  "topic_maps_created": ["<moc title>", "..."],
+  "per_note": [
+    {"id": "<queue-id>", "title": "<note title>", "connections_added": <int>, "reconsidered": "unchanged|sharpened|challenged|revised|skipped(<reason>)"}
+  ],
+  "sibling_links": [
+    {"a": "<note A title>", "b": "<note B title>", "relationship": "extends|grounds|contradicts|exemplifies|synthesizes|enables", "rationale": "<one line>"}
+  ],
+  "synthesis_opportunities": ["<one line>"],
+  "skipped_reverse_links": [{"target": "<title>", "reason": "<one line>"}],
+  "cascades": [{"target": "<title>", "reason": "<one line>"}],
+  "flagged": [{"type": "orphan|gap|tension", "detail": "<one line>"}],
+  "deferred_gaps": ["<gap concept>", "..."],
+  "warnings": [],
+  "learnings": [
+    {"category": "Friction|Surprise|Methodology|Process gap", "description": "<short>"}
+  ]
+}
 ```
 
-The orchestrator parses only `Status:`, `Queue:`, and the Learnings section. Per-note details and discovery narration are human-readable.
-
-On error, set `Status: error: <message>`, `Queue: no change (error)`, emit partial per-note results for audit, and leave `queue.json` unchanged.
+On error: `"status": "error"`, `"error": "<short>"`, populate `per_note` with what completed before the failure, and leave `queue.json` unchanged.
 
 ---
 

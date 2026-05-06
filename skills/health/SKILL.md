@@ -3,6 +3,7 @@ name: health
 description: Run condition-based vault health diagnostics. 8 categories — schema compliance, orphan detection, link health, description quality, three-space boundaries, processing throughput, stale notes, MOC coherence. Returns actionable FAIL/WARN/PASS report with specific fixes ranked by impact. Triggers on "/health", "check vault health", "maintenance report", "what needs fixing".
 version: "1.0"
 context: fork
+model: sonnet
 allowed-tools: Read, Grep, Glob, Bash
 ---
 

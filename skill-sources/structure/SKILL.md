@@ -384,33 +384,32 @@ Update `ops/queue/queue.json`:
 - Every task MUST have `"batch"` identifying which source batch it belongs to.
 - `semantic_neighbors` is the qmd-hit set captured in Step 3, expressed as `[{title, path, reason}, ...]`. Empty array if Step 3 returned no hits. These flow forward as priors for connect — do NOT include them in the note's body or footer (connect places links after evaluation).
 
-### Output Block
+### Output Contract
 
-After materializing all artifacts and updating `ops/queue/queue.json` (mark process task done + append one pending entry per artifact), emit the canonical block below as the final chat message. This is the ONLY chat output — no task file is written.
+After materializing all artifacts and updating `ops/queue/queue.json`, emit a single fenced JSON block as the final chat message. No prose, no headings, no progress narration — the JSON is the entire output.
 
+```json
+{
+  "skill": "structure",
+  "status": "ok",
+  "batch": "<batch-id>",
+  "queue": "marked <batch-id>: process -> done; created <W> note + <E> enrichment entries (current_phase: connect)",
+  "clusters_identified": <N>,
+  "created": ["<note target_path>", "..."],
+  "updated": ["<existing note target_path enriched>", "..."],
+  "enrichment_modes": [{"path": "<note path>", "mode": "inline-integrate|append-with-tension|append-new-section"}],
+  "quarantined": [{"path": "ops/quarantine/...", "reason": "<short>"}],
+  "duplicates_skipped": <int>,
+  "qmd_queries": <int>,
+  "qmd_skipped_reasons": ["small-vault", "filename-duplicate", "..."],
+  "warnings": [],
+  "learnings": [
+    {"category": "Friction|Surprise|Methodology|Process gap", "description": "<short>"}
+  ]
+}
 ```
-## Structure
 
-**Target:** {batch-id}
-**Status:** ok | error: {short message}
-**Queue:** marked {batch-id}: process -> done; created {W} note entries and {E} enrichment entries (current_phase: connect)
-
-### Work
-- Identified {N} topic clusters from {source}
-- Classified: {W} new, {E} enrichment, {S} skipped as duplicates
-- New notes: [{list of note target_paths}]
-- Enrichments: [{list of target note titles with chosen mode}]
-- Quarantined: [list artifacts + reason, or "none"]
-- Descriptions flagged for refresh: [list target notes, or "none"]
-
-### Learnings
-- [Friction]: {description} | NONE
-- [Surprise]: {description} | NONE
-- [Methodology]: {description} | NONE
-- [Process gap]: {description} | NONE
-```
-
-On error, set `Status: error: <message>`, `Queue: no change (error)`, fill `### Work` with what got done before the failure, and leave `queue.json` unchanged.
+On error: `"status": "error"`, `"error": "<short>"`, populate `created`/`updated` with what landed before the failure, and leave `queue.json` unchanged.
 
 ## Shared Helpers (Reference)
 

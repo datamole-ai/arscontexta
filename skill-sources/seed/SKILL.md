@@ -3,6 +3,7 @@ name: seed
 description: Add a source file to the processing queue. Checks for duplicates, creates archive folder, moves source from inbox, creates process task, and updates queue. Triggers on "/seed", "/seed [file]", "queue this for processing".
 version: "1.0"
 context: fork
+model: sonnet
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 ---
 
@@ -50,22 +51,29 @@ Print the commit script's report block verbatim. If you flagged a near-duplicate
 
 If either script exits nonzero, emit `ERROR: <script-name> failed (exit <code>)` and stop. Do not attempt recovery.
 
-## Step 4: Report
+## Step 4: Output Contract
 
+Emit a single fenced JSON block as the final chat message. No prose, no headings, no progress narration before or after — the JSON is the entire output.
+
+```json
+{
+  "skill": "seed",
+  "status": "ok",
+  "batch": "<source-basename>",
+  "queue": "added process task (granularity: <structure|capture>)",
+  "source": "<archived path — same as queue entry's source>",
+  "archive_folder": "<ops/queue/archive/<date>-<basename>>",
+  "next_claim_start": <int>,
+  "granularity": "<structure|capture>",
+  "size_lines": <int>,
+  "content_format": "<detected type>",
+  "near_duplicate": "<path — only when Step 2 flagged one; omit otherwise>",
+  "warnings": [],
+  "learnings": []
+}
 ```
---=={ seed }==--
 
-Seeded: {SOURCE_BASENAME}
-Source: {original path} -> {FINAL_SOURCE}
-Archive folder: {ARCHIVE_DIR}
-Archived copy: {DOMAIN:archive}/{DATE}-{SOURCE_BASENAME}.md
-Size: {line count} lines
-Content type: {detected type}
-
-Claims will start at: {NEXT_CLAIM_START}
-Claim files will be: {SOURCE_BASENAME}-{NNN}.md (unique across vault)
-Queue: updated with process task (granularity: {GRANULARITY_FLAG})
-```
+On error set `"status": "error"` and add `"error": "<short message>"`; leave `queue.json` untouched.
 
 ---
 

@@ -3,6 +3,7 @@ name: archive-batch
 description: Archive a completed processing batch. Verifies all tasks are done, resolves the archive folder from the queue, removes queue entries. Triggers on "/archive-batch", "/archive-batch [batch_id]", "archive this batch".
 version: "1.0"
 context: fork
+model: haiku
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 ---
 
@@ -26,22 +27,21 @@ Derivation manifest for vocabulary mapping:
 
 ---
 
-## Step 1: Find Batch Entries
+## Step 1: Check Batch Readiness
 
-Find all queue entries belonging to this batch. Based on the batch ID.
+Run the deterministic readiness check in one Bash turn:
 
-If no entries found, end immediately with: `ERROR: No batch '{batch_id}' found in queue.`
+```bash
+bash ops/scripts/archive-ready.sh "<batch-id>"
+```
 
-Record the list of matching entries and their count.
+Parse the JSON:
 
-## Step 2: Verify All Tasks Complete
+- `.total == 0` (no entries for this batch) — end immediately with `ERROR: No batch '{batch_id}' found in queue.`
+- `.ready == false` — end immediately with `ERROR: Batch '{batch_id}' has incomplete tasks.` and report `.blocking` (each entry carries `id`, `current_phase`, `status`).
+- `.ready == true` — proceed to Step 2.
 
-Check that every entry for this batch has `status: done`.
-
-If ANY entry does not have `status: done`:
-end immediately with: `ERROR: Batch '{batch_id}' has incomplete tasks.`.
-
-## Step 3: Remove Batch From Queue
+## Step 2: Remove Batch From Queue
 
 Remove all entries for this batch from `ops/queue/queue.json` via a single `jq` call. Substitute the batch id (the source basename) for `<batch-id>`:
 
@@ -54,21 +54,22 @@ jq --arg batch "<batch-id>" \
 
 **Do not re-read after update.** A zero-exit on the `jq | mv` chain means the file was rewritten. Do NOT follow up with `jq` reads to "inspect" what was removed — it adds tokens but provides nothing the skill consumes before emitting the report.
 
-## Step 4: Report
+## Step 3: Output Contract
 
+Emit a single fenced JSON block as the final chat message. No prose, no headings, no progress narration.
+
+```json
+{
+  "skill": "archive-batch",
+  "status": "ok",
+  "batch": "<batch-id>",
+  "queue": "removed <N> entries",
+  "archive_folder": "<ops/queue/archive/...>",
+  "notes_produced": ["<title>", "..."],
+  "enrichments": ["<title>", "..."],
+  "warnings": [],
+  "learnings": []
+}
 ```
---=={ archive-batch }==--
 
-Archived: {batch_id}
-Archive folder: {ARCHIVE_DIR}
-
-{DOMAIN:note_plural} produced: {claim_count}
-Enrichments: {enrichment_count}
-
-Created {DOMAIN:note_plural}:
-- [[{title 1}]]
-- [[{title 2}]]
-- ...
-
-Queue: {remaining_entry_count} entries remaining
-```
+On error: `"status": "error"`, `"error": "<short>"`, leave `queue.json` unchanged.

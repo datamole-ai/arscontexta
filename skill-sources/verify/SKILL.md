@@ -2,6 +2,7 @@
 name: verify
 description: Internal pipeline skill — runs validate + review quality gate across all notes in a batch in one pass, with shared vault-scope checks. Invoked by /pipeline as a subagent; do not invoke directly.
 context: fork
+model: sonnet
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 ---
 
@@ -47,8 +48,13 @@ The script:
 - Runs vault-scope link health and orphan checks across the batch.
 - Runs per-note structural checks (frontmatter delimiters, trailing-period description, Topics footer presence, capture verbatim integrity).
 - Emits the partial `## Verify` block with each per-note line ending in `Review: TBD`.
+- Appends a `### Machine output` JSON object with the deterministic findings:
+  ```json
+  {"batch":"<id>","worklist":N,"link_health":{"status":"PASS|FAIL","scanned":K,"broken":[{"id","target"}]},"orphan_check":{"status":"PASS|FAIL","count":O,"ids":[{"id","target_path"}]},"per_note":[{"id","path","granularity","validate":"PASS|WARN|FAIL","issues":[],"review":"TBD"}]}
+  ```
+  Use this JSON as the source of truth for the deterministic verdicts — the human-readable lines above it are for audit, not for re-parsing.
 
-If the work-list is empty, the script exits 0 with an explicit "no entries" line. Print its output and stop — there is nothing to do.
+If the work-list is empty, the script exits 0 with an explicit "no entries" line and `link_health.status: SKIP`. Print its output and stop — there is nothing to do.
 
 ### Step 2: Semantic per-note checks (LLM judgment)
 
@@ -78,39 +84,34 @@ Append the script's confirmation line to the Output Block's `**Queue:**` field.
 
 If either script exits nonzero, emit `ERROR: <script-name> failed (exit <code>)` and stop. Do not attempt recovery.
 
-## Output Block
+## Output Contract
 
-After finishing all steps for every note in the work list (or after a system-level error), perform queue self-update (mark every successfully verified entry done) and then emit the canonical block below as the final chat message. This is the ONLY chat output — no task file is written.
+After finishing all steps for every note in the work list (or after a system-level error), perform queue self-update (mark every successfully verified entry done) and then emit a single fenced JSON block as the final chat message. The verify-batch.sh `### Machine output` block is the input; the verify skill's chat JSON is the output. No prose, no headings, no progress narration.
 
-```
-## Verify
-
-**Batch:** {batch-id}
-**Status:** ok | error: {short message}
-**Queue:** marked {N} entries: verify -> done
-
-### Vault-scope checks
-- Link health: [PASS/WARN/FAIL] ({K} links scanned across {N} notes, {M} broken)
-- Orphan check: [PASS/WARN/FAIL] ({O} orphans found)
-
-### Per-note checks
-- [[note-1 title]] ({queue-id}) — Validate: PASS | WARN ({issue}) | FAIL ({issue}); Review: PASS | WARN | FAIL
-- [[note-2 title]] ({queue-id}) — ...
-- ...
-
-### Auto-fixes applied
-- [[note]] — {fix description} | NONE
-
-### Learnings
-- [Friction]: {description} | NONE
-- [Surprise]: {description} | NONE
-- [Methodology]: {description} | NONE
-- [Process gap]: {description} | NONE
+```json
+{
+  "skill": "verify",
+  "status": "ok",
+  "batch": "<batch-id>",
+  "queue": "marked <N> entries: verify -> done",
+  "vault_scope": {
+    "link_health": {"status": "PASS|FAIL", "scanned": <K>, "broken": [{"id": "<queue-id>", "target": "<title>"}]},
+    "orphan_check": {"status": "PASS|FAIL", "count": <O>, "ids": [{"id": "<queue-id>", "target_path": "<path>"}]}
+  },
+  "per_note": [
+    {"id": "<queue-id>", "title": "<note title>", "validate": "PASS|WARN|FAIL", "review": "PASS|WARN|FAIL", "issues": ["<short>", "..."]}
+  ],
+  "auto_fixes": [{"note": "<title>", "fix": "<short description>"}],
+  "warnings": [],
+  "learnings": [
+    {"category": "Friction|Surprise|Methodology|Process gap", "description": "<short>"}
+  ]
+}
 ```
 
-The orchestrator parses only `Status:`, `Queue:`, and the Learnings section. Per-note check results and vault-scope summaries are human-readable.
+Token cap: ~500. Successful PASS notes carry empty `issues`; only failing/warning notes carry detail. The orchestrator reads `status`, `queue`, vault-scope verdicts, per-note review failures, and `learnings`.
 
-On error, set `Status: error: <message>`, `Queue: no change (error)`, emit partial per-note results for audit, and leave `queue.json` unchanged.
+On error: `"status": "error"`, `"error": "<short>"`, populate `per_note` with what completed before the failure, and leave `queue.json` unchanged.
 
 ---
 

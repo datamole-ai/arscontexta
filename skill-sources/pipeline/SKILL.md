@@ -49,6 +49,9 @@ Phase 4: /archive-batch — finalize the batch in queue.json and move artifacts 
 Phase 4.5: Write learnings.md to the archive folder
     |
     v
+Phase 4.6: Sync semantic index
+    |
+    v
 Phase 5: Commit — single batch commit if in a git repo
     |
     v
@@ -57,24 +60,36 @@ Complete
 
 /pipeline is the orchestrator. /seed is the entry point for Phase 1; /pipeline drives Phase 2, invokes /archive-batch for Phase 4, and produces the batch commit as Phase 5.
 
+## Output Contract for Sub-skills
+
+Every sub-skill (seed, structure, capture, connect, verify, archive-batch) emits a single fenced JSON block as its final chat message. The block is the canonical handoff and the only chat output. The orchestrator parses these fields:
+
+- `status` — `"ok"` or `"error"`. On `"error"`, stop the pipeline and surface `error`.
+- `batch` — must equal `<batch-id>`.
+- `queue` — short human string for the user-facing progress line.
+- `created` / `updated` (when present) — paths to include in the final report.
+- `learnings` — array of `{category, description}` aggregated for the archive-folder learnings.md.
+
+The orchestrator does NOT re-narrate the JSON. It surfaces a one-line status to the user and moves to the next phase.
+
 ---
 
 ## Phase 1: Seed
 
 Use Skill tool to invoke /seed on the target file with the granularity flag to create the process task.
 
-**Capture from seed output:**
-- **Batch ID**: the source basename
-- **Archive folder path**: where the source was moved
-- **next_claim_start**: the claim numbering start
+Parse the seed JSON Output Contract:
+- `status` — must be `"ok"`; otherwise stop the pipeline and surface `error`.
+- `batch`, `archive_folder`, `next_claim_start`, `granularity` — capture for downstream phases.
+- `learnings` — collect for the final report.
 
-Report: `$ Seeded: {source-name}`
+Report one line: `Seeded: <batch>` (no JSON re-rendering, no per-field listing).
 
 ---
 
 ## Phase 2: Process Source (Granularity-Routed) and claims
 
-Process the source via the appropriate producer, then drive each resulting note/enrichment through the phase sequence. Each sub-skill is self-owning: it updates its own entry in `ops/queue/queue.json` and echoes its canonical output block to chat. The orchestrator parses the chat return for Status / Queue / Learnings and holds the iteration state in memory.
+Process the source via the appropriate producer, then drive each resulting note/enrichment through the phase sequence. Each sub-skill is self-owning: it updates its own entry in `ops/queue/queue.json` and emits its canonical JSON Output Contract to chat. The orchestrator parses each JSON object for `status`, `queue`, paths, and `learnings`, and holds the iteration state in memory.
 
 ### Phase 2.1: Invoke the producer
 
@@ -82,30 +97,20 @@ Use the Skill tool to invoke `/structure` or `/capture` (based on the process en
 
 - `<batch-id>` — the source basename, equal to the process entry's `id`.
 
-Parse the producer's chat return:
-- **Status:** must be `ok`; otherwise stop the pipeline and surface the error.
-- **Queue:** should read `marked <batch-id>: process -> done; created <N> note entries ...`.
-- **Learnings:** capture non-NONE entries for the final report.
-
-### Phase 2.1.5: Sync semantic index
-
-After the producer reports `ok`, refresh the qmd index. Run:
-
-```bash
-bash .claude/hooks/qmd-sync.sh
-```
+Parse the producer's JSON:
+- `status` — must be `"ok"`; otherwise stop and surface `error`.
+- `created`, `updated`, `quarantined` — capture for the final report.
+- `learnings` — collect.
 
 ### Phase 2.2: Sanity check
 
-Confirm at least one new pending entry exists for `<batch-id>` (a quick `jq` count is sufficient — the orchestrator does not enumerate the work list, the batched skills do):
+Confirm at least one new pending entry exists for `<batch-id>` via the deterministic state script:
 
 ```bash
-jq --arg batch "<batch-id>" \
-   '[.tasks[] | select(.batch == $batch and .status == "pending")] | length' \
-   ops/queue/queue.json
+bash ops/scripts/pipeline-state.sh "<batch-id>"
 ```
 
-If the count is `0`, report `Processing produced zero notes` and stop.
+Read the JSON and parse `.by_status.pending` (or `.total`). If no pending entries exist, report `Processing produced zero notes` and stop.
 
 ### Phase 2.3: Drive the batch through connect, then verify
 
@@ -116,85 +121,97 @@ Two skill invocations total. Both batched skills self-discover their work lists 
 Use the Skill tool to invoke `/connect` with the batch id as the only argument:
 - `<batch-id>` — the source basename, equal to the process entry's `id`.
 
-Parse the chat return:
-- **Status:** must be `ok`; otherwise stop the pipeline and surface the error.
-- **Queue:** should read `advanced N entries: connect -> verify`.
-- **Learnings:** capture non-NONE entries for the final report.
+Parse the connect JSON:
+- `status` — must be `"ok"`; otherwise stop and surface `error`.
+- `qmd_queries`, `topic_maps_consulted`, `topic_maps_created` — for the report.
+- `learnings` — collect.
 
-Report:
-```
-{batch-id}: connect done — queue: {queue-line}
-```
+Report one line: `<batch-id>: connect done — <queue>`.
 
 #### Phase 2.3.2: Batched verify
 
-Use the Skill tool to invoke `/verify` with the same batch id. Same return-parsing rules.
+Use the Skill tool to invoke `/verify` with the same batch id.
 
-Report:
-```
-{batch-id}: verify done — queue: {queue-line}
-```
+Parse the verify JSON:
+- `status` — must be `"ok"`; otherwise stop and surface `error`.
+- `vault_scope` and `per_note` — capture failures for the report; do not re-narrate the per-note rows.
+- `learnings` — collect.
 
-The batched skills have already updated `queue.json` atomically by the time their chat returns land. The orchestrator trusts the chat signal and does not re-read the file mid-Phase 2.3.
+Report one line: `<batch-id>: verify done — <queue>`.
+
+The batched skills have already updated `queue.json` atomically by the time their JSON return lands. The orchestrator trusts the JSON signal and does not re-read the file mid-Phase 2.3.
 
 ---
 
 ## Phase 3: Verify Completion
 
-Re-read `ops/queue/queue.json` once. Count entries where `batch == <batch-id>` AND `status != "done"`.
+Run the deterministic readiness check:
 
-**If any remain:**
-- Report which tasks are incomplete and at which phase (from the queue).
-- Show the specific task ids and their `current_phase`.
+```bash
+bash ops/scripts/archive-ready.sh "<batch-id>"
+```
+
+Parse the JSON. **If `.ready == false`:**
+- Report `.blocking` entries — each carries `id`, `current_phase`, `status`.
 - Do NOT proceed to archive.
 
-**If all done:** proceed to Phase 4.
+**If `.ready == true`:** proceed to Phase 4.
 
 ---
 
 ## Phase 4: Archive Batch
 
-When all tasks for the batch are complete, archive the batch by using Skill tool to invoke /archive-batch.
+When all tasks for the batch are complete, use the Skill tool to invoke /archive-batch.
+
+Parse the archive-batch JSON:
+- `status` — must be `"ok"`; otherwise stop and surface `error`.
+- `archive_folder`, `notes_produced`, `enrichments` — for the final report.
+- `learnings` — collect.
 
 ---
 
 ## Phase 4.5: Write Learnings
 
-After `/archive-batch` returns successfully, write the accumulated Learnings to the batch's archive folder.
+After `/archive-batch` returns successfully, aggregate the `learnings` arrays collected from every phase's JSON Output Contract (seed → producer → connect → verify → archive-batch) and write a consolidated file at `<archive_folder>/learnings.md`.
 
-Resolve the archive folder from the queue's process entry.
-
-Write `<archive_folder>/learnings.md` with the following shape:
+Group entries by `category`:
 
 ```markdown
-# Learnings — {batch_id}
+# Learnings — <batch_id>
 
 ## Friction
-- {description}
+- <description>
 - ...
 
 ## Surprise
-- {description}
 - ...
 
 ## Methodology
-- {description}
 - ...
 
 ## Process gap
-- {description}
 - ...
 ```
 
-If a category has zero non-NONE entries, omit that section entirely. If all four categories are empty, do not write the file.
+Omit any category whose aggregated list is empty. If every category is empty across all phases, do not write the file.
 
 ---
 
+## Phase 4.6: Sync semantic index
+
+```bash
+bash .claude/hooks/qmd-sync.sh
+```
+
 ## Phase 5: Commit
 
-After `/archive-batch` returns successfully, commit all batch artifacts in a single commit.
+After `/archive-batch` returns successfully, commit all batch artifacts in a single commit:
 
-Capture the value for inclusion in Phase 6's final report.
+```bash
+bash ops/scripts/commit-batch.sh "<batch-id>" "pipeline: <batch-id>"
+```
+
+Parse the JSON. The script returns `committed: true` and the commit hash when work was staged, or `committed: false` with a `reason` when the tree was already clean or the workspace is not a git repo. Capture `.commit` (the hash) for Phase 6's final report.
 
 ---
 

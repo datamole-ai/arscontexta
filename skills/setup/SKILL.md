@@ -517,11 +517,33 @@ Create the three-space layout with domain-named directories. Flat by default; Fi
 |   +-- templates/                   <-- single note.md template (created in Pipeline Step 4)
 |   +-- features/                    <-- feature reference files
 |   +-- methodology/                 <-- derivation rationale (documentation)
+|   +-- scripts/                     <-- deterministic shell helpers (copied from engine)
 |   +-- queue/
 |   |   +-- archive/
 ```
 
 Hub MOC (`index.md`) lives at the `{vocabulary.note_collection}/` root. Topic MOCs also live at the collection root. Always generate the inbox folder.
+
+##### ops/scripts/ — deterministic helpers
+
+Copy the engine's `ops-scripts/` directory into the vault as `ops/scripts/` and preserve the executable bit. These scripts let pipeline-driven skills do JSON-shaped state queries in a single Bash turn instead of multiple model turns:
+
+```bash
+mkdir -p ops/scripts
+cp "${CLAUDE_PLUGIN_ROOT}/ops-scripts/"*.sh ops/scripts/
+chmod +x ops/scripts/*.sh
+```
+
+The four scripts shipped:
+
+| Script | Purpose |
+|--------|---------|
+| `pipeline-state.sh <batch_id>` | JSON snapshot of queue counts per phase/status, archive folder, git state |
+| `archive-ready.sh <batch_id>` | `{ready, blocking[], total}` — drives /archive-batch's gate |
+| `vault-quick-check.sh` | required-files/dirs sanity check, JSON output |
+| `commit-batch.sh <batch_id> <message>` | stage + commit batch artifacts, return commit hash |
+
+These are vault-internal and do not need vocabulary substitution — they operate on `ops/queue/queue.json`, the manifest, and git, which are universal.
 
 ##### Vault Marker
 

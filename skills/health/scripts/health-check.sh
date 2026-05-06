@@ -36,6 +36,63 @@ note_files() {
   find "$NOTES_DIR" -name "*.md" -type f 2>/dev/null
 }
 
+# A file is a topic map if its YAML frontmatter sets content_type: moc OR
+# carries a tag of "moc" or "topic-map" (block-style or inline list).
+is_moc_file() {
+  awk '
+    BEGIN { fm = 0; found = 0 }
+    /^---[[:space:]]*$/ { fm++; if (fm == 2) exit; next }
+    fm == 1 {
+      if ($0 ~ /^content_type:[[:space:]]*moc[[:space:]]*$/) { found = 1; exit }
+      if ($0 ~ /^[[:space:]]*-[[:space:]]*(moc|topic-map)[[:space:]]*$/) { found = 1; exit }
+      if ($0 ~ /^tags:[[:space:]]*\[.*(moc|topic-map).*\]/) { found = 1; exit }
+    }
+    END { exit !found }
+  ' "$1"
+}
+
+# Pre-scanned inverted index: one "file|target" pair per (note, wiki-link
+# target) it carries, deduplicated within each note. Filenames === titles
+# verbatim, so targets compare directly to basenames. Built once and reused
+# by Cat 2, Cat 7, and Cat 8.
+_LINK_PAIRS_CACHE=""
+build_link_pairs() {
+  [ -n "$_LINK_PAIRS_CACHE" ] && return 0
+  _LINK_PAIRS_CACHE=$(
+    while IFS= read -r f; do
+      [ -f "$f" ] || continue
+      grep -oE '\[\[[^]]+\]\]' "$f" 2>/dev/null \
+        | sed -E 's/^\[\[(.+)\]\]$/\1/' \
+        | sort -u \
+        | while IFS= read -r target; do
+            [ -n "$target" ] && printf '%s|%s\n' "$f" "$target"
+          done
+    done < <(note_files)
+  )
+}
+# Count distinct files in NOTES_DIR that link to a given target, excluding self.
+incoming_count() {
+  local target="$1"
+  local self_path="$2"
+  build_link_pairs
+  printf '%s\n' "$_LINK_PAIRS_CACHE" \
+    | awk -F'|' -v t="$target" -v me="$self_path" '
+        $2 == t && $1 != me { c++ } END { print c+0 }
+      '
+}
+# List of MOC files (one per line) — derived once via is_moc_file.
+_MOC_FILES_CACHE=""
+moc_files() {
+  if [ -z "$_MOC_FILES_CACHE" ]; then
+    while IFS= read -r f; do
+      [ -f "$f" ] || continue
+      is_moc_file "$f" && _MOC_FILES_CACHE="${_MOC_FILES_CACHE}${f}
+"
+    done < <(note_files)
+  fi
+  printf '%s' "$_MOC_FILES_CACHE"
+}
+
 # Print a per-category header line.
 emit_header() {
   printf '[%s] %-30s %s\n' "$1" "$2" "$3"
@@ -43,7 +100,7 @@ emit_header() {
 
 # ── Scan summary ────────────────────────────────────────────────
 TOTAL_NOTES=$(note_files | wc -l | tr -d ' ')
-MOC_COUNT=$(note_files | xargs grep -l '^content_type: moc' 2>/dev/null | wc -l | tr -d ' ')
+MOC_COUNT=$(moc_files | grep -c '\.md$' | tr -d ' ')
 INBOX_COUNT=$(find "$INBOX_DIR" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
 echo "# scan: notes=$TOTAL_NOTES mocs=$MOC_COUNT inbox=$INBOX_COUNT"
 echo ""
@@ -74,9 +131,8 @@ now_epoch=$(date +%s)
 while IFS= read -r f; do
   [ -f "$f" ] || continue
   bn=$(basename "$f" .md)
-  # Skip MOCs from orphan check
-  grep -q '^content_type: moc' "$f" 2>/dev/null && continue
-  incoming=$(grep -rl "\[\[$bn\]\]" "$NOTES_DIR" 2>/dev/null | grep -v "^$f$" | wc -l | tr -d ' ')
+  is_moc_file "$f" && continue
+  incoming=$(incoming_count "$bn" "$f")
   [ "$incoming" -gt 0 ] && continue
   mtime=$(stat -f %m "$f" 2>/dev/null || stat -c %Y "$f" 2>/dev/null)
   age_days=$(( (now_epoch - mtime) / 86400 ))
@@ -187,11 +243,11 @@ cat7_details=""
 while IFS= read -r f; do
   [ -f "$f" ] || continue
   bn=$(basename "$f" .md)
-  grep -q '^content_type: moc' "$f" 2>/dev/null && continue
+  is_moc_file "$f" && continue
   mtime=$(stat -f %m "$f" 2>/dev/null || stat -c %Y "$f" 2>/dev/null)
   age=$(( (now_epoch - mtime) / 86400 ))
   [ "$age" -le 30 ] && continue
-  incoming=$(grep -rl "\[\[$bn\]\]" "$NOTES_DIR" 2>/dev/null | grep -v "^$f$" | wc -l | tr -d ' ')
+  incoming=$(incoming_count "$bn" "$f")
   [ "$incoming" -ge 2 ] && continue
   if [ "$age" -gt 90 ] && [ "$incoming" -eq 0 ]; then
     tier="FAIL"
@@ -211,9 +267,8 @@ cat8_status="PASS"
 cat8_details=""
 while IFS= read -r moc; do
   [ -f "$moc" ] || continue
-  grep -q '^content_type: moc' "$moc" 2>/dev/null || continue
   moc_bn=$(basename "$moc" .md)
-  linked=$(grep -rl "\[\[$moc_bn\]\]" "$NOTES_DIR" --include='*.md' 2>/dev/null | grep -v "^$moc$" | wc -l | tr -d ' ')
+  linked=$(incoming_count "$moc_bn" "$moc")
   if [ "$linked" -lt 5 ]; then
     [ "$cat8_status" = "PASS" ] && cat8_status="WARN"
     cat8_details="${cat8_details}      - $moc_bn: $linked notes [WARN — underdeveloped]\n"
@@ -231,7 +286,7 @@ while IFS= read -r moc; do
     [ "$cat8_status" = "PASS" ] && cat8_status="WARN"
     cat8_details="${cat8_details}        $bare bare links without context phrases\n"
   fi
-done < <(note_files)
+done < <(moc_files)
 emit_header 8 "MOC Coherence" "$cat8_status"
 [ -n "$cat8_details" ] && printf "%b" "$cat8_details"
 echo ""

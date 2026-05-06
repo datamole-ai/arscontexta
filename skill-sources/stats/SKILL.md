@@ -2,6 +2,7 @@
 name: stats
 description: Show vault statistics and knowledge graph metrics. Provides a snapshot of vault health, growth, and progress. Triggers on "/stats", "vault stats", "how big is my vault".
 version: "1.0"
+model: haiku
 allowed-tools: Read, Grep, Glob, Bash
 ---
 

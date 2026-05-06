@@ -3,6 +3,7 @@ name: capture
 description: Internal pipeline skill — preserves source material verbatim with frontmatter and graph connections. Invoked by /pipeline as a subagent; do not invoke directly.
 version: "1.0"
 context: fork
+model: sonnet
 allowed-tools: Read, Write, Grep, Glob
 ---
 
@@ -176,33 +177,26 @@ No enrichment tasks — capture does not analyze content deeply enough to spot e
 
 ---
 
-## Output Block
+## Output Contract
 
-After materializing the note and updating `ops/queue/queue.json` (mark process task done + append the note entry), emit the canonical block below as the final chat message. This is the ONLY chat output — no task file is written.
+After materializing the note and updating `ops/queue/queue.json`, emit a single fenced JSON block as the final chat message. No prose, no headings, no progress narration — the JSON is the entire output.
 
-```
-## Capture
-
-**Target:** {batch-id}
-**Status:** ok | error: {short message}
-**Queue:** marked {batch-id}: process -> done; created 1 note entry (current_phase: connect)
-
-### Work
-- Captured {source} verbatim as [[{note title}]]
-- Created queue entry: note-{NNN}
-
-### Files Modified
-- {vocabulary.note_collection}/{note title}.md
-- ops/queue/queue.json
-
-### Learnings
-- [Friction]: {description} | NONE
-- [Surprise]: {description} | NONE
-- [Methodology]: {description} | NONE
-- [Process gap]: {description} | NONE
+```json
+{
+  "skill": "capture",
+  "status": "ok",
+  "batch": "<batch-id>",
+  "queue": "marked <batch-id>: process -> done; created 1 note entry (current_phase: connect)",
+  "created": ["{vocabulary.note_collection}/<note title>.md"],
+  "queue_id": "note-<NNN>",
+  "warnings": [],
+  "learnings": [
+    {"category": "Friction|Surprise|Methodology|Process gap", "description": "<short>"}
+  ]
+}
 ```
 
-On error, set `Status: error: <message>`, `Queue: no change (error)`, and leave `queue.json` and the target filesystem unchanged.
+On error: `"status": "error"`, `"error": "<short>"`, leave `queue.json` and the filesystem unchanged.
 
 ---
 

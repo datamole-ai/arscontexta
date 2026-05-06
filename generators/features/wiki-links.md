@@ -9,7 +9,7 @@
 
 ### How Links Work
 
-- `[[{DOMAIN:note} title]]` links to the {DOMAIN:note} with that filename
+- `[[{DOMAIN:note} title]]` links to the {DOMAIN:note} with that exact filename
 - Links resolve by filename, not path — every filename must be unique across the entire workspace
 - Links work as prose: "Since [[Mom prefers phone calls on Sunday mornings]], I should call her this weekend"
 - Wiki links are bidirectionally discoverable — you can find what links TO a {DOMAIN:note} by searching for its title in double brackets

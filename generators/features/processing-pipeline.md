@@ -5,7 +5,7 @@
 ```markdown
 ## Processing Pipeline
 
-**Depth over breadth. Quality over speed. Tokens are free.**
+**Correctness first, but every model turn and search must earn its cost.** Prefer deterministic scripts, compact outputs, and bounded search. Spend extra tokens only when they reduce material correctness risk.
 
 Every piece of content follows the same path: capture, then {DOMAIN:process}, then {DOMAIN:connect}, then {DOMAIN:verify}. Each phase has a distinct purpose. Mixing them degrades both.
 
@@ -149,9 +149,9 @@ The task queue tracks every {DOMAIN:note} being processed through the pipeline. 
 
 #### Queue As Sole State Surface
 
-Each phase skill reads its entry from `ops/queue/queue.json` by id, executes the phase, updates its own queue entry (`current_phase`, `completed_phases`, `status`), and emits a canonical Output Block as its final chat message. The orchestrator parses that chat block to drive the next phase. State transfers through the queue and the chat return.
+Each phase skill reads its entry from `ops/queue/queue.json` by id, executes the phase, updates its own queue entry (`current_phase`, `completed_phases`, `status`), and emits a canonical JSON Output Contract as its final chat message — one fenced JSON block, no prose around it. The orchestrator parses that JSON to drive the next phase. State transfers through the queue (durable) and through JSON returns (within a run).
 
-**Batch archival:** When all {DOMAIN:notes} from a source reach `"done"`, the batch is archivable. /archive-batch removes the batch's queue entries; /pipeline then writes `<archive_folder>/learnings.md` aggregating non-NONE learnings from each phase's Output Block.
+**Batch archival:** When all {DOMAIN:notes} from a source reach `"done"`, the batch is archivable. /archive-batch removes the batch's queue entries; /pipeline then writes `<archive_folder>/learnings.md` aggregating the `learnings` arrays from every phase's JSON Output Contract.
 
 #### Maintenance via /health (Diagnostic, On-Demand)
 
@@ -188,8 +188,8 @@ The pipeline's quality depends on each phase getting your best attention. Your c
 
 ~~~
 Orchestrator reads queue -> picks next task -> invokes phase skill for one phase
-  Phase skill (forked context): reads all queue entries for the current batch, executes the phase across the batch, updates queue.json atomically, emits canonical Output Block as final chat message
-  Phase skill returns -> Orchestrator parses chat Output Block -> invokes next phase skill
+  Phase skill (forked context): reads all queue entries for the current batch, executes the phase across the batch, updates queue.json atomically, emits a single fenced JSON block (the Output Contract) as final chat message
+  Phase skill returns -> Orchestrator parses the JSON -> invokes next phase skill
 ~~~
 
 **Why fresh context matters:**
@@ -203,7 +203,7 @@ If all phases run in one session, the verify phase runs on degraded attention �
 
 **Handoff through queue + chat:**
 - Each phase updates its entry in `ops/queue/queue.json` (status, current_phase, completed_phases)
-- Each phase emits a canonical Output Block as its final chat message (Status / Queue / Learnings)
+- Each phase emits a canonical JSON Output Contract as its final chat message (`status`, `queue`, `created`/`updated`, `learnings`)
 - The orchestrator parses that chat block to drive the next phase
 
 **Processing is orchestrated by default.** /pipeline orchestrates the full sequence. The queue drives what happens next.
@@ -260,7 +260,7 @@ Each session focuses on ONE task. Discoveries become future tasks, not immediate
 
 Your attention degrades as context fills. The first ~40% of context is the "smart zone" — sharp, capable, good decisions. Beyond that, context rot sets in. Structure each task so critical information lands early. When processing multiple {DOMAIN:notes}, use fresh context per phase — never chain phases in one session. Each phase fork covers the full batch.
 
-**The handoff protocol:** Every phase updates its queue entries (atomically, across the whole batch) and emits a canonical Output Block as its final chat message. The orchestrator parses that block to drive the next phase. State transfers through the queue (durable) and chat Output Blocks (within a pipeline run), not through accumulated conversation across phases. This ensures:
+**The handoff protocol:** Every phase updates its queue entries (atomically, across the whole batch) and emits a canonical JSON Output Contract as its final chat message. The orchestrator parses that JSON to drive the next phase. State transfers through the queue (durable) and JSON returns (within a pipeline run), not through accumulated conversation across phases. This ensures:
 - No context contamination between phases
 - Each phase gets your best attention
 - Crashes are recoverable (`queue.json` shows `current_phase` for any entries the phase did not advance)
