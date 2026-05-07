@@ -25,15 +25,17 @@ if ! jq empty "$QUEUE" 2>/dev/null; then
   exit 2
 fi
 
-total=$(jq --arg b "$BATCH_ID" '[.tasks[] | select(.batch == $b)] | length' "$QUEUE")
+total=$(jq --arg b "$BATCH_ID" '
+  [.tasks[] | select(.batch == $b and .type != "process")] | length
+' "$QUEUE")
 by_phase=$(jq --arg b "$BATCH_ID" '
-  [.tasks[] | select(.batch == $b)]
+  [.tasks[] | select(.batch == $b and .type != "process")]
   | group_by(.current_phase // "none")
   | map({key:(.[0].current_phase // "none"), value:length})
   | from_entries
 ' "$QUEUE")
 by_status=$(jq --arg b "$BATCH_ID" '
-  [.tasks[] | select(.batch == $b)]
+  [.tasks[] | select(.batch == $b and .type != "process")]
   | group_by(.status)
   | map({key:(.[0].status), value:length})
   | from_entries

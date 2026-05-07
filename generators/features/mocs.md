@@ -47,17 +47,21 @@ These are your foundation. As your {DOMAIN:note_collection}/ grows, you will cre
 Brief orientation — 2-3 sentences explaining what this topic covers and how to use this {DOMAIN:topic map}.
 
 ## Core Ideas
-- [[{DOMAIN:note}]] — context explaining why this matters here
-- [[{DOMAIN:note}]] — what this adds to the topic
+- [[{DOMAIN:note}]] — one short sentence explaining why this matters here
+- [[{DOMAIN:note}]] — one short sentence on what this adds to the topic
 
 ## Tensions
 Unresolved conflicts — intellectual work, not bugs. What questions remain open? Where do ideas clash?
 
 ## Open Questions
-What is unexplored. Research directions, gaps in understanding, areas that need attention.
+- missing concrete examples of [topic]
+- no comparison with [neighboring approach]
+- need evidence for [claim]
 ```
 
-**The critical rule:** Core Ideas entries MUST have context phrases. A bare link list (`- [[{DOMAIN:note}]]` without explanation) is an address book, not a map. The context phrase explains WHY this {DOMAIN:note} belongs here and what it contributes to the topic. This is what makes {DOMAIN:topic maps} navigable — you can scan the context phrases to find the entry point you need without reading every linked {DOMAIN:note}.
+**The critical rule:** Core Ideas entries MUST have context phrases. A bare link list (`- [[{DOMAIN:note}]]` without explanation) is an address book, not a map. The context phrase explains WHY this {DOMAIN:note} belongs here and what it contributes to the topic. Keep it to one short sentence so the map remains scannable.
+
+**Open Questions stay bounded:** keep at most 5 bullets. Each bullet is one concrete missing concept, comparison, example, or evidence source. Merge duplicates or remove stale low-value gaps before adding another.
 
 ### Lifecycle
 

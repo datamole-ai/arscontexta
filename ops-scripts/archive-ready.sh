@@ -23,7 +23,9 @@ if ! jq empty "$QUEUE" 2>/dev/null; then
   exit 2
 fi
 
-total=$(jq --arg b "$BATCH_ID" '[.tasks[] | select(.batch == $b)] | length' "$QUEUE")
+total=$(jq --arg b "$BATCH_ID" '
+  [.tasks[] | select(.batch == $b or (.id == $b and .type == "process"))] | length
+' "$QUEUE")
 
 if [ "$total" = "0" ]; then
   jq -n --arg b "$BATCH_ID" \
@@ -33,7 +35,7 @@ fi
 
 blocking=$(jq -c --arg b "$BATCH_ID" '
   [.tasks[]
-   | select(.batch == $b and .status != "done")
+   | select((.batch == $b or (.id == $b and .type == "process")) and .status != "done")
    | {id, type, current_phase, status, target_path: (.target_path // null)}]
 ' "$QUEUE")
 blocking_count=$(echo "$blocking" | jq 'length')

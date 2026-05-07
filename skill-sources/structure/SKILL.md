@@ -109,29 +109,38 @@ If any check fails, the note needs restructuring — adjust sections or scope, d
 
 ### The Prose-as-Title Pattern
 
-A structure note title is a **sentence** describing the scope of the grouped claims — not a list of topics. When linked into prose, it still reads naturally as a noun phrase ("building on [[title]]", "we explored [[title]]"), but the title itself must parse as a sentence when the completion gate is applied.
+A structure note title is a **source-bounded proposition** about the grouped claims, not a question-shaped scope label and not a list of topics. Atomic notes use strict one-claim titles. Structure notes may contain supporting subclaims, but the title still needs one coherent proposition that says what the source establishes about the cluster.
 
-**The completion gate:** Can you complete this sentence?
-> Since [title], ...
+**The completion gate:** Can the title fit naturally in these frames?
+> the insight that [title]
+> because [title]
+> since [title]
 
-If it parses as a sentence, the title describes a coherent scope. If it reads as a list or trails off incoherently, it is a topic label (too narrow) or a noun bag (too flat) — rewrite before committing.
+If it parses as a proposition, the title is linkable. If it reads like a question label (`how...`, `where...`, `who...`, `what...`) or trails off as a noun bag, rewrite before committing.
 
-Good titles (scope descriptions that work as prose when linked):
-- "how caching strategies affect API latency under load"
-- "trade-offs between consistency and availability in distributed systems"
-- "morning routine patterns and their relationship to anxiety management"
+Good titles (source-bounded propositions that work as prose when linked):
+- "caching strategy choices shape API latency and consistency trade-offs under load"
+- "distributed systems trade consistency against availability under partition pressure"
+- "morning routine patterns correlate with anxiety management outcomes"
+- "the lely milk access table gates robot admission through interval bounds and expected-yield checks"
+- "the 2024 milking interval analysis scoped MIO around farm settings transitions and visit-optimizer behavior"
+- "MSO code ownership spans Datamole repositories and Lely-hosted infrastructure"
 
 Bad titles:
 - "caching reduces API latency by 40%" (single claim, not scope)
+- "how caching strategies affect API latency under load" (question-shaped label)
+- "where the milking settings optimization codebase lives" (question-shaped label)
 - "caching" (topic label, not scope description)
 - "various thoughts about systems" (too vague)
 
 **Title rules:**
-- Lowercase with spaces
+- Lowercase with spaces, preserving source-attested proper nouns and acronyms
 - No punctuation that breaks filesystems: . * ? + [ ] ( ) { } | \ ^
-- Express the scope fully — there is no character limit
+- Express the source-bounded proposition fully — there is no character limit
 - Each title must be unique across the entire workspace
-- Must form a sentence after "Since …". A verb or relational preposition (how, why, between, shaped, drives, affects) will typically appear.
+- Must fit after "because", "since", or "the insight that"
+- Must not start with `how`, `where`, `who`, or `what` unless the note is explicitly a question note
+- Must not pretend a grouped structure note is a narrower atomic claim; the proposition should honestly cover the grouped subclaims
 
 ---
 
@@ -274,7 +283,7 @@ Three decisions in order.
 **Entity directory routing:** Place the note in the appropriate directory in the following structure:
 !`tree -L 2 -d {DOMAIN:note_collection}`
 
-**Filename:** Title according to the prose-as-title pattern mentioned in the Philosophy section.
+**Filename:** Title according to the source-bounded prose-as-title pattern mentioned in the Philosophy section.
 
 ### M2. Select Template and Fill Frontmatter
 
@@ -303,7 +312,7 @@ Do not include the `_schema` block in the output note's frontmatter.
 
 ### M3. Write Body and Footer
 
-**Heading:** same as the filename, expressed as the prose-as-title claim.
+**Heading:** same as the filename, expressed as the source-bounded prose-as-title proposition.
 
 **Body (prescriptive rules):**
 - Body is sourced from the input file only. Neighbor notes read during Orient or Semantic Search inform classification, not composition. Do not import their claims, framings, or evidence into this note. If it is not in the source, do not write it.

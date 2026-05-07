@@ -66,7 +66,7 @@ These hold across all generated systems:
 | Constant | Implementation | Why It's Universal |
 |----------|---------------|-------------------|
 | Flat within entity type | No subfolders within entity directories. When multiple entity types are derived, note_collection contains typed subdirectories (e.g., projects/, contacts/). | Entity types are stable structural categories from derivation, not user-reorganizable hierarchy. Link stability holds because filenames remain globally unique across all entity directories. |
-| Prose-sentence titles | Each note makes one claim, titled as a sentence | Enables wiki-link-as-prose pattern |
+| Prose-sentence titles | Atomic notes make one claim; structure notes use one source-bounded proposition covering grouped subclaims | Enables wiki-link-as-prose pattern |
 | MOC navigation | Hub -> domain -> topic -> notes | Manages attention at scale |
 | Wiki links | `[[note title]]` creates graph edges | Spreading activation without infrastructure |
 | Topics footer | Every note declares MOC membership | Bidirectional navigation |

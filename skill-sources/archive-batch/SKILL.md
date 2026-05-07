@@ -47,7 +47,7 @@ Remove all entries for this batch from `ops/queue/queue.json` via a single `jq` 
 
 ```bash
 jq --arg batch "<batch-id>" \
-   '.tasks |= map(select(.batch != $batch))' \
+   '.tasks |= map(select(.batch != $batch and ((.id == $batch and .type == "process") | not)))' \
    ops/queue/queue.json > ops/queue/queue.json.tmp \
    && mv ops/queue/queue.json.tmp ops/queue/queue.json
 ```

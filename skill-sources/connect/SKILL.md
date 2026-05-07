@@ -272,8 +272,8 @@ Splitting is a human decision (architectural judgment required), but /connect sh
 
 ## Core Ideas
 
-- [[claim note]] — what it contributes to understanding
-- [[another claim]] — how it fits or challenges existing ideas
+- [[claim note]] — one short sentence on what it contributes
+- [[another claim]] — one short sentence on how it fits or challenges the topic
 
 ## Tensions
 
@@ -281,14 +281,13 @@ Splitting is a human decision (architectural judgment required), but /connect sh
 
 ## Gaps
 
-- nothing about X aspect yet
-- need concrete examples of Y
-- missing: comparison with Z approach
+- missing concrete examples of Y
+- no comparison with Z approach
 ```
 
 **Updating Core Ideas:**
 
-Add new {vocabulary.note_plural} with context phrase explaining contribution:
+Add new {vocabulary.note_plural} with one short context sentence explaining contribution. The context sentence should be scannable on its own, but it must not become a paragraph or contain a second sentence:
 ```markdown
 - [[new note]] — extends the quality argument by showing how friction teaches you what to check
 ```
@@ -308,7 +307,11 @@ Document genuine conflicts. Tensions are valuable, not bugs.
 
 **Updating Gaps:**
 
-Remove gaps that are now filled. Add new gaps discovered during this step.
+Remove gaps that are now filled. Keep `Gaps` as a bounded list, not an essay:
+- Maximum 5 gap bullets per {vocabulary.topic_map}.
+- Each gap is one concrete missing concept, comparison, example, or evidence source.
+- Each gap is a short fragment, not a paragraph and not a multi-sentence explanation.
+- When adding a sixth gap, merge duplicates or remove the lowest-value stale gap first.
 
 ### Step 7: Sibling cross-linking (cross-cutting)
 
@@ -329,11 +332,11 @@ Since [[throughput matters more than accumulation]], the question becomes who do
 This works because [[good systems learn from friction]] — each iteration improves the next.
 ```
 
-**Structure notes (scope)** — the title describes territory, link it as a noun phrase:
+**Structure notes (source-bounded propositions)** — the title names the source-supported relationship that organizes grouped subclaims:
 ```markdown
-Building on [[how caching strategies affect API latency under load]], we chose a write-through approach.
+Because [[caching strategy choices shape API latency and consistency trade-offs under load]], we chose a write-through approach.
 
-Given [[trade-offs between consistency and availability in distributed systems]], eventual consistency was the pragmatic choice.
+Given [[distributed systems trade consistency against availability under partition pressure]], eventual consistency was the pragmatic choice.
 ```
 
 **Capture notes (content)** — the title describes an artifact, link it as a reference:
@@ -367,7 +370,7 @@ Topics:
 - [[parent-moc]]
 ```
 
-Context phrases use standard relationship vocabulary: extends, grounds, contradicts, exemplifies, synthesizes, enables.
+Context phrases use standard relationship vocabulary: extends, grounds, contradicts, exemplifies, synthesizes, enables. Keep each footer bullet to one short sentence after the dash; if it needs more explanation, put the connection inline in the body or skip it.
 
 **Bidirectional Consideration:**
 

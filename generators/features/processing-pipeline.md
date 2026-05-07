@@ -36,9 +36,9 @@ Read the source material through the mission lens: "Does this serve {DOMAIN:the 
 **Quality filter:** Not every insight survives. You must judge: does this add genuine value, or is it noise? When in doubt, keep it — it is easier to merge duplicates than recover missed insights.
 
 **Quality bar for {DOMAIN:notes}:**
-- Title works as prose when linked: `since [[{DOMAIN:note title}]]` reads naturally
+- Title works as a source-bounded proposition when linked: `since [[{DOMAIN:note title}]]` reads naturally
 - Description adds information beyond the title
-- Claim is specific enough to disagree with
+- Atomic claims are specific enough to disagree with; structure titles honestly cover their grouped subclaims
 - Reasoning is visible — shows the path to the conclusion
 
 #### Phase 3: {DOMAIN:Connect}
@@ -49,7 +49,7 @@ After {DOMAIN:processing} creates new {DOMAIN:notes}, connection finding integra
 
 **Backward connections:** What older {DOMAIN:notes} need updating now that this new one exists? A {DOMAIN:note} written last week was written with last week's understanding. If today's {DOMAIN:note} extends, challenges, or provides evidence for the older one, update the older one.
 
-**{DOMAIN:Topic map} updates:** Every new {DOMAIN:note} belongs in at least one {DOMAIN:topic map}. Add it with a context phrase explaining WHY it belongs — bare links without context are useless for navigation.
+**{DOMAIN:Topic map} updates:** Every new {DOMAIN:note} belongs in at least one {DOMAIN:topic map}. Add it with one short context sentence explaining WHY it belongs — bare links without context are useless for navigation, and long explanations make maps hard to scan.
 
 **Connection quality standard:** Not just "related to" but "extends X by adding Y" or "contradicts X because Z." Every connection must articulate the relationship.
 

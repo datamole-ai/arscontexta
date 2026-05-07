@@ -39,7 +39,7 @@ Topics:
 - [[methodology]]
 ```
 
-**Prefer inline links.** They carry more information because the argument structure explains WHY the connection matters. Footer links are useful for connections that do not fit naturally into the prose — but every footer link should still have a context phrase explaining the relationship.
+**Prefer inline links.** They carry more information because the argument structure explains WHY the connection matters. Footer links are useful for connections that do not fit naturally into the prose — but every footer link should still have one short context sentence explaining the relationship. If the relationship needs more than one sentence, make it an inline body connection or skip it.
 
 ### Propositional Semantics
 
@@ -56,7 +56,7 @@ Bad: `[[{DOMAIN:note}]] — related`
 Good: `[[{DOMAIN:note}]] — extends this by adding the temporal dimension`
 Good: `[[{DOMAIN:note}]] — provides the foundation this challenges`
 
-The context phrase serves two audiences: it tells a future agent WHY to follow this link (should I read this or skip it?), and it documents the intellectual relationship for anyone maintaining the graph.
+The context phrase serves two audiences: it tells a future agent WHY to follow this link (should I read this or skip it?), and it documents the intellectual relationship for anyone maintaining the graph. Keep it short enough to scan in a footer.
 
 ### Dangling Link Policy
 

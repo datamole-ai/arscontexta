@@ -57,6 +57,7 @@ NEW_ENTRY=$(cat <<JSON
   "type": "process",
   "granularity": "${GRANULARITY}",
   "status": "pending",
+  "batch": "${SOURCE_BASENAME}",
   "source": "${FINAL_SOURCE}",
   "archive_folder": "${ARCHIVE_DIR}",
   "created": "${CREATED_TS}",

@@ -10,7 +10,7 @@ Brief orientation: what this topic covers, where to start.
 
 ## Core Ideas
 
-- [[note]] — context explaining why this matters here
+- [[note]] — one short sentence explaining why this matters here
 
 ## Tensions
 
@@ -18,7 +18,8 @@ Unresolved conflicts within this topic.
 
 ## Open Questions
 
-What's unexplored, gaps that need investigation.
+- missing concrete examples of [topic]
+- no comparison with [neighboring approach]
 
 ---
 
