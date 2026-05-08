@@ -72,6 +72,18 @@ Every sub-skill (seed, structure, capture, connect, verify, archive-batch) emits
 
 The orchestrator does NOT re-narrate the JSON. It surfaces a one-line status to the user and moves to the next phase.
 
+### Compact Batch Manifest
+
+After each sub-skill returns, persist its exact JSON object (without markdown fences) to `<archive_folder>/phase-outputs/<phase>.json`, then refresh the compact manifest:
+
+```bash
+mkdir -p "<archive_folder>/phase-outputs"
+# write the parsed JSON object for the phase, then:
+bash ops/scripts/batch-manifest.sh "<batch-id>"
+```
+
+Before invoking structure/capture, connect, verify, or archive-batch, refresh the same manifest. Phase skills use `<archive_folder>/batch-manifest.json` as their primary entry point, then read specific source, note, or map files only when needed for correctness. The manifest is durable recovery state: if a run fails, queue state plus `batch-manifest.json` plus `phase-outputs/*.json` must be enough to diagnose where it stopped.
+
 ---
 
 ## Phase 1: Seed
@@ -82,6 +94,8 @@ Parse the seed JSON Output Contract:
 - `status` — must be `"ok"`; otherwise stop the pipeline and surface `error`.
 - `batch`, `archive_folder`, `next_claim_start`, `granularity` — capture for downstream phases.
 - `learnings` — collect for the final report.
+
+Persist the seed JSON to `<archive_folder>/phase-outputs/seed.json`, then run `bash ops/scripts/batch-manifest.sh "<batch-id>"`.
 
 Report one line: `Seeded: <batch>` (no JSON re-rendering, no per-field listing).
 
@@ -102,6 +116,8 @@ Parse the producer's JSON:
 - `created`, `updated`, `quarantined` — capture for the final report.
 - `learnings` — collect.
 
+Persist the producer JSON to `<archive_folder>/phase-outputs/structure.json` or `<archive_folder>/phase-outputs/capture.json`, then run `bash ops/scripts/batch-manifest.sh "<batch-id>"`.
+
 ### Phase 2.2: Sanity check
 
 Confirm at least one new pending entry exists for `<batch-id>` via the deterministic state script:
@@ -118,17 +134,31 @@ Two skill invocations total. Both batched skills self-discover their work lists 
 
 #### Phase 2.3.1: Batched connect
 
+Refresh the compact manifest immediately before invoking connect:
+
+```bash
+bash ops/scripts/batch-manifest.sh "<batch-id>"
+```
+
 Use the Skill tool to invoke `/connect` with the batch id as the only argument:
 - `<batch-id>` — the source basename, equal to the process entry's `id`.
 
 Parse the connect JSON:
 - `status` — must be `"ok"`; otherwise stop and surface `error`.
-- `qmd_queries`, `topic_maps_consulted`, `topic_maps_created` — for the report.
+- `qmd_queries`, `topic_maps_consulted`, `topic_maps_created`, `evidence` — for the report and audit trail.
 - `learnings` — collect.
+
+Persist the connect JSON to `<archive_folder>/phase-outputs/connect.json`, then run `bash ops/scripts/batch-manifest.sh "<batch-id>"`.
 
 Report one line: `<batch-id>: connect done — <queue>`.
 
 #### Phase 2.3.2: Batched verify
+
+Refresh the compact manifest immediately before invoking verify:
+
+```bash
+bash ops/scripts/batch-manifest.sh "<batch-id>"
+```
 
 Use the Skill tool to invoke `/verify` with the same batch id.
 
@@ -136,6 +166,8 @@ Parse the verify JSON:
 - `status` — must be `"ok"`; otherwise stop and surface `error`.
 - `vault_scope` and `per_note` — capture failures for the report; do not re-narrate the per-note rows.
 - `learnings` — collect.
+
+Persist the verify JSON to `<archive_folder>/phase-outputs/verify.json`, then run `bash ops/scripts/batch-manifest.sh "<batch-id>"`.
 
 Report one line: `<batch-id>: verify done — <queue>`.
 
@@ -160,6 +192,12 @@ Parse the JSON. **If `.ready == false`:**
 ---
 
 ## Phase 4: Archive Batch
+
+Refresh the compact manifest immediately before invoking archive-batch:
+
+```bash
+bash ops/scripts/batch-manifest.sh "<batch-id>"
+```
 
 When all tasks for the batch are complete, use the Skill tool to invoke /archive-batch.
 

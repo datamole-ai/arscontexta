@@ -11,10 +11,9 @@ All output must use domain-native terms.
 Derivation manifest for vocabulary mapping:
 !`cat ops/derivation-manifest.md`
 
-### Task Queue
+### Compact Batch Manifest
 
-Current task queue:
-!`cat ops/queue/queue.json`
+After parsing the batch id, build/read the compact batch manifest with `ops/scripts/batch-manifest.sh`. Prefer `batch-manifest.json` over broad queue reads. Use it for batch state, note inventory, map inventory, semantic neighbors, and prior phase outputs; read specific note/map files only when evaluating or mutating them.
 
 ## Granularity-Aware Processing
 
@@ -33,16 +32,16 @@ Parse the batch id from arguments (e.g. `my-source`). If no argument is provided
 
 ### Work-list discovery
 
-Read the queue and find every pending entry for this batch awaiting connect:
+Build the compact batch manifest and find every pending entry for this batch awaiting connect:
 
 ```bash
 BATCH_ID="$ARGUMENTS"
-jq --arg batch "$BATCH_ID" \
-   '[.tasks[] | select(.batch == $batch and .status == "pending" and .current_phase == "connect")]' \
-   ops/queue/queue.json
+MANIFEST_JSON=$(bash ops/scripts/batch-manifest.sh "$BATCH_ID")
+MANIFEST_PATH=$(printf '%s' "$MANIFEST_JSON" | jq -r '.manifest_path')
+jq '.queue.tasks | map(select(.status == "pending" and .current_phase == "connect"))' "$MANIFEST_PATH"
 ```
 
-If the work list is empty, end immediately by emitting the JSON Output Contract with `"status": "ok"`, `"queue": "no entries to advance"`, and `"per_note": []`.
+If the work list is empty, end immediately by emitting the JSON Output Contract with `"status": "ok"`, `"queue": "no entries to advance"`, `"per_note": []`, and `"evidence": []`.
 
 For each work-list entry, the relevant fields are:
 - `id` — queue id (e.g. `note-007`, `enrich-002`)
@@ -51,6 +50,8 @@ For each work-list entry, the relevant fields are:
 - `type` — `note` or `enrichment`
 
 All subsequent references to "the {vocabulary.note}" inside per-note steps use the entry's `target_path`. Where this skill says "for each note" it means iterating the work list in queue id order.
+
+Use the manifest's `notes`, `existing_maps`, `semantic_neighbors`, and `phase_outputs` as the primary orientation. Do not reread `ops/queue/queue.json` except for the final atomic queue update or recovery from a manifest/script error.
 
 **START NOW.** Reference below explains methodology — use to guide, not as output.
 
@@ -82,6 +83,22 @@ Do not add context, motivation, rationale, mechanism explanations, or implicatio
 - the vault's stable reference material (identity files, methodology, {vocabulary.topic_map_plural}).
 
 When tempted to explain, either link a neighbor that already explains, or flag the gap for attention. Model-derived framing that looks plausible is still fabrication; once committed to the graph it becomes indistinguishable from attested claims and compounds through later reconsiderations.
+
+## Output Budget Guardrail
+
+Do not emit a reasoning transcript. The final response is the canonical JSON Output Contract only. Keep internal deliberation out of the output and record audit evidence as compact rows:
+
+```json
+{"note":"<title>","candidate":"<linked note or map>","decision":"linked|updated-map|skipped|needs-review","reason":"<one sentence>"}
+```
+
+Include evidence rows for:
+- every created note-to-note link whose reason is not already obvious from the target artifact's one-sentence footer/body wording
+- every topic-map update
+- every plausible semantic-search candidate skipped after reading
+- every unresolved issue that needs human review
+
+Do not include repeated step narration, full per-note summaries, or relationship explanations that were already written into the actual notes/maps. Each reason is one short sentence.
 
 ## Workflow
 
@@ -133,7 +150,7 @@ Step 2's priors and siblings are already in the candidate set. Step 3 runs only 
 - Step 2's gap list is empty.
 - Every named gap is covered by an existing topic map already in the priors (read the topic map's Core Ideas instead of querying).
 
-If the skip rule fires, log `qmd queries issued: 0 (priors covered the candidate set)` in the Output Block and proceed to Step 4 with the priors-only candidate set.
+If the skip rule fires, set `"qmd_queries": 0` in the Output Contract and proceed to Step 4 with the priors-only candidate set.
 
 If the skip rule does not fire, run ONE consolidated pass with dual discovery — {vocabulary.topic_map} exploration AND semantic search in parallel — over the *named* gap set from Step 2.
 
@@ -386,7 +403,7 @@ Add the reverse link only if following that path would be useful for agent trave
 
 ### Step 9: Reconsider each note (per-note)
 
-For each note, apply the guards. If guards fire, record `Reconsideration: skipped ({reason})` in the Output Block's per-note line. Otherwise run Sub-phases 6.1 and 6.2.
+For each note, apply the guards. If guards fire, record `skipped(<reason>)` in the Output Contract's `per_note[].reconsidered` field. Otherwise run Sub-phases 6.1 and 6.2.
 
 After forward connections and {vocabulary.topic_map} updates, reconsider the target {vocabulary.note} against the current state of the {vocabulary.note_collection}. Ask: **"What does the graph now say that this {vocabulary.note} does not yet cite?"** — not "what do I know now".
 
@@ -409,9 +426,9 @@ This is the backward pass that keeps the network alive. {vocabulary.note_plural}
 find {vocabulary.note_collection}/ -name "*.md" -type f -exec grep -l '\[\[target note title\]\]' {} + | wc -l
 ```
 
-If >= 5, skip reconsideration — record `Reconsideration: skipped (hub)` in the Output Block's per-note line.
+If >= 5, skip reconsideration — record `skipped(hub)` in the Output Contract's `per_note[].reconsidered` field.
 
-If any guard fires, set the per-note line's `Reconsideration:` field to `skipped ({reason})` and proceed directly to the next note. Otherwise continue with Sub-phases 6.1 and 6.2.
+If any guard fires, set `per_note[].reconsidered` to `skipped(<reason>)` and proceed directly to the next note. Otherwise continue with Sub-phases 6.1 and 6.2.
 
 #### Sub-phase 6.1: Evaluate the claim
 
@@ -419,7 +436,7 @@ If any guard fires, set the per-note line's `Reconsideration:` field to `skipped
 
 | Finding | Action |
 |---------|--------|
-| Claim holds, evidence strengthened | Note in Output Block; Step 8's connection additions already supply evidence |
+| Claim holds, evidence strengthened | Keep `per_note[].reconsidered` as `unchanged`; Step 8's connection additions already supply evidence |
 | Claim holds but framing is weak | Rewrite for clarity (Sub-phase 6.2 action: Rewrite Content) |
 | Claim is too vague | Sharpen to be more specific (Sub-phase 6.2 action: Sharpen Claim) |
 | Claim is partially wrong | Revise with nuance (Sub-phase 6.2 action: Challenge Claim) |
@@ -502,15 +519,15 @@ This argues [X]. But [[contradicting note]] argues [Y]. The tension remains unre
 This note originally claimed [X]. Based on [[evidence]], the claim is revised: [new claim].
 ```
 
-**Always log challenges:** When a claim is challenged or revised, this is a significant event. Note it in the Output Block's `### Cascades` section with the original claim, the new evidence, and the revised position.
+**Always log challenges:** When a claim is challenged or revised, this is a significant event. Record it as a compact `evidence` row with `decision: "needs-review"` or `decision: "linked"` plus a one-sentence reason, and add a `flagged` tension when human judgment is needed.
 
 ### Step 10: Update queue (shared)
 
 After all per-note work for the batch is complete, advance every successfully processed entry's `current_phase` from `connect` to `verify` in `ops/queue/queue.json` via a single batched jq call. See the [Queue Self-Update](#queue-self-update) section below for the exact command.
 
-### Step 11: Emit Output Block (shared)
+### Step 11: Emit Output Contract (shared)
 
-Emit a single canonical Output Block as the final chat message — one block for the whole batch, regardless of N. See the [Output Block](#output-block) section below for the exact format.
+Emit a single canonical Output Contract as the final chat message — one JSON object for the whole batch, regardless of N. See the [Output Contract](#output-contract) section below for the exact format.
 
 ## Handling Edge Cases
 
@@ -539,7 +556,7 @@ If you find {vocabulary.note_plural} with no connections:
 
 ## Queue Self-Update
 
-Before emitting the Output Block, advance every successfully processed entry in `ops/queue/queue.json` via a single `jq` call. Build `$COMPLETED_IDS_JSON` as a JSON array of the queue ids that completed (on a clean run, this equals the full work-list ids):
+Before emitting the Output Contract, advance every successfully processed entry in `ops/queue/queue.json` via a single `jq` call. Build `$COMPLETED_IDS_JSON` as a JSON array of the queue ids that completed (on a clean run, this equals the full work-list ids):
 
 ```bash
 COMPLETED_IDS_JSON='["note-007","note-008","note-009","note-010"]'  # example — populate from successful completions
@@ -554,7 +571,7 @@ jq --arg batch "$BATCH_ID" --argjson ids "$COMPLETED_IDS_JSON" \
 
 If the Bash call fails (non-zero exit), resort to the Read and Write tools to read the original queue.json file and write the updated file back.
 
-**Do not re-read after update.** A zero-exit on the `jq | mv` chain means the file was rewritten. Do NOT follow up with `jq '.tasks[] | select(.id == ...)'` or any other read of `queue.json` to "inspect" what you just wrote — it adds tokens but provides nothing the skill consumes before emitting the Output Block.
+**Do not re-read after update.** A zero-exit on the `jq | mv` chain means the file was rewritten. Do NOT follow up with `jq '.tasks[] | select(.id == ...)'` or any other read of `queue.json` to "inspect" what you just wrote — it adds tokens but provides nothing the skill consumes before emitting the Output Contract.
 
 On a system-level error before the queue update, do not write the file — `queue.json` stays untouched and pipeline failure semantics handle the rest.
 
@@ -576,12 +593,10 @@ After finishing all steps for every note in the work list (or after a system-lev
   "per_note": [
     {"id": "<queue-id>", "title": "<note title>", "connections_added": <int>, "reconsidered": "unchanged|sharpened|challenged|revised|skipped(<reason>)"}
   ],
-  "sibling_links": [
-    {"a": "<note A title>", "b": "<note B title>", "relationship": "extends|grounds|contradicts|exemplifies|synthesizes|enables", "rationale": "<one line>"}
+  "evidence": [
+    {"note": "<title>", "candidate": "<linked note title or topic-map title>", "decision": "linked|updated-map|skipped|needs-review", "reason": "<one short sentence>"}
   ],
   "synthesis_opportunities": ["<one line>"],
-  "skipped_reverse_links": [{"target": "<title>", "reason": "<one line>"}],
-  "cascades": [{"target": "<title>", "reason": "<one line>"}],
   "flagged": [{"type": "orphan|gap|tension", "detail": "<one line>"}],
   "deferred_gaps": ["<gap concept>", "..."],
   "warnings": [],
@@ -590,6 +605,8 @@ After finishing all steps for every note in the work list (or after a system-lev
   ]
 }
 ```
+
+`per_note` stays summary-only. `evidence` is the audit trail; it replaces verbose sibling-link, reverse-link, and cascade sections. Prefer evidence rows only where the final artifact does not already carry a clear one-sentence reason.
 
 On error: `"status": "error"`, `"error": "<short>"`, populate `per_note` with what completed before the failure, and leave `queue.json` unchanged.
 

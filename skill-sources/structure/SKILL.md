@@ -12,10 +12,9 @@ All output must use domain-native terms.
 Derivation manifest for vocabulary mapping:
 !`cat ops/derivation-manifest.md`
 
-### Task Queue
+### Compact Batch Manifest
 
-Current task queue:
-!`cat ops/queue/queue.json`
+After parsing the batch id, build/read the compact batch manifest with `ops/scripts/batch-manifest.sh`. Prefer the manifest over broad queue reads; read specific source or note files only when needed for correctness.
 
 ### Templates
 
@@ -36,10 +35,12 @@ Available templates:
 
 Parse the batch id from arguments (the source basename, e.g. `my-source`). If no argument is provided, report `ERROR: structure requires batch id` and stop.
 
-Look up the process entry in `ops/queue/queue.json`:
+Build the compact batch manifest and look up the process entry from it:
 
 ```bash
-jq --arg id "$BATCH_ID" '.tasks[] | select(.id == $id and .type == "process")' ops/queue/queue.json
+MANIFEST_JSON=$(bash ops/scripts/batch-manifest.sh "$BATCH_ID")
+MANIFEST_PATH=$(printf '%s' "$MANIFEST_JSON" | jq -r '.manifest_path')
+jq '.process' "$MANIFEST_PATH"
 ```
 
 From that entry, obtain:
@@ -185,7 +186,7 @@ qmd query $'vec: [cluster scope as sentence]' --collection {vocabulary.qmd_colle
 
 ### 4. Proposed Groupings
 
-Keep the grouping analysis in working memory — it becomes the `### Work` section of the Output Block emitted after materialization.
+Keep the grouping analysis in working memory while materializing notes. Do not emit the reasoning transcript; the Output Contract summarizes outcomes through `clusters_identified`, `created`, `updated`, and `quarantined`.
 
 ### 5. Write Notes
 
@@ -349,14 +350,14 @@ If validation FAILs cannot be resolved after one fix attempt, quarantine the art
 
 ## Queue Management
 
-**Queue mutation sequence (run in order before emitting the Output Block):**
+**Queue mutation sequence (run in order before emitting the Output Contract):**
 
 1. Read `ops/queue/queue.json`.
 2. Set the process task entry's `status: "done"` and add `completed: "<ISO UTC now>"`.
 3. Append one new entry per artifact with the shape shown in "Queue Updates" below.
 4. Write the file back.
 
-**Do not re-read after update.** A successful write means the new state is on disk. Do NOT follow up with `jq` reads to "inspect" what you just wrote — it adds tokens but provides nothing the skill consumes before emitting the Output Block.
+**Do not re-read after update.** A successful write means the new state is on disk. Do NOT follow up with `jq` reads to "inspect" what you just wrote — it adds tokens but provides nothing the skill consumes before emitting the Output Contract.
 
 ### Queue Updates
 

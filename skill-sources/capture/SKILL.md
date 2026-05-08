@@ -15,10 +15,9 @@ All output must use domain-native terms.
 Derivation manifest for vocabulary mapping:
 !`cat ops/derivation-manifest.md`
 
-### Task Queue
+### Compact Batch Manifest
 
-Read the current task queue:
-!`cat ops/queue/queue.json`
+After parsing the batch id, build/read the compact batch manifest with `ops/scripts/batch-manifest.sh`. Prefer the manifest over broad queue reads; read the source file only when needed for the verbatim capture.
 
 ---
 
@@ -46,10 +45,12 @@ All graph participation happens OUTSIDE the fenced block:
 Parse the batch id from arguments (the source basename, e.g. `my-source`). If no argument is provided, end immediately with: report
 `ERROR: capture requires batch id`.
 
-Look up the process entry in `ops/queue/queue.json`:
+Build the compact batch manifest and look up the process entry from it:
 
 ```bash
-jq --arg id "$BATCH_ID" '.tasks[] | select(.id == $id and .type == "process")' ops/queue/queue.json
+MANIFEST_JSON=$(bash ops/scripts/batch-manifest.sh "$BATCH_ID")
+MANIFEST_PATH=$(printf '%s' "$MANIFEST_JSON" | jq -r '.manifest_path')
+jq '.process' "$MANIFEST_PATH"
 ```
 
 From that entry, obtain:
@@ -171,7 +172,7 @@ Create one queue entry:
 
 Additionally: set the process task entry's status to "done" and add a "completed" timestamp before writing the file.
 
-**Do not re-read after update.** A successful write means the new state is on disk. Do NOT follow up with `jq` reads to "inspect" what you just wrote — it adds tokens but provides nothing the skill consumes before emitting the Output Block.
+**Do not re-read after update.** A successful write means the new state is on disk. Do NOT follow up with `jq` reads to "inspect" what you just wrote — it adds tokens but provides nothing the skill consumes before emitting the Output Contract.
 
 No enrichment tasks — capture does not analyze content deeply enough to spot enrichment opportunities.
 

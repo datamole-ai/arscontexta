@@ -14,10 +14,9 @@ All output must use domain-native terms.
 Derivation manifest for vocabulary mapping:
 !`cat ops/derivation-manifest.md`
 
-### Task Queue
+### Compact Batch Manifest
 
-Current task queue:
-!`cat ops/queue/queue.json`
+After parsing the batch id, build/read the compact batch manifest with `ops/scripts/batch-manifest.sh`. Prefer the manifest over broad queue reads; `verify-batch.sh` remains the deterministic source for structural checks.
 
 ### Templates
 
@@ -36,6 +35,13 @@ After reading the target {vocabulary.note}, check its `granularity` frontmatter 
 **Target: $ARGUMENTS**
 
 Parse the batch id from arguments (e.g. `my-source` — the source basename). If no argument is provided, end immediately with: report `ERROR: verify requires batch id`.
+
+Build the compact batch manifest before the structural pass:
+
+```bash
+MANIFEST_JSON=$(bash ops/scripts/batch-manifest.sh "$BATCH_ID")
+MANIFEST_PATH=$(printf '%s' "$MANIFEST_JSON" | jq -r '.manifest_path')
+```
 
 ### Step 1: Structural pass
 
@@ -70,7 +76,7 @@ Apply auto-fixes only where judgment is required (the script does not):
 - A missing Topics footer where the correct {vocabulary.topic_map} is obvious from the note's content — add it.
 - Other fixes from the structural pass (missing `---`, trailing period) are already deterministic; the script reports them and the LLM applies them inline if it has the file open.
 
-Record each fix in the Output Block's `### Auto-fixes applied` section.
+Record each fix in the Output Contract's `auto_fixes` array.
 
 ### Step 4: Mark queue done
 
@@ -80,7 +86,7 @@ Once every successful entry has a `Review:` verdict, build a JSON array of compl
 bash .claude/skills/{DOMAIN:verify}/scripts/verify-complete.sh "$BATCH_ID" "$COMPLETED_IDS_JSON"
 ```
 
-Append the script's confirmation line to the Output Block's `**Queue:**` field.
+Use the script's confirmation line to populate the Output Contract's `queue` field.
 
 If either script exits nonzero, emit `ERROR: <script-name> failed (exit <code>)` and stop. Do not attempt recovery.
 

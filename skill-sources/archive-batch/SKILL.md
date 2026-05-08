@@ -19,9 +19,9 @@ All output must use domain-native terms.
 Derivation manifest for vocabulary mapping:
 !`cat ops/derivation-manifest.md`
 
-## Queue File
+## Compact Batch Manifest
 
-!`cat ops/queue/queue.json`
+Before removing queue entries, build/read the compact batch manifest with `ops/scripts/batch-manifest.sh`. Use it for `archive_folder`, produced note titles, enrichment titles, and removal counts instead of loading the whole queue into context.
 
 **START NOW.** Archive the completed batch.
 
@@ -40,6 +40,19 @@ Parse the JSON:
 - `.total == 0` (no entries for this batch) — end immediately with `ERROR: No batch '{batch_id}' found in queue.`
 - `.ready == false` — end immediately with `ERROR: Batch '{batch_id}' has incomplete tasks.` and report `.blocking` (each entry carries `id`, `current_phase`, `status`).
 - `.ready == true` — proceed to Step 2.
+
+Build the compact manifest before queue removal:
+
+```bash
+MANIFEST_JSON=$(bash ops/scripts/batch-manifest.sh "<batch-id>")
+MANIFEST_PATH=$(printf '%s' "$MANIFEST_JSON" | jq -r '.manifest_path')
+```
+
+Use `MANIFEST_PATH` to populate the Output Contract after removal:
+- `archive_folder`: `.archive_folder`
+- removed count: `.queue.tasks | length`
+- `notes_produced`: `.notes[] | select(.type == "note") | .title`
+- `enrichments`: `.notes[] | select(.type == "enrichment") | .title`
 
 ## Step 2: Remove Batch From Queue
 

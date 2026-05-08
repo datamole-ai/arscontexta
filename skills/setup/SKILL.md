@@ -534,10 +534,11 @@ cp "${CLAUDE_PLUGIN_ROOT}/ops-scripts/"*.sh ops/scripts/
 chmod +x ops/scripts/*.sh
 ```
 
-The four scripts shipped:
+The five scripts shipped:
 
 | Script | Purpose |
 |--------|---------|
+| `batch-manifest.sh <batch_id>` | writes `batch-manifest.json` with compact batch state, notes, map inventory, semantic neighbors, and phase outputs |
 | `pipeline-state.sh <batch_id>` | JSON snapshot of queue counts per phase/status, archive folder, git state |
 | `archive-ready.sh <batch_id>` | `{ready, blocking[], total}` — drives /archive-batch's gate |
 | `vault-quick-check.sh` | required-files/dirs sanity check, JSON output |

@@ -188,8 +188,9 @@ The pipeline's quality depends on each phase getting your best attention. Your c
 
 ~~~
 Orchestrator reads queue -> picks next task -> invokes phase skill for one phase
-  Phase skill (forked context): reads all queue entries for the current batch, executes the phase across the batch, updates queue.json atomically, emits a single fenced JSON block (the Output Contract) as final chat message
-  Phase skill returns -> Orchestrator parses the JSON -> invokes next phase skill
+  Orchestrator refreshes ops/queue/archive/<batch>/batch-manifest.json
+  Phase skill (forked context): reads compact manifest first, opens only files needed for evidence, executes the phase across the batch, updates queue.json atomically, emits a single fenced JSON block (the Output Contract) as final chat message
+  Phase skill returns -> Orchestrator stores phase-outputs/<phase>.json, refreshes the manifest, then invokes next phase skill
 ~~~
 
 **Why fresh context matters:**
@@ -204,11 +205,11 @@ If all phases run in one session, the verify phase runs on degraded attention �
 **Handoff through queue + chat:**
 - Each phase updates its entry in `ops/queue/queue.json` (status, current_phase, completed_phases)
 - Each phase emits a canonical JSON Output Contract as its final chat message (`status`, `queue`, `created`/`updated`, `learnings`)
-- The orchestrator parses that chat block to drive the next phase
+- The orchestrator stores that JSON under `<archive_folder>/phase-outputs/`, refreshes `batch-manifest.json`, and uses the manifest to drive the next phase
 
 **Processing is orchestrated by default.** /pipeline orchestrates the full sequence. The queue drives what happens next.
 
-**Orchestration uses the Skill tool** with `context: fork` on each invoked skill, giving each phase a fresh forked context window and true context isolation. The task queue IS the orchestration — {DOMAIN:skills} read from it, write to it, and the queue state drives what happens next. When you say "process this source through the full pipeline," follow the pattern: invoke each phase skill once with the batch id; the phase skill reads the queue, executes across the batch, advances the queue atomically, and returns.
+**Orchestration uses the Skill tool** with `context: fork` on each invoked skill, giving each phase a fresh forked context window and true context isolation. The task queue and compact manifest are the orchestration surface: queue state remains durable truth, while `batch-manifest.json` gives phase skills a small entry point containing batch state, note inventory, map inventory, semantic neighbors, and prior phase outputs. When you say "process this source through the full pipeline," follow the pattern: invoke each phase skill once with the batch id; the phase skill reads the manifest, opens only the files it needs, advances the queue atomically, and returns.
 
 ### Full Automation From Day One
 
@@ -260,10 +261,11 @@ Each session focuses on ONE task. Discoveries become future tasks, not immediate
 
 Your attention degrades as context fills. The first ~40% of context is the "smart zone" — sharp, capable, good decisions. Beyond that, context rot sets in. Structure each task so critical information lands early. When processing multiple {DOMAIN:notes}, use fresh context per phase — never chain phases in one session. Each phase fork covers the full batch.
 
-**The handoff protocol:** Every phase updates its queue entries (atomically, across the whole batch) and emits a canonical JSON Output Contract as its final chat message. The orchestrator parses that JSON to drive the next phase. State transfers through the queue (durable) and JSON returns (within a pipeline run), not through accumulated conversation across phases. This ensures:
+**The handoff protocol:** Every phase updates its queue entries (atomically, across the whole batch) and emits a canonical JSON Output Contract as its final chat message. The orchestrator stores that JSON under `<archive_folder>/phase-outputs/`, refreshes `batch-manifest.json`, and uses the manifest to drive the next phase. State transfers through the queue (durable), the compact manifest (recoverable batch snapshot), and JSON returns (within a pipeline run), not through accumulated conversation across phases. This ensures:
 - No context contamination between phases
 - Each phase gets your best attention
 - Crashes are recoverable (`queue.json` shows `current_phase` for any entries the phase did not advance)
+- Failed runs leave `batch-manifest.json` and phase outputs for diagnosis
 - Multiple {DOMAIN:notes} are processed in one fork per phase, without per-note context resets and without per-phase narration accumulating across notes
 
 ## Dependencies
