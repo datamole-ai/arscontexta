@@ -75,6 +75,8 @@ Read the ENTIRE source file. Understand what it contains — you need this under
 
 Write a prose title that summarizes what the captured content contains. This is the main intellectual work of capture. The title works as a noun phrase when linked — "referencing [[title]]" or "as documented in [[title]]" reads naturally — describing what the artifact contains rather than making a claim or defining a scope.
 
+The title and description are still source-backed claims. They may describe what the source contains, but they must not define terms, infer outcomes, assign ownership, or strengthen uncertainty beyond the source. Prefer "source discussing/listing/asking..." when the artifact is a list, table, or question set.
+
 **The content test:** Can you complete this sentence?
 > This is a capture of [title]
 
@@ -99,6 +101,8 @@ Bad titles:
 ### 3. Write Description
 
 One sentence (~150 chars) adding context beyond the title. What makes this capture worth keeping? What key topics does it touch?
+
+Do not add interpretive claims in the description. If the source contains exact primary artifacts (repository URLs, Google Drive report URLs, emails) and the capture title/description implies coverage of those artifacts, preserve them in the footer or body outside the fenced block as appropriate.
 
 Bad (restates title):
 - Title: "quarterly planning meeting discussing Q3 priorities"

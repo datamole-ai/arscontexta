@@ -12,7 +12,7 @@ When generating a knowledge system for a specific domain, every universal term i
 |---------------|----------|---------|----------|---------------|----------|-----|-----------|
 | note | claim | reflection | concept note | observation | idea | decision | memory |
 | reduce | reduce | surface | break down | notice | discover | document | remember |
-| verify | verify | check resonance | test understanding | confirm accuracy | evaluate draft | review quality | verify memory |
+| verify | verify | verify | verify | verify | verify | verify | verify |
 | MOC | topic map | theme | study guide | relationship map | project hub | decision register | memory collection |
 | description field | claim context | reflection summary | concept explanation | observation context | idea sketch | decision rationale | memory context |
 | topics footer | research areas | themes | study areas | relationship facets | creative projects | project areas | life areas |
@@ -55,10 +55,10 @@ When generating a knowledge system for a specific domain, every universal term i
 | Universal Skill | Research | Therapy | Learning | Relationships | Creative | PM | Companion |
 |----------------|----------|---------|----------|---------------|----------|-----|-----------|
 | /reduce | /reduce | /surface | /break-down | /notice | /discover | /document | /capture |
-| /verify | /verify | /check-resonance | /test | /confirm | /evaluate | /review | /verify |
+| /verify | /verify | /verify | /verify | /verify | /verify | /verify | /verify |
 | /stats | /stats | /stats | /stats | /stats | /stats | /stats | /stats |
 
-**Note:** /stats provides vault metrics and progress visualization. This command uses universal names across all domains.
+**Note:** /stats provides vault metrics and progress visualization. /verify is the fixed pipeline quality gate. These commands use universal names across all domains.
 
 ---
 
@@ -70,7 +70,7 @@ When generating a knowledge system for a specific domain, every universal term i
 2. Look up all universal terms in the mapping table above
 3. Replace every instance in the generated context file
 4. Replace template names and folder names
-5. Replace skill names if generating skills
+5. Replace skill names if generating skills, except fixed commands such as /verify
 6. **Verify:** Read the generated output. Does it feel natural for the domain? Would a therapy user ever see the word "claim"? Would a PM user see "reduce"?
 
 ### Quality check:

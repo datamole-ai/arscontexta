@@ -23,7 +23,7 @@ tags: [<free-form strings>]   # may be empty []
 |-------|--------|-----|
 | `content_type` | routing + filtering skills | "show me all decisions" |
 | `granularity` | /structure, /capture pipelines | selects pipeline behavior |
-| `description` | /{DOMAIN:verify}, progressive disclosure | filter-before-read |
+| `description` | /verify, progressive disclosure | filter-before-read |
 | `created_at` | archive, staleness checks | temporal queries |
 | `tags` | users and agents alike | emergent attributes that have not been formalized |
 

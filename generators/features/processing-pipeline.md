@@ -7,7 +7,7 @@
 
 **Correctness first, but every model turn and search must earn its cost.** Prefer deterministic scripts, compact outputs, and bounded search. Spend extra tokens only when they reduce material correctness risk.
 
-Every piece of content follows the same path: capture, then {DOMAIN:process}, then {DOMAIN:connect}, then {DOMAIN:verify}. Each phase has a distinct purpose. Mixing them degrades both.
+Every piece of content follows the same path: capture, then {DOMAIN:process}, then {DOMAIN:connect}, then verify. Each phase has a distinct purpose. Mixing them degrades both.
 
 ### The Four-Phase Skeleton
 
@@ -75,17 +75,19 @@ The backward sub-phase is gated by guards (hub notes, framework notes, capture-g
 CREATE -> CONNECT FORWARD AND BACKWARD (/{DOMAIN:connect}) -> EVOLVE
 ~~~
 
-#### Phase 4: {DOMAIN:Verify}
+#### Phase 4: Verify
 
-Three checks in one phase:
+Four checks in one phase:
 
 1. **Description quality (cold-read test)** — Read ONLY the title and description. Without reading the body, predict what the {DOMAIN:note} contains. Then read the body. If your prediction missed major content, the description needs improvement. This is the testing effect applied to vault quality: self-testing reveals weak descriptions before they cause retrieval failures in practice.
 
 2. **Schema compliance** — All required fields present, enum values valid, {DOMAIN:topic} links exist, no unknown fields. The template `_schema` block defines what is valid.
 
-3. **Health check** — No broken wiki links (every `[[target]]` resolves to an existing file), no orphaned {DOMAIN:notes} (every {DOMAIN:note} appears in at least one {DOMAIN:topic map}), link density within healthy range (2+ outgoing links per {DOMAIN:note}).
+3. **Source faithfulness** — For source-backed {DOMAIN:notes}, titles, frontmatter descriptions, body claims, and footer bullets must be directly supported by the archived source unless explicitly marked as inference. Source links resolve separately from ordinary knowledge links.
 
-**Failure handling:** Description quality failures get fixed immediately (rewrite the description). Schema failures get fixed immediately (add missing fields). Link failures get logged for the {DOMAIN:connect} phase to address in the next pass.
+4. **Health check** — No broken wiki links (every `[[target]]` resolves to an existing file after title/slug normalization), no orphaned {DOMAIN:notes} (every {DOMAIN:note} appears in at least one {DOMAIN:topic map}), link density within healthy range (2+ outgoing links per {DOMAIN:note}).
+
+**Failure handling:** Description quality failures get fixed immediately (rewrite the description). Schema failures get fixed immediately (add missing fields). Source-faithfulness failures get rewritten against the archive or explicitly marked as inference. Link failures get logged for the {DOMAIN:connect} phase to address in the next pass.
 
 ### Inbox Processing
 
@@ -142,8 +144,8 @@ The task queue tracks every {DOMAIN:note} being processed through the pipeline. 
 | Type | Purpose | Phase Sequence |
 |------|---------|---------------|
 | process | Process source through chosen granularity skill (/structure or /capture) — materializes all notes and enrichments inline | (single phase) |
-| note | A newly materialized {DOMAIN:note} flows through downstream phases | {DOMAIN:connect} -> {DOMAIN:verify} |
-| enrichment | An existing {DOMAIN:note} was modified inline during process; still flows through downstream phases | {DOMAIN:connect} -> {DOMAIN:verify} |
+| note | A newly materialized {DOMAIN:note} flows through downstream phases | {DOMAIN:connect} -> verify |
+| enrichment | An existing {DOMAIN:note} was modified inline during process; still flows through downstream phases | {DOMAIN:connect} -> verify |
 
 **Recovery:** If you crash mid-phase, the queue still shows `current_phase` at the failed phase. Re-running the pipeline picks it up automatically — no manual intervention needed.
 
@@ -196,7 +198,7 @@ Orchestrator reads queue -> picks next task -> invokes phase skill for one phase
 **Why fresh context matters:**
 - {DOMAIN:Process} needs full attention on the source material
 - {DOMAIN:Connect} needs full attention on the knowledge graph (both forward connections and backward reconsideration of the target {DOMAIN:notes})
-- {DOMAIN:Verify} needs neutral perspective, unbiased by creation
+- Verify needs neutral perspective, unbiased by creation
 
 Within a phase, the fork sees the full batch — sibling cross-linking and shared graph discovery happen in one pass.
 
@@ -217,7 +219,7 @@ Every vault ships with the complete pipeline active from the first session. All 
 
 The philosophy: it is easier to disable features you do not need than to discover and enable features you did not know existed. If a feature exists, it works on day one.
 
-**All skills are available from day one.** /structure, /capture, /{DOMAIN:connect}, /{DOMAIN:verify}, /{DOMAIN:health}, and all other skills are ready to invoke on the first source you process. The full pipeline runs on the first {DOMAIN:note} you create.
+**All skills are available from day one.** /structure, /capture, /{DOMAIN:connect}, /verify, /{DOMAIN:health}, and all other skills are ready to invoke on the first source you process. The full pipeline runs on the first {DOMAIN:note} you create.
 
 ### Quality Gates Summary
 
@@ -232,10 +234,11 @@ Every phase has specific gates. Failing a gate does not block progress — it tr
 | {DOMAIN:Connect} | Genuine relationship — can you say WHY? | Do not force the connection |
 | {DOMAIN:Connect} | {DOMAIN:Topic map} updated | Add {DOMAIN:note} to relevant {DOMAIN:topic maps} |
 | {DOMAIN:Connect} | Backward sub-phase — target {DOMAIN:note} reconsidered (or guard fired)? | Apply changes or record skip reason |
-| {DOMAIN:Verify} | Description predicts content (cold-read test) | Improve description |
-| {DOMAIN:Verify} | Schema valid | Fix schema violations |
-| {DOMAIN:Verify} | No broken links | Fix or remove broken links |
-| {DOMAIN:Verify} | {DOMAIN:Note} in at least one {DOMAIN:topic map} | Add to relevant {DOMAIN:topic map} |
+| Verify | Description predicts content (cold-read test) | Improve description |
+| Verify | Schema valid | Fix schema violations |
+| Verify | Source-backed claims match archive | Rewrite unsupported claims or mark inference |
+| Verify | No broken links | Fix or remove broken links |
+| Verify | {DOMAIN:Note} in at least one {DOMAIN:topic map} | Add to relevant {DOMAIN:topic map} |
 
 **Automation of quality gates:** A PostToolUse hook on Write validates YAML frontmatter, description fields, and topic links on {DOMAIN:note} creation. This makes methodology invisible — instead of remembering to validate, a hook catches drift automatically. Build hooks for any quality check you want to be automatic.
 
@@ -248,7 +251,7 @@ If a {DOMAIN:skill} exists for a task, use the {DOMAIN:skill}. Do not manually r
 | New content to {DOMAIN:process} | /structure or /capture |
 | New {DOMAIN:notes} need connections | /{DOMAIN:connect} |
 | Old {DOMAIN:notes} may need updating | /{DOMAIN:connect} |
-| Quality verification needed | /{DOMAIN:verify} |
+| Quality verification needed | /verify |
 | System health check | /{DOMAIN:health} |
 | User asks to find connections | /{DOMAIN:connect} (not manual grep) |
 | System feels disorganized | /{DOMAIN:health} (systematic checks, not ad-hoc) |
@@ -275,6 +278,6 @@ Requires: yaml-schema, wiki-links, atomic-notes, mocs
 - structure (group related claims into structured notes)
 - capture (preserve source verbatim with frontmatter)
 - {DOMAIN:connect} (find connections, update topic maps, reconsider target note against current graph state)
-- {DOMAIN:verify} (combined quality gate: description, schema, links)
+- verify (combined quality gate: description, schema, links)
 - {DOMAIN:health} (systematic health checks)
 - {DOMAIN:rethink} (review accumulated observations and tensions)

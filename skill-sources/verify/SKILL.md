@@ -30,6 +30,8 @@ After reading the target {vocabulary.note}, check its `granularity` frontmatter 
 - **`structure`**: Scope coherence test (do all sections belong together?), section development test (does each section develop its sub-claim, not just state it?), schema compliance, link health (no broken links, in at least one {vocabulary.topic_map}).
 - **`capture`**: Schema compliance, link health. Skip scope coherence test. Add: verbatim integrity check — fenced block present and non-empty, no wikilinks or edits inside the fenced block, all connections in footer sections only.
 
+For source-backed structure notes, verification treats title, frontmatter description, section headings, body text, and footer bullets as factual claims. Source-faithfulness failures are FAIL, not style warnings.
+
 ## EXECUTE NOW
 
 **Target: $ARGUMENTS**
@@ -46,17 +48,17 @@ MANIFEST_PATH=$(printf '%s' "$MANIFEST_JSON" | jq -r '.manifest_path')
 ### Step 1: Structural pass
 
 ```bash
-bash .claude/skills/{DOMAIN:verify}/scripts/verify-batch.sh "$BATCH_ID"
+bash .claude/skills/verify/scripts/verify-batch.sh "$BATCH_ID"
 ```
 
 The script:
 - Discovers the work-list (pending entries with `current_phase=verify` for this batch).
 - Runs vault-scope link health and orphan checks across the batch.
-- Runs per-note structural checks (frontmatter delimiters, trailing-period description, Topics footer presence, capture verbatim integrity).
+- Runs normalized wiki-link health, separate source-link resolution, generic source audit checks, and per-note structural checks (frontmatter delimiters, trailing-period description, Source/Topics footer presence, capture verbatim integrity).
 - Emits the partial `## Verify` block with each per-note line ending in `Review: TBD`.
 - Appends a `### Machine output` JSON object with the deterministic findings:
   ```json
-  {"batch":"<id>","worklist":N,"link_health":{"status":"PASS|FAIL","scanned":K,"broken":[{"id","target"}]},"orphan_check":{"status":"PASS|FAIL","count":O,"ids":[{"id","target_path"}]},"per_note":[{"id","path","granularity","validate":"PASS|WARN|FAIL","issues":[],"review":"TBD"}]}
+  {"batch":"<id>","worklist":N,"link_health":{"status":"PASS|FAIL","scanned":K,"broken":[{"id","target"}]},"source_links":{"status":"PASS|FAIL","broken":[{"id","target"}]},"source_audit":{"status":"PASS|FAIL","issues":[{"id","target_path","source","issue"}]},"orphan_check":{"status":"PASS|FAIL","count":O,"ids":[{"id","target_path"}]},"per_note":[{"id","path","granularity","validate":"PASS|WARN|FAIL","issues":[],"review":"TBD"}]}
   ```
   Use this JSON as the source of truth for the deterministic verdicts — the human-readable lines above it are for audit, not for re-parsing.
 
@@ -67,6 +69,9 @@ If the work-list is empty, the script exits 0 with an explicit "no entries" line
 For each work-list note with `granularity == "structure"`, perform the semantic checks listed in **## Granularity-Aware Verification** above:
 - **Scope coherence** — do all sections of the {vocabulary.note} belong to one claim?
 - **Section development** — does each section develop its sub-claim, not just state it?
+- **Archive-faithfulness** — are title, description, headings, body claims, and footer bullets directly supported by the archived source unless explicitly marked as inference?
+- **Question polarity** — did source questions/hypotheses stay questions/hypotheses rather than becoming findings?
+- **Artifact retention** — when the note claims repository/report/contact-list coverage, did it preserve exact source URLs/emails or state intentional omission?
 
 For each note, replace its `Review: TBD` substring with `Review: PASS | WARN ({issue}) | FAIL ({issue})`.
 
@@ -83,7 +88,7 @@ Record each fix in the Output Contract's `auto_fixes` array.
 Once every successful entry has a `Review:` verdict, build a JSON array of completed ids and call:
 
 ```bash
-bash .claude/skills/{DOMAIN:verify}/scripts/verify-complete.sh "$BATCH_ID" "$COMPLETED_IDS_JSON"
+bash .claude/skills/verify/scripts/verify-complete.sh "$BATCH_ID" "$COMPLETED_IDS_JSON"
 ```
 
 Use the script's confirmation line to populate the Output Contract's `queue` field.
@@ -102,6 +107,8 @@ After finishing all steps for every note in the work list (or after a system-lev
   "queue": "marked <N> entries: verify -> done",
   "vault_scope": {
     "link_health": {"status": "PASS|FAIL", "scanned": <K>, "broken": [{"id": "<queue-id>", "target": "<title>"}]},
+    "source_links": {"status": "PASS|FAIL", "broken": [{"id": "<queue-id>", "target": "<source target>"}]},
+    "source_audit": {"status": "PASS|FAIL", "issues": [{"id": "<queue-id>", "target_path": "<path>", "source": "<source path>", "issue": "<short>"}]},
     "orphan_check": {"status": "PASS|FAIL", "count": <O>, "ids": [{"id": "<queue-id>", "target_path": "<path>"}]}
   },
   "per_note": [

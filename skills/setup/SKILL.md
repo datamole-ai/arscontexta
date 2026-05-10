@@ -336,9 +336,7 @@ You are executing one step of a multi-step generation pipeline.
 - Archive folder: {domain:archive}
 - Note type: {domain:note}
 - Topic map: {domain:topic_map}
-- Process verbs: {domain:verify}
-- Pipeline skills: /structure, /capture (universal — not domain-renamed)
-- Skill names: {DOMAIN:verify}
+- Pipeline skills: /structure, /capture, /connect, /verify (universal — not domain-renamed)
 
 ## Instructions
 1. Read ops/derivation.md FIRST — source of truth for all configuration decisions.
@@ -470,7 +468,6 @@ If nothing was deferred, record: "None — every candidate passed its filter."
 | inbox | [domain term] | folder |
 | archive | [domain term] | folder |
 | note (type) | [domain term] | note type |
-| verify | [domain term] | process phase |
 | MOC | [domain term] | navigation |
 | description | [domain term] | schema field |
 | topics | [domain term] | body footer label |
@@ -789,12 +786,6 @@ vocabulary:
   topic_map: "[domain term]"    # e.g., "topic map", "theme", "decision register"
   hub: "[domain term]"          # e.g., "hub", "home", "overview"
 
-  # Level 5: Process verbs (pipeline skills /structure, /capture, /connect are universal — not mapped here)
-  verify: "[domain term]"       # e.g., "verify", "check resonance", "validate"
-
-  # Level 6: Command names (as users invoke them)
-  cmd_verify: "[/domain-verb]"  # e.g., "/verify", "/check", "/audit"
-
   # Level 7: Processing categories (domain-specific, from conversation)
   processing_categories:
     - name: "[category name]"
@@ -861,12 +852,29 @@ Write `ops/queries/orphans.sh` — substitute `{vocabulary.note_collection}` at 
 
 ```bash
 #!/usr/bin/env bash
-# orphans.sh — notes with no incoming wiki links
+# orphans.sh — notes with no incoming wiki links, using normalized wiki targets
 set -euo pipefail
 NOTES_DIR="{vocabulary.note_collection}"
+
+normalize() {
+  printf '%s' "$1" \
+    | sed -E 's/\|.*$//; s/#.*$//; s/\.md$//; s/^[[:space:]]+|[[:space:]]+$//g' \
+    | tr '[:upper:]' '[:lower:]' \
+    | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//'
+}
+
+targets=$(mktemp)
+trap 'rm -f "$targets"' EXIT
+find "$NOTES_DIR" -name '*.md' -type f -exec grep -hoE '\[\[[^]]+\]\]' {} + 2>/dev/null \
+  | sed -E 's/^\[\[(.+)\]\]$/\1/' \
+  | while read -r target; do normalize "$target"; done \
+  | sort -u > "$targets"
+
 find "$NOTES_DIR" -name '*.md' -type f | while read -r f; do
-  title=$(basename "$f" .md)
-  if ! rg -q "\[\[$title\]\]" "$NOTES_DIR"; then
+  key=$(normalize "$(basename "$f" .md)")
+  title=$(awk '/^# / {sub(/^# /, ""); print; exit}' "$f")
+  title_key=$(normalize "$title")
+  if ! grep -Fxq "$key" "$targets" && { [ -z "$title_key" ] || ! grep -Fxq "$title_key" "$targets"; }; then
     echo "$f"
   fi
 done
@@ -919,11 +927,11 @@ The skills agent uses a specialized prompt (below); its cp + Edit protocol repla
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/seed/`          | seed          | B    | no             | **yes**       | Keep `seed` as the target name                     |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/pipeline/`      | pipeline      | B    | no             | no            | Keep `pipeline` as the target name                 |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/archive-batch/` | archive-batch | B    | no             | no            | Keep `archive-batch` as the target name            |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/verify/`        | verify        | B    | yes            | **yes**       | Target name = domain verb for "verify"             |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/verify/`        | verify        | B    | no             | **yes**       | Keep `verify` as the target name                   |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/structure/`     | structure     | B    | no (universal) | no            | Universal infra; frontmatter `name:` unchanged     |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/capture/`       | capture       | B    | no (universal) | no            | Universal infra; frontmatter `name:` unchanged     |
 
-**Rename rules:** `yes` → directory and frontmatter `name:` both become the domain-native verb from `ops/derivation.md` (e.g. verify → audit). `no` → keep source name. `no (universal)` (`structure`, `capture`, `connect`) → keep frontmatter `name:` and `description:` unchanged; only body `{DOMAIN:xxx}` substitutes.
+**Rename rules:** `yes` → directory and frontmatter `name:` both become the domain-native verb from `ops/derivation.md`. `no` → keep source name. `no (universal)` (`structure`, `capture`, `connect`) → keep frontmatter `name:` and `description:` unchanged; only body `{DOMAIN:xxx}` substitutes. `verify` is fixed: directory, frontmatter `name:`, and command reference stay `verify` / `/verify`.
 
 ---
 
@@ -956,7 +964,7 @@ Batch filesystem ops and body substitution across all skills in one Bash call; E
 
 Universal skills (`structure`, `capture`) are included in the sed pass — their bodies carry `{DOMAIN:xxx}` patterns that need resolution; only their frontmatter is exempt.
 
-**Step 2 — Per-skill frontmatter edits** For each non-universal skill modify `name:` in the frontmatter to the domain-native verb.
+**Step 2 — Per-skill frontmatter edits** For each skill marked `Domain-rename? yes`, modify `name:` in the frontmatter to the domain-native verb. Leave every `no` skill name untouched, including `verify`.
 
 Never touch `{vocabulary.xxx}` patterns — they resolve at runtime from `ops/derivation-manifest.md`.
 
@@ -1123,13 +1131,13 @@ Use these names verbatim in manual/skills.md and any /command references:
 - /seed                     — Tier B, unchanged
 - /pipeline                 — Tier B, unchanged
 - /archive-batch            — Tier B, unchanged
-- /{DOMAIN:verify}          — Tier B, domain-renamed (verify verb)
+- /verify                   — Tier B, unchanged
 - /structure                — Tier B, universal (not renamed)
 - /capture                  — Tier B, universal (not renamed)
 - /ask                      — router (written by context agent)
 ```
 
-The main agent resolves each `{DOMAIN:xxx}` to the domain-native verb from `ops/derivation.md` before passing the prompt — so by the time the manual agent reads the addendum, every skill name is already concrete.
+The main agent resolves each `{DOMAIN:xxx}` to the domain-native term from `ops/derivation.md` before passing the prompt. Fixed command names such as `/verify` are already concrete and must not be adapted.
 
 ---
 
@@ -1137,7 +1145,7 @@ The main agent resolves each `{DOMAIN:xxx}` to the domain-native verb from `ops/
 
 Generate all 7 manual pages. Manual is self-contained — pages wiki-link to each other but NOT to notes/.
 
-For each page: replace universal terms (notes, inbox, topic map) with domain-native equivalents from the derivation conversation. Pipeline skills (/structure, /capture, /connect) are universal and not renamed. Use concrete domain examples.
+For each page: replace universal terms (notes, inbox, topic map) with domain-native equivalents from the derivation conversation. Pipeline skills (/structure, /capture, /connect, /verify) are universal and not renamed. Use concrete domain examples.
 
 **Page 1: manual.md (Hub MOC)**
 
@@ -1203,7 +1211,7 @@ Internal machinery the pipeline orchestrates. Prefer /{DOMAIN:pipeline} as the i
 - /structure — grouped note production (related claims in one {DOMAIN:note})
 - /capture — verbatim capture (no transformation)
 - /connect — find connections, update {DOMAIN:topic map}s, and reconsider {DOMAIN:note_plural} against current graph state
-- /{DOMAIN:verify} — description + schema + health check
+- /verify — description + schema + health check
 - /archive-batch — archive completed batch
 
 ## Reference
@@ -1279,7 +1287,7 @@ type: manual
 
 ## What Pipeline Does
 
-One command, full processing: {DOMAIN:seed} -> structure/capture -> /connect -> {DOMAIN:verify} -> archive. Drop a file in {DOMAIN:inbox}/, run /{DOMAIN:pipeline}, get connected knowledge.
+One command, full processing: {DOMAIN:seed} -> structure/capture -> /connect -> /verify -> archive. Drop a file in {DOMAIN:inbox}/, run /{DOMAIN:pipeline}, get connected knowledge.
 
 ## Two Granularity Modes
 
@@ -1372,7 +1380,7 @@ content_type: moc
 Welcome to your [domain] system.
 
 ## [domain:Topics]
-[Links to self/ MOCs and any domain-specific topic MOCs that are relevant]
+[Template navigation examples; replace with real domain topic maps as they emerge]
 - [[identity]] -- who the agent is and how it approaches work
 - [[methodology]] -- how the agent processes and connects knowledge
 - [[goals]] -- current active threads

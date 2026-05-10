@@ -84,6 +84,8 @@ Do not add context, motivation, rationale, mechanism explanations, or implicatio
 
 When tempted to explain, either link a neighbor that already explains, or flag the gap for attention. Model-derived framing that looks plausible is still fabrication; once committed to the graph it becomes indistinguishable from attested claims and compounds through later reconsiderations.
 
+Titles, descriptions, topic-map bullets, and Relevant Notes bullets are all claims. Do not use drift phrases such as "signals", "implies", "therefore", "productionizes", "owned by", "canonical", or "dose-and-response" unless the phrase is backed by a cited source/neighbor or explicitly marked as inference. Preserve source grain: do not rewrite herd/group as per-cow/per-animal, integration contact as integration path, or source questions as findings.
+
 ## Output Budget Guardrail
 
 Do not emit a reasoning transcript. The final response is the canonical JSON Output Contract only. Keep internal deliberation out of the output and record audit evidence as compact rows:

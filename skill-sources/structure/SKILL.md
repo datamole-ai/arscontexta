@@ -92,7 +92,31 @@ If YES -> split into separate structure notes
 
 ## Source Fidelity
 
-Every sentence in a {vocabulary.note} body must paraphrase a specific line or paragraph of the source. Do not add connective prose, motivation, mechanism explanations, implications, or rationale that is not in the source. If a claim needs background to make sense, either omit it (the source citation suffices) or flag the gap — do not invent the background. When the source is terse, the {vocabulary.note} is proportionally terse; inflation is a fidelity failure, not a thoroughness win.
+Every title, frontmatter description, section heading, body sentence, and footer relationship phrase must be directly supported by the archived source text unless it is explicitly marked as inference. Do not add connective prose, motivation, mechanism explanations, implications, definitions, ownership claims, deployment claims, or rationale that is not in the source. If a claim needs background to make sense, either omit it (the source citation suffices) or flag the gap — do not invent the background. When the source is terse, the {vocabulary.note} is proportionally terse; inflation is a fidelity failure, not a thoroughness win.
+
+### Archive-Faithful Knowledge Rules
+
+**Treat titles and descriptions as factual claims.** A title or `description` may not be stronger than the source-backed body. Preferred phrasing when the source is a list, table, question, or uncertainty:
+- "the source lists..."
+- "the source marks..."
+- "the source asks..."
+- "the source does not state..."
+
+**Keep inference separate.** If the source does not say the thing directly, write `Inference:` before the sentence and keep it out of titles/descriptions unless the title itself says it is an inference. Do not promote interpretation to fact.
+
+**Do not invent domain definitions.** Preserve source terms such as `boxtime`, `bimodality`, `amo_*`, and formula factors such as `0.9` as undefined terms unless the archived source defines them. If a term is undefined, write "the source uses `<term>` without defining it" or add a bounded gap; do not import outside/domain knowledge.
+
+**Preserve source grain and scope exactly.**
+- Do not collapse `herd/group` settings into `per-cow` or `per-animal` settings in titles, descriptions, body text, or related-note bullets.
+- Do not upgrade source "integration contact" into "integration path", "results integration", or a deployment model unless the source says that.
+- Do not turn repository mentions into ownership claims unless ownership is explicit.
+
+**Preserve question polarity and uncertainty.** Source questions like "what is the effect on interval regularity" remain questions. Hypotheses, SME suspicions, and TODOs remain hypotheses/suspicions/TODOs unless the source reports a result.
+
+**Preserve primary artifacts when claiming coverage.**
+- Repository-layout notes that imply repository coverage must retain exact repository URLs from the source.
+- Report/workstream notes that mention reports must retain exact Google Drive report URLs from the source.
+- Contact-list notes that imply roster coverage must preserve emails or clearly state that emails were intentionally omitted.
 
 Neighbor linking is /connect's job — /structure does not pre-seed wiki-links in the body. At this phase, source-fidelity means: if it is not in the source, it does not enter the body.
 
@@ -249,7 +273,7 @@ Decide mode before writing. Log the chosen mode for the handoff summary.
 
 ### E3. Apply the Modification
 
-Write the new content into the chosen location using the same body rules as the New-note path (develop the claim, use connective words, inline wiki-links where genuine, reference source evidence, do not invent claims).
+Write the new content into the chosen location using the same body rules as the New-note path (develop only source-backed claims, reference source evidence, preserve source grain, and do not invent claims).
 
 **Preserve invariants (non-negotiable):**
 - NEVER delete existing body content.
@@ -258,7 +282,7 @@ Write the new content into the chosen location using the same body rules as the 
 - NEVER strip existing footer entries.
 
 **Update footer:**
-- Append the new source to the existing `Source:` line as an additional wiki-link.
+- Append the new source to the existing `Source:` line as an additional `[[source:<batch-id>]]` wiki-link.
 
 ### E4. Two-Phase Validation and Write
 
@@ -317,10 +341,10 @@ Do not include the `_schema` block in the output note's frontmatter.
 
 **Body (prescriptive rules):**
 - Body is sourced from the input file only. Neighbor notes read during Orient or Semantic Search inform classification, not composition. Do not import their claims, framings, or evidence into this note. If it is not in the source, do not write it.
-- Develop the claim. Do not just assert it. Show WHY, provide context. Keep it close to the source material.
+- Develop only what the source develops. Do not just assert, but do not add WHY, mechanism, or context absent from the source.
 - If the reasoning is not provided in the source, do not make it up.
 - Reference the source material's evidence and reasoning — do not invent unsupported claims.
-- Use connective words: because, therefore, this suggests, however, in contrast, building on.
+- Use inference/connective words such as `signals`, `implies`, `therefore`, `this suggests`, `productionizes`, `owned by`, or `canonical` only when the source uses equivalent language or when the sentence is explicitly marked `Inference:`.
 - Do not include wiki-links in the body. Connection-finding belongs to `/connect`, which runs semantic search and verifies targets before writing links. Pre-seeding links here produces dangling links and duplicates connect's work without its verification.
 
 For structure notes, body sections each develop one sub-claim within the shared context. Section headings state the claim or argument thread, not a vague topic label.
@@ -330,13 +354,19 @@ For structure notes, body sections each develop one sub-claim within the shared 
 ```markdown
 ---
 
-Source: [[source filename]]
+Source: [[source:<batch-id>]]
 
 Topics:
 - [[parent-topic-map]]
 ```
 
-Derive `Source:` from the structure task's source. `Topics:` lists the {vocabulary.topic_map}(s) identified in M2
+Derive `Source:` from the structure task's batch id using the supported source-id scheme:
+
+```markdown
+Source: [[source:<batch-id>]]
+```
+
+`[[source:<batch-id>]]` resolves through `ops/queue/archive/<date>-<batch-id>/batch-manifest.json` or the current process entry to the concrete archived source file. Do not link to a normalized note title or a guessed source title. `Topics:` lists the {vocabulary.topic_map}(s) identified in M2.
 
 ### M4. Schema Validation
 
@@ -432,11 +462,11 @@ Appendix referenced by both Materialize paths. Do not invoke independently.
 | 1 | **Required fields** — every field in `_schema.required` exists in the frontmatter | FAIL | Add missing field, re-validate |
 | 2 | **Enum compliance** — every enum field's value is in `_schema.enums.{field}` | FAIL | Correct to valid value, re-validate |
 | 3 | **Constraint compliance** — each field satisfies `_schema.constraints` (`max_length`, `format`, `fixed`) | FAIL | Fix violation, re-validate |
-| 4 | **Description quality** — adds info beyond the title (not a restatement, not empty) | FAIL | Rewrite description, re-validate |
+| 4 | **Description quality and source faithfulness** — adds info beyond the title without exceeding source support | FAIL | Rewrite description, re-validate |
 | 5 | **Topics footer present** — at least one wiki-link in the body-level `Topics:` footer | FAIL | Add topic link, re-validate |
 | 6 | **Body has no wiki-links** — body (content between the H1 heading and the `---` separator that precedes the footer) contains no `[[...]]` | FAIL | Remove body wiki-links, re-validate |
-| 7 | **Footer wiki-link health** — `[[links]]` in the `Source:` and `Topics:` footers resolve to existing files | WARN | Log, continue |
+| 7 | **Footer wiki-link health** — `[[links]]` in the `Source:` and `Topics:` footers resolve via wiki normalization; `Source:` resolves via source-id or concrete archive file | FAIL for Source, WARN for not-yet-created Topics | Fix Source links; log missing topic maps for connect |
 
 **Severity levels:**
 - **FAIL** — missing required field, invalid enum, constraint violation, empty description, empty Topics footer, any wiki-link present in the body. Fix inline (edit the content in memory) and re-validate. If a FAIL cannot be resolved after one fix attempt, quarantine the artifact.
-- **WARN** — broken footer wiki-link (most often a `Topics:` link to a not-yet-existent MOC), missing optional field. Log the warning and continue. Topic-map creation happens in `/connect`; structure flags missing MOCs rather than blocking on them.
+- **WARN** — broken non-source footer wiki-link (most often a `Topics:` link to a not-yet-existent MOC), missing optional field. Log the warning and continue. Topic-map creation happens in `/connect`; structure flags missing MOCs rather than blocking on them. Broken `Source:` links are FAIL because source traceability is non-negotiable.

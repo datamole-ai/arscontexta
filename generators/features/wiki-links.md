@@ -9,8 +9,8 @@
 
 ### How Links Work
 
-- `[[{DOMAIN:note} title]]` links to the {DOMAIN:note} with that exact filename
-- Links resolve by filename, not path — every filename must be unique across the entire workspace
+- `[[{DOMAIN:note} title]]` links to the {DOMAIN:note} with that title or normalized filename slug
+- Links resolve through normalized aliases: exact title, filename slug, case-insensitive match, and `[[target|alias]]` all point at the same target when unambiguous
 - Links work as prose: "Since [[Mom prefers phone calls on Sunday mornings]], I should call her this weekend"
 - Wiki links are bidirectionally discoverable — you can find what links TO a {DOMAIN:note} by searching for its title in double brackets
 
@@ -63,15 +63,20 @@ The context phrase serves two audiences: it tells a future agent WHY to follow t
 Every `[[link]]` must point to a real file. Dangling links — wiki links to {DOMAIN:notes} that do not exist — create confusion during traversal and pollute health checks. The policy:
 
 - **Before creating a link:** Verify the target {DOMAIN:note} exists
+- **When filenames are slugged:** Link text may use the prose title; health checks normalize spaces, case, aliases, and title-to-filename slugs
 - **If the target should exist but does not:** Create it, then link
 - **If you are unsure whether to create the target:** Do not create the link. Capture the idea in your current {DOMAIN:note}'s prose instead
 - **During health checks:** Dangling links are flagged as high-priority issues (session-level consequence speed)
+
+### Source Links
+
+`Source:` footer links are stricter than ordinary knowledge links. Use `[[source:<batch-id>]]` for pipeline-produced structure notes, or link the concrete archived source file when one exists. The verifier resolves source IDs through `batch-manifest.json` and fails unresolved source links separately from ordinary knowledge links.
 
 Dangling links also serve as demand signals. When `/health` reports dangling links, they reveal what {DOMAIN:notes} your graph expects to exist. Creating those {DOMAIN:notes} fills structural gaps.
 
 ### Filename Uniqueness
 
-Every filename must be unique across the entire workspace. Wiki links resolve by name, not path. If `[[{DOMAIN:note} name]]` matches multiple files in different folders, the link becomes ambiguous and may resolve unpredictably.
+Every normalized target must be unique across the entire workspace. Wiki links resolve by title/slug alias, not path. If `[[{DOMAIN:note} name]]` matches multiple files in different folders after normalization, the link becomes ambiguous and may resolve unpredictably.
 
 This is a consequence of flat folder architecture with wiki links as the connection layer. Unlike traditional file systems where paths disambiguate (`folder/file.md` vs `other/file.md`), wiki links only see the filename.
 
