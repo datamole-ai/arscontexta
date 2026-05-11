@@ -49,7 +49,7 @@ High backlink counts identify hub {DOMAIN:notes} — central concepts that many 
 ```bash
 ./ops/scripts/link-density.sh
 ```
-Healthy graphs maintain an average of 3+ outgoing links per {DOMAIN:note}. Below that threshold, the graph is sparse and traversal becomes unreliable.
+Healthy graphs maintain an average of 3+ outgoing links per {DOMAIN:note}. Below that point, the graph is sparse and traversal becomes unreliable.
 
 **Schema validation** — Validate all {DOMAIN:notes} against their template schemas:
 ```bash

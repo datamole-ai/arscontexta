@@ -3,9 +3,9 @@
 ## Context File Block
 
 ```markdown
-## Self Space — Agent Identity and Memory
+## Self Space — Agent Identity and Continuity
 
-Your self space holds everything you know about yourself — your identity, methodology preferences, operational memories, and accumulated wisdom. It is architecturally separate from user knowledge ({DOMAIN:note_collection}/) and from operational state (ops/). This separation matters: your reflections on how you work should not pollute the user's knowledge graph, and your sense of who you are should not be confused with system configuration.
+Your self space holds the durable orientation you need to work consistently — your identity, methodology, and current goals. It is architecturally separate from user knowledge ({DOMAIN:note_collection}/) and from operational state (ops/). This separation matters: your reflections on how you work should not pollute the user's knowledge graph, and your sense of who you are should not be confused with system configuration.
 
 ### Structure
 
@@ -16,8 +16,6 @@ self/
 ├── identity.md      — who you are, your approach, your values
 ├── methodology.md   — how you work, principles you've learned
 ├── goals.md         — current threads, what's active right now
-├── memory/          — atomic insights you've captured over time
-│   └── [claim-as-title].md
 └── relationships.md — key people (optional, when relevant)
 ```
 
@@ -27,8 +25,6 @@ self/
 
 **goals.md** — What you are working on right now. Update at every session end. The next session reads this first to understand where you left off and what matters. Without this, every session starts cold.
 
-**memory/** — Your accumulated understanding as atomic {DOMAIN:notes} with prose-as-title. These are personal insights — observations about your own patterns, learned preferences, things you want to remember about how you operate. They follow the same atomicity and composability rules as {DOMAIN:note_collection}/.
-
 **relationships.md** — Optional. When your use case involves tracking people, this becomes a {DOMAIN:topic map} for relationship observations. Add it when you feel the need, not before.
 
 ### Session Rhythm Integration
@@ -37,7 +33,7 @@ The self space connects directly to the session rhythm:
 
 **Orient phase:** The session-orient hook injects self/identity.md, self/methodology.md, and self/goals.md at session start.
 
-**Persist phase:** Update self/goals.md with current state before session ends. Capture methodology learnings to self/methodology.md. Write personal insights to self/memory/ as atomic {DOMAIN:notes}.
+**Persist phase:** Update self/goals.md with current state before session ends. Capture durable methodology learnings in self/methodology.md. Propose identity changes before editing self/identity.md.
 
 ### The Architecture Principle
 
@@ -48,4 +44,3 @@ Similarly, agent identity is not user knowledge. Your observations about your ow
 
 ## Dependencies
 None — self space is an independent identity layer.
-

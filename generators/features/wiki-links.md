@@ -32,7 +32,7 @@ When you write `because [[the anxiety usually starts when I skip morning routine
 ---
 
 Relevant Notes:
-- [[related note]] — extends this by adding the temporal dimension
+- [[related note]] — extends this by adding the temporal aspect
 - [[another note]] — provides the evidence this builds on
 
 Topics:
@@ -46,14 +46,14 @@ Topics:
 Every connection must articulate the relationship. The question is never "are these related?" but "HOW are these related?"
 
 Standard relationship types:
-- **extends** — builds on an idea by adding a new dimension
+- **extends** — builds on an idea by adding a new aspect
 - **foundation** — provides the evidence or reasoning this depends on
 - **contradicts** — conflicts with this claim (capture as a tension if significant)
 - **enables** — makes this possible or practical
 - **example** — illustrates or demonstrates this concept in practice
 
 Bad: `[[{DOMAIN:note}]] — related`
-Good: `[[{DOMAIN:note}]] — extends this by adding the temporal dimension`
+Good: `[[{DOMAIN:note}]] — extends this by adding the temporal aspect`
 Good: `[[{DOMAIN:note}]] — provides the foundation this challenges`
 
 The context phrase serves two audiences: it tells a future agent WHY to follow this link (should I read this or skip it?), and it documents the intellectual relationship for anyone maintaining the graph. Keep it short enough to scan in a footer.

@@ -82,7 +82,7 @@ mkdir -p "<archive_folder>/phase-outputs"
 bash ops/scripts/batch-manifest.sh "<batch-id>"
 ```
 
-Before invoking structure/capture, connect, verify, or archive-batch, refresh the same manifest. Phase skills use `<archive_folder>/batch-manifest.json` as their primary entry point, then read specific source, note, or map files only when needed for correctness. The manifest is durable recovery state: if a run fails, queue state plus `batch-manifest.json` plus `phase-outputs/*.json` must be enough to diagnose where it stopped.
+Before invoking structure/capture, connect, or archive-batch, refresh the same manifest. Those phase skills use `<archive_folder>/batch-manifest.json` as their primary entry point, then read specific source, note, or map files only when needed for correctness. `/verify` reads the queue and target notes directly. The manifest is durable recovery state: if a run fails, queue state plus `batch-manifest.json` plus `phase-outputs/*.json` must be enough to diagnose where it stopped.
 
 ---
 
@@ -154,17 +154,11 @@ Report one line: `<batch-id>: connect done — <queue>`.
 
 #### Phase 2.3.2: Batched verify
 
-Refresh the compact manifest immediately before invoking verify:
-
-```bash
-bash ops/scripts/batch-manifest.sh "<batch-id>"
-```
-
 Use the Skill tool to invoke `/verify` with the same batch id.
 
 Parse the verify JSON:
 - `status` — must be `"ok"`; otherwise stop and surface `error`.
-- `vault_scope` and `per_note` — capture failures for the report; do not re-narrate the per-note rows.
+- `checks` and `per_note` — capture failures for the report; do not re-narrate the per-note rows.
 - `learnings` — collect.
 
 Persist the verify JSON to `<archive_folder>/phase-outputs/verify.json`, then run `bash ops/scripts/batch-manifest.sh "<batch-id>"`.

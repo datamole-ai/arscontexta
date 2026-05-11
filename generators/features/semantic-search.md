@@ -60,15 +60,20 @@ Semantic search finds meaning across vocabularies:
 ```bash
 # Before creating — check for duplicates
 # "Am I about to create a note that already exists in different words?"
+qmd vsearch "claim or concept to check" --collection {vocabulary.qmd_collection} -n 5
 
 # Finding connections — what relates to this concept?
 # "What exists that connects to this idea, even with different terminology?"
+qmd query "concept or mechanism to connect" --collection {vocabulary.qmd_collection} -n 15
 
 # Exploring — what does the vault know about this?
 # "Show me everything related to this theme, broadly"
+qmd query "broad theme or question" --collection {vocabulary.qmd_collection} -n 10
 ```
 
 Semantic search is especially valuable for duplicate detection. Two {DOMAIN:notes} might express the same idea using completely different words — keyword search would miss the overlap, but semantic search catches it.
+
+Use `qmd vsearch` for pure vector searches. Do not write natural-language vector searches as `qmd query $'vec: ...'`: qmd's structured `vec:`/`hyde:` validator rejects lex-only negation syntax and can misread ordinary hyphenated terms such as `Take-off`. Use bare `qmd query "..."` for hybrid searches where expansion and reranking are wanted.
 
 ### Index Maintenance
 

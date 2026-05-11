@@ -67,16 +67,16 @@ New {DOMAIN:notes} create connections going forward. But older {DOMAIN:notes} do
 
 ### Condition-Based Maintenance
 
-Maintenance triggers are condition-based, not time-based. Time-based triggers (weekly, monthly, quarterly) assume uniform activity — a vault that scales fast would overwhelm a monthly check, while a vault used rarely would run empty checks on schedule. Condition-based triggers respond to actual state, firing exactly when the system needs attention.
+Maintenance signals are condition-based, not time-based. Time-based triggers (weekly, monthly, quarterly) assume uniform activity — a vault that scales fast would overwhelm a monthly check, while a vault used rarely would run empty checks on schedule. Condition-based signals respond to actual state, surfacing maintenance when the system needs attention.
 
-| Condition | Threshold | Action When True |
-|-----------|-----------|-----------------|
-| Orphan {DOMAIN:notes} | Any detected | Surface for connection-finding |
-| Dangling links | Any detected | Surface for resolution |
-| {DOMAIN:Topic map} size | >40 {DOMAIN:notes} | Suggest sub-{DOMAIN:topic map} split |
-| Inbox pressure | Items older than 3 days | Suggest processing |
-| Stale pipeline batch | >2 sessions without progress | Surface as blocked |
-| Schema violations | Any detected | Surface for correction |
+| Condition | Action When True |
+|-----------|-----------------|
+| Orphan {DOMAIN:notes} | Surface for connection-finding |
+| Dangling links | Surface for resolution |
+| Oversized {DOMAIN:topic map} | Suggest sub-{DOMAIN:topic map} split |
+| Inbox pressure | Suggest processing |
+| Stale pipeline batch | Surface as blocked |
+| Schema violations | Surface for correction |
 
 These conditions are evaluated by /health on demand. When a condition fires, /health reports it with specific files and ranked recommended actions — not a calendar reminder.
 
@@ -99,7 +99,7 @@ The graph doesn't just get maintained. It gets better.
 Maintenance is diagnostic, not a separate queue of work. /health evaluates all conditions on demand and reports fired conditions with specific files and ranked actions.
 
 The reconciliation pattern:
-1. **Declare conditions** — the system defines what "healthy" looks like (desired state) via thresholds in `ops/config.yaml`
+1. **Declare built-in health signals** — the system defines what "healthy" looks like through fixed diagnostics
 2. **Measure actual state** — /health compares reality against each condition across its 8 diagnostic categories plus cross-cutting maintenance signals
 3. **Report findings** — /health produces a PASS/WARN/FAIL report with specific files, persisted to `ops/health/YYYY-MM-DD-report.md`
 4. **Self-healing** — the user fixes the underlying issue; the next /health run confirms resolution

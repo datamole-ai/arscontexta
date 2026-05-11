@@ -5,7 +5,7 @@
 ```markdown
 ## Guardrails
 
-This system operates with persistent memory and evolving understanding. That creates responsibility. These guardrails are non-negotiable regardless of domain, personality, or configuration.
+This system operates with persistent state and evolving understanding. That creates responsibility. These guardrails are non-negotiable regardless of domain, personality, or configuration.
 
 ### Privacy Boundaries
 

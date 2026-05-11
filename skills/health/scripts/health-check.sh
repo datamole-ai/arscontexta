@@ -276,7 +276,7 @@ while IFS= read -r moc; do
     [ "$cat8_status" = "PASS" ] && cat8_status="WARN"
     cat8_details="${cat8_details}      - $moc_bn: $linked notes [WARN — oversized]\n"
   elif [ "$linked" -gt 40 ]; then
-    cat8_details="${cat8_details}      - $moc_bn: $linked notes [INFO — approaching threshold]\n"
+    cat8_details="${cat8_details}      - $moc_bn: $linked notes [INFO — approaching split point]\n"
   else
     cat8_details="${cat8_details}      - $moc_bn: $linked notes [PASS]\n"
   fi
@@ -294,9 +294,9 @@ echo ""
 # ── Maintenance Signals ─────────────────────────────────────────
 echo "Maintenance Signals:"
 if [ "$INBOX_COUNT" -ge 3 ]; then
-  echo "    - inbox: $INBOX_COUNT items (threshold: 3) [TRIGGERED]"
+  echo "    - inbox: $INBOX_COUNT items [TRIGGERED]"
 else
-  echo "    - inbox: $INBOX_COUNT items (threshold: 3) [OK]"
+  echo "    - inbox: $INBOX_COUNT items [OK]"
 fi
 pending=$(jq '[.tasks[] | select(.status=="pending")] | length' ops/queue/queue.json 2>/dev/null || echo 0)
 if [ "$pending" -ge 1 ]; then

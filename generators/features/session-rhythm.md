@@ -12,7 +12,7 @@ Every session follows three phases. This rhythm prevents context loss across ses
 Before doing anything, understand where you are:
 
 1. The session-orient hook injects your identity, methodology, goals, workspace tree, and maintenance signals at session start (startup, resume, clear). Do not re-read self/identity.md, self/methodology.md, or self/goals.md unless something is missing or stale.
-2. **Check condition-based triggers** — The hook surfaces key maintenance conditions (orphans, dangling links, inbox pressure, observation thresholds). Run /health for the full diagnostic sweep.
+2. **Check condition-based signals** — The hook surfaces key maintenance conditions (orphans, dangling links, inbox pressure, observations). Run /health for the full diagnostic sweep.
 3. **Understand current state** — What {DOMAIN:notes} exist? What's in {DOMAIN:inbox/}? What does the graph look like?
 
 **Orientation shortcuts:**

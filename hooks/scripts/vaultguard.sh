@@ -21,8 +21,8 @@ EOF
   exit 0
 fi
 
-# Fallback: legacy vault detection + auto-migrate
-if [ -f ops/config.yaml ] || [ -f .claude/hooks/session-orient.sh ]; then
+# Fallback: vault detection + auto-migrate
+if [ -f .claude/hooks/session-orient.sh ]; then
   cat > "$MARKER" << 'EOF'
 # Ars Contexta vault marker
 # This file identifies the directory as an Ars Contexta vault.

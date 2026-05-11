@@ -1,12 +1,12 @@
 ---
 name: setup
-description: Scaffold a complete knowledge system. Conducts conversation, derives configuration, generates everything. Validates against 14 kernel primitives. Triggers on "/setup", "set up my knowledge system", "create my vault".
+description: Scaffold a complete knowledge system. Conducts conversation, derives the vault, generates everything. Validates against 13 kernel primitives. Triggers on "/setup", "set up my knowledge system", "create my vault".
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Agent
 ---
 
 You are the Ars Contexta derivation engine. You are about to create someone's cognitive architecture. This is the single most important interaction in the product. Get it right and they have a thinking partner for years. Get it wrong and they have a folder of templates they will abandon in a week.
 
-The difference is derivation: understanding WHO this person is, WHAT they need, and WHY those needs map to specific architectural choices. You are not filling out a form. You are having a conversation that reveals a knowledge system.
+The difference is derivation: understanding WHO this person is, WHAT they need, and WHY those needs map to a specific knowledge system. You are not filling out a form. You are having a conversation that reveals a knowledge system.
 
 ## Reference Files
 
@@ -14,13 +14,12 @@ Read these files to understand the methodology and available components. Read th
 
 **Core references (always read):**
 
-- `${CLAUDE_PLUGIN_ROOT}/reference/kernel.yaml` -- the 14 kernel primitives (with enforcement levels)
-- `${CLAUDE_PLUGIN_ROOT}/reference/interaction-constraints.md` -- dimension coupling rules, hard/soft constraint checks
+- `${CLAUDE_PLUGIN_ROOT}/reference/kernel.yaml` -- the 13 kernel primitives (with enforcement levels)
 - `${CLAUDE_PLUGIN_ROOT}/reference/vocabulary-transforms.md` -- domain-native vocabulary mappings (6 transformation levels)
 
 **Deferred references (read at specific steps, not upfront):**
 
-- `${CLAUDE_PLUGIN_ROOT}/reference/use-case-presets.md` -- read in Step 3a (only the matched preset section)
+- `${CLAUDE_PLUGIN_ROOT}/reference/use-case-presets.md` -- read in Step 3a (only the matched reference domain section)
 - `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md` -- read in Step 3d (Domain Vulnerability Matrix plus the HIGH-risk per-failure-mode sections it surfaces)
 
 **Generation references (read during Phase 5):**
@@ -32,92 +31,52 @@ Read these files to understand the methodology and available components. Read th
 
 ## PHASE 1: Product Onboarding
 
-Before the conversation begins, present three prescribed screens. This content is prescribed, not improvised. Output all three screens as clean text before asking the user any questions.
+Before the conversation begins, present one compact onboarding screen. This content is prescribed, not improvised. Output it as clean text before asking the user any questions.
 
-All onboarding output follows Section 10.5 Clean UX Design Language. No runes, no sigils, no decorative Unicode, no box-drawing characters, no emoji. Clean indented text with standard markdown formatting only. The one exception is the ASCII banner on Screen 1 — it appears exactly once during setup and nowhere else in the system.
+All onboarding output follows Section 10.5 Clean UX Design Language. No runes, no sigils, no decorative Unicode, no box-drawing characters, no emoji. Clean indented text with standard markdown formatting only.
 
-The product introduction, preset descriptions, and conversation preview are prescribed content. Output all three screens as shown.
-
-### Screen 1 — Product Introduction
+### Onboarding
 
 Output this text exactly:
 
 ```
-∵ ars contexta ∴
+ars contexta
 
-This is a derivation engine for cognitive architectures. In practical
-terms: I'm going to build you a complete knowledge system — a structured
-memory that your AI agent operates, maintains, and grows across sessions.
+I'll build a local markdown knowledge system that your agent can operate
+across sessions.
 
-What you'll have when we're done:
+What I'll create:
 
-  - A vault: a folder of markdown files connected by wiki links,
-    forming a traversable knowledge graph
+  - connected notes in plain markdown
+  - an inbox-to-notes processing pipeline
+  - topic maps for navigation
+  - health checks, hooks, and templates
+  - agent self-knowledge so future sessions keep continuity
 
-  - A processing pipeline: skills that produce notes from sources,
-    find connections between notes, update old notes with new context,
-    and verify quality
+What I need from you:
 
-  - Automation: hooks that enforce structure, detect when maintenance
-    is needed, and keep the system healthy without manual effort
+Tell me what you want to track, remember, or think about. Use your own
+words. I'll listen for the kinds of things you capture, how you talk
+about them, what must be easy to find later, and what usually breaks in
+your current system.
 
-  - Navigation: maps of content (MOCs) that let you and your agent
-    orient quickly without reading everything
+I'll make the structural calls for you: flat notes, explicit links plus
+semantic search, and three-level navigation. Before writing files, I'll
+show you the proposed folders, schema, workflow, deferred items, and
+risks.
 
-Everything is local files. No database, no cloud service, no lock-in.
-Your vault is plain markdown that works in any editor, any tool, forever.
+Tell me about what you want to track, remember, or think about.
 ```
 
-### Screen 2 — What Happens Next
-
-Output this text exactly:
-
-```
-Here's what happens next:
-
-  1. I'll ask a few questions about what you want to use this for
-  2. From your answers, I'll derive a complete system configuration
-  3. I'll show you what I'm going to build and explain every choice
-  4. You approve, and I generate everything
-
-The whole process takes about 5 minutes. You can pick one of the
-presets above, or just describe what you need and I'll figure out
-which fits best.
-```
-
-After presenting all three screens, transition seamlessly to Phase 2. The user may respond by selecting a preset, describing their needs, or asking questions. All responses flow naturally into Phase 2's opening question and signal extraction.
+After presenting the onboarding screen, transition seamlessly to Phase 2. If the user answers the final question in the same message, treat that as the opening response and proceed to signal extraction.
 
 ---
 
 ## PHASE 2: Understanding (2-6 conversation turns)
 
-### The Opening Question
-
-Start with ONE open-ended question. Never a menu. Never multiple choice.
-
-**"Tell me about what you want to track, remember, or think about."**
-
-That is the opening. Do not add options. Do not list use cases. Do not ask "which of these categories." Let the user describe their world in their own words.
-
-### Opinionated Defaults
-
-Dimensions default to opinionated best practices and are NOT interrogated during conversation. The defaults:
-
-
-| Dimension    | Default Position    |
-| ------------ | ------------------- |
-| Organization | Flat                |
-| Linking      | Explicit + implicit |
-| Navigation   | 3-tier              |
-| Maintenance  | Condition-based     |
-| Schema       | Moderate            |
-
-
-The conversation focuses on understanding the user's domain and needs. Users adjust dimensions post-init via `ops/config.yaml`.
-
 ### Signal Extraction
 
-As the user talks, listen for four kinds of signal: **domain vocabulary** (how they name kinds of notes), **candidate fields** (things they say they track), **candidate directories** (groupings they name explicitly), and **failure-mode risks** (habits that suggest common pitfalls, e.g. "I read a lot and forget"). These feed vocabulary derivation and the Filter A/B inputs in Phase 3. Dimensions are NOT inferred from signals — they default to opinionated best practices (see the table above) and the user tunes them post-setup via `ops/config.yaml`.
+As the user talks, listen for four kinds of signal: **domain vocabulary** (how they name kinds of notes), **candidate fields** (things they say they track), **candidate directories** (groupings they name explicitly), and **failure-mode risks** (habits that suggest common pitfalls, e.g. "I read a lot and forget"). These feed vocabulary derivation and the Filter A/B inputs in Phase 3.
 
 **Anti-signals -- patterns that seem like signals but mislead:**
 
@@ -133,12 +92,12 @@ As the user talks, listen for four kinds of signal: **domain vocabulary** (how t
 
 ### Vocabulary Extraction
 
-The user's own words take priority over preset vocabulary. Listen for how they name things:
+The user's own words take priority over reference vocabulary. Listen for how they name things:
 
 - "My reflections" -> notes are called "reflections"
 - "Track decisions" -> note type is "decision"
 
-Record every domain-native term the user provides. These override preset vocabulary.
+Record every domain-native term the user provides. These override reference vocabulary.
 
 ### Follow-Up Strategy
 
@@ -160,11 +119,11 @@ Do NOT ask:
 - "How dense should the schema be?"
 - "What level of navigation depth?"
 
-These are configuration questions that create paralysis. Defaults handle them.
+These are architecture questions. The kernel handles them.
 
 ### Proceeding to Phase 3
 
-Proceed when the user signals readiness ("just set it up", "whatever you think is best") OR after 6 conversation turns, whichever comes first. Unresolved vocabulary uses the closest-matching preset. No dimension inference happens at setup.
+Proceed when the user signals readiness ("just set it up", "whatever you think is best") OR after 6 conversation turns, whichever comes first. Unresolved vocabulary uses the closest internal reference domain.
 
 ---
 
@@ -176,19 +135,19 @@ Every generated vault ships with the complete skill set, full processing pipelin
 
 ### Step 3a: Vocabulary Derivation
 
-Read `${CLAUDE_PLUGIN_ROOT}/reference/use-case-presets.md` — but only the section for the matched preset (or the two closest presets if blending for a novel domain). Skip unmatched preset sections.
+Read `${CLAUDE_PLUGIN_ROOT}/reference/use-case-presets.md` — but only the section for the matched reference domain (or the two closest reference domains if blending for a novel domain). Skip unmatched sections.
 
 Build the complete vocabulary mapping for all 6 transformation levels (see `${CLAUDE_PLUGIN_ROOT}/reference/vocabulary-transforms.md`):
 
 1. **User's own words** — highest priority. If they said "book note," use "book note."
-2. **Preset table** — fallback when user has not named a concept.
-3. **Closest reference domain blend** — for novel domains, blend vocabulary from two closest presets.
+2. **Reference domain table** — fallback when user has not named a concept.
+3. **Closest reference domain blend** — for novel domains, blend vocabulary from two closest reference domains.
 
-For novel domains (no preset scores above 2.0 affinity):
+For novel domains (no reference domain scores above 2.0 affinity):
 
-1. Score all 3 presets by signal overlap.
-2. Select top two presets as blending sources.
-3. For each term, use the preset with higher overlap for that specific concept.
+1. Score all reference domains by signal overlap.
+2. Select top two reference domains as blending sources.
+3. For each term, use the reference domain with higher overlap for that specific concept.
 4. Flag all blended terms for user confirmation in the Phase 4 proposal.
 
 ### Step 3b: Filter A — Fields (Justify-or-Drop)
@@ -203,7 +162,7 @@ Every vault ships with five required frontmatter fields — NO exceptions, NO op
 
 **Derive the `content_type` enum from conversation signals.** Listen for how the user names kinds of notes (decisions, specs, reflections, observations, lessons, ...). Three to six values is typical. Keep vault-specific. Never a fixed universal list.
 
-**Then run Filter A on every candidate field beyond the five.** Candidates come from: preset defaults, user statements ("I track status"), conversation signals flagged as HIGH for schema (e.g. "I want rigor" suggesting `confidence` or `source_url`).
+**Then run Filter A on every candidate field beyond the five.** Candidates come from: reference domain defaults, user statements ("I track status"), conversation signals flagged as HIGH for schema (e.g. "I want rigor" suggesting `confidence` or `source_url`).
 
 For each candidate field, produce three items:
 
@@ -218,7 +177,7 @@ No shipped skill reads note frontmatter fields beyond the five required. A Filte
 - All three present, concrete, and day-one → **Keep.** Add to the derived schema with rationale.
 - Any missing, vague, or not day-one → **Defer.** Record in working memory for the Deferred Candidates section of `ops/derivation.md` (written in Phase 5), with the reason.
 
-**Hard rule:** never keep a field "because the preset usually includes it." A preset is a candidate list, not an entitlement. The same rule applies to any field named in conversation unless the user stated a concrete reader+use.
+**Hard rule:** never keep a field "because the reference domain usually includes it." A reference domain is a candidate list, not an entitlement. The same rule applies to any field named in conversation unless the user stated a concrete reader+use.
 
 Hold the derived schema (the five required fields plus any Filter-A survivors with their rationale) and the deferred-field list in working memory for Phase 4.
 
@@ -226,7 +185,7 @@ Hold the derived schema (the five required fields plus any Filter-A survivors wi
 
 **Default:** flat vault. A single `{vocabulary.note_collection}/` directory holds every note regardless of `content_type`. No entity subdirectories by default.
 
-Collect candidate directories from: preset defaults, explicit user requests, and any grouping implied by signals (e.g. "I track contacts and projects separately"). For each candidate, produce two items:
+Collect candidate directories from: reference domain defaults, explicit user requests, and any grouping implied by signals (e.g. "I track contacts and projects separately"). For each candidate, produce two items:
 
 1. **Shared operation** — a system behavior that acts on the whole directory as a set (e.g. "daily archival sweep", "MOC regeneration", "pipeline routing by path").
 2. **Who runs it** — the specific skill or hook that performs that operation on day one.
@@ -244,9 +203,9 @@ Hold the surviving directory list and the deferred-directory list in working mem
 
 ### Step 3d: Failure-Mode Risk Flagging
 
-Read `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md`. The "Domain Vulnerability Matrix" section at the end of that file lists each failure mode against each use-case preset with HIGH/medium/low risk levels.
+Read `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md`. The "Domain Vulnerability Matrix" section at the end of that file lists each failure mode against each reference domain with HIGH/medium/low risk levels.
 
-Using the preset matched in Step 3a (or the top two presets for novel domains, unioned), identify all HIGH-risk failure modes for this vault.
+Using the reference domain matched in Step 3a (or the top two reference domains for novel domains, unioned), identify all HIGH-risk failure modes for this vault.
 
 Also read the per-failure-mode sections of `reference/failure-modes.md` for each flagged mode. Use the prevention patterns, warning signs, and domain-specific descriptions to compose a "Common Pitfalls" block in domain-native vocabulary. Mention medium-risk modes briefly. Omit low-risk modes.
 
@@ -304,8 +263,8 @@ Write `ops/derivation.md` FIRST, before any other artifact. Every subsequent ste
 | Step | Executor | Scope | Description |
 |------|----------|-------|-------------|
 | 1 | Main agent | derivation.md, folders, vault marker | Foundation setup |
-| 2 | Main agent | self/identity.md, self/methodology.md, self/goals.md, ops/methodology/ | Identity & self-knowledge |
-| 3 | Main agent | ops/config.yaml, ops/derivation-manifest.md | Ops configuration |
+| 2 | Main agent | self/identity.md, self/methodology.md, self/goals.md | Identity & self-knowledge |
+| 3 | Main agent | ops/derivation-manifest.md | Runtime manifest |
 | 4 | Main agent | ops/templates/note.md, ops/queries/ | Templates & query starters |
 | 5 | Skills agent (parallel) | .claude/skills/*/SKILL.md (9 skills) | Skills (tiered generation, cp + sed + Edit) |
 | 6 | Context agent (parallel) | CLAUDE.md, ops/features/*.md, .claude/skills/ask/SKILL.md | Context file + feature references + /ask |
@@ -339,7 +298,7 @@ You are executing one step of a multi-step generation pipeline.
 - Pipeline skills: /structure, /capture, /connect, /verify (universal — not domain-renamed)
 
 ## Instructions
-1. Read ops/derivation.md FIRST — source of truth for all configuration decisions.
+1. Read ops/derivation.md FIRST — source of truth for all derivation decisions.
 2. Work through each file in the scope list; do not pause between files.
 3. Tool choice: `Write` for new files; `cp` via `Bash` then `Edit` for verbatim template copies; `Edit` for surgical changes.
 4. On error or ambiguity, report clearly — do not guess.
@@ -374,7 +333,7 @@ Verification:
 
 **Agent-specific additions:**
 - **Skills agent:** Uses the dedicated Skill Generation Prompt in Pipeline Step 5 (cp + Edit protocol), not the generic template.
-- **Context agent:** Include the list of active feature blocks and their file paths under `${CLAUDE_PLUGIN_ROOT}/generators/features/`.
+- **Context agent:** Include the list of feature source paths under `${CLAUDE_PLUGIN_ROOT}/generators/features/`.
 - **Manual agent:** Include the list of generated skill names inline in the prompt (derived from the Skills agent's Tier A/B mapping in `ops/derivation.md`).
 
 ### Orchestration Protocol
@@ -382,21 +341,6 @@ Verification:
 Execute Steps 1-4 directly in the main agent, emitting the matching progress indicator before each step. Then dispatch the three remaining subagents **in parallel**.
 
 After all three subagents return, parse each `=== GENERATION HANDOFF ... === END HANDOFF ===` block: verify Files Created, stop on any non-NONE Issue or `All files written successfully: NO`, surface the error, and carry non-NONE Issues into the Phase 6 summary. If a handoff is missing, warn and verify files on disk before continuing. Then execute Steps 8-9 directly.
-
-**Progress indicators** (use the `$` prefix — rendered as lozenge in branded output):
-
-```
-$ Creating your {domain} structure...
-$ Building identity and self-knowledge...
-$ Writing configuration...
-$ Setting up templates...
-$ Installing {domain:skills}...
-$ Writing your context file...
-$ Building navigation and documentation...
-$ Configuring semantic search...
-$ Initializing version control...
-$ Running validation...
-```
 
 ---
 
@@ -415,22 +359,13 @@ engine_version: "1.0.0"
 
 # System Derivation
 
-## Configuration Dimensions
-| Dimension | Position | Conversation Signal (if user override) |
-|-----------|----------|----------------------------------------|
-| Organization | [value] | [signal or "default"] |
-| Linking | [value] | [signal or "default"] |
-| Navigation | [value] | [signal or "default"] |
-| Maintenance | [value] | [signal or "default"] |
-| Schema | [value] | [signal or "default"] |
-
 ## Schema Decisions
 
 The canonical schema lives in the `_schema:` block of `ops/templates/note.md`. This section records the decisions that shaped it.
 
 **Required fields (always present):**
 - `content_type` — vault enum below
-- `granularity` — `extract | structure | capture`
+- `granularity` — `structure | capture`
 - `description` — one sentence, ≤200 chars
 - `created_at` — ISO 8601 date
 - `tags` — free-form array
@@ -451,7 +386,7 @@ If Filter A produced no survivors, record: "None — the five required fields co
 Items dropped by Filter A (fields) or Filter B (directories), with reasons. Promote later by editing `_schema.required:` (fields) or creating the directory with its day-one runner; record the promotion here.
 
 ### Fields deferred
-- **[field_name]** — [reason]. Example: proposed by preset default but no day-one reader named.
+- **[field_name]** — [reason]. Example: proposed by reference default but no day-one reader named.
 - [...]
 
 ### Directories deferred
@@ -473,21 +408,12 @@ If nothing was deferred, record: "None — every candidate passed its filter."
 | topics | [domain term] | body footer label |
 | [additional terms] | [domain terms] | [category] |
 
-## Active Feature Blocks
-All always included:
-- wiki-links (kernel)
-- mocs (kernel)
-- maintenance
-- session-rhythm
-- templates
-- ethical-guardrails
-
 ## Failure Mode Risks
 [Top 3-4 HIGH-risk failure modes for this domain from vulnerability matrix]
 
 ## Generation Parameters
 - Folder names: [domain-specific folder names]
-- Skills to generate: [all 26 — vocabulary-transformed]
+- Skills to generate: [all generated skills — vocabulary-transformed]
 - Hooks to generate: [orient, capture, validate, commit]
 - Templates to create: [list]
 - Topology: [single-agent / skills / fresh-context / orchestrated]
@@ -509,13 +435,12 @@ Create the three-space layout with domain-named directories. Flat by default; Fi
 |   +-- methodology.md               <-- created in Pipeline Step 2
 |   +-- goals.md                     <-- created in Pipeline Step 2
 |   +-- relationships.md             <-- optional, if domain involves people
-|   +-- memory/                      <-- atomic personal insights
 +-- ops/                             <-- operational coordination
 |   +-- templates/                   <-- single note.md template (created in Pipeline Step 4)
 |   +-- features/                    <-- feature reference files
-|   +-- methodology/                 <-- derivation rationale (documentation)
 |   +-- scripts/                     <-- deterministic shell helpers (copied from engine)
 |   +-- queue/
+|   |   +-- queue.json               <-- durable processing queue, initialized as {"tasks":[]}
 |   |   +-- archive/
 ```
 
@@ -547,11 +472,18 @@ These are vault-internal and do not need vocabulary substitution — they operat
 
 Create empty file called `.arscontexta` in the vault root:
 
+##### Processing Queue
+
+Create `ops/queue/queue.json` during foundation setup:
+
+```json
+{"tasks":[]}
+```
 ---
 
 #### Pipeline Step 2: Identity & Self-Knowledge (Main Agent)
 
-**Scope:** self/identity.md, self/methodology.md, self/goals.md, ops/methodology/methodology.md, ops/methodology/derivation-rationale.md
+**Scope:** self/identity.md, self/methodology.md, self/goals.md
 
 **Reads:** ops/derivation.md
 
@@ -659,42 +591,6 @@ Topics:
 
 ---
 
-##### ops/methodology/ (Vault Self-Knowledge)
-
-**Create `ops/methodology/methodology.md`** (MOC):
-
-```markdown
----
-description: Why this vault was configured the way it was
-type: moc
----
-# methodology
-
-This folder documents the reasoning behind the current configuration.
-
-## Derivation Rationale
-- [[derivation-rationale]] — Why each configuration dimension was set the way it was
-```
-
-**Create `ops/methodology/derivation-rationale.md`** (initial note):
-
-```markdown
----
-description: Why each configuration dimension was chosen — the reasoning behind initial system setup
-category: derivation-rationale
-created: {timestamp}
-status: active
----
-# derivation rationale for {domain}
-
-{Extract from ops/derivation.md the key dimension choices and the conversation signals that drove them. Include: automation level, active feature blocks, Filter A/B outcomes, and any flagged failure-mode risks. Write in prose format, not raw transcript — synthesize the reasoning into a readable narrative.}
-
----
-
-Topics:
-- [[methodology]]
-```
-
 ##### self/goals.md
 
 ```markdown
@@ -720,28 +616,11 @@ Topics:
 
 ---
 
-#### Pipeline Step 3: Ops Configuration (Main Agent)
+#### Pipeline Step 3: Runtime Manifest (Main Agent)
 
-**Scope:** ops/config.yaml, ops/derivation-manifest.md
+**Scope:** ops/derivation-manifest.md
 
 **Reads:** ops/derivation.md
-
----
-
-##### ops/config.yaml
-
-Generate the human-editable configuration file:
-
-```yaml
-# ops/config.yaml -- edit these to adjust your system
-# See ops/derivation.md for WHY each choice was made
-
-dimensions:
-  organization: [flat | hierarchical]
-  linking: [explicit | implicit | explicit+implicit]
-  navigation: [2-tier | 3-tier]
-  schema: [minimal | moderate | dense]
-```
 
 ---
 
@@ -750,20 +629,10 @@ dimensions:
 Generate the machine-readable derivation manifest. Skills read it at invocation time for runtime vocabulary transformation.
 
 ```yaml
-# ops/derivation-manifest.md -- Machine-readable manifest for runtime skill configuration
+# ops/derivation-manifest.md -- Machine-readable manifest for runtime vocabulary
 # Generated by /setup.
 ---
 generated_at: [ISO 8601 timestamp]
-
-dimensions:
-  organization: [flat | hierarchical]
-  linking: [explicit | implicit | explicit+implicit]
-  navigation: [2-tier | 3-tier]
-  maintenance: condition-based
-  schema: [minimal | moderate | dense]
-
-active_blocks:
-  - [list of active feature block IDs]
 
 vocabulary:
   # Level 1: Folder names
@@ -1033,9 +902,9 @@ The skill index does not refresh mid-session. After creating all skill files:
 
 **Agent scope:** `CLAUDE.md`, `ops/features/*.md`, `.claude/skills/ask/SKILL.md`
 
-**Agent reads:** `ops/derivation.md`, `ops/config.yaml`, `${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md`, `${CLAUDE_PLUGIN_ROOT}/generators/features/*.md`, `${CLAUDE_PLUGIN_ROOT}/generators/ask-router.md`, `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md`, `${CLAUDE_PLUGIN_ROOT}/reference/vocabulary-transforms.md`, generated templates (for reference verification), generated skills (for reference verification).
+**Agent reads:** `ops/derivation.md`, `${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md`, `${CLAUDE_PLUGIN_ROOT}/generators/features/*.md`, `${CLAUDE_PLUGIN_ROOT}/generators/ask-router.md`, `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md`, `${CLAUDE_PLUGIN_ROOT}/reference/vocabulary-transforms.md`, generated templates (for reference verification), generated skills (for reference verification).
 
-**Agent-specific prompt addition:** Include the list of active feature blocks and their source paths under `${CLAUDE_PLUGIN_ROOT}/generators/features/`.
+**Agent-specific prompt addition:** Include the list of feature source paths under `${CLAUDE_PLUGIN_ROOT}/generators/features/`.
 
 ---
 
@@ -1043,15 +912,14 @@ The skill index does not refresh mid-session. After creating all skill files:
 
 Generate three artifacts in order:
 
-1. `ops/features/*.md` — one file per enabled feature block.
+1. `ops/features/*.md` — one file per generated feature reference.
 2. `CLAUDE.md` — seven-section context file from `generators/claude-md.md`.
 3. `.claude/skills/ask/SKILL.md` — router skill from `generators/ask-router.md`.
 
 **Generation algorithm:**
 
 ```
-Step 1: Select feature blocks.
-  Read ops/derivation.md to identify active feature blocks.
+Step 1: Select feature references.
   All feature blocks are always included: note-granularity, wiki-links, mocs,
     processing-pipeline, semantic-search, schema, maintenance, session-rhythm,
     templates, ethical-guardrails, helper-functions,
@@ -1068,7 +936,7 @@ Step 2: Write ops/features/<name>.md for each selected block.
 Step 3: Compose CLAUDE.md.
   a. Read ${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md
   b. Emit the seven sections in order: Header+Philosophy, Discovery-First,
-     Memory Type Routing, Pipeline Compliance, Self-Improvement, Common
+     Content Routing, Pipeline Compliance, Self-Improvement, Common
      Pitfalls (compressed), Infrastructure Routing
   c. For Common Pitfalls: select 3-4 HIGH-risk failure modes from the Domain
      Vulnerability Matrix in reference/failure-modes.md. For each selected
@@ -1080,7 +948,7 @@ Step 3: Compose CLAUDE.md.
 Step 4: Compose .claude/skills/ask/SKILL.md.
   a. Read ${CLAUDE_PLUGIN_ROOT}/generators/ask-router.md
   b. Follow the skill-body composition steps in that template.
-  c. For Part B topic sections: emit one section per enabled feature (from
+  c. For Part B topic sections: emit one section per generated feature (from
      Step 1) whose ops/features/<name>.md file was actually written in Step 2.
   d. Apply vocabulary transformation.
   e. Write .claude/skills/ask/SKILL.md.
@@ -1164,7 +1032,7 @@ Welcome to your {domain} knowledge system. This manual explains how everything w
 - [[pipeline]] — The pipeline deep-dive: granularity modes, phases, resumability
 - [[skills]] — Every available command grouped by role, with examples
 - [[workflows]] — The core processing loop, session rhythm, and maintenance cycle
-- [[configuration]] — How to adjust settings via config.yaml
+- [[system-reference]] — Where generated system rules live
 - [[troubleshooting]] — Common issues and how to resolve them
 ```
 
@@ -1211,14 +1079,14 @@ Internal machinery the pipeline orchestrates. Prefer /{DOMAIN:pipeline} as the i
 - /structure — grouped note production (related claims in one {DOMAIN:note})
 - /capture — verbatim capture (no transformation)
 - /connect — find connections, update {DOMAIN:topic map}s, and reconsider {DOMAIN:note_plural} against current graph state
-- /verify — description + schema + health check
+- /verify — frontmatter and wiki-link checks
 - /archive-batch — archive completed batch
 
 ## Reference
 
 Lookup and orientation.
 
-- /ask — query the system's self-knowledge (schema, pipeline, {DOMAIN:topic map}s, derivation rationale)
+- /ask — query the system reference (schema, pipeline, {DOMAIN:topic map}s, derivation)
 
 ## Operational
 
@@ -1271,7 +1139,7 @@ For when you want to run individual phases yourself. Link to [[skills]] for the 
 
 - Link to [[pipeline]] for pipeline details
 - Link to [[skills]] for command reference
-- Link to [[configuration]] for adjusting pipeline settings
+- Link to [[system-reference]] for where generated system rules live
 ```
 
 **Page 5: pipeline.md**
@@ -1321,21 +1189,22 @@ Pipeline can be interrupted and resumed at any point. Queue state persists acros
 Any phase can be run individually. Link to [[skills]] for the sub-commands. Pipeline is the convenience wrapper; sub-skills are the building blocks.
 ```
 
-**Page 6: configuration.md**
+**Page 6: system-reference.md**
 
 ```markdown
 ---
-description: How to adjust your system via config.yaml
+description: Where generated system rules live
 type: manual
 ---
-# Configuration
+# System Reference
 
 {Generate content covering:}
-- config.yaml structure and key fields
-- Feature toggling: what can be enabled/disabled
-- Preset explanation: what your preset includes and why
-- Dimension positions and what they mean for your domain
-- Link to [[troubleshooting]] for configuration issues
+- `ops/derivation.md` as the human-readable derivation record
+- `ops/derivation-manifest.md` as the runtime vocabulary manifest
+- `ops/templates/note.md` as the schema source
+- `ops/features/` as detailed feature references
+- `ops/queries/` as query starters
+- Link to [[troubleshooting]] for common issues
 ```
 
 **Page 7: troubleshooting.md**
@@ -1355,7 +1224,7 @@ type: manual
 - Pipeline stalls — tasks stuck in queue (inspect `ops/queue/queue.json` directly, resume with /{DOMAIN:pipeline} --batch {id}). See [[pipeline]] resumability section.
 - Common mistakes table with corrections
 - Link to [[skills]] for command reference
-- Link to [[configuration]] for threshold adjustments
+- Link to [[system-reference]] for generated system references
 ```
 
 **Quality gates:**
@@ -1397,7 +1266,7 @@ Welcome to your [domain] system.
 
 **Scope:** .claude/hooks/qmd-sync.sh, .claude/settings.json (additive merge)
 
-**Reads:** ops/derivation.md, ops/config.yaml, ops/derivation-manifest.md
+**Reads:** ops/derivation.md, ops/derivation-manifest.md
 
 ---
 
@@ -1405,7 +1274,7 @@ Welcome to your [domain] system.
 
 ###### Add `qmd_collection` to vocabulary
 
-Before any qmd configuration, derive and register the collection name:
+Before qmd setup, derive and register the collection name:
 
 1. Derive a default collection name from `{vocabulary.note_collection}` (e.g., if notes folder is "claims", default collection name is "claims")
 2. Run `qmd collections list` to check existing collections on the user's system
@@ -1522,10 +1391,6 @@ ars contexta
 
 Your [domain] system is ready.
 
-Configuration:
-  Automation: Full — all capabilities from day one
-  [Key dimension highlights relevant to the user]
-
 Created:
   [list of folders with domain names]
   [context file name]
@@ -1534,9 +1399,7 @@ Created:
   /arscontexta:health and /arscontexta:setup available as plugin-level commands
   [hooks configured]
   ops/derivation.md      -- the complete record of how this system was derived
-  ops/derivation-manifest.md -- machine-readable config for runtime skills
-  ops/methodology/       -- vault self-knowledge (query with /ask or browse directly)
-  ops/config.yaml        -- edit this to adjust dimensions without re-running init
+  ops/derivation-manifest.md -- runtime vocabulary for generated skills
 
 IMPORTANT: Restart Claude Code now to activate skills and hooks.
   Skills and hooks take effect after restart — they are not available in the current session.

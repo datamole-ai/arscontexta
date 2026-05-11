@@ -230,7 +230,7 @@ If you cannot fill in [specific reason] with something substantive, the connecti
 
 | Relationship | Signal | Example |
 |-------------|--------|---------|
-| extends | adds dimension | "extends [[X]] by adding temporal aspect" |
+| extends | adds aspect | "extends [[X]] by adding temporal aspect" |
 | grounds | provides foundation | "this works because [[Y]] establishes..." |
 | contradicts | creates tension | "conflicts with [[Z]] because..." |
 | exemplifies | concrete instance | "demonstrates [[W]] in practice" |
@@ -382,7 +382,7 @@ See also [[throughput matters more than accumulation]].
 ---
 
 Relevant Notes:
-- [[note title]] — extends this by adding the temporal dimension
+- [[note title]] — extends this by adding the temporal aspect
 - [[another note]] — provides the mechanism this claim depends on
 
 Topics:

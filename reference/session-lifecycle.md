@@ -71,7 +71,7 @@ Questions the engine must answer when generating session configuration:
 
 **Summary:** Maintenance sessions focus on system health: schema validation, orphan detection, link health, MOC coverage, stale note identification. Orientation loads the latest health report (if one exists) and the maintenance checklist from the context file. Work runs health checks systematically — not ad-hoc inspection but scripted validation. Persistence captures findings as observation notes, updates health reports, and creates tasks for issues that require separate sessions to fix.
 
-**Derivation Implication:** Generated systems should include a maintenance session section in the context file with: which health checks to run, expected thresholds (orphan percentage, schema compliance), and where to log findings. The maintenance session type should be distinct from processing and exploration — mixing maintenance with content work produces incomplete maintenance because content work is more engaging.
+**Derivation Implication:** Generated systems should include a maintenance session section in the context file with: which health checks to run, which built-in health signals can fire, and where to log findings. The maintenance session type should be distinct from processing and exploration — mixing maintenance with content work produces incomplete maintenance because content work is more engaging.
 
 **Source:** Vault /review skill and reconciliation pattern. Maintenance is most effective when it is the sole focus of a session, not a side activity.
 
@@ -111,9 +111,9 @@ Questions the engine must answer when generating session configuration:
 
 #### Progressive disclosure during orientation prevents context waste
 
-**Summary:** Not every self/ file needs to be loaded fully at session start. Progressive disclosure applies to orientation: load identity.md fully (it is small and essential), load goals.md fully (it is the active orientation file), but load methodology.md only when the session involves quality decisions. For large self/ spaces with memory/ directories, load the memory directory listing first, then read specific memories only when relevant to the current task. This preserves context budget for work without sacrificing orientation quality.
+**Summary:** Not every self/ file needs to be loaded fully at session start. Progressive disclosure applies to orientation: load identity.md fully (it is small and essential), load goals.md fully (it is the active orientation file), but load methodology.md only when the session involves quality decisions. Load relationships.md only when people-specific context matters. This preserves context budget for work without sacrificing orientation quality.
 
-**Derivation Implication:** Generated systems with self/ spaces larger than ~2000 tokens total should include progressive disclosure guidance for orientation. The context file should distinguish between "always load" files (identity.md, goals.md) and "load when relevant" files (memory/, relationships.md). Hooks can automate the "always load" files while leaving "load when relevant" files to agent judgment.
+**Derivation Implication:** Generated systems with self/ spaces larger than ~2000 tokens total should include progressive disclosure guidance for orientation. The context file should distinguish between "always load" files (identity.md, goals.md) and "load when relevant" files (methodology.md, relationships.md). Hooks can automate the "always load" files while leaving "load when relevant" files to agent judgment.
 
 **Source:** Vault discovery layer pattern. The vault applies progressive disclosure to note discovery (description before content); the same principle applies to self/ orientation.
 
@@ -217,7 +217,7 @@ Hooks automate session rhythm. A SessionStart hook injects the file tree and loa
 
 #### The morning briefing pattern gives each session a purpose statement
 
-**Summary:** Systems with processing pipelines or maintenance schedules benefit from a "morning briefing" at session start: a summary of what happened since the last session, what conditions have fired, and what the system's health looks like. This is richer than just reading goals.md — it synthesizes queue state, fired conditions, health metrics, and recent observations into a single orientation snapshot. The briefing gives the session a purpose statement: "Today: 3 queue items ready for connect, 2 conditions fired (orphan notes detected, pending observations threshold exceeded), inbox has 5 new items."
+**Summary:** Systems with processing pipelines or maintenance schedules benefit from a "morning briefing" at session start: a summary of what happened since the last session, what conditions have fired, and what the system's health looks like. This is richer than just reading goals.md — it synthesizes queue state, fired conditions, health metrics, and recent observations into a single orientation snapshot. The briefing gives the session a purpose statement: "Today: 3 queue items ready for connect, 2 conditions fired (orphan notes detected, pending observations accumulated), inbox has 5 new items."
 
 **Derivation Implication:** Generated systems with processing = moderate or heavy should include a morning briefing mechanism. The session-start hook aggregates condition evaluation results with queue status and inbox count. The briefing pattern transforms "what should I do?" into "here is what needs doing" — reducing the orientation cost.
 

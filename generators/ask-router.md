@@ -9,7 +9,7 @@ When generating the `/ask` skill for a vault, produce `.claude/skills/ask/SKILL.
 ```yaml
 ---
 name: ask
-description: User-invoked reference lookup for questions about this vault's structure, schema, pipeline, {DOMAIN:topic maps}, templates, or derivation rationale. Invoke explicitly with /ask <question>.
+description: User-invoked reference lookup for questions about this vault's structure, schema, pipeline, {DOMAIN:topic maps}, templates, or derivation. Invoke explicitly with /ask <question>.
 allowed-tools: Read, Grep, Glob
 ---
 ```
@@ -31,16 +31,16 @@ A fixed-shape paragraph describing the three-space architecture and pointing to 
 
 This vault separates three concerns:
 
-- `self/` — agent identity and memory.
+- `self/` — agent identity and session continuity.
 - `{DOMAIN:note_collection}/` — the knowledge graph.
-- `ops/` — coordination, configuration, and system self-knowledge.
+- `ops/` — coordination and system references.
 
-The {DOMAIN:processing} pipeline routes raw material through `{DOMAIN:inbox}/` into `{DOMAIN:note_collection}/` via named skills. For the full justification chain — which dimensions were chosen and why — read `ops/derivation.md`.
+The {DOMAIN:processing} pipeline routes raw material through `{DOMAIN:inbox}/` into `{DOMAIN:note_collection}/` via named skills. For the derivation record, read `ops/derivation.md`.
 ```
 
-### Part B — Topic sections (one per enabled feature)
+### Part B — Topic sections (one per generated feature)
 
-Emit one section per feature that ended up in `ops/features/`. Feature membership is derived from `ops/config.yaml` + the Active Feature Blocks list in `ops/derivation.md`. Do NOT emit a section for a feature whose reference file does not exist.
+Emit one section per feature that ended up in `ops/features/`. Do NOT emit a section for a feature whose reference file does not exist.
 
 Section template:
 
@@ -84,14 +84,13 @@ A fixed-shape "When the question spans files" section. Use this content:
 
 ## Skill-body composition steps for the generation agent
 
-1. Read `ops/config.yaml` to identify enabled features.
-2. List `ops/features/*.md` that were actually written in the previous step; intersect with enabled-features list for safety.
-3. Emit frontmatter (domain-adapted `description`).
-4. Emit Part A overview.
-5. For each enabled feature, emit a Part B section in the canonical order above. Skip features whose file was not written.
-6. Emit Part C cross-cutting routes.
-7. Apply a final vocabulary-transform pass on the assembled file.
-8. Write to `.claude/skills/ask/SKILL.md` inside the vault.
+1. List `ops/features/*.md` that were actually written in the previous step.
+2. Emit frontmatter (domain-adapted `description`).
+3. Emit Part A overview.
+4. For each generated feature, emit a Part B section in the canonical order above. Skip features whose file was not written.
+5. Emit Part C cross-cutting routes.
+6. Apply a final vocabulary-transform pass on the assembled file.
+7. Write to `.claude/skills/ask/SKILL.md` inside the vault.
 
 ---
 

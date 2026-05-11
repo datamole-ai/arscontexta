@@ -87,8 +87,7 @@ archive/        — processed sources, completed work
 self/           — agent's persistent mind space
   ├── identity.md
   ├── methodology.md
-  ├── goals.md
-  └── memory/   — atomic insights
+  └── goals.md
 templates/      — note templates per domain
 ```
 
@@ -261,23 +260,9 @@ Check MOC coverage:
 
 ---
 
-## Methodology Folder — Derivation Rationale Documentation
-
-**What:** ops/methodology/ holds a single derivation-rationale note explaining why the vault was configured the way it was. Optional documentation convention — no automation reads or writes it.
-
-**Why:** A written derivation rationale lets future operators (human or agent) understand why the system was shaped this way. It is documentation, not a feedback loop.
-
-**How to implement:**
-- `ops/methodology/` directory with `methodology.md` MOC
-- `derivation-rationale.md` note at generation time (capturing why the vault was configured this way)
-
-**Quality gate:** Can the agent explain WHY the vault is configured the way it is by reading `ops/methodology/derivation-rationale.md`? If yes, the documentation layer is functional.
-
----
-
 ## Self/ Space — The Agent's Persistent Mind
 
-**What:** A dedicated directory where the agent stores its identity, methodology, goals, and accumulated memory.
+**What:** A dedicated directory where the agent stores its identity, methodology, and goals.
 
 **Why:** Without self/, every session starts blank. The agent doesn't know who it is, what it's working on, or what it learned yesterday. self/ is the agent's extended mind — read at session start, updated at session end.
 
@@ -287,10 +272,9 @@ self/
 ├── identity.md      — who the agent is, personality, approach
 ├── methodology.md   — how it works, principles, quality standards
 ├── goals.md         — current threads, active projects
-├── relationships.md — key people, preferences, context
-└── memory/          — atomic insights (prose-as-title)
+└── relationships.md — key people, preferences, context
 ```
 
-**The pattern:** self/ mirrors the main notes structure — atomic notes with prose titles, linked from MOCs. Journal serves as capture zone for processing into atomic notes.
+**The pattern:** self/ is a compact orientation layer. Identity changes rarely, methodology changes when operational learnings prove durable, and goals changes at session boundaries.
 
 **Critical rule:** Read self/ at EVERY session start. This is non-negotiable. The agent must remember who it is before doing anything else.

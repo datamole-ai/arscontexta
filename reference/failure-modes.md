@@ -19,7 +19,7 @@ How knowledge systems die. The init wizard uses this to include domain-specific 
 **Prevention:**
 - Processing pipeline with explicit reduce phase
 - WIP limits on inbox (process before adding more)
-- Condition-based inbox review (trigger when inbox exceeds threshold)
+- Condition-based inbox review when inbox pressure builds
 - Visible inbox count as friction signal
 
 **Warning signs:** Inbox > 20 items. New captures outnumber processed items 3:1.
@@ -190,7 +190,7 @@ How knowledge systems die. The init wizard uses this to include domain-specific 
 
 **What:** Content becomes outdated but isn't flagged. Old notes presented as current.
 
-**one_line_rule:** Flag or refresh notes older than your domain's staleness threshold before citing them.
+**one_line_rule:** Flag or refresh stale notes before citing them.
 
 **Why it happens:** Knowledge systems don't inherently track temporal validity. A note written 6 months ago appears identical to one written yesterday.
 
@@ -198,7 +198,7 @@ How knowledge systems die. The init wizard uses this to include domain-specific 
 
 **Prevention:**
 - `meta_state` or staleness fields in schema (current/outdated/speculative)
-- Maintenance condition thresholds matched to domain's rate of change
+- Date-aware maintenance checks matched to domain's rate of change
 - Periodic staleness sweeps (flag notes older than N days for review)
 - Date-aware health checks
 
@@ -237,7 +237,7 @@ It's tempting to keep perfecting the system instead of using it. The vault serve
 
 ## Domain Vulnerability Matrix
 
-Which failure modes hit which preset hardest. The setup derivation engine reads this matrix in Phase 3d to flag HIGH-risk failure modes for inclusion in the generated vault's "Common Pitfalls" section.
+Which failure modes hit which reference domain hardest. The setup derivation engine reads this matrix in Phase 3d to flag HIGH-risk failure modes for inclusion in the generated vault's "Common Pitfalls" section.
 
 | Failure Mode          | Research | Learning | Therapy | Relationships | Creative | PM     | Companion |
 | --------------------- | -------- | -------- | ------- | ------------- | -------- | ------ | --------- |
@@ -252,4 +252,4 @@ Which failure modes hit which preset hardest. The setup derivation engine reads 
 | Productivity Porn     | HIGH     | medium   | low     | low           | medium   | HIGH   | low       |
 | Temporal Staleness    | low      | medium   | low     | low           | low      | HIGH   | low       |
 
-**How Phase 3d uses this:** For the preset matched in Step 3a (or the top two presets for novel domains, unioned), flag all HIGH-risk modes. Include those in the generated CLAUDE.md's "Common Pitfalls" section using the prevention patterns, warning signs, and domain-specific descriptions from the per-failure-mode sections above. Mention medium-risk modes briefly. Omit low-risk modes.
+**How Phase 3d uses this:** For the reference domain matched in Step 3a (or the top two reference domains for novel domains, unioned), flag all HIGH-risk modes. Include those in the generated CLAUDE.md's "Common Pitfalls" section using the prevention patterns, warning signs, and domain-specific descriptions from the per-failure-mode sections above. Mention medium-risk modes briefly. Omit low-risk modes.

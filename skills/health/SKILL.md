@@ -19,11 +19,9 @@ Read these files to configure domain-specific behavior:
    - Use `vocabulary.topic_map` for MOC/topic map references
    - Use `vocabulary.topic_maps` for plural form
 
-2. **`ops/config.yaml`** — thresholds
+2. **Three-space reference** — `${CLAUDE_PLUGIN_ROOT}/reference/three-spaces.md` for boundary rules
 
-3. **Three-space reference** — `${CLAUDE_PLUGIN_ROOT}/reference/three-spaces.md` for boundary rules
-
-4. **Templates** — read template files to understand required schema fields for validation
+3. **Templates** — read template files to understand required schema fields for validation
 
 If these files don't exist (pre-init invocation or standalone use), use universal defaults:
 - note collection: `note_collection/`
@@ -67,13 +65,13 @@ For each {vocabulary.note}:
 
 **Quality heuristics:**
 
-| Check | Threshold |
+| Check | Guidance |
 |-------|-----------|
 | Description length | 50-200 chars ideal. < 30 chars = too terse. > 250 chars = too verbose |
 | Restatement detection | If description uses >70% of the same words as the title = restatement |
 | Information added | Description should mention mechanism, scope, or implication not in title |
 
-**Thresholds:**
+**Verdicts:**
 
 | Condition | Level |
 |-----------|-------|
@@ -103,17 +101,17 @@ For each {vocabulary.note}:
 
 ## Condition-Based Maintenance Signals
 
-After running all applicable diagnostic categories, check these condition-based triggers. These are NOT the 8 categories above — they are cross-cutting signals that suggest specific skill invocations.
+After running all applicable diagnostic categories, check these built-in maintenance signals. These are NOT the 8 categories above — they are cross-cutting signals that suggest specific skill invocations.
 
-| Condition | Threshold | Recommendation |
-|-----------|-----------|---------------|
-| Inbox items | >= 3 items | Consider /structure, /capture, or /pipeline |
-| Orphan notes | Any persistent (> 7d) | Run /connect on orphaned notes |
-| Dangling links | Any | Fix broken references immediately |
-| Stale notes | Low links + old | Consider /connect |
-| {vocabulary.topic_map} oversized | > 40 notes | Consider splitting |
-| Queue stalled | Tasks pending > 2 sessions without progress | Surface as blocked |
-| Trigger coverage gap | Known maintenance condition has no configured trigger | Flag gap itself |
+| Condition | Recommendation |
+|-----------|---------------|
+| Inbox pressure | Consider /structure, /capture, or /pipeline |
+| Persistent orphan notes | Run /connect on orphaned notes |
+| Dangling links | Fix broken references immediately |
+| Stale notes | Consider /connect |
+| Oversized {vocabulary.topic_map} | Consider splitting |
+| Queue stalled | Surface as blocked |
+| Signal coverage gap | Flag known maintenance conditions that are not checked |
 
 **How to check condition counts:**
 
@@ -126,7 +124,7 @@ INBOX_COUNT=$(find {vocabulary.inbox}/ -name '*.md' -not -path '*/archive/*' 2>/
 PENDING_TASKS=$(jq '[.tasks[] | select(.status=="pending")] | length' ops/queue/queue.json 2>/dev/null || echo 0)
 ```
 
-**The meta-trigger:** Include a "trigger coverage" check. Compare known maintenance conditions against what is actually being checked. If a maintenance condition has no corresponding check or trigger configured, that gap itself is a finding. This prevents the failure mode where maintenance debt accumulates undetected.
+**The meta-signal:** Include a "signal coverage" check. Compare known maintenance conditions against what is actually being checked. If a maintenance condition has no corresponding check, that gap itself is a finding. This prevents the failure mode where maintenance debt accumulates undetected.
 
 ---
 
@@ -181,11 +179,9 @@ PASS:
 ---
 
 Maintenance Signals:
-    [condition-based triggers from table above, if any thresholds met]
-    - observations: N pending (threshold: 10) [TRIGGERED | OK]
-    - tensions: N pending (threshold: 5) [TRIGGERED | OK]
-    - inbox: N items (threshold: 3) [TRIGGERED | OK]
-    - sessions: N unprocessed (threshold: 5) [TRIGGERED | OK]
+    [built-in maintenance signals from table above]
+    - inbox: N items [TRIGGERED | OK]
+    - queue: N pending tasks [TRIGGERED | OK]
 
 ---
 

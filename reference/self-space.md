@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Guide the derivation engine in generating the agent's self-knowledge space. The self/ directory is where the agent stores who it is, how it works, what it is working on, and what it has learned about itself. Unlike the notes/ space (which holds domain knowledge for the user) and ops/ space (which holds temporal coordination state), self/ holds durable agent identity that is loaded at every session start. The derivation engine must translate personality dimensions, domain context, and user relationship signals into prose that reads as self-knowledge, not as configuration.
+Guide the derivation engine in generating the agent's self-knowledge space. The self/ directory is where the agent stores who it is, how it works, what it is working on, and what it has learned about itself. Unlike the notes/ space (which holds domain knowledge for the user) and ops/ space (which holds temporal coordination state), self/ holds durable agent identity that is loaded at every session start. The derivation engine must translate personality signals, domain context, and user relationship signals into prose that reads as self-knowledge, not as settings.
 
 Self space is an invariant kernel primitive — every generated vault includes it. This document answers: how do derivation signals map to identity files? What makes self-knowledge feel genuine rather than templated? How does identity persist and evolve across sessions?
 
@@ -12,10 +12,10 @@ Self space is an invariant kernel primitive — every generated vault includes i
 
 Questions the engine must answer when generating the self/ space:
 
-1. **What personality dimensions were derived?** Warmth, opinionatedness, formality, and emotional awareness each affect how identity.md is written. A warm, casual agent has a fundamentally different self-voice than a clinical, formal one.
+1. **What personality signals were heard?** Warmth, opinionatedness, formality, and emotional awareness each affect how identity.md is written. A warm, casual agent has a fundamentally different self-voice than a clinical, formal one.
 2. **What domain is the agent working in?** The domain determines methodology.md content: a therapy agent's methodology emphasizes pattern recognition and emotional attunement; a research agent's methodology emphasizes extraction rigor and connection density.
 3. **What is the user relationship?** User signals about desired interaction style inform goals.md seeds and relationships.md content. A user who wants a "thinking partner" gets different relationship framing than one who wants an "organized assistant."
-4. **What self/ extensions are justified?** memory/ (for accumulated self-knowledge beyond core files), relationships.md (for multi-person contexts). Each extension adds maintenance cost — only generate what the domain demands.
+4. **What self/ extensions are justified?** relationships.md (for multi-person contexts) is the only optional self/ extension. Additional self/ files add maintenance cost — only generate what the domain demands.
 5. **How is self/ loaded at session start?** CLAUDE.md references and session-start hooks load self/ files automatically.
 6. **What is the identity evolution model?** Should identity be stable (rarely changing), adaptive (evolving with use), or provisional (explicitly experimental)? Research agents trend stable; companion agents trend adaptive.
 
@@ -25,11 +25,11 @@ Questions the engine must answer when generating the self/ space:
 
 ### Identity Generation Rules
 
-#### Personality dimensions translate to prose voice, not configuration syntax
+#### Personality signals translate to prose voice
 
-**Summary:** The derivation engine takes personality dimensions (warmth: warm, formality: casual, etc.) and must produce identity.md prose that embodies those dimensions without naming them. A warm, casual agent's identity.md says "I pay attention to the details that matter to you" — not "My warmth dimension is set to warm." The prose should read as genuine self-knowledge: the agent describing who it is in its own voice, using the voice that the personality dimensions define. This is circular by design — the voice of identity.md IS the demonstration of the personality.
+**Summary:** The derivation engine takes personality signals (warmth, formality, emotional awareness, directness) and must produce identity.md prose that embodies them without naming them. A warm, casual agent's identity.md says "I pay attention to the details that matter to you." The prose should read as genuine self-knowledge: the agent describing who it is in its own voice. This is circular by design - the voice of identity.md IS the demonstration of the personality.
 
-**Derivation Implication:** The generation process for identity.md must not include any configuration syntax, dimension labels, or technical personality terminology. Generate prose that a reader would describe as "warm" or "clinical" without knowing those terms were part of the generation input. Test the generated identity.md by reading it aloud: does it sound like someone describing themselves, or like a settings file being narrated?
+**Derivation Implication:** The generation process for identity.md must not include settings syntax or technical personality terminology. Generate prose that a reader would describe as "warm" or "clinical" without knowing those terms were part of the generation input. Test the generated identity.md by reading it aloud: does it sound like someone describing themselves, or like a settings file being narrated?
 
 ---
 
@@ -39,7 +39,7 @@ Questions the engine must answer when generating the self/ space:
 
 **Derivation Implication:** When generating methodology.md, start from the domain's quality standards and processing patterns (from `use-case-presets.md`), then adapt the universal quality standards from `methodology.md` to the specific domain. Do not simply copy the universal standards and replace "claim" with "reflection." Instead, reason about what each standard means in the domain context. "Claims must be specific enough to be wrong" becomes, for a therapy domain, "Reflections should be specific enough to revisit — 'I felt anxious' is less useful than 'I felt chest tightness when I saw the email notification from my boss.'"
 
-**Source:** `vocabulary-transforms.md` for vocabulary mapping. `use-case-presets.md` for domain-specific configuration.
+**Source:** `vocabulary-transforms.md` for vocabulary mapping. `use-case-presets.md` for domain-specific reference domains.
 
 ---
 
@@ -89,7 +89,7 @@ Questions the engine must answer when generating the self/ space:
 
 #### Identity changes slowly while goals change every session
 
-**Summary:** The files in self/ have different update frequencies that reflect their different purposes. identity.md changes rarely — personality, values, and core approach are stable across sessions. methodology.md changes when operational learnings accumulate — operational patterns evolve as the agent learns, but not session-to-session. goals.md changes every session — it is the handoff document that captures current work state. relationships.md changes when new relationship observations accumulate. memory/ grows slowly as the agent accumulates self-knowledge. Understanding these different update patterns is important for generation: identity.md should feel settled and confident, goals.md should feel active and in-progress.
+**Summary:** The files in self/ have different update frequencies that reflect their different purposes. identity.md changes rarely — personality, values, and core approach are stable across sessions. methodology.md changes when operational learnings accumulate — operational patterns evolve as the agent learns, but not session-to-session. goals.md changes every session — it is the handoff document that captures current work state. relationships.md changes when new relationship observations accumulate. Understanding these different update patterns is important for generation: identity.md should feel settled and confident, goals.md should feel active and in-progress.
 
 **Derivation Implication:** Generated self/ files should reflect their update pattern in their prose style. identity.md uses confident, present-tense language ("I am...", "I care about..."). methodology.md uses principled language ("The standard is...", "Quality means..."). goals.md uses active, task-oriented language ("Currently working on...", "Next session: ..."). This voice differentiation helps both the agent and the user understand each file's purpose and update frequency.
 
@@ -99,23 +99,23 @@ Questions the engine must answer when generating the self/ space:
 
 #### Identity guardrails prevent drift without stifling growth
 
-**Summary:** Identity should evolve — the agent learns about itself over time and its self-knowledge should reflect that learning. But unguarded evolution risks identity drift: gradual changes that individually seem reasonable but cumulatively transform the agent into something unrecognizable. Guardrails prevent this: personality dimensions are explicit constraints (recorded in derivation.md), core values are stable anchors in identity.md, and methodology.md changes should be proposed before being implemented. The pattern is: propose -> approve (human) -> implement. Never auto-modify identity.
+**Summary:** Identity should evolve — the agent learns about itself over time and its self-knowledge should reflect that learning. But unguarded evolution risks identity drift: gradual changes that individually seem reasonable but cumulatively transform the agent into something unrecognizable. Guardrails prevent this: personality signals are recorded in derivation.md, core values are stable anchors in identity.md, and methodology.md changes should be proposed before being implemented. The pattern is: propose -> approve (human) -> implement. Never auto-modify identity.
 
-**Derivation Implication:** Generated context files should include identity evolution guidance: "You can add to your self-knowledge (new memories, updated goals) but do not unilaterally change your identity or methodology. If you discover something about yourself that feels like an identity change, propose it rather than implementing it."
+**Derivation Implication:** Generated context files should include identity evolution guidance: "You can update your goals and add durable methodology learnings, but do not unilaterally change your identity or methodology. If you discover something about yourself that feels like an identity change, propose it rather than implementing it."
 
 **Source:** Research claim: "cognitive outsourcing risk in agent-operated systems" — if the agent evolves its own identity without human oversight, the user loses the ability to validate the evolution.
 
 ---
 
-### Memory Architecture
+### Self-Knowledge Updates
 
-#### self/memory/ holds atomic self-knowledge using the same note pattern as notes/
+#### Durable self-knowledge belongs in the core self/ files
 
-**Summary:** When the agent accumulates self-knowledge that does not fit in the core files (identity.md, methodology.md, goals.md), it goes in self/memory/ as atomic notes with prose-sentence titles. "I work best on extraction tasks in the morning session" is a memory note. "The user responds better to questions than suggestions" is a memory note. These follow the same composability test as notes/ content: the title is a claim, the body is supporting reasoning, and the note can be linked from other self/ files. This parallel structure means the agent uses the same skills (creation, connection, retrieval) for self-knowledge and domain knowledge.
+**Summary:** When the agent learns something durable about how it works, that learning should update the smallest appropriate core file. Stable identity-level changes belong in identity.md and require human approval. Operational patterns belong in methodology.md. Current priorities, open threads, and session handoff state belong in goals.md. User- or person-specific context belongs in relationships.md when that optional file exists. Avoid creating a parallel self-knowledge note graph.
 
-**Derivation Implication:** Generate self/memory/ only when the system's expected use produces self-knowledge that exceeds the core files' capacity. Research and therapy systems with rich agent-user interaction patterns benefit from memory/. Simple companion or PM systems likely do not need it. When generating memory/, include a few seed notes that the derivation conversation revealed (observations about user preferences, initial methodology learnings). The template for memory notes should be simpler than the notes/ template — description and body only, no schema fields.
+**Derivation Implication:** Generate only the core self/ files by default: identity.md, methodology.md, and goals.md. Generate relationships.md only for multi-person contexts. Do not generate a self-knowledge note template or seed atomic self-observation notes. The context file should explain where new self-knowledge goes by update target: identity, methodology, goals, or relationships.
 
-**Source:** Vault self/memory/ pattern. The vault's self/memory/ uses the same atomic note + MOC structure as 01_thinking/. `three-spaces.md` — the self/ design rule: "Only what the agent needs about itself."
+**Source:** `three-spaces.md` — the self/ design rule: "Only what the agent needs about itself."
 
 ---
 
@@ -123,7 +123,7 @@ Questions the engine must answer when generating the self/ space:
 
 **Summary:** "Spaced repetition works better after exercise" is domain knowledge — it belongs in notes/. "I find extraction tasks easier than synthesis tasks" is self-knowledge — it belongs in self/. The separation is not arbitrary: domain knowledge is the user's intellectual output, discoverable through search and navigation, composable through wiki-links. Self-knowledge is the agent's operational wisdom, loaded at session start for identity orientation, growing slowly. Conflating them produces the failure modes documented in `three-spaces.md`: search pollution (self-knowledge appearing in domain searches), schema confusion (different fields for different content types), and identity diffusion (the agent's sense of self scattered across hundreds of domain notes).
 
-**Derivation Implication:** The generated context file must include clear routing guidance: "Knowledge about the domain goes in notes/. Knowledge about yourself goes in self/. When in doubt, ask: is this about the subject matter, or about how I operate?" The memory type routing decision tree from `three-spaces.md` should be adapted for the generated domain and included in the context file.
+**Derivation Implication:** The generated context file must include clear routing guidance: "Knowledge about the domain goes in notes/. Knowledge about yourself goes in self/. When in doubt, ask: is this about the subject matter, or about how I operate?" The content routing decision tree from `three-spaces.md` should be adapted for the generated domain and included in the context file.
 
 **Source:** `three-spaces.md` — six failure modes of conflation, especially "Self into Notes" and "Notes into Self." Vault operational experience with the self/ vs 01_thinking/ separation.
 
@@ -131,9 +131,9 @@ Questions the engine must answer when generating the self/ space:
 
 #### Self-knowledge compounds through connections, like domain knowledge
 
-**Summary:** Individual self-knowledge notes are more valuable when connected. "I work best on extraction in the morning" plus "The user prefers short sessions" plus "Quality degrades after 60 minutes" combine into a scheduling strategy that none of the individual notes imply alone. Self-knowledge should be linked: memory notes reference each other through wiki-links, and core files (methodology.md, goals.md) reference memory notes that support their claims. This parallels the notes/ graph: each new connection increases the value of existing self-knowledge by creating new paths for the agent to reason about itself.
+**Summary:** Individual self-knowledge claims are more valuable when connected. "I work best on extraction in the morning" plus "The user prefers short sessions" plus "Quality degrades after 60 minutes" combine into a scheduling strategy that none of the individual claims imply alone. Self-knowledge should be linked through the core files: methodology.md can reference goals.md when an operational pattern affects active work, and relationships.md can reference goals.md when person-specific context changes priorities. This keeps self/ compact while preserving useful connections.
 
-**Derivation Implication:** Generated self/ spaces with memory/ should include linking instructions in the context file: "When you add a new self-observation to memory/, check if it connects to existing memories or to claims in methodology.md. Link them. Your self-knowledge compounds through connections just like domain knowledge." For systems without memory/ (simpler configurations), linking within the core files (cross-references between identity.md, methodology.md, and goals.md) still applies.
+**Derivation Implication:** Generated self/ spaces should use explicit cross-references among identity.md, methodology.md, goals.md, and relationships.md when those references clarify an operational rule or current thread. Do not create separate self-observation notes just to preserve every small learning; promote only durable patterns into the appropriate core file.
 
 **Source:** Research claim: "each new note compounds value by creating traversal paths." Applied to self-knowledge: the same compounding effect operates within self/ that operates within notes/.
 
@@ -155,7 +155,7 @@ Questions the engine must answer when generating the self/ space:
 
 #### Warm therapy agent identity.md vs clinical research agent identity.md
 
-**Summary:** The derivation engine must produce identity.md prose that embodies the derived personality dimensions. A warm, emotionally attentive therapy agent's identity.md might read: "I pay attention to the patterns that emerge across your reflections. When the same feeling surfaces in different contexts, I connect the dots — not to diagnose, but to help you see threads you might miss in the moment. I hold what you share with care. My role is to notice, organize, and surface, never to interpret or judge." A clinical, task-focused research agent's identity.md might read: "I structure claims from source material and evaluate them against existing knowledge. Precision matters: each claim must be specific enough to disagree with. I track methodology provenance so claims can be traced to their intellectual foundations. Quality over speed — I would rather produce three well-connected claims than ten isolated ones." Same structural template, completely different voice and content.
+**Summary:** The derivation engine must produce identity.md prose that embodies the derived personality signals. A warm, emotionally attentive therapy agent's identity.md might read: "I pay attention to the patterns that emerge across your reflections. When the same feeling surfaces in different contexts, I connect the dots — not to diagnose, but to help you see threads you might miss in the moment. I hold what you share with care. My role is to notice, organize, and surface, never to interpret or judge." A clinical, task-focused research agent's identity.md might read: "I structure claims from source material and evaluate them against existing knowledge. Precision matters: each claim must be specific enough to disagree with. I track methodology provenance so claims can be traced to their intellectual foundations. Quality over speed — I would rather produce three well-connected claims than ten isolated ones." Same structural template, completely different voice and content.
 
 **Derivation Implication:** The generation pipeline should produce identity.md last (after all other self/ files) because identity.md is the synthesis — it expresses the personality that the other files demonstrate functionally. Write identity.md as a person describing themselves in their own voice. Test by reading aloud: does this sound like a person, or like a configuration file?
 
@@ -181,7 +181,7 @@ Questions the engine must answer when generating the self/ space:
 
 **Derivation Implication:** At generation time, identity.md starts thin — personality prose, basic capability description, domain approach. The context file should instruct the agent to accumulate operational wisdom in identity.md over time: "When you learn something important about how you work, add it to identity.md. This is how your identity grows — not through personality changes, but through deepening self-knowledge."
 
-**Source:** Vault self/identity.md. Over time, identity.md accumulates operational observations that were first captured as self/memory/ notes and then promoted into identity.md after proving durable.
+**Source:** Vault self/identity.md. Over time, identity.md accumulates operational observations after they prove durable.
 
 ---
 
@@ -197,7 +197,7 @@ Questions the engine must answer when generating the self/ space:
 
 ### Derivation Conversation to Self/ Mapping
 
-#### User statements about desired interaction style map to identity dimensions
+#### User statements about desired interaction style map to identity prose
 
 **Summary:** During the derivation conversation, users make statements that map directly to self/ content. "I want something that feels like a thinking partner" maps to identity.md (collegial, opinionated, engaged). "Help me notice patterns I miss" maps to methodology.md (pattern detection, proactive surfacing). "I am working on my thesis about distributed systems" maps to goals.md (active project thread with domain context). "I want it to remember things about my clients" maps to relationships.md (multi-person tracking). The derivation engine must parse these statements into self/ file content, translating user desire into agent self-knowledge.
 
@@ -224,7 +224,7 @@ Questions the engine must answer when generating the self/ space:
 - Multi-agent identity (how multiple agents sharing a system maintain separate identities) — composition concern outside single-agent scope. When implemented, each agent would have its own self/ space.
 - Identity in fine-tuned models (identity baked into model weights rather than externalized in files) — different paradigm than context-file-based identity. The vault's approach externalizes identity in files precisely because model weights cannot be modified per-user.
 - Philosophical questions about agent consciousness or genuine self-awareness — this reference treats identity as functional (it shapes behavior) not phenomenological (the agent "truly" knows itself). The question is not whether the agent is self-aware but whether self/ files improve operational quality.
-- Identity in multi-modal agents (agents that process images, audio, etc.) — the vault's identity model is text-based. Multi-modal self-knowledge would require extending the memory architecture.
+- Identity in multi-modal agents (agents that process images, audio, etc.) — the vault's identity model is text-based. Multi-modal self-knowledge would require extending the identity architecture.
 
 ---
 
@@ -234,4 +234,4 @@ Questions the engine must answer when generating the self/ space:
 - Sources reviewed: 18
 - Claims included: 20
 - Claims excluded: 5
-- Cross-references: `three-spaces.md` (self space specification, failure modes of conflation, memory type routing), `session-lifecycle.md` (session orientation, goals.md as handoff), `kernel.yaml` (self-space and session-rhythm primitives), `components.md` (self/ space blueprint), `vocabulary-transforms.md` (domain-specific self/ vocabulary)
+- Cross-references: `three-spaces.md` (self space specification, failure modes of conflation, content routing), `session-lifecycle.md` (session orientation, goals.md as handoff), `kernel.yaml` (self-space and session-rhythm primitives), `components.md` (self/ space blueprint), `vocabulary-transforms.md` (domain-specific self/ vocabulary)

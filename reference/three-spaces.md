@@ -24,12 +24,11 @@ Every generated system divides its workspace into three spaces: self, notes, and
 | `methodology.md` | How the agent works — quality standards, processing principles, operational patterns | When operational learnings accumulate (evolves as agent learns) |
 | `goals.md` | Current threads — what's active, deferred, completed | Every session (the orientation file) |
 
-### Optional Extensions (generated based on configuration)
+### Optional Extensions
 
 | File/Directory | Included When | Purpose |
 |---------------|---------------|---------|
 | `relationships.md` | Domain involves multiple people | Key people, preferences, interaction patterns |
-| `memory/` | Agent needs atomic self-knowledge beyond core files | Prose-titled atomic notes mirroring the notes/ pattern |
 
 ### Design Rule
 
@@ -65,7 +64,7 @@ These hold across all generated systems:
 
 | Constant | Implementation | Why It's Universal |
 |----------|---------------|-------------------|
-| Flat within entity type | No subfolders within entity directories. When multiple entity types are derived, note_collection contains typed subdirectories (e.g., projects/, contacts/). | Entity types are stable structural categories from derivation, not user-reorganizable hierarchy. Link stability holds because filenames remain globally unique across all entity directories. |
+| Flat note collection | A single note_collection directory holds notes regardless of content type. | Link stability holds because filenames remain globally unique. Topic maps provide navigation without folder hierarchy. |
 | Prose-sentence titles | Atomic notes make one claim; structure notes use one source-bounded proposition covering grouped subclaims | Enables wiki-link-as-prose pattern |
 | MOC navigation | Hub -> domain -> topic -> notes | Manages attention at scale |
 | Wiki links | `[[note title]]` creates graph edges | Spreading activation without infrastructure |
@@ -82,7 +81,7 @@ These hold across all generated systems:
 
 ### Design Rule
 
-**Durable, composable, worth finding again.** If it won't be queried or linked, it doesn't belong here. Session-specific observations start in ops/ and get promoted when they earn permanence. Raw capture starts in inbox/ and gets processed into the note_collection through the processing pipeline. When the collection has entity-type subdirectories, the processing pipeline routes each note to the matching entity directory based on its schema entity_type.
+**Durable, composable, worth finding again.** If it won't be queried or linked, it doesn't belong here. Session-specific observations start in ops/ and get promoted when they earn permanence. Raw capture starts in inbox/ and gets processed into the note_collection through the processing pipeline.
 
 ### What Does NOT Belong in Notes
 
@@ -107,8 +106,8 @@ These hold across all generated systems:
 
 | Directory | Contents | Lifecycle |
 |-----------|----------|-----------|
-| `derivation.md` | The original derivation rationale — dimension positions, tradition mapping, vocabulary choices, rationale for each decision | Semi-permanent — rarely updated |
-| `derivation-manifest.md` | Version tracking — arscontexta version, research snapshot date, feature blocks enabled, coherence validation results | Semi-permanent |
+| `derivation.md` | The original derivation record — domain summary, vocabulary choices, schema decisions, deferred candidates, failure risks | Semi-permanent — rarely updated |
+| `derivation-manifest.md` | Runtime vocabulary and folder-name manifest for generated skills | Semi-permanent |
 | `health/` | Schema validation results, orphan lists, link health metrics — point-in-time snapshots | Superseding — yesterday's report is superseded by today's |
 | `queue/` | Processing queue state — what needs extraction, connection, verification | Flowing — items move through and complete |
 
@@ -159,7 +158,7 @@ Each conflation pattern produces specific, predictable failures:
 
 **What breaks:** Self/ bloats beyond what can be loaded at session start. The agent carries domain-specific knowledge as identity, which doesn't scale. Search in notes/ misses content that's hidden in self/. The distinction between "what the agent knows about itself" and "what the agent knows about the domain" collapses.
 
-**Example:** A research agent stores "spaced repetition works better after exercise" in self/memory/ instead of notes/. It's domain knowledge, not agent self-knowledge — even though the agent found it interesting.
+**Example:** A research agent stores "spaced repetition works better after exercise" in self/methodology.md instead of notes/. It's domain knowledge, not agent self-knowledge — even though the agent found it interesting.
 
 ---
 
@@ -180,8 +179,7 @@ project-root/
 │   ├── identity.md
 │   ├── methodology.md
 │   ├── goals.md
-│   ├── relationships.md         # optional
-│   └── memory/                  # optional
+│   └── relationships.md         # optional
 ├── notes/                       # or domain-specific name (reflections/, concepts/, etc.)
 │   ├── index.md                 # hub MOC
 │   ├── [domain-mocs].md         # domain/topic MOCs
@@ -234,14 +232,14 @@ Entity directories contain only atomic notes, not MOCs. If an entity type needs 
 
 ---
 
-## Memory Type Routing Decision Tree
+## Content Routing Decision Tree
 
 When the agent captures something, this decision tree determines where it belongs:
 
 ```
 Is this about the agent itself?
 ├── YES: Is it durable self-knowledge?
-│   ├── YES -> self/ (identity, methodology, goals, memory)
+│   ├── YES -> self/ (identity, methodology, goals, relationships)
 │   └── NO -> ops/ (observations, current processing state)
 │
 └── NO: Is this domain knowledge?

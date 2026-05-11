@@ -35,7 +35,7 @@ Before writing to {DOMAIN:note_collection}/, ask:
 If any answer is "no," fix it before saving. Discovery-first is a creation constraint, not a polish step.
 ```
 
-## 3. Memory Type Routing (always include)
+## 3. Content Routing (always include)
 
 ```markdown
 ## Where Things Go
