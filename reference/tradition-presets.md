@@ -1,6 +1,6 @@
 # Methodology Tradition Background
 
-Background examples for vocabulary, processing language, and failure-risk intuition. Traditions are not selectable architectures.
+Background examples for vocabulary and processing language. Traditions are not selectable architectures.
 
 Every generated vault keeps the same kernel: flat note collection, wiki links plus semantic search, topic-map navigation, templates, hooks, health checks, full pipeline, and self/ continuity.
 

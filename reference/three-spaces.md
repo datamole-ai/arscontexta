@@ -1,6 +1,6 @@
 # Three-Space Architecture Reference
 
-Every generated system divides its workspace into three spaces: self, notes, and ops. This is not an organizational preference but an architectural decision driven by failure mode prevention. The three spaces have fundamentally different durability profiles, growth patterns, and query characteristics. Conflating any two produces predictable, documented failures.
+Every generated system divides its workspace into three spaces: self, notes, and ops. This is not an organizational preference. The three spaces have fundamentally different durability profiles, growth patterns, and query characteristics.
 
 ---
 
@@ -85,9 +85,9 @@ These hold across all generated systems:
 
 ### What Does NOT Belong in Notes
 
-- Processing queue state -> ops/queue/
+- Runtime templates and derivation records -> ops/
 - Agent self-knowledge -> self/
-- Health reports -> ops/health/
+- Health workflow output -> transient JSON from `/health`
 - Temporary scaffolding -> ops/
 
 ---
@@ -98,18 +98,17 @@ These hold across all generated systems:
 
 **Growth pattern:** Fluctuating — grows during active work, shrinks during maintenance. Nothing in ops/ is permanent knowledge.
 
-**Load pattern:** Targeted. Queue status, latest health report. Never loaded in bulk.
+**Load pattern:** Targeted. Templates, derivation records, and session handoffs. Never loaded in bulk.
 
-**Purpose:** Keep the knowledge graph clean by separating operational scaffolding from durable knowledge. Without ops/, queue state, health reports accumulate alongside genuine insights, polluting search results and inflating note counts.
+**Purpose:** Keep the knowledge graph clean by separating operational scaffolding from durable knowledge. Without ops/, templates, derivation records, and transient coordination artifacts accumulate alongside genuine insights, polluting search results and inflating note counts.
 
 ### Contents
 
 | Directory | Contents | Lifecycle |
 |-----------|----------|-----------|
-| `derivation.md` | The original derivation record — domain summary, vocabulary choices, schema decisions, deferred candidates, failure risks | Semi-permanent — rarely updated |
-| `derivation-manifest.md` | Runtime vocabulary and folder-name manifest for generated skills | Semi-permanent |
-| `health/` | Schema validation results, orphan lists, link health metrics — point-in-time snapshots | Superseding — yesterday's report is superseded by today's |
-| `queue/` | Processing queue state — what needs extraction, connection, verification | Flowing — items move through and complete |
+| `derivation.md` | The original derivation record — domain summary, vocabulary choices, schema decisions, deferred candidates | Semi-permanent — rarely updated |
+| `derivation-manifest.yaml` | Runtime vocabulary and folder-name manifest for generated skills | Semi-permanent |
+| `templates/` | Canonical note templates and `_schema` blocks | Semi-permanent |
 
 ### Content Promotion Rule
 
@@ -123,42 +122,10 @@ Content never moves FROM notes/ or self/ INTO ops/. Durable knowledge doesn't be
 
 ### The Promotion Pattern
 
-1. Content enters ops/ at low ceremony (session notes, queue entries, health reports)
+1. Content enters ops/ at low ceremony (session notes, observations, derivation records)
 2. When it demonstrates persistence — an insight proves useful across sessions, a pattern is confirmed — it gets promoted
 3. Promotion means creating a proper note in notes/ or adding to self/, not moving the ops entry
 4. The ops entry can then be archived, its value extracted
-
----
-
-## Six Failure Modes of Conflation
-
-Each conflation pattern produces specific, predictable failures:
-
-
-### 1. Self into Notes
-
-**What happens:** Agent identity, preferences, and operational methodology end up in the user's knowledge graph.
-
-**What breaks:** Schema confusion — agent self-knowledge has different fields than domain knowledge. Search pollution — "how I process therapy reflections" is agent methodology, not a therapy insight. The user's graph contains content about the agent rather than about the domain. Progressive disclosure loads agent self-knowledge when searching for domain content.
-
-**Example:** An agent note saying "I work best when processing in small batches" gets filed alongside user's therapy reflections.
-
-
-### 2. Ops into Self
-
-**What happens:** Agent identity gets polluted with temporal processing state — today's queue status, current health metrics, in-progress session context.
-
-**What breaks:** Self/ becomes too large to load fully at session start. Temporal content creates noise in identity orientation. The agent's self-model includes "I have 12 items in queue" as if it were identity rather than current state.
-
-**Example:** self/methodology.md includes "currently processing the Johnson 2026 paper" — which is ops state, not methodology.
-
-### 3. Notes into Self
-
-**What happens:** Domain knowledge gets stored in self/ because it felt personally relevant to the agent.
-
-**What breaks:** Self/ bloats beyond what can be loaded at session start. The agent carries domain-specific knowledge as identity, which doesn't scale. Search in notes/ misses content that's hidden in self/. The distinction between "what the agent knows about itself" and "what the agent knows about the domain" collapses.
-
-**Example:** A research agent stores "spaced repetition works better after exercise" in self/methodology.md instead of notes/. It's domain knowledge, not agent self-knowledge — even though the agent found it interesting.
 
 ---
 
@@ -186,51 +153,11 @@ project-root/
 │   └── [prose-titled-notes].md  # atomic notes
 ├── inbox/                       # or domain-specific name
 ├── archive/                     # processed sources
-├── templates/
 └── ops/
     ├── derivation.md
-    ├── derivation-manifest.md
-    ├── health/
-    └── queue/
+    ├── derivation-manifest.yaml
+    └── templates/
 ```
-
-### Multi-Entity Layout
-
-When the derivation produces multiple entity types, note_collection becomes a parent directory with typed subdirectories:
-
-```
-project-root/
-├── CLAUDE.md
-├── .claude/
-│   ├── hooks/
-│   ├── skills/
-│   └── settings.json
-├── self/
-│   ├── identity.md
-│   ├── methodology.md
-│   ├── goals.md
-│   └── ...
-├── knowledge-base/              # note_collection (derived vocabulary term)
-│   ├── index.md                 # hub MOC
-│   ├── [topic-mocs].md          # topic MOCs span entity types
-│   ├── projects/                # entity type directory
-│   │   └── [prose-titled-notes].md
-│   ├── contacts/                # entity type directory
-│   │   └── [prose-titled-notes].md
-│   └── blueprints/              # entity type directory
-│       └── [prose-titled-notes].md
-├── inbox/                       # unified capture zone
-├── archive/                     # processed sources
-├── templates/
-└── ops/
-    ├── derivation.md
-    ├── derivation-manifest.md
-    └── ...
-```
-
-Entity directories contain only atomic notes, not MOCs. If an entity type needs its own navigation (e.g., "all projects"), that is a topic MOC at the note_collection root, not an index inside the entity directory.
-
----
 
 ## Content Routing Decision Tree
 
@@ -249,7 +176,7 @@ Is this about the agent itself?
     │       └── May be promoted to notes/ later if it persists
     │
     └── NO: Is this operational coordination?
-        └── YES -> ops/ (queue state, health report, session handoff)
+        └── YES -> ops/ (template, derivation record, session handoff)
 ```
 
 **Quick routing rules:**
@@ -259,14 +186,13 @@ Is this about the agent itself?
 | "I work best when..." | self/methodology.md | Agent operational learning |
 | "The user prefers..." | self/relationships.md | Agent knowledge about user |
 | "Spaced repetition helps memory" | notes/ | Domain knowledge |
-| "Queue has 12 items" | ops/queue/ | Temporal coordination state |
-| "Schema validation passed" | ops/health/ | Point-in-time diagnostic |
+| "Inbox has 12 unprocessed items" | transient `/health` JSON | Temporal coordination state |
+| "Schema validation passed" | transient `/health` JSON | Point-in-time diagnostic |
 | "My goal this quarter is..." | self/goals.md | Agent orientation |
 
 ---
 
 ## Cross-Reference
 
-- **Failure modes that afflict each space:** See `failure-modes.md` for the full failure mode taxonomy. Conflation failures (this document) are structural; failure-modes.md covers operational decay (collector's fallacy, orphan drift, schema erosion).
 - **What goes in each space per domain:** See `use-case-presets.md` for domain-specific routing decisions (therapy reflections vs research claims vs PM decisions).
 - **Kernel primitives that depend on three-space separation:** `self-space`, `session-rhythm`, and `discovery-first` all assume clean space boundaries. See `kernel.yaml`.

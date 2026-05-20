@@ -112,7 +112,7 @@ primitives:
 
   - id: semantic-search
     name: Semantic search capability
-    description: Meaning-based discovery across vocabularies. Complements structural navigation. Processing skills (connect, verify, structure, seed) call it directly — the system is designed around its presence.
+    description: Meaning-based discovery across vocabularies. Complements structural navigation. Processing skills such as connect and structure call it directly — the system is designed around its presence.
     layer: convention
     requires: wiki-links
     enforcement: invariant
@@ -123,12 +123,12 @@ primitives:
 
   - id: unique-addresses
     name: Filesystem graph database
-    description: "The vault is a graph database on the filesystem. Markdown files are nodes, wiki links are edges, YAML frontmatter is the property store, ripgrep is the query engine. Three query levels: field-level (rg on YAML), node-level (backlinks, link extraction), graph-level (scripts combining traversal + analysis)."
+    description: "The vault is a graph database on the filesystem. Markdown files are nodes, wiki links are edges, YAML frontmatter is the property store, and Obsidian CLI provides vault-native graph facts. Ad hoc ripgrep remains useful for human inspection."
     layer: foundation
     requires: wiki-links, markdown-yaml
     enforcement: invariant
     validation:
-      check: "ops/scripts/graph/ directory exists with core analysis scripts. At minimum: orphan detection, dangling link detection, backlink counting, link density measurement, forward/backward traversal, synthesis opportunity detection."
+      check: "Obsidian CLI returns unresolved links, orphans, backlinks, properties, and tags from the generated vault. `uv run arscontexta-vault validate --all` returns deterministic schema JSON."
     cognitive_grounding: "Structured data enables queries that unstructured files cannot answer. The graph structure emerges from kernel invariants without additional infrastructure."
 
   - id: discovery-first
@@ -146,15 +146,15 @@ primitives:
       check: "Generated context file contains Discovery-First Design section. Generated skills include discovery checks. PostToolUse validation hook exists."
     cognitive_grounding: "Discoverability compounds — the system's value grows through findability. Every note that can't be found is negative value."
 
-  - id: processing-queue
-    name: Processing queue
-    description: "The lifecycle backbone. Every note flows through phase states tracked in ops/queue/ — the unified queue holding pipeline tasks (claims, enrichments) and their phase progression (create, connect, verify)."
+  - id: pipeline-state
+    name: Lean pipeline state
+    description: "The happy-path pipeline passes one lean JSON object between seed, producer, connect, verify, and commit. Durable queue/recovery mechanics are deferred until real friction appears."
     layer: convention
     requires: markdown-yaml, session-rhythm
     enforcement: invariant
     validation:
-      check: "Queue file (ops/queue/queue.json) exists. Context file references it in session-orient phase. Pipeline skills read and advance tasks through phase_order."
-    cognitive_grounding: "Without queue tracking, the pipeline has no lifecycle visibility. Cannot answer 'what processing is pending?' or resume after interruption."
+      check: "Pipeline skills pass batch, source, artifacts, and optional commit_paths. /pipeline stages only those named paths and commits them."
+    cognitive_grounding: "A lean handoff keeps the happy path understandable and avoids maintaining recovery machinery before the workflow proves it needs it."
 # Dependency graph (DAG):
 # markdown-yaml → description-field
 # markdown-yaml → topics-footer
@@ -171,5 +171,5 @@ primitives:
 
 # Layer mapping:
 # foundation: markdown-yaml, wiki-links, unique-addresses
-# convention: moc-hierarchy, tree-injection, description-field, topics-footer, schema-enforcement, self-space, session-rhythm, semantic-search, discovery-first, processing-queue
+# convention: moc-hierarchy, tree-injection, description-field, topics-footer, schema-enforcement, self-space, session-rhythm, semantic-search, discovery-first, pipeline-state
 # automation: (none)

@@ -232,31 +232,32 @@ Check MOC coverage:
 
 ## Graph — Filesystem Graph Database
 
-**What:** The vault is a graph database on the filesystem. Markdown files are nodes, wiki links are edges, YAML frontmatter is the property store, ripgrep is the query engine.
+**What:** The vault is a graph database on the filesystem. Markdown files are nodes, wiki links are edges, YAML frontmatter is the property store, and Obsidian CLI provides vault-native graph facts.
 
-**Why:** Structured data enables queries that unstructured files cannot answer. The graph structure emerges from kernel invariants (markdown-yaml + wiki-links) without additional infrastructure. Three query levels provide progressive analytical power: field-level queries on YAML frontmatter, node-level queries like backlinks and link extraction, and graph-level analysis combining traversal with computation.
+**Why:** Structured data enables queries that unstructured files cannot answer. The graph structure emerges from kernel invariants (markdown-yaml + wiki-links) without additional infrastructure. Obsidian owns vault-native link, backlink, unresolved-link, property, tag, and move semantics while ad hoc `rg` remains available for local inspection.
 
 **How to implement:**
-- `ops/scripts/graph/` directory with core analysis scripts
-- At minimum: orphan detection, dangling link detection, backlink counting, link density measurement, forward/backward traversal, synthesis opportunity detection
-- Scripts compose with each other — backlinks feeds into orphan detection, link extraction feeds into traversal
+- Require `obsidian` on PATH during setup
+- Use Obsidian CLI for unresolved links, orphans, backlinks, properties, and tags
+- Use `uv run arscontexta-vault validate --all` for deterministic schema checks
 
 **Quality gate:** Can the system answer "what notes link to X?", "what notes have no incoming links?", and "what notes share a topic but aren't connected?" If yes, the graph database is functional.
 
 ---
 
-## Processing Queue — Lifecycle Backbone
+## Lean Pipeline State — Happy-Path Backbone
 
-**What:** Every note flows through phase states tracked in the queue file — from inbox capture through processing phases to completion.
+**What:** A pipeline run passes `batch`, `source`, `artifacts`, and optional `commit_paths` between phases.
 
-**Why:** Without queue tracking, the pipeline has no lifecycle visibility. It cannot answer "what processing is pending?" or resume after interruption. The queue makes the processing pipeline observable and steerable.
+**Why:** The happy-path pipeline should complete without maintaining durable recovery state. Lean state keeps handoffs explicit while avoiding queue machinery until standalone paused work proves necessary.
 
 **How to implement:**
-- `ops/queue/queue.json` (or `queue.yaml`) — machine-readable queue for pipeline orchestration
-- Context file references it in the session-orient phase
-- Tasks track phase progression: each note (or enrichment) moves through connect, verify. Materialization happens inside /structure during the process phase — there is no separate create or enrich phase.
+- `seed` emits `batch` and `source`
+- producer skills emit `artifacts`
+- `/connect` may add `commit_paths`
+- `/pipeline` stages only named paths from final state and creates the git commit
 
-**Quality gate:** Can the pipeline answer "what processing is pending?" by reading the queue? If yes, lifecycle visibility is achieved.
+**Quality gate:** Can `/pipeline` finish one source without reading durable queue state or staging unrelated paths? If yes, the happy-path lifecycle is achieved.
 
 ---
 

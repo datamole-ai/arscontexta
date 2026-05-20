@@ -45,7 +45,7 @@ If any answer is "no," fix it before saving. Discovery-first is a creation const
 | {DOMAIN:Knowledge} claims, insights | {DOMAIN:note_collection}/ | Research findings, patterns, principles |
 | Raw material to process | {DOMAIN:inbox}/ | Articles, voice dumps, links, imported content |
 | Agent identity, methodology, preferences | self/ | Working patterns, learned preferences, goals |
-| Processing state, queue, config | ops/ | Queue state, batch archives, learnings |
+| Operational coordination and generated references | ops/ | Templates, feature docs, derivation record |
 | Friction signals, patterns noticed | ops/observations/ | Search failures, methodology improvements |
 
 When uncertain, ask: "Is this durable {DOMAIN:knowledge} ({DOMAIN:note_collection}/), agent identity (self/), or temporal coordination (ops/)?" Durable {DOMAIN:knowledge} earns its place in the graph. Agent identity shapes future behavior. Everything else is operational.
@@ -61,24 +61,7 @@ When uncertain, ask: "Is this durable {DOMAIN:knowledge} ({DOMAIN:note_collectio
 Full automation is active from day one. All {DOMAIN:processing} skills, all quality gates, all maintenance mechanisms are available immediately. You do not need to reach a certain vault size before using orchestrated {DOMAIN:processing}.
 ```
 
-## 5. Common Pitfalls — compressed (always include)
-
-Select the 3–4 HIGH-risk failure modes for the user's domain from `reference/failure-modes.md` using the Domain Vulnerability Matrix. For each selected failure mode, emit ONE LINE: the failure-mode name (domain-native), followed by the value of the `one_line_rule:` field from that mode's entry in `reference/failure-modes.md`. Do not inline prose explanations — full guidance is available via `/ask`.
-
-Emit this block:
-
-```markdown
-## Common Pitfalls
-
-- **[Failure mode 1 — domain-native name]:** [one_line_rule from reference/failure-modes.md, vocabulary-transformed]
-- **[Failure mode 2 — domain-native name]:** [one_line_rule]
-- **[Failure mode 3 — domain-native name]:** [one_line_rule]
-- **[Failure mode 4 — domain-native name]:** [one_line_rule] (optional)
-
-For the full prevention pattern on any pitfall, invoke `/ask`.
-```
-
-## 6. Infrastructure Routing (always include)
+## 5. Infrastructure Routing (always include)
 
 ```markdown
 ## Infrastructure Routing
@@ -96,11 +79,10 @@ When users ask about system structure, schema, methodology, or any meta-question
 
 ## Composition Rules for the Generation Agent
 
-1. **Emit all seven sections in order.** No feature summaries. No additional narrative sections.
+1. **Emit all five sections in order.** No feature summaries. No additional narrative sections.
 2. **Domain-native vocabulary throughout.** Apply vocabulary transformation from `reference/vocabulary-transforms.md` to every universal term before writing.
-3. **Compressed pitfalls.** Use the `one_line_rule:` field from `reference/failure-modes.md`; do not synthesize new prevention guidance at generation time.
-4. **Terse over complete.** Every sentence must carry information that would not be obvious from section headings alone.
-5. **No inlined feature content.** If a concept belongs to a feature (schema, {DOMAIN:topic maps}, pipeline mechanics), it belongs in `ops/features/` and is reached via `/ask`.
-6. **Structural markers are invariant.** Vocabulary transformation never touches YAML field names (`content_type:`, `granularity:`, `description:`, `created_at:`, `tags:`) or markdown structure.
+3. **Terse over complete.** Every sentence must carry information that would not be obvious from section headings alone.
+4. **No inlined feature content.** If a concept belongs to a feature (schema, {DOMAIN:topic maps}, pipeline mechanics), it belongs in `ops/features/` and is reached via `/ask`.
+5. **Structural markers are invariant.** Vocabulary transformation never touches YAML field names (`content_type:`, `granularity:`, `description:`, `created_at:`, `tags:`) or markdown structure.
 
 The vocabulary test: read the generated CLAUDE.md as the domain user would. If any term feels imported from a different discipline, transform it.

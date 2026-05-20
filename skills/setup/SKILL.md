@@ -20,7 +20,6 @@ Read these files to understand the methodology and available components. Read th
 **Deferred references (read at specific steps, not upfront):**
 
 - `${CLAUDE_PLUGIN_ROOT}/reference/use-case-presets.md` -- read in Step 3a (only the matched reference domain section)
-- `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md` -- read in Step 3d (Domain Vulnerability Matrix plus the HIGH-risk per-failure-mode sections it surfaces)
 
 **Generation references (read during Phase 5):**
 
@@ -29,11 +28,33 @@ Read these files to understand the methodology and available components. Read th
 
 ---
 
-## PHASE 1: Product Onboarding
+## PHASE 1: Prerequisite Gate and Product Onboarding
+
+Before the conversation begins, verify required local tooling and fail fast if anything is missing. Do this before onboarding, follow-up questions, derivation, or file writes.
+
+Run:
+
+```bash
+command -v tree
+command -v rg
+command -v uv
+command -v qmd
+command -v obsidian
+qmd -v
+```
+
+Requirements:
+
+- Claude Code is the current plugin host
+- `tree` is installed and on `PATH`
+- `rg` is installed and on `PATH`
+- `uv` is installed and on `PATH`
+- `qmd` is installed, on `PATH`, and version is 2 or newer
+- `obsidian` CLI is installed and on `PATH`
+
+If any prerequisite is missing, Python 3.12+ is unavailable, or `qmd` is older than v2, stop immediately with concise installation instructions. Do not continue to onboarding.
 
 Before the conversation begins, present one compact onboarding screen. This content is prescribed, not improvised. Output it as clean text before asking the user any questions.
-
-All onboarding output follows Section 10.5 Clean UX Design Language. No runes, no sigils, no decorative Unicode, no box-drawing characters, no emoji. Clean indented text with standard markdown formatting only.
 
 ### Onboarding
 
@@ -62,8 +83,7 @@ your current system.
 
 I'll make the structural calls for you: flat notes, explicit links plus
 semantic search, and three-level navigation. Before writing files, I'll
-show you the proposed folders, schema, workflow, deferred items, and
-risks.
+show you the proposed folders, schema, workflow, and deferred items.
 
 Tell me about what you want to track, remember, or think about.
 ```
@@ -76,19 +96,7 @@ After presenting the onboarding screen, transition seamlessly to Phase 2. If the
 
 ### Signal Extraction
 
-As the user talks, listen for four kinds of signal: **domain vocabulary** (how they name kinds of notes), **candidate fields** (things they say they track), **candidate directories** (groupings they name explicitly), and **failure-mode risks** (habits that suggest common pitfalls, e.g. "I read a lot and forget"). These feed vocabulary derivation and the Filter A/B inputs in Phase 3.
-
-**Anti-signals -- patterns that seem like signals but mislead:**
-
-
-| Phrase                              | Risk                                            | Probe                                                                 |
-| ----------------------------------- | ----------------------------------------------- | --------------------------------------------------------------------- |
-| "I want Zettelkasten"               | User may want the label, not the discipline     | Ask: "Walk me through your last week of note-taking"                  |
-| "Make it like Obsidian"             | User wants a navigation feel, not a methodology | Ask: "What do you like about Obsidian?"                               |
-| "I need AI to think for me"         | Cognitive outsourcing risk                      | Probe: "What do you want to decide vs what should the system handle?" |
-| "Everything connects to everything" | Undifferentiated linking desire                 | Ask for a specific example of two things that connect                 |
-| "I've tried everything"             | PKM failure cycle — needs simple start          | Start with minimal config, friction-driven adoption                   |
-
+As the user talks, listen for two kinds of signal: **domain vocabulary** (how they name kinds of notes) and **candidate fields** (things they say they track). These feed vocabulary derivation and Filter A inputs in Phase 3. Treat named groupings as topic-map/navigation signals, not directory candidates.
 
 ### Vocabulary Extraction
 
@@ -181,47 +189,15 @@ No shipped skill reads note frontmatter fields beyond the five required. A Filte
 
 Hold the derived schema (the five required fields plus any Filter-A survivors with their rationale) and the deferred-field list in working memory for Phase 4.
 
-### Step 3c: Filter B — Directories (Justify-or-Drop)
-
-**Default:** flat vault. A single `{vocabulary.note_collection}/` directory holds every note regardless of `content_type`. No entity subdirectories by default.
-
-Collect candidate directories from: reference domain defaults, explicit user requests, and any grouping implied by signals (e.g. "I track contacts and projects separately"). For each candidate, produce two items:
-
-1. **Shared operation** — a system behavior that acts on the whole directory as a set (e.g. "daily archival sweep", "MOC regeneration", "pipeline routing by path").
-2. **Who runs it** — the specific skill or hook that performs that operation on day one.
-
-**Outcome:**
-
-- Shared operation + concrete day-one runner → **Keep.**
-- Browsing convenience, "looks tidier", or "humans like folders" → **Defer.** Record in working memory for the Deferred Candidates section of `ops/derivation.md`.
-
-**Expected survivors for most vaults:** zero to one. `moc/` can survive if MOC regeneration is a scheduled operation. `people/`, `projects/`, `daily/` typically do NOT survive — they are browsing groupings.
-
-**Note:** the `{vocabulary.note_collection}/`, `{vocabulary.inbox}/`, `{vocabulary.archive}/`, `self/`, and `ops/` directories are kernel-mandated (not Filter-B candidates) and are always created. Filter B only gates *additional* content directories.
-
-Hold the surviving directory list and the deferred-directory list in working memory for Phase 4.
-
-### Step 3d: Failure-Mode Risk Flagging
-
-Read `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md`. The "Domain Vulnerability Matrix" section at the end of that file lists each failure mode against each reference domain with HIGH/medium/low risk levels.
-
-Using the reference domain matched in Step 3a (or the top two reference domains for novel domains, unioned), identify all HIGH-risk failure modes for this vault.
-
-Also read the per-failure-mode sections of `reference/failure-modes.md` for each flagged mode. Use the prevention patterns, warning signs, and domain-specific descriptions to compose a "Common Pitfalls" block in domain-native vocabulary. Mention medium-risk modes briefly. Omit low-risk modes.
-
-Hold the flagged HIGH-risk list and the composed "Common Pitfalls" content in working memory for Phase 4 (shown in the proposal) and Phase 5 (included in the generated CLAUDE.md).
-
----
-
 ## PHASE 4: Proposal
 
 Present the derived system to the user as a single proposal message with a single approval gate. Use the user's own vocabulary throughout.
 
 ### Proposal structure
 
-Show six labeled blocks in one message:
+Show five labeled blocks in one message:
 
-1. **Folder structure** — domain-named directories using derived vocabulary. Flat by default: a single `{vocabulary.note_collection}/` holds every note regardless of `content_type` or `granularity`. List any Filter-B survivors (from Step 3c) as additional directories, each with the shared day-one operation that justified it. List deferred directory candidates with the reason each was dropped; invite the user to challenge a drop by naming a concrete day-one reader and use.
+1. **Folder structure** — domain-named kernel directories using derived vocabulary. State that `{vocabulary.note_collection}/` is the single flat note collection and holds every note regardless of `content_type`, entity type, domain hierarchy, or `granularity`. Mention any requested entity or hierarchy folders as navigation views that will be represented by notes, MOCs, links, tags, or `content_type`, not physical folders.
 
 2. **One concrete note example** — a title + frontmatter + short body, using the user's vocabulary and the primary `content_type` they mentioned.
 
@@ -234,16 +210,14 @@ Show six labeled blocks in one message:
 
    Do NOT inline the full YAML here — the canonical location is the template file.
 
-5. **Deferred items** — fields (from Step 3b) and directories (from Step 3c) that Filter A/B dropped, each with its reason. Invite challenge: "If you can name a day-one reader and concrete use for any of these, I'll move it up."
-
-6. **Excluded items + failure-mode callouts** — intentional non-inclusions and HIGH-risk failure modes flagged in Step 3d, described in the user's vocabulary.
+5. **Deferred items** — fields (from Step 3b) that Filter A dropped, each with its reason. Invite challenge: "If you can name a day-one reader and concrete use for any of these, I'll move it up."
 
 End the proposal with: **"Would you like me to adjust anything before I create this?"**
 
 ### Challenge handling
 
-- **Deferred item challenged:** Apply the Filter A or Filter B check to the challenged item. If the user names a concrete reader+use that runs day-one, promote to Keep. Otherwise the item stays deferred. No silent additions.
-- **Structural change requested** (e.g. user wants a different folder structure or content_type enum): Apply the change and re-present the proposal. No separate coherence re-check.
+- **Deferred field challenged:** Apply the Filter A check to the challenged field. If the user names a concrete reader+use that runs day-one, promote to Keep. Otherwise the item stays deferred. No silent additions.
+- **Structural change requested** (e.g. user wants a different content_type enum): Apply the change and re-present the proposal. Treat reference-domain folder defaults, entity hierarchies, and explicit folder requests as navigation candidates, not physical directory candidates. If the requested change is a physical folder hierarchy, explain that setup keeps storage flat, ask what navigation view or day-one workflow they need instead, and represent the need as a note, hub/topic MOC, link pattern, tag, or `content_type` inside the flat collection.
 - **Schema field rename/removal:** Apply and update working-memory schema.
 
 No file writes happen in Phase 4. All vault artifacts — including `ops/derivation.md` (which contains the Schema Decisions and Deferred Candidates sections) and `ops/templates/note.md` (which contains the canonical `_schema:` block with Filter-A survivors filled in) — are written in Phase 5.
@@ -262,13 +236,13 @@ Write `ops/derivation.md` FIRST, before any other artifact. Every subsequent ste
 
 | Step | Executor | Scope | Description |
 |------|----------|-------|-------------|
-| 1 | Main agent | derivation.md, folders, vault marker | Foundation setup |
+| 1 | Main agent | derivation.md, folders, vault marker, Python tooling | Foundation setup |
 | 2 | Main agent | self/identity.md, self/methodology.md, self/goals.md | Identity & self-knowledge |
-| 3 | Main agent | ops/derivation-manifest.md | Runtime manifest |
-| 4 | Main agent | ops/templates/note.md, ops/queries/ | Templates & query starters |
-| 5 | Skills agent (parallel) | .claude/skills/*/SKILL.md (9 skills) | Skills (tiered generation, cp + sed + Edit) |
+| 3 | Main agent | ops/derivation-manifest.yaml | Runtime manifest |
+| 4 | Main agent | ops/templates/note.md | Templates |
+| 5 | Skills agent (parallel) | .claude/skills/*/SKILL.md (8 skills) | Skills (copy sources + apply domain substitutions) |
 | 6 | Context agent (parallel) | CLAUDE.md, ops/features/*.md, .claude/skills/ask/SKILL.md | Context file + feature references + /ask |
-| 7 | Manual agent (parallel) | manual/ (7 pages), [domain:notes]/index.md | Manual & hub MOC |
+| 7 | Hub agent (parallel) | [domain:notes]/index.md | Hub MOC |
 | 8 | Main agent | Semantic search setup| Semantic search |
 | 9 | Main agent | git init/commit | Version control |
 
@@ -332,9 +306,9 @@ Verification:
 ~~~
 
 **Agent-specific additions:**
-- **Skills agent:** Uses the dedicated Skill Generation Prompt in Pipeline Step 5 (cp + Edit protocol), not the generic template.
+- **Skills agent:** Uses the dedicated Skill Generation Prompt in Pipeline Step 5, not the generic template.
 - **Context agent:** Include the list of feature source paths under `${CLAUDE_PLUGIN_ROOT}/generators/features/`.
-- **Manual agent:** Include the list of generated skill names inline in the prompt (derived from the Skills agent's Tier A/B mapping in `ops/derivation.md`).
+- **Hub agent:** Creates the collection root hub MOC from `ops/derivation.md` and `self/*.md`.
 
 ### Orchestration Protocol
 
@@ -383,17 +357,13 @@ If Filter A produced no survivors, record: "None — the five required fields co
 
 ## Deferred Candidates
 
-Items dropped by Filter A (fields) or Filter B (directories), with reasons. Promote later by editing `_schema.required:` (fields) or creating the directory with its day-one runner; record the promotion here.
+Fields dropped by Filter A, with reasons. Promote later by editing `_schema.required:` and recording the day-one reader/use here.
 
 ### Fields deferred
 - **[field_name]** — [reason]. Example: proposed by reference default but no day-one reader named.
 - [...]
 
-### Directories deferred
-- **[directory_name]** — [reason]. Example: grouped for browsing only; no shared day-one operation.
-- [...]
-
-If nothing was deferred, record: "None — every candidate passed its filter."
+If nothing was deferred, record: "None — every field candidate passed Filter A."
 
 ## Vocabulary Mapping
 | Universal Term | Domain Term | Category |
@@ -408,13 +378,10 @@ If nothing was deferred, record: "None — every candidate passed its filter."
 | topics | [domain term] | body footer label |
 | [additional terms] | [domain terms] | [category] |
 
-## Failure Mode Risks
-[Top 3-4 HIGH-risk failure modes for this domain from vulnerability matrix]
-
 ## Generation Parameters
 - Folder names: [domain-specific folder names]
 - Skills to generate: [all generated skills — vocabulary-transformed]
-- Hooks to generate: [orient, capture, validate, commit]
+- Hooks to generate: [orient, qmd-sync]
 - Templates to create: [list]
 - Topology: [single-agent / skills / fresh-context / orchestrated]
 ```
@@ -423,7 +390,7 @@ If nothing was deferred, record: "None — every candidate passed its filter."
 
 ##### Folder Structure
 
-Create the three-space layout with domain-named directories. Flat by default; Filter B (Step 3c) determines any additional content directories.
+Create the three-space layout with domain-named directories. The physical note collection is flat; do not create additional content directories for entity types, hierarchies, MOCs, daily notes, or browsing groups.
 
 ```
 [workspace]/
@@ -438,47 +405,28 @@ Create the three-space layout with domain-named directories. Flat by default; Fi
 +-- ops/                             <-- operational coordination
 |   +-- templates/                   <-- single note.md template (created in Pipeline Step 4)
 |   +-- features/                    <-- feature reference files
-|   +-- scripts/                     <-- deterministic shell helpers (copied from engine)
-|   +-- queue/
-|   |   +-- queue.json               <-- durable processing queue, initialized as {"tasks":[]}
-|   |   +-- archive/
++-- pyproject.toml                   <-- uv project manifest copied from vault-template
++-- uv.lock                          <-- generated by `uv lock`
++-- src/arscontexta_vault/           <-- vault-local Python tooling copied from vault-template
++-- tests/                           <-- tooling smoke tests copied from vault-template
 ```
 
 Hub MOC (`index.md`) lives at the `{vocabulary.note_collection}/` root. Topic MOCs also live at the collection root. Always generate the inbox folder.
 
-##### ops/scripts/ — deterministic helpers
+##### Python Tooling
 
-Copy the engine's `ops-scripts/` directory into the vault as `ops/scripts/` and preserve the executable bit. These scripts let pipeline-driven skills do JSON-shaped state queries in a single Bash turn instead of multiple model turns:
+Copy the engine's static Python project template into the vault root. This is a copy operation, not a scaffolder:
 
 ```bash
-mkdir -p ops/scripts
-cp "${CLAUDE_PLUGIN_ROOT}/ops-scripts/"*.sh ops/scripts/
-chmod +x ops/scripts/*.sh
+cp -R "${CLAUDE_PLUGIN_ROOT}/vault-template/." .
+uv lock
 ```
 
-The five scripts shipped:
-
-| Script | Purpose |
-|--------|---------|
-| `batch-manifest.sh <batch_id>` | writes `batch-manifest.json` with compact batch state, notes, map inventory, semantic neighbors, and phase outputs |
-| `pipeline-state.sh <batch_id>` | JSON snapshot of queue counts per phase/status, archive folder, git state |
-| `archive-ready.sh <batch_id>` | `{ready, blocking[], total}` — drives /archive-batch's gate |
-| `vault-quick-check.sh` | required-files/dirs sanity check, JSON output |
-| `commit-batch.sh <batch_id> <message>` | stage + commit batch artifacts, return commit hash |
-
-These are vault-internal and do not need vocabulary substitution — they operate on `ops/queue/queue.json`, the manifest, and git, which are universal.
+The setup run MUST fail if any Phase 1 prerequisite is missing, or if the template copy fails.
 
 ##### Vault Marker
 
 Create empty file called `.arscontexta` in the vault root:
-
-##### Processing Queue
-
-Create `ops/queue/queue.json` during foundation setup:
-
-```json
-{"tasks":[]}
-```
 ---
 
 #### Pipeline Step 2: Identity & Self-Knowledge (Main Agent)
@@ -618,18 +566,18 @@ Topics:
 
 #### Pipeline Step 3: Runtime Manifest (Main Agent)
 
-**Scope:** ops/derivation-manifest.md
+**Scope:** ops/derivation-manifest.yaml
 
 **Reads:** ops/derivation.md
 
 ---
 
-##### ops/derivation-manifest.md (Runtime Vocabulary for Inherited Skills)
+##### ops/derivation-manifest.yaml (Runtime Vocabulary for Inherited Skills)
 
 Generate the machine-readable derivation manifest. Skills read it at invocation time for runtime vocabulary transformation.
 
 ```yaml
-# ops/derivation-manifest.md -- Machine-readable manifest for runtime vocabulary
+# ops/derivation-manifest.yaml -- Machine-readable manifest for runtime vocabulary
 # Generated by /setup.
 ---
 generated_at: [ISO 8601 timestamp]
@@ -665,25 +613,18 @@ vocabulary:
       output_type: "[note type]"
     # ... 4-8 domain-specific categories
 
-  # Filter B survivor directories (only present when Step 3c kept a directory)
-  # filter_b_survivors:
-  #   - name: archive
-  #     shared_operation: "scheduled archival sweep retires notes where status == closed older than 30 days"
-  #     runner: "/archive-batch sweep"
-
-
 ---
 ```
 
 ---
 
-#### Pipeline Step 4: Templates & Query Starters (Main Agent)
+#### Pipeline Step 4: Templates (Main Agent)
 
-**Scope:** ops/templates/note.md, ops/queries/{README.md,orphans.sh,by-tag.sh}
+**Scope:** ops/templates/note.md
 
 **Reads:** ops/derivation.md
 
-Create the template first, then write the three fixed query-starter files.
+Create the template. Do not add graph diagnostics, semantic-search commands, or runtime command examples to `ops/templates/note.md`.
 
 ---
 
@@ -697,79 +638,15 @@ Read `${CLAUDE_PLUGIN_ROOT}/reference/templates/note.md` for canonical structure
 2. Copy the body structure (H1, prose body, `---`, `Topics:` footer) verbatim.
 3. Apply vocabulary transformation to body prose and comments only — `description`, `content_type`, `granularity`, `created_at`, `tags` YAML field names stay structural.
 
-##### Query Starters (fixed files)
-
-After creating the template, write three fixed files into `ops/queries/`. No per-domain generation — the starters are universal and the README points the user at the agent for anything domain-specific.
-
-Write `ops/queries/README.md` verbatim:
-
-```markdown
-# Queries
-
-Ad-hoc ripgrep scripts for vault inspection. Two universal starters ship with
-every vault:
-
-- `orphans.sh` — notes with no incoming wiki links
-- `by-tag.sh <tag>` — notes carrying a given tag
-
-Need a domain-specific query (e.g., "recent decisions with low confidence")?
-Ask the agent: "Write me a query that finds X." It will read the schema from
-ops/templates/note.md, write the script here, and hand it back.
-```
-
-Write `ops/queries/orphans.sh` — substitute `{vocabulary.note_collection}` at generation time (read the value from `ops/derivation-manifest.md`):
-
-```bash
-#!/usr/bin/env bash
-# orphans.sh — notes with no incoming wiki links, using normalized wiki targets
-set -euo pipefail
-NOTES_DIR="{vocabulary.note_collection}"
-
-normalize() {
-  printf '%s' "$1" \
-    | sed -E 's/\|.*$//; s/#.*$//; s/\.md$//; s/^[[:space:]]+|[[:space:]]+$//g' \
-    | tr '[:upper:]' '[:lower:]' \
-    | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//'
-}
-
-targets=$(mktemp)
-trap 'rm -f "$targets"' EXIT
-find "$NOTES_DIR" -name '*.md' -type f -exec grep -hoE '\[\[[^]]+\]\]' {} + 2>/dev/null \
-  | sed -E 's/^\[\[(.+)\]\]$/\1/' \
-  | while read -r target; do normalize "$target"; done \
-  | sort -u > "$targets"
-
-find "$NOTES_DIR" -name '*.md' -type f | while read -r f; do
-  key=$(normalize "$(basename "$f" .md)")
-  title=$(awk '/^# / {sub(/^# /, ""); print; exit}' "$f")
-  title_key=$(normalize "$title")
-  if ! grep -Fxq "$key" "$targets" && { [ -z "$title_key" ] || ! grep -Fxq "$title_key" "$targets"; }; then
-    echo "$f"
-  fi
-done
-```
-
-Write `ops/queries/by-tag.sh` — same substitution:
-
-```bash
-#!/usr/bin/env bash
-# by-tag.sh TAG — notes carrying a given tag
-set -euo pipefail
-if [ $# -ne 1 ]; then echo "usage: $0 TAG" >&2; exit 2; fi
-NOTES_DIR="{vocabulary.note_collection}"
-rg -l "^tags:.*\b$1\b" "$NOTES_DIR" --glob '*.md'
-```
-
 ---
 
 #### Pipeline Step 5: Skills (Skills Agent)
 
 **Agent scope:**
-- Write target: `.claude/skills/<domain-skill-name>/SKILL.md` (9 files) — populated by `cp`, then modified with `Edit`. **Never `Write`**.
+- Write target: `.claude/skills/<domain-skill-name>/SKILL.md` (7 files), copied from source skills and then domain-adjusted.
 - Read: `${CLAUDE_PLUGIN_ROOT}/skill-sources/*/SKILL.md`, `ops/derivation.md`
-- Bash commands allowed: `mkdir`, `cp`, `rg`
 
-The skills agent uses a specialized prompt (below); its cp + Edit protocol replaces the generic Write-based template.
+The skills agent uses a specialized prompt (below); source skills are copied first, then adjusted.
 
 ---
 
@@ -781,7 +658,7 @@ The skills agent uses a specialized prompt (below); its cp + Edit protocol repla
    - `{TIER_A_TABLE}` — populate from the Skill Sources table below, Tier A rows only
    - `{TIER_B_TABLE}` — populate from the Skill Sources table below, Tier B rows only
    - `{DOMAIN_MAP}` — build from the vocabulary mapping in `ops/derivation.md`, one row per `{DOMAIN:xxx}` → domain value. Include every `{DOMAIN:xxx}` pattern that appears in any Tier B source.
-   - `{N_SKILLS}` — total number of skills (9)
+   - `{N_SKILLS}` — total number of generated source skills (8)
 2. Dispatch the skills agent via the `Agent` tool, passing the built prompt as the `prompt` argument.
 3. On return, parse the handoff block (Files Created, Issues, Verification). If `{DOMAIN:}` remaining is non-zero, STOP and surface the error.
 
@@ -789,16 +666,15 @@ The skills agent uses a specialized prompt (below); its cp + Edit protocol repla
 
 ##### Skill Sources (reference table — used by the main agent to build {TIER_A_TABLE} and {TIER_B_TABLE})
 
-| Source Directory                                     | Source Name   | Tier | Domain-rename? | Has scripts/? | Notes                                              |
-| ---------------------------------------------------- | ------------- | ---- | -------------- | ------------- | -------------------------------------------------- |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/connect/`       | connect       | A    | no (universal) | no            | Universal infra; frontmatter `name:` and `description:` unchanged       |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/stats/`         | stats         | A    | no             | **yes**       | Keep `stats` as the target name                    |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/seed/`          | seed          | B    | no             | **yes**       | Keep `seed` as the target name                     |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/pipeline/`      | pipeline      | B    | no             | no            | Keep `pipeline` as the target name                 |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/archive-batch/` | archive-batch | B    | no             | no            | Keep `archive-batch` as the target name            |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/verify/`        | verify        | B    | no             | **yes**       | Keep `verify` as the target name                   |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/structure/`     | structure     | B    | no (universal) | no            | Universal infra; frontmatter `name:` unchanged     |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/capture/`       | capture       | B    | no (universal) | no            | Universal infra; frontmatter `name:` unchanged     |
+| Source Directory                                     | Source Name   | Tier | Domain-rename? | Notes                                              |
+| ---------------------------------------------------- | ------------- | ---- | -------------- | -------------------------------------------------- |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/connect/`       | connect       | A    | no (universal) | Universal infra; frontmatter `name:` and `description:` unchanged       |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/health/`        | health        | A    | no             | Local generated diagnostics; keep `health` as the target name |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/seed/`          | seed          | B    | no             | Keep `seed` as the target name                     |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/pipeline/`      | pipeline      | B    | no             | Keep `pipeline` as the target name                 |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/verify/`        | verify        | B    | no             | Keep `verify` as the target name                   |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/structure/`     | structure     | B    | no (universal) | Universal infra; frontmatter `name:` unchanged     |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/capture/`       | capture       | B    | no (universal) | Universal infra; frontmatter `name:` unchanged     |
 
 **Rename rules:** `yes` → directory and frontmatter `name:` both become the domain-native verb from `ops/derivation.md`. `no` → keep source name. `no (universal)` (`structure`, `capture`, `connect`) → keep frontmatter `name:` and `description:` unchanged; only body `{DOMAIN:xxx}` substitutes. `verify` is fixed: directory, frontmatter `name:`, and command reference stay `verify` / `/verify`.
 
@@ -819,27 +695,23 @@ You are the skills agent of the Ars Contexta generation pipeline. Install all pr
 
 ## Procedure
 
-Batch filesystem ops and body substitution across all skills in one Bash call; Edit only frontmatter per skill. Read `ops/derivation.md` first.
+Read `ops/derivation.md` first. Copy each source skill into the vault, then apply the domain substitutions and frontmatter changes described below.
 
-**Step 1 — Batch scaffold + body substitute (ONE Bash call).** Chain for all {N_SKILLS} skills in a single Bash invocation:
-- `mkdir -p <target-dir>` per skill
-- `cp <source> <target>` per skill
-- For each skill whose source has a `scripts/` subdir, append:
-  - `cp -r <source-skill-dir>/scripts <target-skill-dir>/scripts`
-  - `chmod +x <target-skill-dir>/scripts/*.sh`
-  Skills with `scripts/`: `stats`, `seed`, `verify` (per Skill Sources table). Other skills omit these two commands.
-- `sed -i.bak -e 's|{DOMAIN:xxx}|<value>|g' … <target1> <target2> …` — one sed call covering every target, one `-e` per entry in the DOMAIN Substitution Map. Use `|` as the `s` delimiter so `/` characters in domain values do not clash.
-- `rm -f <target1>.bak <target2>.bak …` — delete the transient backup files sed writes (required for BSD/GNU compatibility; `-i.bak` is the portable in-place form).
+**Step 1 — Copy sources + substitute bodies.** For all {N_SKILLS} skills, create the target skill directories, copy the source `SKILL.md` files, and replace every Tier B `{DOMAIN:xxx}` body placeholder using the DOMAIN Substitution Map.
 
-Universal skills (`structure`, `capture`) are included in the sed pass — their bodies carry `{DOMAIN:xxx}` patterns that need resolution; only their frontmatter is exempt.
+Universal skills (`structure`, `capture`) also carry `{DOMAIN:xxx}` body placeholders that need resolution; only their frontmatter is exempt.
 
 **Step 2 — Per-skill frontmatter edits** For each skill marked `Domain-rename? yes`, modify `name:` in the frontmatter to the domain-native verb. Leave every `no` skill name untouched, including `verify`.
 
-Never touch `{vocabulary.xxx}` patterns — they resolve at runtime from `ops/derivation-manifest.md`.
+Never touch `{vocabulary.xxx}` patterns — they resolve at runtime from `ops/derivation-manifest.yaml`.
 
-**Step 3 — Verify (ONE Bash call).** Run two checks:
-1. `rg '\{DOMAIN:' .claude/skills/ --include='*.md'` — count MUST be 0. If not, extend the DOMAIN Substitution Map and re-run Step 1's Bash call.
-2. `find .claude/skills -name '*.sh' -not -perm -u=x` — output MUST be empty. If any script lacks the executable bit, re-run `chmod +x` on the offending files.
+**Step 3 — Verify (ONE Bash call).** Run:
+
+```bash
+rg '\{DOMAIN:' .claude/skills --glob '*.md'
+```
+
+Output MUST be empty. If not, extend the DOMAIN Substitution Map and re-run Step 1.
 
 ## Tier A — frontmatter only, body untouched
 
@@ -857,8 +729,6 @@ Literal string replacements. Preserve exact case and pluralization. If a `{DOMAI
 
 ## Constraints
 
-- `Write` is FORBIDDEN on SKILL.md files — always `cp` then `Edit`.
-- Allowed Bash: `mkdir`, `cp`, `sed`, `rm`, `rg`, `chmod`. Nothing else.
 - Stay inside `.claude/skills/` for writes; reads from `${CLAUDE_PLUGIN_ROOT}/skill-sources/` are expected.
 - Do NOT modify `{vocabulary.xxx}` patterns or improvise content beyond the map.
 
@@ -880,9 +750,8 @@ Issues:
 - [Friction]: <description> | NONE
 
 Verification:
-- All files populated via cp then Edit (no Write): YES/NO
+- All files copied from source skills and then adjusted: YES/NO
 - {DOMAIN:} patterns remaining in .claude/skills/: <count — must be 0>
-- All script files (.sh) executable: YES/NO (must be YES)
 - {vocabulary.xxx} patterns preserved: YES
 === END HANDOFF ===
 ~~~
@@ -894,7 +763,7 @@ Verification:
 The skill index does not refresh mid-session. After creating all skill files:
 
 1. Report to main agent: list all generated skill names and confirm zero `{DOMAIN:` strings remain in Tier B output.
-2. Phase 6 output must include: "Restart Claude Code now to activate all skills, then read manual/skills.md for the full command reference."
+2. Phase 6 output must include: "Restart Claude Code now to activate all skills and hooks."
 
 ---
 
@@ -902,7 +771,7 @@ The skill index does not refresh mid-session. After creating all skill files:
 
 **Agent scope:** `CLAUDE.md`, `ops/features/*.md`, `.claude/skills/ask/SKILL.md`
 
-**Agent reads:** `ops/derivation.md`, `${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md`, `${CLAUDE_PLUGIN_ROOT}/generators/features/*.md`, `${CLAUDE_PLUGIN_ROOT}/generators/ask-router.md`, `${CLAUDE_PLUGIN_ROOT}/reference/failure-modes.md`, `${CLAUDE_PLUGIN_ROOT}/reference/vocabulary-transforms.md`, generated templates (for reference verification), generated skills (for reference verification).
+**Agent reads:** `ops/derivation.md`, `${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md`, `${CLAUDE_PLUGIN_ROOT}/generators/features/*.md`, `${CLAUDE_PLUGIN_ROOT}/generators/ask-router.md`, `${CLAUDE_PLUGIN_ROOT}/reference/vocabulary-transforms.md`, generated templates (for reference verification), generated skills (for reference verification).
 
 **Agent-specific prompt addition:** Include the list of feature source paths under `${CLAUDE_PLUGIN_ROOT}/generators/features/`.
 
@@ -935,15 +804,10 @@ Step 2: Write ops/features/<name>.md for each selected block.
 
 Step 3: Compose CLAUDE.md.
   a. Read ${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md
-  b. Emit the seven sections in order: Header+Philosophy, Discovery-First,
-     Content Routing, Pipeline Compliance, Self-Improvement, Common
-     Pitfalls (compressed), Infrastructure Routing
-  c. For Common Pitfalls: select 3-4 HIGH-risk failure modes from the Domain
-     Vulnerability Matrix in reference/failure-modes.md. For each selected
-     mode, emit one bullet using the `one_line_rule:` field, vocabulary-
-     transformed. Do not inline full prevention prose.
-  d. Apply vocabulary transformation one final time on the assembled file.
-  e. Write CLAUDE.md.
+  b. Emit the five sections in order: Header+Philosophy, Discovery-First,
+     Content Routing, Pipeline Compliance, Infrastructure Routing
+  c. Apply vocabulary transformation one final time on the assembled file.
+  d. Write CLAUDE.md.
 
 Step 4: Compose .claude/skills/ask/SKILL.md.
   a. Read ${CLAUDE_PLUGIN_ROOT}/generators/ask-router.md
@@ -954,11 +818,9 @@ Step 4: Compose .claude/skills/ask/SKILL.md.
   e. Write .claude/skills/ask/SKILL.md.
 
 Step 5: Coherence verification.
-  - [ ] CLAUDE.md has exactly seven sections (header through Infrastructure
+  - [ ] CLAUDE.md has exactly five sections (header through Infrastructure
         Routing)
   - [ ] CLAUDE.md contains no feature summaries
-  - [ ] CLAUDE.md pitfall bullets each correspond to a `one_line_rule:` in
-        reference/failure-modes.md
   - [ ] CLAUDE.md Infrastructure Routing table has a /ask row
   - [ ] Every ops/features/<name>.md referenced by /ask exists on disk
   - [ ] /ask Part B emits sections only for features with matching
@@ -981,260 +843,13 @@ Step 5: Coherence verification.
 
 ---
 
-#### Pipeline Step 7: Manual & Hub MOC (Manual Agent)
+#### Pipeline Step 7: Hub MOC (Hub Agent)
 
-**Agent scope:** manual/ (7 pages), [domain:notes]/index.md
+**Agent scope:** [domain:notes]/index.md
 
-**Agent reads:** ops/derivation.md, self/*.md (for hub MOC links). **Does not read `.claude/skills/`** — the skills agent runs in parallel and may not have finished yet. The main agent passes the final skill-name list inline in the prompt (see "Manual Agent Prompt Addendum" below).
-
-**Manual Agent Prompt Addendum (main agent must inline this before dispatch):**
-
-```
-## Generated Skills (authoritative list for this vault)
-
-Use these names verbatim in manual/skills.md and any /command references:
-
-- /connect                  — Tier A, universal (not renamed)
-- /stats                    — Tier A, unchanged
-- /seed                     — Tier B, unchanged
-- /pipeline                 — Tier B, unchanged
-- /archive-batch            — Tier B, unchanged
-- /verify                   — Tier B, unchanged
-- /structure                — Tier B, universal (not renamed)
-- /capture                  — Tier B, universal (not renamed)
-- /ask                      — router (written by context agent)
-```
-
-The main agent resolves each `{DOMAIN:xxx}` to the domain-native term from `ops/derivation.md` before passing the prompt. Fixed command names such as `/verify` are already concrete and must not be adapted.
+**Agent reads:** ops/derivation.md, self/*.md
 
 ---
-
-##### manual/ (User-Navigable Documentation)
-
-Generate all 7 manual pages. Manual is self-contained — pages wiki-link to each other but NOT to notes/.
-
-For each page: replace universal terms (notes, inbox, topic map) with domain-native equivalents from the derivation conversation. Pipeline skills (/structure, /capture, /connect, /verify) are universal and not renamed. Use concrete domain examples.
-
-**Page 1: manual.md (Hub MOC)**
-
-```markdown
----
-description: User manual for your {domain} knowledge system
-type: manual
----
-# Manual
-
-Welcome to your {domain} knowledge system. This manual explains how everything works.
-
-## Pages
-
-- [[getting-started]] — Your first session: drop a file in inbox, run /pipeline, see results
-- [[pipeline]] — The pipeline deep-dive: granularity modes, phases, resumability
-- [[skills]] — Every available command grouped by role, with examples
-- [[workflows]] — The core processing loop, session rhythm, and maintenance cycle
-- [[system-reference]] — Where generated system rules live
-- [[troubleshooting]] — Common issues and how to resolve them
-```
-
-**Page 2: getting-started.md**
-
-```markdown
----
-description: First session guide — run your first pipeline and build connections
-type: manual
----
-# Getting Started
-
-{Generate content covering:}
-- Drop something in {DOMAIN:inbox}/ — any file, paste, or voice transcript
-- Run /{DOMAIN:pipeline} — it asks which granularity (structure/capture), then handles everything
-- See what happened — pipeline report shows created {DOMAIN:note_plural}, connections, updated {DOMAIN:topic map}s
-- Browse the results — follow wiki links from new {DOMAIN:note_plural} to see how the graph connects
-- The session rhythm: orient (session start shows pending work) -> work (pipeline or manual commands) -> persist (session end saves state)
-- Where to go next: link to [[pipeline]] for the deep-dive, [[skills]] for manual alternatives
-```
-
-**Page 3: skills.md**
-
-```markdown
----
-description: Complete reference for every available command, grouped by role
-type: manual
----
-# Skills
-
-{Generate content with these groups. For each skill: one-line purpose, when to use it, example invocation.}
-
-## Pipeline
-
-The primary workflow. One command for end-to-end source processing.
-
-- /{DOMAIN:pipeline} — end-to-end processing: seed, structure/capture, connect, verify, archive
-
-## Pipeline Sub-Skills
-
-Internal machinery the pipeline orchestrates. Prefer /{DOMAIN:pipeline} as the interface — it owns queue state, batch tracking, and cross-phase quality gates. Invoke sub-skills directly only to recover from a stuck batch or re-run a single phase after a known failure.
-
-- /{DOMAIN:seed} — create queue entry with duplicate detection
-- /structure — grouped note production (related claims in one {DOMAIN:note})
-- /capture — verbatim capture (no transformation)
-- /connect — find connections, update {DOMAIN:topic map}s, and reconsider {DOMAIN:note_plural} against current graph state
-- /verify — frontmatter and wiki-link checks
-- /archive-batch — archive completed batch
-
-## Reference
-
-Lookup and orientation.
-
-- /ask — query the system reference (schema, pipeline, {DOMAIN:topic map}s, derivation)
-
-## Operational
-
-Vault state and diagnostics.
-
-- /{DOMAIN:stats} — vault metrics
-
-Note: /arscontexta:health (plugin-level) also performs diagnostics but is always available, not generated.
-
-## Plugin-Level (always available)
-
-These come with the plugin, not generated during setup. Referenced here for completeness.
-
-- /arscontexta:health — run diagnostic checks on your vault
-
-- Link to [[pipeline]] for how skills chain together in the pipeline
-- Link to [[workflows]] for the processing loop and session rhythm
-```
-
-**Page 4: workflows.md**
-
-```markdown
----
-description: The core processing loop, session rhythm, and maintenance cycle
-type: manual
----
-# Workflows
-
-{Generate content covering:}
-
-## The Core Loop
-
-inbox -> /{DOMAIN:pipeline} -> connected knowledge. This is the primary workflow. Everything else supports it.
-
-## Processing Pipeline
-
-The 5 Rs: Record (capture into {DOMAIN:inbox}), Reduce (/structure or /capture), Reflect (find connections and reconsider older {DOMAIN:note_plural}), Verify (quality checks), Rethink (challenge assumptions). Link to [[pipeline]] for the deep-dive.
-
-## Session Rhythm
-
-Orient (session start shows pending work and maintenance signals) -> work (run /{DOMAIN:pipeline} on inbox items, or manual commands) -> persist (session end saves state).
-
-## Maintenance Cycle
-
-Condition-based triggers, what to do when they fire, frequency guidance.
-
-## Manual Processing
-
-For when you want to run individual phases yourself. Link to [[skills]] for the sub-commands.
-
-- Link to [[pipeline]] for pipeline details
-- Link to [[skills]] for command reference
-- Link to [[system-reference]] for where generated system rules live
-```
-
-**Page 5: pipeline.md**
-
-```markdown
----
-description: The pipeline deep-dive — granularity modes, processing phases, and resumability
-type: manual
----
-# Pipeline
-
-{Generate content covering:}
-
-## What Pipeline Does
-
-One command, full processing: {DOMAIN:seed} -> structure/capture -> /connect -> /verify -> archive. Drop a file in {DOMAIN:inbox}/, run /{DOMAIN:pipeline}, get connected knowledge.
-
-## Two Granularity Modes
-
-Present both as equal choices:
-
-- `/{DOMAIN:pipeline} --structure` — grouped {DOMAIN:note_plural} preserving shared context. Best for sources where ideas are interrelated.
-- `/{DOMAIN:pipeline} --capture` — verbatim preservation, no transformation. Best for reference material you want searchable but unaltered.
-- No flag — pipeline asks you to choose.
-
-## Processing Phases
-
-Brief explanation of each phase: seed (duplicate detection, queue entry), processing (granularity-routed), connect (forward connections, {DOMAIN:topic map} updates, and backward reconsideration of older {DOMAIN:note_plural}), verify (quality gate), archive (cleanup and summary). What each does and why it matters.
-
-## Resumability
-
-Pipeline can be interrupted and resumed at any point. Queue state persists across sessions. Table:
-
-| Interrupted At | How to Resume |
-|----------------|---------------|
-| Before seed | Run /{DOMAIN:pipeline} again |
-| After seed, before processing | /{DOMAIN:pipeline} --batch {id} |
-| During note processing | /{DOMAIN:pipeline} --batch {id} |
-| Before archive | /archive-batch {id} |
-
-## Batch Orchestration
-
-/{DOMAIN:pipeline} processes multiple items via the queue. Queue state lives in `ops/queue/queue.json`. Fresh context per phase ensures quality doesn't degrade.
-
-## Going Manual
-
-Any phase can be run individually. Link to [[skills]] for the sub-commands. Pipeline is the convenience wrapper; sub-skills are the building blocks.
-```
-
-**Page 6: system-reference.md**
-
-```markdown
----
-description: Where generated system rules live
-type: manual
----
-# System Reference
-
-{Generate content covering:}
-- `ops/derivation.md` as the human-readable derivation record
-- `ops/derivation-manifest.md` as the runtime vocabulary manifest
-- `ops/templates/note.md` as the schema source
-- `ops/features/` as detailed feature references
-- `ops/queries/` as query starters
-- Link to [[troubleshooting]] for common issues
-```
-
-**Page 7: troubleshooting.md**
-
-```markdown
----
-description: Common issues and resolution patterns
-type: manual
----
-# Troubleshooting
-
-{Generate content covering:}
-- Orphan {DOMAIN:notes} — {DOMAIN:note_plural} with no incoming links (run /connect)
-- Dangling links — wiki links to non-existent {DOMAIN:note_plural} (check after renames)
-- Stale content — {DOMAIN:note_plural} not updated in 30+ days with sparse connections (run /connect)
-- Inbox overflow — too many items accumulating (run /{DOMAIN:pipeline} to process inbox items)
-- Pipeline stalls — tasks stuck in queue (inspect `ops/queue/queue.json` directly, resume with /{DOMAIN:pipeline} --batch {id}). See [[pipeline]] resumability section.
-- Common mistakes table with corrections
-- Link to [[skills]] for command reference
-- Link to [[system-reference]] for generated system references
-```
-
-**Quality gates:**
-
-- All skill references use domain-native names from the derivation conversation
-- All pages link back to [[manual]] via a footer or contextual reference
-- No wiki links to notes/ — manual is self-contained
-- Content uses domain-specific examples, not generic/abstract ones
-
-##### Hub MOC
 
 Create the vault entry point at `[domain:notes]/index.md`:
 
@@ -1242,6 +857,9 @@ Create the vault entry point at `[domain:notes]/index.md`:
 ---
 description: Entry point to the knowledge system -- start here to navigate
 content_type: moc
+granularity: structure
+created_at: [YYYY-MM-DD]
+tags: []
 ---
 
 # index
@@ -1266,7 +884,7 @@ Welcome to your [domain] system.
 
 **Scope:** .claude/hooks/qmd-sync.sh, .claude/settings.json (additive merge)
 
-**Reads:** ops/derivation.md, ops/derivation-manifest.md
+**Reads:** ops/derivation.md, ops/derivation-manifest.yaml
 
 ---
 
@@ -1281,17 +899,13 @@ Before qmd setup, derive and register the collection name:
 3. If the derived name collides with an existing collection, choose an alternative (e.g., append the vault directory name: "claims-myproject") — report the conflict and chosen name in output
 4. Add `qmd_collection` to **both** vocabulary stores:
    - `ops/derivation.md` — add a row to the Vocabulary Mapping table: `| qmd_collection | <chosen-name> | qmd collection |`
-   - `ops/derivation-manifest.md` — add `qmd_collection: "<chosen-name>"` to the vocabulary section (after Level 6 / before processing_categories)
+   - `ops/derivation-manifest.yaml` — add `qmd_collection: "<chosen-name>"` to the vocabulary section (after Level 6 / before processing_categories)
 
-###### Check qmd installation and version
-
-1. Check if `qmd` is installed: `which qmd`
-2. If installed, check version: `qmd -v` — must be >= 2
-3. If not installed or version < 2: skip to the not-installed path below
-
-###### Configure qmd (installed, version >= 2)
+###### Configure qmd
 
 Processing skills call `qmd query` via Bash — no MCP server, no `.mcp.json`, no autoapprove list. All that is needed is a registered collection and a fresh index.
+
+Phase 1 already verified that `qmd` is installed and version 2 or newer. If `qmd collection add`, `qmd update`, or `qmd embed` fails here, stop and surface the command output; do not generate a degraded vault.
 
 1. Configure the qmd collection for `{vocabulary.qmd_collection}` pointing at the generated notes directory:
    - `qmd collection add . --name {vocabulary.qmd_collection} --mask "{vocabulary.note_collection}/**/*.md"`
@@ -1304,7 +918,7 @@ Generate a bash script `.claude/hooks/qmd-sync.sh`:
 ```bash
 #!/usr/bin/env bash
 # qmd-sync.sh — keep semantic search index current on session start
-# No-ops gracefully if qmd is not installed
+# No-ops if qmd is later removed from PATH after setup
 
 if ! command -v qmd &>/dev/null; then
   exit 0
@@ -1333,16 +947,6 @@ Append this matcher group to the `hooks.SessionStart` array:
 }
 ```
 
-###### Not-installed path
-
-If qmd is not installed or version < 2:
-
-- Add a "Next Steps" section to the Phase 6 summary with install instructions:
-  - `npm install -g @tobilu/qmd` (or `bun install -g @tobilu/qmd`)
-  - `qmd collection add . --name {vocabulary.qmd_collection} --mask "{vocabulary.note_collection}/**/*.md"`
-  - `qmd update && qmd embed`
-- The hook script (`qmd-sync.sh`) is already generated and will activate automatically once qmd is installed; processing skills will succeed as soon as the CLI is available on PATH
-
 ---
 
 #### Pipeline Step 9: Git Initialization (Main Agent)
@@ -1359,6 +963,14 @@ If already initialized, skip `git init` and commit the generated files.
 
 ## PHASE 6: Validation and Summary
 
+Before presenting the summary, run deterministic vault-local validation from the generated vault:
+
+```bash
+uv run arscontexta-vault validate --all
+```
+
+It must return JSON with `"ok": true`. If it fails, stop and surface the returned JSON.
+
 ### Clean CLI Output
 
 Present results using clean formatting. No runes, no sigils, no decorative Unicode, no ASCII art. Clean indented text with standard markdown formatting only.
@@ -1368,14 +980,14 @@ Present results using clean formatting. No runes, no sigils, no decorative Unico
 
 ### Progressive Feature Reveal
 
-Show available commands in the user's vocabulary. Resolve command names from `ops/derivation-manifest.md` vocabulary:
+Show available commands in the user's vocabulary. Resolve command names from `ops/derivation-manifest.yaml` vocabulary:
 
 ```
 Here's what you can do:
 
   /{domain:pipeline}              -- end-to-end processing of inbox items
   /ask                            -- query your system's self-knowledge
-  /arscontexta:health             -- check your knowledge system
+  /health                         -- local diagnostics and metrics
 ```
 
 ### First-Success Moment
@@ -1396,19 +1008,18 @@ Created:
   [context file name]
   [templates created]
   [N] skills generated into .claude/skills/ (vocabulary-transformed)
-  /arscontexta:health and /arscontexta:setup available as plugin-level commands
+  /arscontexta:setup available as the plugin-level command
+  vault-local Python tooling at pyproject.toml and src/arscontexta_vault/
   [hooks configured]
   ops/derivation.md      -- the complete record of how this system was derived
-  ops/derivation-manifest.md -- runtime vocabulary for generated skills
+  ops/derivation-manifest.yaml -- runtime vocabulary for generated skills
 
 IMPORTANT: Restart Claude Code now to activate skills and hooks.
   Skills and hooks take effect after restart — they are not available in the current session.
 
 Next steps:
   1. Quit and restart Claude Code
-  2. Read self/ space and CLAUDE.md - it's guides the agent how to work
-  3. Read manual for the full system reference
-  4. [If qmd not installed: "REQUIRED — install qmd to activate semantic search: npm install -g @tobilu/qmd (or bun install -g @tobilu/qmd), then run qmd collection add, qmd update, qmd embed"]
-  5. Drop a file in {domain:inbox}/ and run /{domain:pipeline} to try your first end-to-end run
+  2. Read self/ space and CLAUDE.md - it guides the agent how to work
+  3. Drop a file in {domain:inbox}/ and run /{domain:pipeline} to try your first end-to-end run
 
 ```

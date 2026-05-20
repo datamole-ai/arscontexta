@@ -3,3 +3,7 @@
 .claude/settings.local.json
 docs/superpowers/
 todo.md
+docs/
+CONTEXT.md
+**.pyc
+AGENTS.md

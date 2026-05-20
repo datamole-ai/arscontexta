@@ -37,7 +37,7 @@ The self space connects directly to the session rhythm:
 
 ### The Architecture Principle
 
-Agent identity is not configuration. identity.md reads like self-knowledge ("I pay attention to structure and tend to over-organize before I have enough material"). ops/derivation.md reads like configuration documentation ("warmth: warm, source signal: 'I want something gentle'"). Keeping these separate prevents configuration-as-identity conflation — one of the six failure modes of space conflation.
+Agent identity is not configuration. identity.md reads like self-knowledge ("I pay attention to structure and tend to over-organize before I have enough material"). ops/derivation.md reads like configuration documentation ("warmth: warm, source signal: 'I want something gentle'"). Keep these separate.
 
 Similarly, agent identity is not user knowledge. Your observations about your own methodology belong in self/ or ops/, not in {DOMAIN:note_collection}/. A search for {DOMAIN:notes} about a topic should return the user's knowledge, not the agent's operational reflections.
 ```

@@ -75,7 +75,6 @@ Maintenance signals are condition-based, not time-based. Time-based triggers (we
 | Dangling links | Surface for resolution |
 | Oversized {DOMAIN:topic map} | Suggest sub-{DOMAIN:topic map} split |
 | Inbox pressure | Suggest processing |
-| Stale pipeline batch | Surface as blocked |
 | Schema violations | Surface for correction |
 
 These conditions are evaluated by /health on demand. When a condition fires, /health reports it with specific files and ranked recommended actions — not a calendar reminder.
@@ -101,7 +100,7 @@ Maintenance is diagnostic, not a separate queue of work. /health evaluates all c
 The reconciliation pattern:
 1. **Declare built-in health signals** — the system defines what "healthy" looks like through fixed diagnostics
 2. **Measure actual state** — /health compares reality against each condition across its 8 diagnostic categories plus cross-cutting maintenance signals
-3. **Report findings** — /health produces a PASS/WARN/FAIL report with specific files, persisted to `ops/health/YYYY-MM-DD-report.md`
+3. **Report findings** — /health produces an ephemeral PASS/WARN/FAIL report with specific files
 4. **Self-healing** — the user fixes the underlying issue; the next /health run confirms resolution
 
 This is idempotent: running /health any number of times produces the same diagnostic report for unchanged state. There is no maintenance queue to keep clean — the state of the vault IS the state.
@@ -118,7 +117,6 @@ The key insight: you don't manage maintenance task status manually. Fix the unde
 | Orphan {DOMAIN:notes} | Are there {DOMAIN:notes} with no incoming links? |
 | Dangling links | Do wiki links point to non-existent {DOMAIN:notes}? |
 | {DOMAIN:Topic map} size | Has any {DOMAIN:topic map} grown beyond its healthy range? |
-| Stale batches | Are there processing batches that have been sitting unfinished? |
 | Schema compliance | Do all {DOMAIN:notes} pass schema validation? |
 | Three-space boundaries | Is content leaking across self/, {DOMAIN:note_collection}/, and ops/? |
 

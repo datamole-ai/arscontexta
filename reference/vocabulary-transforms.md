@@ -2,63 +2,58 @@
 
 When generating a knowledge system for a specific domain, every universal term in the generated context file, templates, skills, and self/ files must use the domain-native equivalent. Vocabulary transformation is not cosmetic — it changes how the system feels to use.
 
-"Surface patterns in reflections" is therapy work. "Structure claims from sources" is research work. Same structural operation, different cognitive framing.
+"Structure claims from sources" is research work. "Document decisions from project material" is PM work. Same structural operation, different cognitive framing.
 
 ---
 
 ## Universal → Domain Mapping
 
-| Universal Term | Research | Therapy | Learning | Relationships | Creative | PM | Companion |
-|---------------|----------|---------|----------|---------------|----------|-----|-----------|
-| note | claim | reflection | concept note | observation | idea | decision | memory |
-| reduce | reduce | surface | break down | notice | discover | document | remember |
-| verify | verify | verify | verify | verify | verify | verify | verify |
-| MOC | topic map | theme | study guide | relationship map | project hub | decision register | memory collection |
-| description field | claim context | reflection summary | concept explanation | observation context | idea sketch | decision rationale | memory context |
-| topics footer | research areas | themes | study areas | relationship facets | creative projects | project areas | life areas |
-| inbox | capture | journaling | study notes | encounters | inspiration | action items | moments |
-| processing / pipeline | pipeline | reflection cycle | study cycle | relationship review | creative process | review cycle | reminiscence |
-| wiki link | connection | pattern link | concept link | connection | inspiration thread | decision trail | memory link |
-| thinking notes | claims | reflections | concepts | observations | ideas | decisions | memories |
-| archive | processed sources | past reflections | mastered material | past encounters | completed works | closed decisions | past events |
-| self/ space | research identity | reflection partner | study companion | relationship tracker | creative identity | project mind | companion memory |
-| orient | orient | center | review progress | check in | survey ideas | status check | remember |
-| persist | persist | journal | log progress | update records | save state | update status | save memories |
+| Universal Term | Research | Learning | Creative | PM | Companion |
+|---------------|----------|----------|----------|-----|-----------|
+| note | claim | concept note | idea | decision | memory |
+| MOC | topic map | study guide | project hub | decision register | memory collection |
+| description field | claim context | concept explanation | idea sketch | decision rationale | memory context |
+| topics footer | research areas | study areas | creative projects | project areas | life areas |
+| wiki link | connection | concept link | inspiration thread | decision trail | memory link |
+| thinking notes | claims | concepts | ideas | decisions | memories |
+| self/ space | research identity | study companion | creative identity | project mind | companion memory |
+| orient | orient | review progress | survey ideas | status check | remember |
+| persist | persist | log progress | save state | update status | save memories |
 
 ---
 
 ## Template Name Mapping
 
-| Universal Template | Research | Therapy | Learning | Relationships | Creative | PM | Companion |
-|-------------------|----------|---------|----------|---------------|----------|-----|-----------|
-| base-note.md | thinking-note.md | reflection-note.md | concept-note.md | observation-note.md | idea-note.md | decision-note.md | memory-note.md |
-| moc.md | topic-map.md | theme.md | study-guide.md | relationship-map.md | project-hub.md | decision-register.md | collection.md |
+| Universal Template | Research | Learning | Creative | PM | Companion |
+|-------------------|----------|----------|----------|-----|-----------|
+| base-note.md | thinking-note.md | concept-note.md | idea-note.md | decision-note.md | memory-note.md |
+| moc.md | topic-map.md | study-guide.md | project-hub.md | decision-register.md | collection.md |
 
 ---
 
 ## Folder Name Mapping
 
-| Universal Folder | Research | Therapy | Learning | Relationships | Creative | PM | Companion |
-|-----------------|----------|---------|----------|---------------|----------|-----|-----------|
-| note_collection/ | notes/ | reflections/ | concepts/ | observations/ | ideas/ | decisions/ | memories/ |
-| notes/ | notes/ | reflections/ | concepts/ | observations/ | ideas/ | decisions/ | memories/ |
-| inbox/ | inbox/ | journal/ | study-inbox/ | encounters/ | inspiration/ | action-items/ | moments/ |
-| archive/ | archive/ | past/ | mastered/ | history/ | completed/ | closed/ | past/ |
-| templates/ | templates/ | templates/ | templates/ | templates/ | templates/ | templates/ | templates/ |
+| Universal Folder | Research | Learning | Creative | PM | Companion |
+|-----------------|----------|----------|----------|-----|-----------|
+| note_collection/ | notes/ | concepts/ | ideas/ | decisions/ | memories/ |
+| notes/ | notes/ | concepts/ | ideas/ | decisions/ | memories/ |
+| inbox/ | inbox/ | study-inbox/ | inspiration/ | action-items/ | moments/ |
+| archive/ | archive/ | mastered/ | completed/ | closed/ | past/ |
+| templates/ | templates/ | templates/ | templates/ | templates/ | templates/ |
 
-**note_collection collapse behavior:** For single-entity domains, `note_collection` maps to the same value as `notes/` — the single entity directory IS the collection, with no parent wrapper. For multi-entity domains (2+ entity types derived in Step 3g), `note_collection` becomes a distinct parent directory (e.g., `knowledge-base/`) containing typed entity subdirectories. The `notes/` row represents the default/primary entity type within the collection.
+**note_collection behavior:** `note_collection` is always the single flat container for durable domain notes. It may use a domain-native name (`notes/`, `decisions/`, `knowledge-base/`, etc.), but it does not gain typed entity subdirectories when the domain has multiple entity types.
 
 ---
 
 ## Skill Name Mapping
 
-| Universal Skill | Research | Therapy | Learning | Relationships | Creative | PM | Companion |
-|----------------|----------|---------|----------|---------------|----------|-----|-----------|
-| /reduce | /reduce | /surface | /break-down | /notice | /discover | /document | /capture |
-| /verify | /verify | /verify | /verify | /verify | /verify | /verify | /verify |
-| /stats | /stats | /stats | /stats | /stats | /stats | /stats | /stats |
+| Universal Skill | Research | Learning | Creative | PM | Companion |
+|----------------|----------|----------|----------|-----|-----------|
+| /reduce | /reduce | /break-down | /discover | /document | /capture |
+| /verify | /verify | /verify | /verify | /verify | /verify |
+| /health | /health | /health | /health | /health | /health |
 
-**Note:** /stats provides vault metrics and progress visualization. /verify is the fixed pipeline quality gate. These commands use universal names across all domains.
+**Note:** /health provides vault diagnostics and metrics. /verify is the fixed pipeline quality gate. These commands use universal names across all domains.
 
 ---
 
@@ -71,7 +66,7 @@ When generating a knowledge system for a specific domain, every universal term i
 3. Replace every instance in the generated context file
 4. Replace template names and folder names
 5. Replace skill names if generating skills, except fixed commands such as /verify
-6. **Verify:** Read the generated output. Does it feel natural for the domain? Would a therapy user ever see the word "claim"? Would a PM user see "reduce"?
+6. **Verify:** Read the generated output. Does it feel natural for the domain? Would a research user see generic project language? Would a PM user see "reduce"?
 
 ### Quality check:
 

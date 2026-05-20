@@ -143,7 +143,7 @@ Guide the derivation engine in composing search modalities at query time. Semant
 
 ---
 
-### Search Quality and Failure Modes
+### Search Quality
 
 #### Vector proximity measures surface overlap, not deep connection
 

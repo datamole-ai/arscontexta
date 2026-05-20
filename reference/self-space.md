@@ -103,7 +103,7 @@ Questions the engine must answer when generating the self/ space:
 
 **Derivation Implication:** Generated context files should include identity evolution guidance: "You can update your goals and add durable methodology learnings, but do not unilaterally change your identity or methodology. If you discover something about yourself that feels like an identity change, propose it rather than implementing it."
 
-**Source:** Research claim: "cognitive outsourcing risk in agent-operated systems" — if the agent evolves its own identity without human oversight, the user loses the ability to validate the evolution.
+**Source:** Research claim: agent-operated systems need human review for identity changes.
 
 ---
 
@@ -121,11 +121,11 @@ Questions the engine must answer when generating the self/ space:
 
 #### Vault knowledge and self-knowledge are architecturally separate for principled reasons
 
-**Summary:** "Spaced repetition works better after exercise" is domain knowledge — it belongs in notes/. "I find extraction tasks easier than synthesis tasks" is self-knowledge — it belongs in self/. The separation is not arbitrary: domain knowledge is the user's intellectual output, discoverable through search and navigation, composable through wiki-links. Self-knowledge is the agent's operational wisdom, loaded at session start for identity orientation, growing slowly. Conflating them produces the failure modes documented in `three-spaces.md`: search pollution (self-knowledge appearing in domain searches), schema confusion (different fields for different content types), and identity diffusion (the agent's sense of self scattered across hundreds of domain notes).
+**Summary:** "Spaced repetition works better after exercise" is domain knowledge — it belongs in notes/. "I find extraction tasks easier than synthesis tasks" is self-knowledge — it belongs in self/. The separation is not arbitrary: domain knowledge is the user's intellectual output, discoverable through search and navigation, composable through wiki-links. Self-knowledge is the agent's operational wisdom, loaded at session start for identity orientation, growing slowly.
 
 **Derivation Implication:** The generated context file must include clear routing guidance: "Knowledge about the domain goes in notes/. Knowledge about yourself goes in self/. When in doubt, ask: is this about the subject matter, or about how I operate?" The content routing decision tree from `three-spaces.md` should be adapted for the generated domain and included in the context file.
 
-**Source:** `three-spaces.md` — six failure modes of conflation, especially "Self into Notes" and "Notes into Self." Vault operational experience with the self/ vs 01_thinking/ separation.
+**Source:** `three-spaces.md`. Vault operational experience with the self/ vs 01_thinking/ separation.
 
 ---
 
@@ -191,7 +191,7 @@ Questions the engine must answer when generating the self/ space:
 
 **Derivation Implication:** The generated context file should include a clear boundary statement: "Self/ holds what you know about yourself and how you work. Notes/ holds what you know about the domain and the user's content. 'The user responds better to questions' is self-knowledge (it changes how you operate). 'The user is anxious about their job interview' is domain content (it describes their life, not your operation)." For emotionally sensitive domains, this boundary requires extra emphasis.
 
-**Source:** `three-spaces.md` — six failure modes of conflation. The "Notes into Self" and "Self into Notes" failure modes both apply to agent-user boundary confusion.
+**Source:** `three-spaces.md`.
 
 ---
 
@@ -234,4 +234,4 @@ Questions the engine must answer when generating the self/ space:
 - Sources reviewed: 18
 - Claims included: 20
 - Claims excluded: 5
-- Cross-references: `three-spaces.md` (self space specification, failure modes of conflation, content routing), `session-lifecycle.md` (session orientation, goals.md as handoff), `kernel.yaml` (self-space and session-rhythm primitives), `components.md` (self/ space blueprint), `vocabulary-transforms.md` (domain-specific self/ vocabulary)
+- Cross-references: `three-spaces.md` (self space specification, content routing), `session-lifecycle.md` (session orientation, goals.md as handoff), `kernel.yaml` (self-space and session-rhythm primitives), `components.md` (self/ space blueprint), `vocabulary-transforms.md` (domain-specific self/ vocabulary)

@@ -17,7 +17,7 @@ Questions the engine must answer when generating session configuration:
 3. **What session types will this system support?** Processing sessions (pipeline work), maintenance sessions (health checks), exploration sessions (research and connection finding), capture sessions (rapid note creation). Different types orient and persist differently.
 4. **What is the expected session frequency?** Frequent sessions need different handoff than infrequent sessions. Systems used rarely need heavier orientation because more has been forgotten.
 5. **How large is the context window budget?** Orientation competes with work for context space. Generated systems should specify how much context to allocate to orientation vs task execution.
-6. **Does the system have a processing pipeline?** Pipeline sessions have different rhythm than ad-hoc sessions — they read queue state at orient, process tasks during work, and update queue state at persist.
+6. **Does the system have a processing pipeline?** Pipeline sessions have different rhythm than ad-hoc sessions — they carry lean pipeline state, process tasks during work, and commit named paths at persist.
 
 ---
 
@@ -57,11 +57,11 @@ Questions the engine must answer when generating session configuration:
 
 ### Session Types
 
-#### Processing sessions orient from queue state and persist phase completion
+#### Processing sessions carry lean pipeline state
 
-**Summary:** Processing sessions follow the pipeline: read queue.json to find the next unblocked task, execute one or more phases (reduce, connect, verify), and update queue state with completion. Orientation is minimal and targeted — the agent needs queue state, the specific task file, and the relevant skill instructions. It does NOT need full self/ orientation because processing is methodological, not identity-dependent. The persist phase must advance the queue entry (mark phases complete, update status) — without this, the pipeline stalls.
+**Summary:** Processing sessions follow the happy-path pipeline: seed a source, produce notes, connect them, verify them, and commit only named paths. Orientation is minimal and targeted — the agent needs the pipeline state, the specific source/artifact files, and the relevant skill instructions. It does NOT need full self/ orientation because processing is methodological, not identity-dependent.
 
-**Derivation Implication:** Generated systems with processing pipelines should include a processing session template in the context file. This template specifies: (1) read queue state, (2) identify next task, (3) load task-specific context, (4) execute phase, (5) update task file, (6) advance queue. Skip heavy orientation — processing sessions are mechanical, not exploratory.
+**Derivation Implication:** Generated systems with processing pipelines should include a processing session template in the context file. This template specifies: (1) carry lean state, (2) load the source/artifacts, (3) execute the phase, (4) validate artifacts, (5) pass state onward, and (6) commit named paths. Skip heavy orientation — processing sessions are mechanical, not exploratory.
 
 **Source:** Vault /pipeline orchestration pattern. Each skill invoked by /pipeline (via the Skill tool with `context: fork`) runs in a forked context following this minimal-orientation processing session pattern.
 
@@ -69,7 +69,7 @@ Questions the engine must answer when generating session configuration:
 
 #### Maintenance sessions orient from health metrics and persist improvement actions
 
-**Summary:** Maintenance sessions focus on system health: schema validation, orphan detection, link health, MOC coverage, stale note identification. Orientation loads the latest health report (if one exists) and the maintenance checklist from the context file. Work runs health checks systematically — not ad-hoc inspection but scripted validation. Persistence captures findings as observation notes, updates health reports, and creates tasks for issues that require separate sessions to fix.
+**Summary:** Maintenance sessions focus on system health: schema validation, orphan detection, link health, MOC coverage, stale note identification. Orientation runs the current health workflow and loads the maintenance checklist from the context file. Work runs health checks systematically — not ad-hoc inspection but scripted validation. Persistence captures findings as observation notes and creates tasks for issues that require separate sessions to fix.
 
 **Derivation Implication:** Generated systems should include a maintenance session section in the context file with: which health checks to run, which built-in health signals can fire, and where to log findings. The maintenance session type should be distinct from processing and exploration — mixing maintenance with content work produces incomplete maintenance because content work is more engaging.
 
@@ -135,7 +135,7 @@ Questions the engine must answer when generating session configuration:
 
 **Summary:** When a session ends without proper persistence, the agent in the next session lacks information about what was in progress, what was discovered, and what decisions were made. This is the agent equivalent of attention residue — incomplete tasks from a previous context contaminating the current context. The persist phase eliminates attention residue by explicitly capturing session state: what was done, what was discovered, what remains to do. Cal Newport's research on attention residue for humans translates directly: incomplete work contaminates future attention, and explicit closure rituals are the remedy.
 
-**Derivation Implication:** Generated context files must include an explicit session-end checklist. Minimum: update self/goals.md with current state, capture any observations, push changes to remote. For pipeline sessions: update queue state. For exploration sessions: update MOCs with discoveries. The checklist should be positioned prominently (not buried in appendix) because skipping it is the most common session failure mode.
+**Derivation Implication:** Generated context files must include an explicit session-end checklist. Minimum: update self/goals.md with current state, capture any observations, and push changes to remote. For pipeline sessions: ensure `/pipeline` completed its commit or record the failure in goals. For exploration sessions: update MOCs with discoveries. The checklist should be positioned prominently.
 
 **Source:** Newport, "Deep Work" (2016) — attention residue concept. Research claim: "closure rituals create clean breaks that prevent attention residue bleed." Vault operational experience with goals.md as the primary session-handoff mechanism.
 
@@ -217,11 +217,11 @@ Hooks automate session rhythm. A SessionStart hook injects the file tree and loa
 
 #### The morning briefing pattern gives each session a purpose statement
 
-**Summary:** Systems with processing pipelines or maintenance schedules benefit from a "morning briefing" at session start: a summary of what happened since the last session, what conditions have fired, and what the system's health looks like. This is richer than just reading goals.md — it synthesizes queue state, fired conditions, health metrics, and recent observations into a single orientation snapshot. The briefing gives the session a purpose statement: "Today: 3 queue items ready for connect, 2 conditions fired (orphan notes detected, pending observations accumulated), inbox has 5 new items."
+**Summary:** Systems with processing pipelines or maintenance schedules benefit from a "morning briefing" at session start: a summary of what happened since the last session, what conditions have fired, and what the system's health looks like. This is richer than just reading goals.md — it synthesizes fired conditions, health metrics, inbox pressure, and recent observations into a single orientation snapshot. The briefing gives the session a purpose statement: "Today: 2 conditions fired (orphan notes detected, pending observations accumulated), inbox has 5 new items."
 
-**Derivation Implication:** Generated systems with processing = moderate or heavy should include a morning briefing mechanism. The session-start hook aggregates condition evaluation results with queue status and inbox count. The briefing pattern transforms "what should I do?" into "here is what needs doing" — reducing the orientation cost.
+**Derivation Implication:** Generated systems with processing = moderate or heavy should include a morning briefing mechanism. The session-start hook aggregates condition evaluation results with inbox count. The briefing pattern transforms "what should I do?" into "here is what needs doing" — reducing the orientation cost.
 
-**Source:** Vault queue reconciliation pattern. The session-start hook shows queue status and fired conditions, functioning as the morning briefing; /health runs the full diagnostic on demand.
+**Source:** Vault reconciliation pattern. The session-start hook shows fired conditions, functioning as the morning briefing; /health runs the full diagnostic on demand.
 
 ---
 
@@ -245,4 +245,4 @@ Hooks automate session rhythm. A SessionStart hook injects the file tree and loa
 - Sources reviewed: 20
 - Claims included: 22
 - Claims excluded: 5
-- Cross-references: `kernel.yaml` (session-rhythm and self-space primitives), `three-spaces.md` (self/ space specification, session rhythm integration), `components.md` (hooks component blueprint), `failure-modes.md` (temporal staleness)
+- Cross-references: `kernel.yaml` (session-rhythm and self-space primitives), `three-spaces.md` (self/ space specification, session rhythm integration), `components.md` (hooks component blueprint)

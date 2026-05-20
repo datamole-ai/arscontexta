@@ -1,6 +1,6 @@
 # Use-Case Reference Domains
 
-Internal reference domains for vocabulary, processing categories, starter topic maps, and failure-mode risk selection. These are matching aids, not user-facing choices.
+Internal reference domains for vocabulary, processing categories, and starter topic maps. These are matching aids, not user-facing choices.
 
 Every generated vault uses the same kernel: flat note collection, wiki links plus semantic search, topic-map navigation, full processing pipeline, templates, hooks, health checks, and self/ continuity.
 
@@ -32,13 +32,6 @@ Every generated vault uses the same kernel: flat note collection, wiki links plu
 **Processing categories:** claims, evidence, methodology-comparisons, contradictions, open-questions, design-patterns.
 
 **Starter topic maps:** domain-overview, methods, open-questions.
-
-**High-risk failure modes:**
-- Collector's Fallacy - source material is abundant.
-- Orphan Drift - high creation volume without mandatory connection.
-- Verbatim Risk - source material tempts reproduction over transformation.
-- MOC Sprawl - topics proliferate in research domains.
-- Productivity Porn - meta-system building displaces actual research.
 
 **Example signals:**
 - "I read papers and need to track claims across disciplines."
@@ -72,12 +65,6 @@ Every generated vault uses the same kernel: flat note collection, wiki links plu
 
 **Starter topic maps:** life-areas, people, goals.
 
-**High-risk failure modes:**
-- Journal without reflection - capture without pattern detection.
-- Cognitive Outsourcing - pattern detection without human validation.
-- Emotional avoidance - system enables intellectual distancing from feelings.
-- Capture without connection - reflections stay isolated.
-
 **Example signals:**
 - "I want to track my growth and notice patterns in my life."
 - "I need something that remembers what I care about across sessions."
@@ -100,7 +87,7 @@ Use the user's terms first. Blend Research and Personal Assistant only when a un
 **Starter topic-map derivation:**
 - Use the user's highest-level nouns.
 - Prefer task-neutral names: overview, open questions, people, projects, methods, themes.
-- Do not create a directory for a grouping unless Filter B keeps it.
+- Represent groupings as notes and topic maps inside the flat collection. Do not create physical directories for browsing groups.
 
 **Schema field candidates:**
 
@@ -128,7 +115,6 @@ Listen for signals in the user's description and follow-up answers:
 | Processing verbs | "track claims", "remember reactions", "document decisions" | Processing categories |
 | Connection words | "across disciplines", "between projects", "patterns" | Topic-map and linking examples |
 | Emotional register | "feel seen", "professional", "direct" | self/identity.md voice |
-| Failure history | "I collect and never process", "I lose things" | Failure-mode risks |
 
 ### Step 2: Reference-Domain Affinity
 
@@ -164,10 +150,8 @@ Use the matched reference domain to propose:
 - processing categories
 - starter topic maps
 - candidate schema fields
-- candidate directories
-- failure-mode risks
 
-Then apply Filter A for fields and Filter B for directories. Reference-domain defaults are candidates only.
+Then apply Filter A for fields. Reference-domain defaults are candidates only; physical folder layout stays flat.
 
 ---
 

@@ -110,54 +110,39 @@ Everything enters through {DOMAIN:inbox/}. Do not think about structure at captu
 - **The generation effect** — Moving information is not processing. You must TRANSFORM it: generate descriptions, find connections, create synthesis. Passive transfer does not create understanding.
 - **Skills encode methodology** — If a {DOMAIN:skill} exists for a processing step, use it. Do not manually replicate the workflow. {DOMAIN:Skills} contain quality gates that manual execution bypasses.
 
-### Task Management Architecture
+### Pipeline State Architecture
 
-Processing multiple {DOMAIN:notes} through a multi-phase pipeline requires tracking. Without it, {DOMAIN:notes} get stuck mid-pipeline, phases get skipped, and you lose visibility into what has been done and what remains.
-
-#### Task Queue
-
-The task queue tracks every {DOMAIN:note} being processed through the pipeline. It lives at `ops/queue/queue.json` with a simple structure:
+The happy-path pipeline completes in one invocation. It does not persist durable queue state, required `batch-manifest.json` recovery snapshots, or `phase-outputs/*.json` handoffs. The orchestrator carries one lean JSON object between phases:
 
 ~~~json
 {
-  "tasks": [
-    {
-      "id": "source-name-001",
-      "type": "note",
-      "granularity": "structure",
-      "status": "pending",
-      "target": "{DOMAIN:note} title here",
-      "target_path": "{DOMAIN:note_collection}/path/to/note.md",
-      "batch": "source-name",
-      "created": "2026-02-13T10:00:00Z",
-      "current_phase": "{DOMAIN:connect}",
-      "completed_phases": ["{DOMAIN:process}"]
-    }
-  ]
+  "batch": "source-name",
+  "source": "archive/2026-05-20-source-name/source.md",
+  "artifacts": [
+    {"kind": "note", "path": "{DOMAIN:note_collection}/path/to/note.md"},
+    {"kind": "enrichment", "path": "{DOMAIN:note_collection}/existing.md"}
+  ],
+  "commit_paths": ["{DOMAIN:note_collection}/topic-map.md"]
 }
 ~~~
 
-**Phase tracking:** Each {DOMAIN:note} has ONE queue entry. Phase progression is tracked via `current_phase` (the next phase to run) and `completed_phases` (what is already done). After each phase completes: append the current phase to `completed_phases`, advance `current_phase` to the next in sequence. When the last phase completes: set `status` to `"done"`.
+`batch`, `source`, and `artifacts` are required. `commit_paths` is optional and lets /connect include topic maps or other graph notes it changed.
 
-**Task types:**
+**Runtime commands:**
 
-| Type | Purpose | Phase Sequence |
-|------|---------|---------------|
-| process | Process source through chosen granularity skill (/structure or /capture) — materializes all notes and enrichments inline | (single phase) |
-| note | A newly materialized {DOMAIN:note} flows through downstream phases | {DOMAIN:connect} -> verify |
-| enrichment | An existing {DOMAIN:note} was modified inline during process; still flows through downstream phases | {DOMAIN:connect} -> verify |
+~~~bash
+uv run arscontexta-vault seed --source "<file>" --mode structure
+uv run arscontexta-vault seed --source "<file>" --mode capture
+uv run arscontexta-vault validate --path "{DOMAIN:note_collection}/example.md"
+uv run arscontexta-vault validate --all
+printf '%s' "$PIPELINE_STATE" | uv run arscontexta-vault validate --artifacts
+~~~
 
-**Recovery:** If you crash mid-phase, the queue still shows `current_phase` at the failed phase. Re-running the pipeline picks it up automatically — no manual intervention needed.
-
-#### Queue As Sole State Surface
-
-Each phase skill reads its entry from `ops/queue/queue.json` by id, executes the phase, updates its own queue entry (`current_phase`, `completed_phases`, `status`), and emits a canonical JSON Output Contract as its final chat message — one fenced JSON block, no prose around it. The orchestrator parses that JSON to drive the next phase. State transfers through the queue (durable) and through JSON returns (within a run).
-
-**Batch archival:** When all {DOMAIN:notes} from a source reach `"done"`, the batch is archivable. /archive-batch removes the batch's queue entries; /pipeline then writes `<archive_folder>/learnings.md` aggregating the `learnings` arrays from every phase's JSON Output Contract.
+**Recovery:** Durable resume mechanics are deferred. If a run fails, fix the reported deterministic or graph error and rerun /pipeline from the source.
 
 #### Maintenance via /health (Diagnostic, On-Demand)
 
-Maintenance is diagnostic, not queued. The pipeline queue holds pipeline tasks only (process, connect, verify). Vault health is evaluated on demand by /health, which reports fired conditions with specific files and ranked actions.
+Maintenance is diagnostic, not queued. Vault health is evaluated on demand by /health, which reports fired conditions with specific files and ranked actions.
 
 **Maintenance conditions (evaluated by /health):**
 
@@ -169,7 +154,6 @@ Maintenance is diagnostic, not queued. The pipeline queue holds pipeline tasks o
 | Orphan {DOMAIN:notes} | Any | Flag for connection finding |
 | Dangling links | Any | Flag for resolution |
 | Inbox age | >3 days | Suggest processing |
-| Pipeline batch stalled | >2 sessions without progress | Surface as blocked |
 
 **Impact-based ranking** (highest to lowest):
 
@@ -180,7 +164,7 @@ Maintenance is diagnostic, not queued. The pipeline queue holds pipeline tasks o
 | Medium | Description quality, stale notes |
 | Low | {DOMAIN:Topic map} size warnings, throughput ratio |
 
-The session-start orientation shows queue status; /health runs the full diagnostic when invoked. This is reconciliation-based diagnosis — /health tells you what needs attention based on measured state, with no maintenance queue to keep clean.
+The session-start orientation can show inbox pressure and fired conditions; /health runs the full diagnostic when invoked. This is reconciliation-based diagnosis — /health tells you what needs attention based on measured state, with no maintenance queue to keep clean.
 
 ### Orchestrated Processing (Fresh Context Per Phase)
 
@@ -189,10 +173,11 @@ The pipeline's quality depends on each phase getting your best attention. Your c
 **The orchestration pattern:**
 
 ~~~
-Orchestrator reads queue -> picks next task -> invokes phase skill for one phase
-  Orchestrator refreshes ops/queue/archive/<batch>/batch-manifest.json
-  Phase skill (forked context): reads compact manifest first, opens only files needed for evidence, executes the phase across the batch, updates queue.json atomically, emits a single fenced JSON block (the Output Contract) as final chat message
-  Phase skill returns -> Orchestrator stores phase-outputs/<phase>.json, refreshes the manifest, then invokes next phase skill
+Orchestrator seeds source -> invokes producer with lean state
+  Producer writes Markdown directly, validates artifacts, returns lean state
+  Connect runs qmd and Obsidian discovery, edits graph notes, returns updated lean state
+  Verify runs Obsidian checks plus validate --artifacts
+  Pipeline orchestrator stages only named paths from final state and commits
 ~~~
 
 **Why fresh context matters:**
@@ -204,18 +189,20 @@ Within a phase, the fork sees the full batch — sibling cross-linking and share
 
 If all phases run in one session, the verify phase runs on degraded attention — you have already decided this {DOMAIN:note} is good during materialization, and confirmation bias sets in. Fresh context prevents this.
 
-**Handoff through queue + chat:**
-- Each phase updates its entry in `ops/queue/queue.json` (status, current_phase, completed_phases)
-- Each phase emits a canonical JSON Output Contract as its final chat message (`status`, `queue`, `created`/`updated`, `learnings`)
-- The orchestrator stores that JSON under `<archive_folder>/phase-outputs/`, refreshes `batch-manifest.json`, and uses the manifest to drive the next phase
+**Handoff through lean state:**
+- seed emits `batch` and `source`
+- producer skills emit `artifacts`
+- /connect may add `commit_paths`
+- /verify returns validated state
+- /pipeline commits source, artifacts, and commit_paths directly with git
 
-**Processing is orchestrated by default.** /pipeline orchestrates the full sequence. The queue drives what happens next.
+**Processing is orchestrated by default.** /pipeline orchestrates the full sequence. Lean state drives what happens next.
 
-**Orchestration uses the Skill tool** with `context: fork` on each invoked skill, giving each phase a fresh forked context window and true context isolation. The task queue and compact manifest are the orchestration surface: queue state remains durable truth, while `batch-manifest.json` gives phase skills a small entry point containing batch state, note inventory, map inventory, semantic neighbors, and prior phase outputs. When you say "process this source through the full pipeline," follow the pattern: invoke each phase skill once with the batch id; the phase skill reads the manifest, opens only the files it needs, advances the queue atomically, and returns.
+**Orchestration uses the Skill tool** with `context: fork` on each invoked skill, giving each phase a fresh forked context window and true context isolation. When you say "process this source through the full pipeline," follow the pattern: invoke each phase skill once with the current pipeline state; the phase skill opens only the files it needs and returns the next state.
 
 ### Full Automation From Day One
 
-Every vault ships with the complete pipeline active from the first session. All processing skills, all quality gates, all maintenance mechanisms are available immediately. You do not need to "level up" or wait for your vault to reach a certain size before using orchestrated processing, fresh context isolation, or queue management.
+Every vault ships with the complete pipeline active from the first session. All processing skills, all quality gates, all maintenance mechanisms are available immediately. You do not need to "level up" or wait for your vault to reach a certain size before using orchestrated processing or fresh context isolation.
 
 The philosophy: it is easier to disable features you do not need than to discover and enable features you did not know existed. If a feature exists, it works on day one.
 
@@ -264,11 +251,11 @@ Each session focuses on ONE task. Discoveries become future tasks, not immediate
 
 Your attention degrades as context fills. The first ~40% of context is the "smart zone" — sharp, capable, good decisions. Beyond that, context rot sets in. Structure each task so critical information lands early. When processing multiple {DOMAIN:notes}, use fresh context per phase — never chain phases in one session. Each phase fork covers the full batch.
 
-**The handoff protocol:** Every phase updates its queue entries (atomically, across the whole batch) and emits a canonical JSON Output Contract as its final chat message. The orchestrator stores that JSON under `<archive_folder>/phase-outputs/`, refreshes `batch-manifest.json`, and uses the manifest to drive the next phase. State transfers through the queue (durable), the compact manifest (recoverable batch snapshot), and JSON returns (within a pipeline run), not through accumulated conversation across phases. This ensures:
+**The handoff protocol:** Every phase emits lean pipeline state as its final chat message. State transfers through JSON returns during one pipeline run, not through accumulated conversation across phases. This ensures:
 - No context contamination between phases
 - Each phase gets your best attention
-- Crashes are recoverable (`queue.json` shows `current_phase` for any entries the phase did not advance)
-- Failed runs leave `batch-manifest.json` and phase outputs for diagnosis
+- /pipeline stages only named source/artifact/map paths
+- Recovery machinery stays out of the happy path until real friction justifies it
 - Multiple {DOMAIN:notes} are processed in one fork per phase, without per-note context resets and without per-phase narration accumulating across notes
 
 ## Dependencies

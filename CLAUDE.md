@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-**Ars Contexta** — Claude Code plugin. Conversational derivation engine: a conversation about how the user works produces a bespoke knowledge system (folders, notes, processing skills, hooks, manual). **This repo is the engine, not a vault** — do not scaffold one here. `README.md` has the product pitch; this file navigates the code.
+**Ars Contexta** — Claude Code plugin. Conversational derivation engine: a conversation about how the user works produces a bespoke knowledge system (folders, notes, processing skills, hooks, navigation). **This repo is the engine, not a vault** — do not scaffold one here. `README.md` has the product pitch; this file navigates the code.
 
 ## Quick Map
 
@@ -46,7 +46,7 @@ docs/             superpowers/{plans,specs}          design specs
 | Connect | `connect/` |
 | Verify | `verify/` |
 | Orchestration | `pipeline/` |
-| Reporting | `stats/`, `archive-batch/` |
+| Diagnostics | `health/` |
 
 Each `SKILL.md` uses `{DOMAIN:…}` placeholders that the derivation engine rewrites at generation.
 
@@ -57,10 +57,9 @@ Each `SKILL.md` uses `{DOMAIN:…}` placeholders that the derivation engine rewr
 | `kernel.yaml` | 13 invariants |
 | `three-spaces.md` | self/notes/ops architecture |
 | `components.md` | per-component build blueprints |
-| `use-case-presets.md` | internal reference domains for vocabulary, categories, and risks |
+| `use-case-presets.md` | internal reference domains for vocabulary and categories |
 | `tradition-presets.md` | Zettelkasten / PARA / GTD / Cornell background |
 | `vocabulary-transforms.md` | universal → domain-native maps |
-| `failure-modes.md` | how vaults die (warnings injected into vaults) |
 | `session-lifecycle.md` | orient / work / persist spec |
 | `self-space.md` | agent-identity generation guide |
 | `semantic-vs-keyword.md` | search modality selection |

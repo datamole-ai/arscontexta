@@ -70,7 +70,7 @@ Every `[[link]]` must point to a real file. Dangling links — wiki links to {DO
 
 ### Source Links
 
-`Source:` footer links are stricter than ordinary knowledge links. Use `[[source:<batch-id>]]` for pipeline-produced structure notes, or link the concrete archived source file when one exists. The verifier resolves source IDs through `batch-manifest.json` and fails unresolved source links separately from ordinary knowledge links.
+`Source:` footer links are stricter than ordinary knowledge links. Prefer the concrete archived source path from lean pipeline state, for example `archive/<date>-<batch>/source.md`. `/verify` uses Obsidian CLI for unresolved ordinary links and runtime validation for deterministic artifact checks.
 
 Dangling links also serve as demand signals. When `/health` reports dangling links, they reveal what {DOMAIN:notes} your graph expects to exist. Creating those {DOMAIN:notes} fills structural gaps.
 

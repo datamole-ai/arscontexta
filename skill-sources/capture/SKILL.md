@@ -1,218 +1,73 @@
 ---
 name: capture
-description: Internal pipeline skill — preserves source material verbatim with frontmatter and graph connections. Invoked by /pipeline as a subagent; do not invoke directly.
-version: "1.0"
+description: Internal pipeline skill -- preserves source material verbatim with frontmatter. Invoked by /pipeline as a subagent; do not invoke directly.
 context: fork
 model: sonnet
-allowed-tools: Read, Write, Grep, Glob
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 ---
 
-## Runtime Configuration
+## Execute
 
-### Vocabulary
+Target: `$ARGUMENTS`
 
-All output must use domain-native terms.
-Derivation manifest for vocabulary mapping:
-!`cat ops/derivation-manifest.md`
+Parse the target as pipeline state JSON with `batch` and `source`. If missing, emit:
 
-### Compact Batch Manifest
+```json
+{"status":"error","error":"capture requires pipeline state JSON"}
+```
 
-After parsing the batch id, build/read the compact batch manifest with `ops/scripts/batch-manifest.sh`. Prefer the manifest over broad queue reads; read the source file only when needed for the verbatim capture.
-
----
-
-## THE MISSION
-
-You are the capture engine. Source material enters. A graph-connected, frontmatter-stamped verbatim copy exits. Your job is to make raw content findable and connected without transforming it.
-
-### The Verbatim Principle
-
-**Content is sacred.** The source material goes into a fenced code block exactly as received. No editing, no reformatting, no summarizing, no restructuring, no "fixing" grammar or formatting. The fenced block is a sealed artifact.
-
-All graph participation happens OUTSIDE the fenced block:
-- Frontmatter provides structured metadata
-- Title provides discoverability
-- Description provides context
-- Relevant Notes footer provides connections
-- Topics footer provides {vocabulary.topic_map} membership
-
----
-
-## EXECUTE NOW
-
-**Target: $ARGUMENTS**
-
-Parse the batch id from arguments (the source basename, e.g. `my-source`). If no argument is provided, end immediately with: report
-`ERROR: capture requires batch id`.
-
-Build the compact batch manifest and look up the process entry from it:
+Read:
 
 ```bash
-MANIFEST_JSON=$(bash ops/scripts/batch-manifest.sh "$BATCH_ID")
-MANIFEST_PATH=$(printf '%s' "$MANIFEST_JSON" | jq -r '.manifest_path')
-jq '.process' "$MANIFEST_PATH"
+cat ops/derivation-manifest.yaml
+cat ops/templates/note.md
 ```
 
-From that entry, obtain:
-- `id` — the batch id (source basename)
-- `source` — the archived source file path
-- `granularity` — must equal `capture` (error out otherwise)
-- `next_claim_start` — first claim number to use
+Then read the entire `source` file.
 
-All subsequent references to "the source" use the `source` value from the queue entry.
+## Rules
 
-**START NOW.** Capture the source.
+- Preserve the source content verbatim inside a fenced block.
+- Do not call qmd.
+- Do not gather semantic neighbors.
+- Carry state only through the provided pipeline JSON; do not create durable recovery files.
+- Graph connection work belongs to `/connect`; this skill may include only minimal source-bounded topic/footer placeholders.
+- Title and description must describe what the captured content contains without adding interpretation.
+- Use `ops/templates/note.md` for required fields, enum values, and deterministic constraints.
 
+## Note Shape
+
+~~~markdown
 ---
-
-## Workflow
-
-### 1. Read Source
-
-Read the ENTIRE source file. Understand what it contains — you need this understanding to craft a good title and description, even though you won't transform the content.
-
-### 2. Craft Title (Prose-as-Title — Content Variant)
-
-Write a prose title that summarizes what the captured content contains. This is the main intellectual work of capture. The title works as a noun phrase when linked — "referencing [[title]]" or "as documented in [[title]]" reads naturally — describing what the artifact contains rather than making a claim or defining a scope.
-
-The title and description are still source-backed claims. They may describe what the source contains, but they must not define terms, infer outcomes, assign ownership, or strengthen uncertainty beyond the source. Prefer "source discussing/listing/asking..." when the artifact is a list, table, or question set.
-
-**The content test:** Can you complete this sentence?
-> This is a capture of [title]
-
-If it works, the title describes the content. If it doesn't, it's probably a topic label.
-
-Good titles (content descriptions that work as prose when linked):
-- "quarterly planning meeting discussing Q3 priorities and hiring timeline"
-- "Dr Smith lecture on cognitive load theory and instructional design"
-- "customer interview with Jane about onboarding friction points"
-
-Bad titles:
-- "meeting notes" (too vague)
-- "lecture" (topic label)
-- "interview" (says nothing about content)
-
-**Title rules:**
-- Lowercase with spaces
-- No punctuation that breaks filesystems: . * ? + [ ] ( ) { } | \ ^
-- Express the concept fully — there is no character limit
-- Each title must be unique across the entire workspace
-
-### 3. Write Description
-
-One sentence (~150 chars) adding context beyond the title. What makes this capture worth keeping? What key topics does it touch?
-
-Do not add interpretive claims in the description. If the source contains exact primary artifacts (repository URLs, Google Drive report URLs, emails) and the capture title/description implies coverage of those artifacts, preserve them in the footer or body outside the fenced block as appropriate.
-
-Bad (restates title):
-- Title: "quarterly planning meeting discussing Q3 priorities"
-- Description: Meeting about Q3 priorities and planning
-
-Good (adds context):
-- Title: "quarterly planning meeting discussing Q3 priorities"
-- Description: Key decisions on hiring freeze timeline and product launch date; tension between engineering capacity and marketing commitments
-
-### 4. Identify Connections
-
-Scan the source content for references to existing {vocabulary.note_plural} or topics. Do NOT modify the content — identify connections to add in the footer sections:
-
-- Which existing {vocabulary.note_plural} does this content relate to?
-- Which {vocabulary.topic_maps} should reference this capture?
-- Are there specific claims in the content that connect to existing {vocabulary.note_plural}?
-
-### 5. Write the {vocabulary.note}
-
-```yaml
----
-content_type: [vault content_type value — see the content_type enum in ops/templates/note.md _schema:]
+content_type: <valid content_type enum>
 granularity: capture
-description: [~150 chars — context beyond the title]
-created_at: [YYYY-MM-DD]
-tags: [array of free-form strings — may be []]
+description: <source-bounded description, <=200 chars>
+created_at: <YYYY-MM-DD>
+tags: []
 ---
+
+# <prose title describing the captured content>
+
+```text
+<source content exactly as received>
 ```
 
-```markdown
-# [prose-as-title]
-
-(VERBATIM CONTENT — exactly as received, no modifications)
-
 ---
-
-Relevant Notes:
-- [[related {vocabulary.note}]] — [why this capture relates]
 
 Topics:
-- [[relevant {vocabulary.topic_map}]]
+- [[<topic map>]]
+~~~
+
+## Validation
+
+After writing the capture note, validate lean state:
+
+```bash
+printf '%s' "$PIPELINE_STATE" | uv run arscontexta-vault validate --artifacts
 ```
 
-### 6. Quality Check Before Writing
+Fix deterministic validation failures once. If validation still fails, emit the failure JSON and stop.
 
-- Title is specific and descriptive (not a topic label)
-- Description adds information beyond the title
-- Content inside fenced block is IDENTICAL to source (no edits whatsoever)
-- At least one {vocabulary.topic_map} link in the Topics footer
-- All five required fields present in frontmatter: `content_type`, `granularity: capture`, `description`, `created_at`, `tags`
-- File written to flat `{vocabulary.note_collection}/[title].md` — routing is by `granularity` frontmatter, not by subdirectory
+## Output
 
-### 7. Create Queue Entry
-
-Create one queue entry:
-
-```json
-{
-  "id": "note-{NNN}",
-  "type": "note",
-  "granularity": "capture",
-  "status": "pending",
-  "target": "[note title]",
-  "target_path": "{vocabulary.note_collection}/{note title}.md",
-  "batch": "{batch}",
-  "created": "[UTC timestamp]",
-  "current_phase": "connect",
-  "completed_phases": ["capture"]
-}
-```
-
-Additionally: set the process task entry's status to "done" and add a "completed" timestamp before writing the file.
-
-**Do not re-read after update.** A successful write means the new state is on disk. Do NOT follow up with `jq` reads to "inspect" what you just wrote — it adds tokens but provides nothing the skill consumes before emitting the Output Contract.
-
-No enrichment tasks — capture does not analyze content deeply enough to spot enrichment opportunities.
-
----
-
-## Output Contract
-
-After materializing the note and updating `ops/queue/queue.json`, emit a single fenced JSON block as the final chat message. No prose, no headings, no progress narration — the JSON is the entire output.
-
-```json
-{
-  "skill": "capture",
-  "status": "ok",
-  "batch": "<batch-id>",
-  "queue": "marked <batch-id>: process -> done; created 1 note entry (current_phase: connect)",
-  "created": ["{vocabulary.note_collection}/<note title>.md"],
-  "queue_id": "note-<NNN>",
-  "warnings": [],
-  "learnings": [
-    {"category": "Friction|Surprise|Methodology|Process gap", "description": "<short>"}
-  ]
-}
-```
-
-On error: `"status": "error"`, `"error": "<short>"`, leave `queue.json` and the filesystem unchanged.
-
----
-
-## THE IMMUTABILITY INVARIANT
-
-**Content inside the fenced block is IMMUTABLE.** This is not a guideline — it is a hard constraint.
-
-- No adding links inside the fenced block
-- No reformatting content inside the fenced block
-- No correcting typos inside the fenced block
-- No "improving" content inside the fenced block
-- All connections go in frontmatter and footer sections ONLY
-
-If you catch yourself about to edit the fenced block content, STOP. The fenced block is a sealed artifact. All graph participation happens through frontmatter and footer sections.
+Emit the validated JSON object as the final message. No prose, headings, or markdown fences.

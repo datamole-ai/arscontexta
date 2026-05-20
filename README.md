@@ -13,20 +13,16 @@ No templates. No configuration. Just conversation.
 
 ## Prerequisites
 
-Install these before running `/arscontexta:setup`. All four are expected — the generated system assumes they are present and its skills call them directly.
+Install these before running `/arscontexta:setup`. All six are expected — the generated system assumes they are present and its skills call them directly.
 
 | Dependency | Purpose |
 |-----------|---------|
 | [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Plugin host |
 | `tree` | Workspace structure injection |
 | `ripgrep` (`rg`) | YAML queries, schema validation |
+| [uv](https://docs.astral.sh/uv/) | Runs and locks vault-local Python tooling |
 | [qmd](https://github.com/tobi/qmd) v2+ | Semantic search (invariant kernel primitive — see below) |
-
-```bash
-npm install -g @tobilu/qmd
-# or
-bun install -g @tobilu/qmd
-```
+| Obsidian CLI (`obsidian`) | Vault-native file, link, property, and graph facts |
 
 ---
 
@@ -66,11 +62,12 @@ a persistent thinking system derived from how you actually work.
   knowledge graph. No database, no cloud, no lock-in.
 - **A processing pipeline** -- skills that extract insights, find connections, update
   old notes with new context, and verify quality.
+- **Vault-local tooling** -- a copied `uv` Python project with two deterministic
+  runtime commands: `seed` and `validate`.
 - **Automation** -- hooks that enforce structure on every write, detect maintenance
   needs, and capture session state. `/pipeline` produces a single commit at the end of each batch.
 - **Navigation** -- Maps of Content (MOCs) at hub, domain, and topic levels.
 - **Templates** -- note templates with `_schema` blocks as single source of truth.
-- **A user manual** -- 7 pages of domain-native documentation generated alongside.
 
 **The key differentiator:** derivation, not templating. Every choice traces to
 specific research claims. The engine reasons from principles about what your
@@ -86,10 +83,10 @@ domain needs and why.
 |-------|-------------|
 | **Detection** | Detects Claude Code environment and capabilities |
 | **Understanding** | 2-4 conversation turns where you describe your domain |
-| **Derivation** | Maps signals to vocabulary, schema, workflow, and risk decisions |
+| **Derivation** | Maps signals to vocabulary, schema, and workflow |
 | **Proposal** | Shows what will be generated and why, in your vocabulary |
-| **Generation** | Produces all files: context file, folders, templates, skills, hooks, manual |
-| **Validation** | Checks all 13 kernel primitives, runs pipeline smoke test |
+| **Generation** | Produces all files: context file, folders, templates, skills, hooks, and hub MOC |
+| **Validation** | Checks generated dependencies and deterministic runtime validation |
 
 The whole process takes about 20 minutes. It's token-intensive because the engine
 reads research claims, reasons about your domain, and generates substantial output.
@@ -105,7 +102,7 @@ Every generated system separates content into three spaces:
 |-------|---------|--------|
 | **self/** | Agent persistent mind -- identity, methodology, goals | Slow (tens of files) |
 | **notes/** | Knowledge graph -- the reason the system exists | Steady (10-50/week) |
-| **ops/** | Operational coordination -- queue state, sessions | Fluctuating |
+| **ops/** | Operational coordination -- templates, derivation, sessions | Fluctuating |
 
 Names adapt to your domain (`notes/` might become `reflections/`, `claims/`,
 or `decisions/`), but the separation is invariant.
@@ -114,12 +111,11 @@ or `decisions/`), but the separation is invariant.
 
 ## Commands
 
-### Plugin-Level (always available)
+### Plugin-Level
 
 | Command | What It Does |
 |---------|-------------|
 | `/arscontexta:setup` | Conversational onboarding -- generates your full system |
-| `/arscontexta:health` | Run diagnostic checks on your vault |
 
 ### Generated (available after setup)
 
@@ -133,18 +129,17 @@ or `decisions/`), but the separation is invariant.
 
 | Command | What It Does |
 |---------|-------------|
-| `/seed` | Create processing task with duplicate detection |
+| `/seed` | Pipeline-internal source archival and initial state |
 | `/structure` | Group claims into finished notes and apply enrichments to existing notes |
 | `/capture` | Verbatim capture — preserves source without transformation |
-| `/connect` | Find connections, update MOCs, reconsider older notes |
-| `/verify` | Combined quality check: description + schema + health |
-| `/archive-batch` | Archive batch of notes |
+| `/connect` | Run qmd discovery, gather Obsidian graph facts, update MOCs |
+| `/verify` | Obsidian link checks plus deterministic schema validation |
 
 #### Operational
 
 | Command | What It Does |
 |---------|-------------|
-| `/stats` | Vault metrics |
+| `/health` | Obsidian diagnostics plus `validate --all` |
 
 ---
 
@@ -153,10 +148,10 @@ or `decisions/`), but the separation is invariant.
 
 | Phase | What Happens | Command |
 |-------|-------------|---------|
-| **Record** | Zero-friction capture into inbox/ | Manual |
+| **Record** | Zero-friction capture into inbox/ | User action |
 | **Reduce** | Extract insights with domain-native categories | `/structure`, `/capture` |
 | **Connect** | Find connections, update MOCs, reconsider older notes | `/connect` |
-| **Verify** | Description + schema + health checks | `/verify` |
+| **Verify** | Obsidian link checks plus deterministic schema validation | `/verify` |
 
 ---
 
@@ -165,36 +160,6 @@ or `decisions/`), but the separation is invariant.
 | Hook | Event | What It Does |
 |------|-------|-------------|
 | **Session Orient** | `SessionStart` | Injects workspace tree, loads identity, surfaces maintenance signals |
-
----
-
-## Project Structure
-
-```
-arscontexta/
-|-- .claude-plugin/
-|   |-- plugin.json              # Plugin manifest
-|   +-- marketplace.json         # Marketplace listing
-|-- skills/                      # Plugin-level commands
-|   |-- setup/                   # Conversational onboarding
-|   +-- health/                  # Diagnostic checks
-|-- skill-sources/               # 8 generated command templates
-|   |-- structure/               # Extract insights
-|   |-- connect/                 # Find connections, update MOCs, reconsider older notes
-|   |-- verify/                  # Combined quality check
-|   +-- ...                      # 5 more processing commands
-|-- hooks/
-|   |-- hooks.json               # Hook configuration
-|   +-- scripts/                 # Hook implementations
-|-- generators/
-|   |-- claude-md.md             # CLAUDE.md template
-|   +-- features/                # 12 composable feature blocks
-|-- reference/                   # Core reference documents
-|   |-- kernel.yaml              # 13 kernel primitives
-|   |-- three-spaces.md          # Architecture spec
-|   +-- use-case-presets.md      # Internal reference domains
-+-- README.md
-```
 
 ---
 
@@ -218,11 +183,3 @@ Every time you make changes, re-install the plugin:
 /plugin uninstall arscontexta@datamole-ai-arscontexta
 /plugin install arscontexta@datamole-ai-arscontexta
 ```
-
-### Key Files for Contributors
-
-- `reference/kernel.yaml` -- 13 primitives every system must include
-- `generators/features/*.md` -- composable feature blocks
-- `skill-sources/*/SKILL.md` -- generated command templates
-- `skills/setup/SKILL.md` -- the derivation engine
-- `reference/use-case-presets.md` -- internal reference domains
