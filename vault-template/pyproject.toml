@@ -14,7 +14,10 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project.scripts]
-arscontexta-vault = "arscontexta_vault.cli:main"
+arscontexta-vault = "vault.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/vault"]
 
 [dependency-groups]
 dev = [

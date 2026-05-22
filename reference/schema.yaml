@@ -1,0 +1,33 @@
+required:
+  - content_type
+  - granularity
+  - description
+  - created_at
+  - tags
+enums:
+  granularity:
+    - structure
+    - capture
+  content_type:
+    # Vault-specific. Populated during setup from the user's vocabulary.
+    # Examples: spec, decision, lesson, reflection, observation.
+constraints:
+  content_type:
+    format: "One of the enum values derived from setup vocabulary."
+  granularity:
+    format: "One of structure | capture."
+  description:
+    max_length: 200
+    format: "One sentence adding context beyond the title. No trailing period."
+  created_at:
+    format: "ISO 8601 date (YYYY-MM-DD)."
+  tags:
+    format: "Obsidian tags property. Use [] when empty; otherwise use a YAML block list. Omit leading #. No spaces. Use / for nested tags. Must contain at least one non-numeric character."
+obsidian_defaults:
+  allowed_optional_properties:
+    - aliases
+    - cssclasses
+  deprecated_properties:
+    tag: tags
+    alias: aliases
+    cssclass: cssclasses

@@ -89,17 +89,17 @@ Use the user's terms first. Blend Research and Personal Assistant only when a un
 - Prefer task-neutral names: overview, open questions, people, projects, methods, themes.
 - Represent groupings as notes and topic maps inside the flat collection. Do not create physical directories for browsing groups.
 
-**Schema field candidates:**
+**Tag vocabulary candidates:**
 
-| Domain Characteristic | Candidate Field |
+| Domain Characteristic | Candidate Tags |
 |----------------------|-----------------|
 | Temporal dynamics | `status`, `review_after`, `superseded_by` |
 | Confidence tracking | `confidence` |
 | Sequential progression | `prerequisites` |
 | Entity tracking | `person`, `entity`, `project` |
-| Source accountability | `source_url`, `source_date` |
+| Source accountability | `source/url`, `source/date` |
 
-Run Filter A before keeping any candidate field.
+Use these as starter tag vocabulary when they fit the user's language. Do not turn them into schema fields.
 
 ---
 
@@ -149,9 +149,9 @@ Verify: would this term feel natural to the user?
 Use the matched reference domain to propose:
 - processing categories
 - starter topic maps
-- candidate schema fields
+- starter tag vocabulary
 
-Then apply Filter A for fields. Reference-domain defaults are candidates only; physical folder layout stays flat.
+Reference-domain defaults are candidates only; physical folder layout stays flat and schema fields stay fixed.
 
 ---
 
@@ -178,10 +178,10 @@ Then apply Filter A for fields. Reference-domain defaults are candidates only; p
 - comparisons
 - open questions
 
-**Schema candidates:**
+**Tag candidates:**
 - `region`
 - `varietal`
 - `pairing`
 - `vintage`
 
-Run Filter A before keeping any candidate.
+Use these as tags if they match the user's vocabulary.

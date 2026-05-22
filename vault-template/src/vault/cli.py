@@ -5,10 +5,10 @@ from typing import Annotated
 
 import typer
 
-from arscontexta_vault.output import emit_json, run_json
-from arscontexta_vault.paths import VaultPaths
-from arscontexta_vault.seed import SeedMode, seed_source
-from arscontexta_vault.validate import validate_all, validate_artifacts, validate_path
+from vault.output import emit_json, run_json
+from vault.paths import VaultPaths
+from vault.seed import SeedMode, seed_source
+from vault.validate import validate_all, validate_artifacts, validate_path
 
 app = typer.Typer(add_completion=False, pretty_exceptions_enable=False)
 

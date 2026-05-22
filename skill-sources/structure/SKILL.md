@@ -25,7 +25,7 @@ Read:
 
 ```bash
 cat ops/derivation-manifest.yaml
-cat ops/templates/note.md
+cat ops/schema.yaml
 ```
 
 Then read the entire `source` file.
@@ -37,7 +37,8 @@ Then read the entire `source` file.
 - Do not gather semantic neighbors.
 - Carry state only through the provided pipeline JSON; do not create durable recovery files.
 - Do not include wiki links in the body unless they are directly present in the source; graph weaving belongs to `/connect`.
-- Use `ops/templates/note.md` as the schema source. Output notes must include every `_schema.required` field and satisfy `_schema.enums` and deterministic constraints.
+- Use `ops/schema.yaml` as the schema source. Output notes must include every `required` field and satisfy `enums` and deterministic constraints.
+- When `tags` is not empty, use Obsidian YAML list form. Omit leading `#`, avoid spaces, and use `/` for nested tags.
 - Write notes directly under the configured note collection.
 - For enrichments, edit existing note Markdown directly and include the edited path as an artifact with `kind: "enrichment"`.
 

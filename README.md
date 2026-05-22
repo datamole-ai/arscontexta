@@ -5,7 +5,7 @@
 A Claude Code plugin that generates complete knowledge systems from conversation.
 You describe how you think and work. The engine derives a cognitive architecture
 -- folder structure, context files, processing pipeline, hooks, navigation maps,
-and note templates -- tailored to your domain and backed by 242 research claims.
+and note schema -- tailored to your domain and backed by 242 research claims.
 
 No templates. No configuration. Just conversation.
 
@@ -67,7 +67,7 @@ a persistent thinking system derived from how you actually work.
 - **Automation** -- hooks that enforce structure on every write, detect maintenance
   needs, and capture session state. `/pipeline` produces a single commit at the end of each batch.
 - **Navigation** -- Maps of Content (MOCs) at hub, domain, and topic levels.
-- **Templates** -- note templates with `_schema` blocks as single source of truth.
+- **Schema contract** -- `ops/schema.yaml` as the single source of truth for note properties.
 
 **The key differentiator:** derivation, not templating. Every choice traces to
 specific research claims. The engine reasons from principles about what your
@@ -83,9 +83,9 @@ domain needs and why.
 |-------|-------------|
 | **Detection** | Detects Claude Code environment and capabilities |
 | **Understanding** | 2-4 conversation turns where you describe your domain |
-| **Derivation** | Maps signals to vocabulary, schema, and workflow |
+| **Derivation** | Maps signals to vocabulary; schema stays fixed and attributes become tags |
 | **Proposal** | Shows what will be generated and why, in your vocabulary |
-| **Generation** | Produces all files: context file, folders, templates, skills, hooks, and hub MOC |
+| **Generation** | Produces all files: context file, folders, schema, skills, hooks, and hub MOC |
 | **Validation** | Checks generated dependencies and deterministic runtime validation |
 
 The whole process takes about 20 minutes. It's token-intensive because the engine
@@ -102,7 +102,7 @@ Every generated system separates content into three spaces:
 |-------|---------|--------|
 | **self/** | Agent persistent mind -- identity, methodology, goals | Slow (tens of files) |
 | **notes/** | Knowledge graph -- the reason the system exists | Steady (10-50/week) |
-| **ops/** | Operational coordination -- templates, derivation, sessions | Fluctuating |
+| **ops/** | Operational coordination -- schema, derivation, sessions | Fluctuating |
 
 Names adapt to your domain (`notes/` might become `reflections/`, `claims/`,
 or `decisions/`), but the separation is invariant.

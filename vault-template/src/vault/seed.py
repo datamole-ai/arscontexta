@@ -5,9 +5,9 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal
 
-from arscontexta_vault.errors import VaultError
-from arscontexta_vault.markdown import slug
-from arscontexta_vault.paths import VaultPaths
+from vault.errors import VaultError
+from vault.markdown import slug
+from vault.paths import VaultPaths
 
 SeedMode = Literal["structure", "capture"]
 

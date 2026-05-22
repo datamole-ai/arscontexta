@@ -13,12 +13,12 @@ How to build each component of a knowledge system. Each blueprint explains WHAT 
 **How to implement:**
 - Title: lowercase prose proposition (no punctuation that breaks filesystems)
 - Body: reasoning that supports the title claim
-- YAML frontmatter: `description` (required), domain-specific fields (optional)
+- YAML frontmatter: the fixed five-field schema; domain-specific attributes use `tags`
 - Footer: `Topics:` linking to parent MOC(s)
 
 **Quality gate:** The composability test — can you complete "This note argues that [title]"? If yes, it's a proper note. If not, it's a topic label.
 
-**Template:** See `templates/base-note.md`
+**Schema:** See `schema.yaml`
 
 ---
 
@@ -29,12 +29,12 @@ How to build each component of a knowledge system. Each blueprint explains WHAT 
 **Why:** Metadata reduces entropy. Pre-computed low-entropy representations (content_type, domain, mastery level) shrink the search space. An agent scanning 500 notes can filter by `content_type: pattern` before reading anything — this is retrieval utility driving design.
 
 **How to implement:**
-- Universal base: `content_type`, `granularity`, `description`, `created_at`, `tags`
-- Domain extensions: add fields relevant to the use case
+- Fixed fields: `content_type`, `granularity`, `description`, `created_at`, `tags`
+- Domain-specific attributes: represent as Obsidian-compatible tags, not additional fields
 - Query via ripgrep: `rg '^content_type: pattern' notes/`
-- Templates define valid schemas per domain
+- `ops/schema.yaml` defines required fields, enum values, and deterministic constraints
 
-**Evolution:** Schemas are living structures. Add fields when a genuine querying need emerges. Remove fields nobody queries. The template is the single source of truth.
+**Evolution:** Keep the schema stable. Add or refine tags when a genuine querying need emerges. Use modern Obsidian property names (`tags`, `aliases`, `cssclasses`) and avoid deprecated singular forms. `ops/schema.yaml` is the single source of truth.
 
 ---
 
@@ -88,26 +88,26 @@ self/           — agent's persistent mind space
   ├── identity.md
   ├── methodology.md
   └── goals.md
-templates/      — note templates per domain
+ops/schema.yaml — note property schema
 ```
 
 **Principle:** If it's in inbox, it's unprocessed. If it's in notes, it's structured. If it's in archive, it's done.
 
 ---
 
-## Templates — Reusable Structures
+## Schema Contract — Reusable Property Rules
 
-**What:** Pre-defined note structures per domain with required fields and valid values.
+**What:** A single machine-readable schema with required fields, valid enum values, and Obsidian compatibility rules.
 
-**Why:** Schema templates reduce cognitive overhead at capture time. They shift decisions from "what fields should I use?" to "what values should I fill in?" — execution over design.
+**Why:** A schema contract reduces cognitive overhead at capture time. It shifts decisions from "what fields should I use?" to "what values should I fill in?" — execution over design.
 
 **How to implement:**
-- One template per domain (research, learning, relationships, etc.)
-- Universal base template for domain-agnostic notes
-- MOC template for navigation hubs
-- Templates define valid enum values for constrained fields
+- One `ops/schema.yaml` per generated vault
+- Fixed required fields for every note
+- Vault-specific `content_type` enum values
+- Obsidian-compatible `tags`, plus allowed default properties `aliases` and `cssclasses`
 
-**Templates are the single source of truth for schema.** Validation checks notes against templates.
+**The schema file is the single source of truth for note properties.** Validation checks notes against `ops/schema.yaml`.
 
 ---
 

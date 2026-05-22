@@ -85,7 +85,7 @@ These hold across all generated systems:
 
 ### What Does NOT Belong in Notes
 
-- Runtime templates and derivation records -> ops/
+- Runtime schema and derivation records -> ops/
 - Agent self-knowledge -> self/
 - Health workflow output -> transient JSON from `/health`
 - Temporary scaffolding -> ops/
@@ -98,17 +98,17 @@ These hold across all generated systems:
 
 **Growth pattern:** Fluctuating — grows during active work, shrinks during maintenance. Nothing in ops/ is permanent knowledge.
 
-**Load pattern:** Targeted. Templates, derivation records, and session handoffs. Never loaded in bulk.
+**Load pattern:** Targeted. Schema, derivation records, and session handoffs. Never loaded in bulk.
 
-**Purpose:** Keep the knowledge graph clean by separating operational scaffolding from durable knowledge. Without ops/, templates, derivation records, and transient coordination artifacts accumulate alongside genuine insights, polluting search results and inflating note counts.
+**Purpose:** Keep the knowledge graph clean by separating operational scaffolding from durable knowledge. Without ops/, schema, derivation records, and transient coordination artifacts accumulate alongside genuine insights, polluting search results and inflating note counts.
 
 ### Contents
 
 | Directory | Contents | Lifecycle |
 |-----------|----------|-----------|
-| `derivation.md` | The original derivation record — domain summary, vocabulary choices, schema decisions, deferred candidates | Semi-permanent — rarely updated |
+| `derivation.md` | The original derivation record — domain summary, vocabulary choices, fixed schema, starter tag vocabulary | Semi-permanent — rarely updated |
 | `derivation-manifest.yaml` | Runtime vocabulary and folder-name manifest for generated skills | Semi-permanent |
-| `templates/` | Canonical note templates and `_schema` blocks | Semi-permanent |
+| `schema.yaml` | Canonical note property schema and Obsidian compatibility contract | Semi-permanent |
 
 ### Content Promotion Rule
 
@@ -156,7 +156,7 @@ project-root/
 └── ops/
     ├── derivation.md
     ├── derivation-manifest.yaml
-    └── templates/
+    └── schema.yaml
 ```
 
 ## Content Routing Decision Tree
@@ -176,7 +176,7 @@ Is this about the agent itself?
     │       └── May be promoted to notes/ later if it persists
     │
     └── NO: Is this operational coordination?
-        └── YES -> ops/ (template, derivation record, session handoff)
+        └── YES -> ops/ (schema, derivation record, session handoff)
 ```
 
 **Quick routing rules:**

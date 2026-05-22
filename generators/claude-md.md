@@ -45,7 +45,7 @@ If any answer is "no," fix it before saving. Discovery-first is a creation const
 | {DOMAIN:Knowledge} claims, insights | {DOMAIN:note_collection}/ | Research findings, patterns, principles |
 | Raw material to process | {DOMAIN:inbox}/ | Articles, voice dumps, links, imported content |
 | Agent identity, methodology, preferences | self/ | Working patterns, learned preferences, goals |
-| Operational coordination and generated references | ops/ | Templates, feature docs, derivation record |
+| Operational coordination and generated references | ops/ | Schema, feature docs, derivation record |
 | Friction signals, patterns noticed | ops/observations/ | Search failures, methodology improvements |
 
 When uncertain, ask: "Is this durable {DOMAIN:knowledge} ({DOMAIN:note_collection}/), agent identity (self/), or temporal coordination (ops/)?" Durable {DOMAIN:knowledge} earns its place in the graph. Agent identity shapes future behavior. Everything else is operational.
@@ -70,7 +70,7 @@ When users ask about system structure, schema, methodology, or any meta-question
 
 | Pattern | Route To | Fallback |
 |---------|----------|----------|
-| "How does <system topic> work?" — schema, {DOMAIN:topic maps}, pipeline, templates, derivation | /ask | Read the file /ask points to |
+| "How does <system topic> work?" — schema, {DOMAIN:topic maps}, pipeline, derivation | /ask | Read the file /ask points to |
 | "What does my system know about <topic>?" | Grep {DOMAIN:note_collection}/ or semantic search | Check ops/derivation.md for system self-knowledge |
 | "What should I work on next?" | /health | Diagnose + ranked recommendations |
 ```

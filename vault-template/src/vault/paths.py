@@ -5,7 +5,7 @@ from pathlib import Path
 
 import yaml
 
-from arscontexta_vault.errors import VaultError
+from vault.errors import VaultError
 
 
 @dataclass(frozen=True)
@@ -34,8 +34,8 @@ class VaultPaths:
         raise VaultError(".arscontexta marker not found; run from a generated vault")
 
     @property
-    def template_note(self) -> Path:
-        return self.root / "ops" / "templates" / "note.md"
+    def schema_file(self) -> Path:
+        return self.root / "ops" / "schema.yaml"
 
     def rel(self, path: Path) -> str:
         try:

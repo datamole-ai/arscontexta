@@ -73,15 +73,15 @@ primitives:
     cognitive_grounding: "Bidirectional orientation — MOCs link down to notes via `## Core Ideas` (the canonical membership index), notes link up to MOCs via the Topics footer (orientation when reading a note alone)"
 
   - id: schema-enforcement
-    name: Schema enforcement via templates
-    description: One unified template (`ops/templates/note.md`) defines the five required fields plus any Filter-A survivors. Enforcement is template-driven — skills that create notes copy the template and populate every required field. The note title is its filename (prose-as-title) and body H1, not a frontmatter field. No runtime validation hook is required. No optional fields exist.
+    name: Schema enforcement via schema contract
+    description: One unified schema (`ops/schema.yaml`) defines the five required fields. Conversation-derived attributes belong in the Obsidian-compatible `tags` property, not additional frontmatter fields. Enforcement is schema-driven — skills that create notes populate every required field. The note title is its filename (prose-as-title) and body H1, not a frontmatter field. No optional Ars fields exist.
     layer: convention
     requires: markdown-yaml
     enforcement: invariant
     validation:
-      check: "every note's frontmatter includes all fields declared in ops/templates/note.md _schema.required:"
+      check: "every note's frontmatter includes all fields declared in ops/schema.yaml required:"
       threshold: ">95% of notes"
-    cognitive_grounding: "Template-as-contract — the shape of the template is the schema; skills that create notes reproduce that shape rather than relying on external validation"
+    cognitive_grounding: "Schema-as-contract — one machine-readable file defines note properties; skills that create notes reproduce that shape and deterministic validation checks it"
 
   - id: self-space
     name: Self space for agent identity and session continuity

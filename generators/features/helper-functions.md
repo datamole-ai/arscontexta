@@ -47,7 +47,7 @@ obsidian properties
 obsidian tags
 ```
 
-**Schema validation** — Validate all {DOMAIN:notes} against their template schemas:
+**Schema validation** — Validate all {DOMAIN:notes} against `ops/schema.yaml`:
 ```bash
 uv run arscontexta-vault validate --all
 ```

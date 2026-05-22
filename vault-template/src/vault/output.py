@@ -6,7 +6,7 @@ from typing import Any
 
 import typer
 
-from arscontexta_vault.errors import VaultError
+from vault.errors import VaultError
 
 
 def emit_json(value: Any) -> None:

@@ -3,7 +3,7 @@
 ## Context File Block
 
 ```markdown
-## Note Granularity — Two Pipelines, One Graph, One Template
+## Note Granularity — Two Pipelines, One Graph, One Schema
 
 Every {DOMAIN:note} declares its `granularity` in frontmatter: `structure` or `capture`. Content flows through `{DOMAIN:inbox}/` and one of two pipelines routes on the frontmatter value — not on a directory path.
 
@@ -13,7 +13,7 @@ Every {DOMAIN:note} declares its `granularity` in frontmatter: `structure` or `c
 | Capture | /capture | `capture` | Verbatim source in a fenced block — no transformation |
 
 **Shared invariants across both:**
-- One unified template (`ops/templates/note.md`) — `granularity` is a field, not a directory
+- One unified schema (`ops/schema.yaml`) — `granularity` is a field, not a directory
 - Every note in the same flat `{DOMAIN:note_collection}/` folder regardless of granularity
 - Every note has the five required fields (content_type, granularity, description, created_at, tags)
 - Wiki links connect notes to the graph

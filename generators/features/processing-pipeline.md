@@ -81,7 +81,7 @@ Four checks in one phase:
 
 1. **Description quality (cold-read test)** — Read ONLY the title and description. Without reading the body, predict what the {DOMAIN:note} contains. Then read the body. If your prediction missed major content, the description needs improvement. This is the testing effect applied to vault quality: self-testing reveals weak descriptions before they cause retrieval failures in practice.
 
-2. **Schema compliance** — All required fields present, enum values valid, {DOMAIN:topic} links exist, no unknown fields. The template `_schema` block defines what is valid.
+2. **Schema compliance** — All required fields present, enum values valid, {DOMAIN:topic} links exist, no unknown fields. `ops/schema.yaml` defines what is valid.
 
 3. **Source faithfulness** — For source-backed {DOMAIN:notes}, titles, frontmatter descriptions, body claims, and footer bullets must be directly supported by the archived source unless explicitly marked as inference. Source links resolve separately from ordinary knowledge links.
 

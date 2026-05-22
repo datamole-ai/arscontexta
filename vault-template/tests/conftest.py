@@ -12,7 +12,7 @@ def vault(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     (tmp_path / "notes").mkdir()
     (tmp_path / "inbox").mkdir()
     (tmp_path / "archive").mkdir()
-    (tmp_path / "ops" / "templates").mkdir(parents=True)
+    (tmp_path / "ops").mkdir()
     (tmp_path / "ops" / "derivation-manifest.yaml").write_text(
         """
 ---
@@ -28,36 +28,27 @@ vocabulary:
 """.lstrip(),
         encoding="utf-8",
     )
-    (tmp_path / "ops" / "templates" / "note.md").write_text(
-        """---
-_schema:
-  required:
-    - content_type
-    - granularity
-    - description
-    - created_at
-    - tags
-  enums:
-    granularity:
-      - structure
-      - capture
-    content_type:
-      - claim
-      - source
-  constraints:
-    description:
-      max_length: 200
-    created_at:
-      format: "ISO 8601 date (YYYY-MM-DD)."
-    tags:
-      format: "Array of strings."
-content_type: ""
-granularity: structure
-description: ""
-created_at: YYYY-MM-DD
-tags: []
----
-# Template
+    (tmp_path / "ops" / "schema.yaml").write_text(
+        """required:
+  - content_type
+  - granularity
+  - description
+  - created_at
+  - tags
+enums:
+  granularity:
+    - structure
+    - capture
+  content_type:
+    - claim
+    - source
+constraints:
+  description:
+    max_length: 200
+  created_at:
+    format: "ISO 8601 date (YYYY-MM-DD)."
+  tags:
+    format: "Array of strings."
 """,
         encoding="utf-8",
     )

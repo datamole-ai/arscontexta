@@ -63,13 +63,14 @@ Each `SKILL.md` uses `{DOMAIN:…}` placeholders that the derivation engine rewr
 | `session-lifecycle.md` | orient / work / persist spec |
 | `self-space.md` | agent-identity generation guide |
 | `semantic-vs-keyword.md` | search modality selection |
-| `templates/` | `moc.md`, `note.md` |
+| `schema.yaml` | canonical note property schema |
+| `templates/` | `moc.md` |
 
 ## generators/features/ (composable CLAUDE.md blocks)
 
 One file per feature; `skills/setup/` generates the full set:
 
-`ethical-guardrails`, `helper-functions`, `maintenance`, `mocs`, `note-granularity`, `processing-pipeline`, `schema`, `self-space`, `semantic-search`, `session-rhythm`, `templates`, `wiki-links`.
+`ethical-guardrails`, `helper-functions`, `maintenance`, `mocs`, `note-granularity`, `processing-pipeline`, `schema`, `schema-contract`, `self-space`, `semantic-search`, `session-rhythm`, `wiki-links`.
 
 ## Hooks
 

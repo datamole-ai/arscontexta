@@ -20,7 +20,7 @@ Read:
 
 ```bash
 cat ops/derivation-manifest.yaml
-cat ops/templates/note.md
+cat ops/schema.yaml
 ```
 
 Then read the entire `source` file.
@@ -33,7 +33,7 @@ Then read the entire `source` file.
 - Carry state only through the provided pipeline JSON; do not create durable recovery files.
 - Graph connection work belongs to `/connect`; this skill may include only minimal source-bounded topic/footer placeholders.
 - Title and description must describe what the captured content contains without adding interpretation.
-- Use `ops/templates/note.md` for required fields, enum values, and deterministic constraints.
+- Use `ops/schema.yaml` for required fields, enum values, and deterministic constraints.
 
 ## Note Shape
 
@@ -57,6 +57,14 @@ tags: []
 Topics:
 - [[<topic map>]]
 ~~~
+
+When `tags` is not empty, use Obsidian YAML list form and omit leading `#`:
+
+```yaml
+tags:
+  - status/draft
+  - source/interview
+```
 
 ## Validation
 

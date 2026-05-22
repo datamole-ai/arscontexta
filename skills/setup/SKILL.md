@@ -71,7 +71,7 @@ What I'll create:
   - connected notes in plain markdown
   - an inbox-to-notes processing pipeline
   - topic maps for navigation
-  - health checks, hooks, and templates
+  - health checks, hooks, and schema
   - agent self-knowledge so future sessions keep continuity
 
 What I need from you:
@@ -83,7 +83,7 @@ your current system.
 
 I'll make the structural calls for you: flat notes, explicit links plus
 semantic search, and three-level navigation. Before writing files, I'll
-show you the proposed folders, schema, workflow, and deferred items.
+show you the proposed folders, fixed schema, workflow, and starter tags.
 
 Tell me about what you want to track, remember, or think about.
 ```
@@ -96,7 +96,7 @@ After presenting the onboarding screen, transition seamlessly to Phase 2. If the
 
 ### Signal Extraction
 
-As the user talks, listen for two kinds of signal: **domain vocabulary** (how they name kinds of notes) and **candidate fields** (things they say they track). These feed vocabulary derivation and Filter A inputs in Phase 3. Treat named groupings as topic-map/navigation signals, not directory candidates.
+As the user talks, listen for **domain vocabulary**: how they name kinds of notes, groupings, workflows, and attributes they want to find later. These feed vocabulary derivation in Phase 3. Treat named groupings as topic-map/navigation signals, not directory candidates. Treat named attributes as tag vocabulary.
 
 ### Vocabulary Extraction
 
@@ -139,7 +139,7 @@ Proceed when the user signals readiness ("just set it up", "whatever you think i
 
 Internal reasoning the user never sees. Do NOT present derivation internals to the user.
 
-Every generated vault ships with the complete skill set, full processing pipeline, and all hooks enabled from day one. The steps below determine vault-specific vocabulary and schema — everything else is constant.
+Every generated vault ships with the complete skill set, full processing pipeline, fixed note schema, and all hooks enabled from day one. The only setup-specific derivation is vocabulary — everything else is constant.
 
 ### Step 3a: Vocabulary Derivation
 
@@ -158,36 +158,25 @@ For novel domains (no reference domain scores above 2.0 affinity):
 3. For each term, use the reference domain with higher overlap for that specific concept.
 4. Flag all blended terms for user confirmation in the Phase 4 proposal.
 
-### Step 3b: Filter A — Fields (Justify-or-Drop)
+### Step 3b: Tags and Fixed Schema
 
 Every vault ships with five required frontmatter fields — NO exceptions, NO optional fields:
 
-- `content_type` — vault-specific enum derived below; agents route on it
+- `content_type` — vault-specific enum derived from vocabulary; agents route on it
 - `granularity` — one of `structure | capture`; pipelines route on it
 - `description` — one sentence adding context beyond the title (<=200 chars)
 - `created_at` — ISO 8601 date; used by archive and staleness checks
-- `tags` — free-form array; escape hatch for emergent attributes
+- `tags` — Obsidian tags property; escape hatch for emergent attributes
 
-**Derive the `content_type` enum from conversation signals.** Listen for how the user names kinds of notes (decisions, specs, reflections, observations, lessons, ...). Three to six values is typical. Keep vault-specific. Never a fixed universal list.
+**Derive the `content_type` enum from vocabulary only.** Listen for how the user names kinds of notes (decisions, specs, reflections, observations, lessons, ...). Three to six values is typical. Keep vault-specific. Never a fixed universal list.
 
-**Then run Filter A on every candidate field beyond the five.** Candidates come from: reference domain defaults, user statements ("I track status"), conversation signals flagged as HIGH for schema (e.g. "I want rigor" suggesting `confidence` or `source_url`).
+Do NOT derive or add fields beyond the five required fields.
 
-For each candidate field, produce three items:
+When the user names attributes they want to track ("status", "confidence", "source", "person", "region", "vintage"), represent them as tag vocabulary. Tags must be Obsidian-compatible: omit the leading `#`, contain no spaces, use `/` for nested tags, and include at least one non-numeric character.
 
-1. **Reader** — name the specific skill or pipeline phase that consumes it.
-2. **Use** — the concrete behavior that reader enables.
-3. **Day-one check** — is that reader actually running on day one of this vault? If the reader is a future/opt-in skill, the answer is NO.
+Reference-domain defaults may suggest tag vocabulary or topic-map names; they never create schema fields.
 
-No shipped skill reads note frontmatter fields beyond the five required. A Filter-A survivor is therefore an advance commitment to author or customize a reader — a hook, a query, or a skill edit. If the user is not ready to make that commitment, defer.
-
-**Outcome:**
-
-- All three present, concrete, and day-one → **Keep.** Add to the derived schema with rationale.
-- Any missing, vague, or not day-one → **Defer.** Record in working memory for the Deferred Candidates section of `ops/derivation.md` (written in Phase 5), with the reason.
-
-**Hard rule:** never keep a field "because the reference domain usually includes it." A reference domain is a candidate list, not an entitlement. The same rule applies to any field named in conversation unless the user stated a concrete reader+use.
-
-Hold the derived schema (the five required fields plus any Filter-A survivors with their rationale) and the deferred-field list in working memory for Phase 4.
+Hold the fixed schema, derived `content_type` enum, and useful tag vocabulary in working memory for Phase 4.
 
 ## PHASE 4: Proposal
 
@@ -203,24 +192,24 @@ Show five labeled blocks in one message:
 
 3. **Processing in their words** — one or two sentences describing the core workflow (capture → process → review). Full detail lives in the generated CLAUDE.md.
 
-4. **Schema** — the canonical schema lives in the `_schema:` block of `ops/templates/note.md` (written in Phase 5). In the proposal, show only:
+4. **Schema** — the canonical schema lives in `ops/schema.yaml` (written in Phase 5). In the proposal, show only:
    - The five required field names as a bullet list: `content_type`, `granularity`, `description`, `created_at`, `tags`.
-   - The `content_type` enum values derived in Step 3b.
-   - Each Filter-A survivor with a one-line rationale: "I kept `<field>` because `<reader>` uses it to `<do what>` on day one."
+   - The `content_type` enum values derived from the user's vocabulary.
+   - Any tag vocabulary worth starting with.
 
-   Do NOT inline the full YAML here — the canonical location is the template file.
+   Do NOT inline the full YAML here — the canonical location is `ops/schema.yaml`.
 
-5. **Deferred items** — fields (from Step 3b) that Filter A dropped, each with its reason. Invite challenge: "If you can name a day-one reader and concrete use for any of these, I'll move it up."
+5. **Navigation choices** — explain which requested groupings will be represented as notes, MOCs, links, tags, or `content_type` inside the flat collection.
 
 End the proposal with: **"Would you like me to adjust anything before I create this?"**
 
 ### Challenge handling
 
-- **Deferred field challenged:** Apply the Filter A check to the challenged field. If the user names a concrete reader+use that runs day-one, promote to Keep. Otherwise the item stays deferred. No silent additions.
+- **Field requested:** Keep the fixed schema. Ask what they need to find or group by, then represent that need as tag vocabulary.
 - **Structural change requested** (e.g. user wants a different content_type enum): Apply the change and re-present the proposal. Treat reference-domain folder defaults, entity hierarchies, and explicit folder requests as navigation candidates, not physical directory candidates. If the requested change is a physical folder hierarchy, explain that setup keeps storage flat, ask what navigation view or day-one workflow they need instead, and represent the need as a note, hub/topic MOC, link pattern, tag, or `content_type` inside the flat collection.
-- **Schema field rename/removal:** Apply and update working-memory schema.
+- **Schema field rename/removal:** Do not rename or remove structural fields during setup. Explain that setup keeps the schema fixed and adapts vocabulary around it.
 
-No file writes happen in Phase 4. All vault artifacts — including `ops/derivation.md` (which contains the Schema Decisions and Deferred Candidates sections) and `ops/templates/note.md` (which contains the canonical `_schema:` block with Filter-A survivors filled in) — are written in Phase 5.
+No file writes happen in Phase 4. All vault artifacts — including `ops/derivation.md` (which records the fixed schema and vocabulary choices) and `ops/schema.yaml` (which contains the canonical schema contract) — are written in Phase 5.
 
 ---
 
@@ -239,7 +228,7 @@ Write `ops/derivation.md` FIRST, before any other artifact. Every subsequent ste
 | 1 | Main agent | derivation.md, folders, vault marker, Python tooling | Foundation setup |
 | 2 | Main agent | self/identity.md, self/methodology.md, self/goals.md | Identity & self-knowledge |
 | 3 | Main agent | ops/derivation-manifest.yaml | Runtime manifest |
-| 4 | Main agent | ops/templates/note.md | Templates |
+| 4 | Main agent | ops/schema.yaml | Schema contract |
 | 5 | Skills agent (parallel) | .claude/skills/*/SKILL.md (8 skills) | Skills (copy sources + apply domain substitutions) |
 | 6 | Context agent (parallel) | CLAUDE.md, ops/features/*.md, .claude/skills/ask/SKILL.md | Context file + feature references + /ask |
 | 7 | Hub agent (parallel) | [domain:notes]/index.md | Hub MOC |
@@ -335,7 +324,7 @@ engine_version: "1.0.0"
 
 ## Schema Decisions
 
-The canonical schema lives in the `_schema:` block of `ops/templates/note.md`. This section records the decisions that shaped it.
+The canonical schema lives in `ops/schema.yaml`. This section records the decisions that shaped it.
 
 **Required fields (always present):**
 - `content_type` — vault enum below
@@ -344,26 +333,17 @@ The canonical schema lives in the `_schema:` block of `ops/templates/note.md`. T
 - `created_at` — ISO 8601 date
 - `tags` — free-form array
 
-**Content_type enum (derived in Step 3b from conversation signals):**
+**Content_type enum (derived from vocabulary):**
 - [enum_value_1]
 - [enum_value_2]
 - [...]
 
-**Filter-A survivors (fields kept beyond the five required):**
-- [field_name] — kept because [reader] uses it to [do what]; day-one via [skill]. Signal that justified it: "[user phrase]".
+**Tag vocabulary (conversation-derived attributes):**
+- [tag_1]
+- [tag_2]
 - [...]
 
-If Filter A produced no survivors, record: "None — the five required fields cover this vault."
-
-## Deferred Candidates
-
-Fields dropped by Filter A, with reasons. Promote later by editing `_schema.required:` and recording the day-one reader/use here.
-
-### Fields deferred
-- **[field_name]** — [reason]. Example: proposed by reference default but no day-one reader named.
-- [...]
-
-If nothing was deferred, record: "None — every field candidate passed Filter A."
+If no useful starter tags emerged, record: "None — start with empty tags and let them emerge during use."
 
 ## Vocabulary Mapping
 | Universal Term | Domain Term | Category |
@@ -382,7 +362,7 @@ If nothing was deferred, record: "None — every field candidate passed Filter A
 - Folder names: [domain-specific folder names]
 - Skills to generate: [all generated skills — vocabulary-transformed]
 - Hooks to generate: [orient, qmd-sync]
-- Templates to create: [list]
+- Schema file: ops/schema.yaml
 - Topology: [single-agent / skills / fresh-context / orchestrated]
 ```
 
@@ -403,11 +383,11 @@ Create the three-space layout with domain-named directories. The physical note c
 |   +-- goals.md                     <-- created in Pipeline Step 2
 |   +-- relationships.md             <-- optional, if domain involves people
 +-- ops/                             <-- operational coordination
-|   +-- templates/                   <-- single note.md template (created in Pipeline Step 4)
+|   +-- schema.yaml                  <-- note property contract (created in Pipeline Step 4)
 |   +-- features/                    <-- feature reference files
 +-- pyproject.toml                   <-- uv project manifest copied from vault-template
 +-- uv.lock                          <-- generated by `uv lock`
-+-- src/arscontexta_vault/           <-- vault-local Python tooling copied from vault-template
++-- src/vault/                       <-- vault-local Python tooling copied from vault-template
 +-- tests/                           <-- tooling smoke tests copied from vault-template
 ```
 
@@ -618,25 +598,25 @@ vocabulary:
 
 ---
 
-#### Pipeline Step 4: Templates (Main Agent)
+#### Pipeline Step 4: Schema Contract (Main Agent)
 
-**Scope:** ops/templates/note.md
+**Scope:** ops/schema.yaml
 
 **Reads:** ops/derivation.md
 
-Create the template. Do not add graph diagnostics, semantic-search commands, or runtime command examples to `ops/templates/note.md`.
+Create the schema contract. Do not add graph diagnostics, semantic-search commands, or runtime command examples to `ops/schema.yaml`.
 
 ---
 
-##### Unified note template
+##### Unified note schema
 
-Create exactly one template file: `ops/templates/note.md`. Every note uses it regardless of `content_type` or `granularity`.
+Create exactly one schema file: `ops/schema.yaml`. Every note is validated against it regardless of `content_type` or `granularity`.
 
-Read `${CLAUDE_PLUGIN_ROOT}/reference/templates/note.md` for canonical structure and the Schema Decisions section of `ops/derivation.md` for content_type enum values and Filter-A survivors.
+Read `${CLAUDE_PLUGIN_ROOT}/reference/schema.yaml` for canonical structure and the Schema Decisions section of `ops/derivation.md` for content_type enum values.
 
-1. Copy the reference `note.md` frontmatter verbatim as `_schema`, then splice in: `content_type` enum values into `enums.content_type`; Filter-A survivor fields appended to `required` with rationale comments and any associated constraints.
-2. Copy the body structure (H1, prose body, `---`, `Topics:` footer) verbatim.
-3. Apply vocabulary transformation to body prose and comments only — `description`, `content_type`, `granularity`, `created_at`, `tags` YAML field names stay structural.
+1. Copy the reference `schema.yaml` verbatim, then splice in `content_type` enum values into `enums.content_type`.
+2. Do not append conversation-derived fields to `required`; represent them as tag vocabulary.
+3. Do not create a note template file. Skills create notes directly from `ops/schema.yaml` plus the note shape examples in their own instructions.
 
 ---
 
@@ -771,7 +751,7 @@ The skill index does not refresh mid-session. After creating all skill files:
 
 **Agent scope:** `CLAUDE.md`, `ops/features/*.md`, `.claude/skills/ask/SKILL.md`
 
-**Agent reads:** `ops/derivation.md`, `${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md`, `${CLAUDE_PLUGIN_ROOT}/generators/features/*.md`, `${CLAUDE_PLUGIN_ROOT}/generators/ask-router.md`, `${CLAUDE_PLUGIN_ROOT}/reference/vocabulary-transforms.md`, generated templates (for reference verification), generated skills (for reference verification).
+**Agent reads:** `ops/derivation.md`, `${CLAUDE_PLUGIN_ROOT}/generators/claude-md.md`, `${CLAUDE_PLUGIN_ROOT}/generators/features/*.md`, `${CLAUDE_PLUGIN_ROOT}/generators/ask-router.md`, `${CLAUDE_PLUGIN_ROOT}/reference/vocabulary-transforms.md`, generated schema/features (for reference verification), generated skills (for reference verification).
 
 **Agent-specific prompt addition:** Include the list of feature source paths under `${CLAUDE_PLUGIN_ROOT}/generators/features/`.
 
@@ -791,7 +771,7 @@ Generate three artifacts in order:
 Step 1: Select feature references.
   All feature blocks are always included: note-granularity, wiki-links, mocs,
     processing-pipeline, semantic-search, schema, maintenance, session-rhythm,
-    templates, ethical-guardrails, helper-functions,
+    schema-contract, ethical-guardrails, helper-functions,
     self-space.
 
 Step 2: Write ops/features/<name>.md for each selected block.
@@ -832,7 +812,7 @@ Step 5: Coherence verification.
         vocabulary transform
 ```
 
-**Structural Marker Protection:** Never apply vocabulary transformation to YAML field names (`description:`, `content_type:`, `type:`, `granularity:`, `status:`, `_schema:`, `name:`, `allowed-tools:`). Body-footer labels like `Topics:` and `Relevant Notes:` MAY be domain-renamed. Transform values, prose, and footer labels only.
+**Structural Marker Protection:** Never apply vocabulary transformation to YAML field names (`description:`, `content_type:`, `type:`, `granularity:`, `status:`, `name:`, `allowed-tools:`). Body-footer labels like `Topics:` and `Relevant Notes:` MAY be domain-renamed. Transform values, prose, and footer labels only.
 
 **Quality requirements:**
 
@@ -1006,10 +986,10 @@ Your [domain] system is ready.
 Created:
   [list of folders with domain names]
   [context file name]
-  [templates created]
+  ops/schema.yaml
   [N] skills generated into .claude/skills/ (vocabulary-transformed)
   /arscontexta:setup available as the plugin-level command
-  vault-local Python tooling at pyproject.toml and src/arscontexta_vault/
+  vault-local Python tooling at pyproject.toml and src/vault/
   [hooks configured]
   ops/derivation.md      -- the complete record of how this system was derived
   ops/derivation-manifest.yaml -- runtime vocabulary for generated skills

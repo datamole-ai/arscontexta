@@ -7,19 +7,25 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-from arscontexta_vault.errors import VaultError
-from arscontexta_vault.markdown import parse_frontmatter
-from arscontexta_vault.paths import VaultPaths
+from vault.errors import VaultError
+from vault.markdown import parse_frontmatter, parse_yaml_mapping
+from vault.paths import VaultPaths
 
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+DEPRECATED_PROPERTIES = {
+    "tag": "tags",
+    "alias": "aliases",
+    "cssclass": "cssclasses",
+}
+OBSIDIAN_DEFAULT_PROPERTIES = {"aliases", "cssclasses"}
 
 
 def _load_schema(paths: VaultPaths) -> dict[str, Any]:
-    if not paths.template_note.exists():
-        raise VaultError("ops/templates/note.md not found", command="validate")
-    schema = parse_frontmatter(paths.template_note).get("_schema")
+    if not paths.schema_file.exists():
+        raise VaultError("ops/schema.yaml not found", command="validate")
+    schema = parse_yaml_mapping(paths.schema_file)
     if not isinstance(schema, dict):
-        raise VaultError("ops/templates/note.md lacks _schema mapping", command="validate")
+        raise VaultError("ops/schema.yaml must be a mapping", command="validate")
     return schema
 
 
@@ -61,14 +67,21 @@ def validate_note(paths: VaultPaths, path: Path, schema: dict[str, Any] | None =
 
     required = schema.get("required", [])
     if not isinstance(required, list):
-        errors.append("_schema.required must be a list")
+        errors.append("schema.required must be a list")
         required = []
 
     for field in required:
         if field not in frontmatter:
             errors.append(f"missing required field: {field}")
 
+    allowed_properties = set(required) | OBSIDIAN_DEFAULT_PROPERTIES
     for field in frontmatter:
+        if field in DEPRECATED_PROPERTIES:
+            errors.append(f"deprecated Obsidian property: {field}; use {DEPRECATED_PROPERTIES[field]}")
+        if field not in allowed_properties:
+            errors.append(f"unknown property: {field}; use tags for conversation-derived attributes")
+        if isinstance(frontmatter[field], dict):
+            errors.append(f"nested properties are not Obsidian-compatible: {field}")
         allowed = _enum_values(schema, field)
         if allowed and frontmatter[field] not in allowed:
             errors.append(f"invalid {field}: {frontmatter[field]}")
@@ -92,7 +105,38 @@ def validate_note(paths: VaultPaths, path: Path, schema: dict[str, Any] | None =
             errors.append("tags must be a list")
         elif any(not isinstance(tag, str) for tag in tags):
             errors.append("tags must contain only strings")
+        else:
+            for tag in tags:
+                tag_errors = _validate_tag(tag)
+                errors.extend(tag_errors)
 
+    aliases = frontmatter.get("aliases")
+    if "aliases" in frontmatter and (
+        not isinstance(aliases, list) or any(not isinstance(alias, str) for alias in aliases)
+    ):
+        errors.append("aliases must be a list of strings")
+
+    cssclasses = frontmatter.get("cssclasses")
+    if "cssclasses" in frontmatter and (
+        not isinstance(cssclasses, list)
+        or any(not isinstance(cssclass, str) for cssclass in cssclasses)
+    ):
+        errors.append("cssclasses must be a list of strings")
+
+    return errors
+
+
+def _validate_tag(tag: str) -> list[str]:
+    errors: list[str] = []
+    if not tag:
+        errors.append("tags must not contain empty strings")
+    if tag.startswith("#"):
+        errors.append(f"tag must omit leading #: {tag}")
+    if any(character.isspace() for character in tag):
+        errors.append(f"tag must not contain spaces: {tag}")
+    comparable = tag.replace("/", "")
+    if comparable and comparable.isdigit():
+        errors.append(f"tag must contain at least one non-numeric character: {tag}")
     return errors
 
 

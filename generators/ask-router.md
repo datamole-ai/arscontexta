@@ -9,7 +9,7 @@ When generating the `/ask` skill for a vault, produce `.claude/skills/ask/SKILL.
 ```yaml
 ---
 name: ask
-description: User-invoked reference lookup for questions about this vault's structure, schema, pipeline, {DOMAIN:topic maps}, templates, or derivation. Invoke explicitly with /ask <question>.
+description: User-invoked reference lookup for questions about this vault's structure, schema, pipeline, {DOMAIN:topic maps}, or derivation. Invoke explicitly with /ask <question>.
 allowed-tools: Read, Grep, Glob
 ---
 ```
@@ -62,7 +62,7 @@ Canonical mapping (source file → `/ask` section heading). Sections appear in t
 | `schema.md` | `### Schema / frontmatter` |
 | `maintenance.md` | `### Maintenance checks` |
 | `session-rhythm.md` | `### Session rhythm` |
-| `templates.md` | `### Templates` |
+| `schema-contract.md` | `### Schema Contract` |
 | `ethical-guardrails.md` | `### Ethical guardrails` |
 | `self-space.md` | `### Self space` |
 | `helper-functions.md` | `### Helper functions` |
