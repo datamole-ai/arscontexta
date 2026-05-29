@@ -117,7 +117,7 @@ The happy-path pipeline completes in one invocation. It does not persist durable
 ~~~json
 {
   "batch": "source-name",
-  "source": "archive/2026-05-20-source-name/source.md",
+  "source": "archive/2026-05-20-source-name.md",
   "artifacts": [
     {"kind": "note", "path": "{DOMAIN:note_collection}/path/to/note.md"},
     {"kind": "enrichment", "path": "{DOMAIN:note_collection}/existing.md"}
@@ -195,6 +195,7 @@ If all phases run in one session, the verify phase runs on degraded attention â€
 - /connect may add `commit_paths`
 - /verify returns validated state
 - /pipeline commits source, artifacts, and commit_paths directly with git
+- /pipeline refreshes qmd after a successful commit so new {DOMAIN:notes} are searchable in the next run
 
 **Processing is orchestrated by default.** /pipeline orchestrates the full sequence. Lean state drives what happens next.
 

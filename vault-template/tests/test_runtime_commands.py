@@ -40,8 +40,9 @@ def test_seed_archives_source_and_emits_lean_state(vault: Path) -> None:
     assert result["batch"] == "source-file"
     assert set(result) == {"ok", "command", "batch", "source"}
     assert result["source"].startswith("archive/")
-    assert result["source"].endswith("/source.md")
+    assert result["source"].endswith("-source-file.md")
     assert (vault / result["source"]).read_text(encoding="utf-8") == "# Source\n"
+    assert not (vault / "archive" / "source-file").exists()
     assert source.exists()
     assert not (vault / "ops" / "queue" / "queue.json").exists()
 
@@ -98,11 +99,10 @@ def test_validate_rejects_obsidian_incompatible_properties(vault: Path) -> None:
     exit_code, failure = invoke_json(["validate", "--path", "notes/bad-tags.md"])
 
     assert exit_code == 1
-    assert "deprecated Obsidian property: tag; use tags" in failure["errors"]
-    assert "unknown property: tag; use tags for conversation-derived attributes" in failure["errors"]
-    assert "unknown property: confidence; use tags for conversation-derived attributes" in failure[
-        "errors"
-    ]
+    errors = failure["errors"]
+    assert "deprecated Obsidian property: tag; use tags" in errors
+    assert "unknown property: tag; use tags for conversation-derived attributes" in errors
+    assert "unknown property: confidence; use tags for conversation-derived attributes" in errors
     assert "tag must omit leading #: #prefixed" in failure["errors"]
     assert "tag must not contain spaces: has space" in failure["errors"]
     assert "tag must contain at least one non-numeric character: 1984" in failure["errors"]
@@ -131,6 +131,40 @@ def test_validate_accepts_obsidian_default_properties(vault: Path) -> None:
         "command": "validate",
         "path": "notes/with-obsidian-defaults.md",
     }
+
+
+def test_validate_enforces_configured_tag_prefixes_only_for_namespaced_tags(
+    vault: Path,
+) -> None:
+    schema = vault / "ops" / "schema.yaml"
+    schema.write_text(
+        schema.read_text(encoding="utf-8")
+        + "    allowed_prefixes:\n"
+        + "      - project/\n"
+        + "      - customer/\n",
+        encoding="utf-8",
+    )
+    write_note(vault / "notes" / "allowed-tag.md", "Allowed Tag", tags=["project/mso"])
+    write_note(vault / "notes" / "bare-tag.md", "Bare Tag", tags=["mso"])
+    write_note(vault / "notes" / "bad-prefix.md", "Bad Prefix", tags=["vendor/lely"])
+
+    assert run_json(["validate", "--path", "notes/allowed-tag.md"]) == {
+        "ok": True,
+        "command": "validate",
+        "path": "notes/allowed-tag.md",
+    }
+    assert run_json(["validate", "--path", "notes/bare-tag.md"]) == {
+        "ok": True,
+        "command": "validate",
+        "path": "notes/bare-tag.md",
+    }
+    exit_code, failure = invoke_json(["validate", "--path", "notes/bad-prefix.md"])
+
+    assert exit_code == 1
+    assert (
+        "namespaced tag must use an allowed prefix (project/, customer/): vendor/lely"
+        in failure["errors"]
+    )
 
 
 def test_validate_rejects_nested_note_properties(vault: Path) -> None:
@@ -179,7 +213,7 @@ def test_validate_all_and_artifacts(vault: Path) -> None:
     write_note(vault / "notes" / "good.md", "Good")
     state = {
         "batch": "batch",
-        "source": "archive/batch/source.md",
+        "source": "archive/2026-05-22-batch.md",
         "artifacts": [{"kind": "note", "path": "notes/good.md"}],
         "commit_paths": ["notes/topic-map.md"],
     }
@@ -194,7 +228,7 @@ def test_validate_all_and_artifacts(vault: Path) -> None:
         "ok": True,
         "command": "validate",
         "batch": "batch",
-        "source": "archive/batch/source.md",
+        "source": "archive/2026-05-22-batch.md",
         "artifacts": [{"kind": "note", "path": "notes/good.md"}],
         "commit_paths": ["notes/topic-map.md"],
     }

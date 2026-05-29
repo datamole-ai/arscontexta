@@ -39,6 +39,25 @@ def _enum_values(schema: dict[str, Any], field: str) -> list[Any]:
     return [value for value in values if value is not None]
 
 
+def _tag_allowed_prefixes(schema: dict[str, Any], errors: list[str]) -> list[str]:
+    constraints = schema.get("constraints")
+    if not isinstance(constraints, dict):
+        return []
+    tags = constraints.get("tags")
+    if not isinstance(tags, dict):
+        return []
+    prefixes = tags.get("allowed_prefixes", [])
+    if prefixes is None:
+        return []
+    if not isinstance(prefixes, list):
+        errors.append("schema.constraints.tags.allowed_prefixes must be a list")
+        return []
+    if any(not isinstance(prefix, str) or not prefix for prefix in prefixes):
+        errors.append("schema.constraints.tags.allowed_prefixes must contain non-empty strings")
+        return []
+    return prefixes
+
+
 def _as_date_string(value: Any) -> str | None:
     if isinstance(value, date):
         return value.isoformat()
@@ -77,9 +96,12 @@ def validate_note(paths: VaultPaths, path: Path, schema: dict[str, Any] | None =
     allowed_properties = set(required) | OBSIDIAN_DEFAULT_PROPERTIES
     for field in frontmatter:
         if field in DEPRECATED_PROPERTIES:
-            errors.append(f"deprecated Obsidian property: {field}; use {DEPRECATED_PROPERTIES[field]}")
+            replacement = DEPRECATED_PROPERTIES[field]
+            errors.append(f"deprecated Obsidian property: {field}; use {replacement}")
         if field not in allowed_properties:
-            errors.append(f"unknown property: {field}; use tags for conversation-derived attributes")
+            errors.append(
+                f"unknown property: {field}; use tags for conversation-derived attributes"
+            )
         if isinstance(frontmatter[field], dict):
             errors.append(f"nested properties are not Obsidian-compatible: {field}")
         allowed = _enum_values(schema, field)
@@ -100,6 +122,7 @@ def validate_note(paths: VaultPaths, path: Path, schema: dict[str, Any] | None =
             errors.append("created_at must use YYYY-MM-DD")
 
     tags = frontmatter.get("tags")
+    tag_allowed_prefixes = _tag_allowed_prefixes(schema, errors)
     if "tags" in frontmatter:
         if not isinstance(tags, list):
             errors.append("tags must be a list")
@@ -107,7 +130,7 @@ def validate_note(paths: VaultPaths, path: Path, schema: dict[str, Any] | None =
             errors.append("tags must contain only strings")
         else:
             for tag in tags:
-                tag_errors = _validate_tag(tag)
+                tag_errors = _validate_tag(tag, tag_allowed_prefixes)
                 errors.extend(tag_errors)
 
     aliases = frontmatter.get("aliases")
@@ -126,7 +149,7 @@ def validate_note(paths: VaultPaths, path: Path, schema: dict[str, Any] | None =
     return errors
 
 
-def _validate_tag(tag: str) -> list[str]:
+def _validate_tag(tag: str, allowed_prefixes: list[str]) -> list[str]:
     errors: list[str] = []
     if not tag:
         errors.append("tags must not contain empty strings")
@@ -137,6 +160,10 @@ def _validate_tag(tag: str) -> list[str]:
     comparable = tag.replace("/", "")
     if comparable and comparable.isdigit():
         errors.append(f"tag must contain at least one non-numeric character: {tag}")
+    has_allowed_prefix = any(tag.startswith(prefix) for prefix in allowed_prefixes)
+    if "/" in tag and allowed_prefixes and not has_allowed_prefix:
+        allowed = ", ".join(allowed_prefixes)
+        errors.append(f"namespaced tag must use an allowed prefix ({allowed}): {tag}")
     return errors
 
 

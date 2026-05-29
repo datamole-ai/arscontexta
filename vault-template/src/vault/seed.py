@@ -11,12 +11,6 @@ from vault.paths import VaultPaths
 
 SeedMode = Literal["structure", "capture"]
 
-
-def _archive_source_name(source: Path) -> str:
-    suffix = source.suffix or ".md"
-    return f"source{suffix}"
-
-
 def seed_source(paths: VaultPaths, source: Path, mode: SeedMode) -> dict:
     source = source if source.is_absolute() else paths.root / source
     if not source.exists() or not source.is_file():
@@ -32,21 +26,20 @@ def seed_source(paths: VaultPaths, source: Path, mode: SeedMode) -> dict:
         raise VaultError("source basename is empty after normalization", command="seed")
 
     today = datetime.now(UTC).strftime("%Y-%m-%d")
-    archive_folder = paths.archive_dir / f"{today}-{source_basename}"
-    if archive_folder.exists():
+    archive_source = paths.archive_dir / f"{today}-{source_basename}.md"
+    if archive_source.exists():
         raise VaultError(
-            f"archive folder already exists: {paths.rel(archive_folder)}",
+            f"archive source already exists: {paths.rel(archive_source)}",
             command="seed",
             batch=source_basename,
         )
 
-    archive_folder.mkdir(parents=True, exist_ok=False)
-    final_source = archive_folder / _archive_source_name(source)
-    shutil.copy2(source, final_source)
+    archive_source.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, archive_source)
 
     return {
         "ok": True,
         "command": "seed",
         "batch": source_basename,
-        "source": paths.rel(final_source),
+        "source": paths.rel(archive_source),
     }

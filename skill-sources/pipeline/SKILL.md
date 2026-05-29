@@ -28,7 +28,7 @@ Pass this lean state between phases:
 ```json
 {
   "batch": "<source-basename>",
-  "source": "archive/<date>-<batch>/source.md",
+  "source": "archive/<date>-<batch>.md",
   "artifacts": [
     {"kind": "note", "path": "notes/example.md"},
     {"kind": "enrichment", "path": "notes/existing.md"}
@@ -69,6 +69,14 @@ Only `batch`, `source`, and `artifacts` are required. `commit_paths` is optional
    - Commit with the fixed message `pipeline: <batch>`.
    - Do not stage all workspace changes.
 
+6. Refresh semantic search after the commit:
+
+   ```bash
+   bash .claude/hooks/qmd-sync.sh
+   ```
+
+   If sync fails, report the commit hash and the qmd sync error. Do not amend, roll back, retry, or stage additional files.
+
 ## Output
 
 Emit a concise human summary after the commit succeeds:
@@ -77,5 +85,6 @@ Emit a concise human summary after the commit succeeds:
 - source path
 - artifact paths
 - commit hash
+- qmd sync status
 
 On any handled runtime failure, surface the returned JSON and stop. Do not attempt recovery, queue repair, extra cleanup, or manual Git staging.

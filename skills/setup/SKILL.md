@@ -399,6 +399,7 @@ Copy the engine's static Python project template into the vault root. This is a 
 
 ```bash
 cp -R "${CLAUDE_PLUGIN_ROOT}/vault-template/." .
+mv .gitignore-vault .gitignore
 uv lock
 ```
 
@@ -897,7 +898,7 @@ Generate a bash script `.claude/hooks/qmd-sync.sh`:
 
 ```bash
 #!/usr/bin/env bash
-# qmd-sync.sh — keep semantic search index current on session start
+# qmd-sync.sh — refresh the semantic search index
 # No-ops if qmd is later removed from PATH after setup
 
 if ! command -v qmd &>/dev/null; then

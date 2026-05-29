@@ -12,7 +12,7 @@ Target: `$ARGUMENTS`
 Parse the target as pipeline state JSON. It must contain:
 
 ```json
-{"batch":"<batch>","source":"archive/<date>-<batch>/source.md","artifacts":[]}
+{"batch":"<batch>","source":"archive/<date>-<batch>.md","artifacts":[]}
 ```
 
 If state is missing or invalid, emit:

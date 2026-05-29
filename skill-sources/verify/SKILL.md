@@ -8,6 +8,8 @@ allowed-tools: Bash
 
 ## Execute
 
+Final response must be raw JSON only: no prose, headings, or Markdown fences.
+
 Target: `$ARGUMENTS`
 
 Parse the target as pipeline state JSON. If missing, emit:
@@ -42,4 +44,4 @@ Rules:
 
 ## Output
 
-On success, emit the validated lean pipeline state JSON. On failure, emit a compact JSON object with `status: "error"` and the failing paths/errors. No prose, headings, or markdown fences.
+On success, emit the validated lean pipeline state JSON. On failure, emit a compact JSON object with `status: "error"` and the failing paths/errors.

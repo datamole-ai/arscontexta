@@ -23,6 +23,7 @@ constraints:
     format: "ISO 8601 date (YYYY-MM-DD)."
   tags:
     format: "Obsidian tags property. Use [] when empty; otherwise use a YAML block list. Omit leading #. No spaces. Use / for nested tags. Must contain at least one non-numeric character."
+    allowed_prefixes: []
 obsidian_defaults:
   allowed_optional_properties:
     - aliases

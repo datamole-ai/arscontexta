@@ -20,7 +20,7 @@ uv run arscontexta-vault seed --source "$FILE" --mode capture
 The runtime:
 
 - validates the source path
-- copies the source into `archive/<date>-<batch>/source.<ext>`
+- copies the source into `archive/<date>-<batch>.md`
 - emits only `ok`, `command`, `batch`, and `source`
 - does not create durable queue entries
 
