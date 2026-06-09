@@ -56,7 +56,7 @@ When uncertain, ask: "Is this durable {DOMAIN:knowledge} ({DOMAIN:note_collectio
 ```markdown
 ## Pipeline Compliance
 
-**NEVER write directly to {DOMAIN:note_collection}/.** All content routes through the pipeline: {DOMAIN:inbox}/ → /{DOMAIN:process} → {DOMAIN:note_collection}/. If you find yourself creating a file in {DOMAIN:note_collection}/ without having run /{DOMAIN:process}, STOP. Route through {DOMAIN:inbox}/ first. The pipeline exists because direct writes skip quality gates.
+**NEVER write directly to {DOMAIN:note_collection}/.** All content routes through the pipeline: {DOMAIN:inbox}/ → /process → {DOMAIN:note_collection}/. If you find yourself creating a file in {DOMAIN:note_collection}/ without having run /process, STOP. Route through {DOMAIN:inbox}/ first. The pipeline exists because direct writes skip quality gates.
 
 Full automation is active from day one. All {DOMAIN:processing} skills, all quality gates, all maintenance mechanisms are available immediately. You do not need to reach a certain vault size before using orchestrated {DOMAIN:processing}.
 ```

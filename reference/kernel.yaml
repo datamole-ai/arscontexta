@@ -118,7 +118,7 @@ primitives:
     enforcement: invariant
     implementation: "Embedding tool (qmd >= 2, invoked via CLI from Bash). Always generated. If qmd is absent at generation time, the vault is scaffolded with the SessionStart sync hook and the user is told to install qmd; skills degrade (not disable) until it is present."
     validation:
-      check: "Context file and processing skills invoke qmd via Bash (`qmd query` for hybrid search, `qmd vsearch` for pure vector search). `.claude/hooks/qmd-sync.sh` is wired into SessionStart and `/pipeline` runs it after successful commits so completed pipeline output is indexed for the next run."
+      check: "Context file and processing skills invoke qmd via Bash (`qmd query` for hybrid search, `qmd vsearch` for pure vector search). `.claude/hooks/qmd-sync.sh` is wired into SessionStart and `/process` runs it after successful commits so completed pipeline output is indexed for the next run."
     cognitive_grounding: "Vocabulary divergence — same concept, different words. Structural graph traversal misses these connections. Treating semantic search as optional produced split-brain skills (one path assuming it, one path assuming keyword-only); making it invariant collapses that ambiguity."
 
   - id: unique-addresses
@@ -153,7 +153,7 @@ primitives:
     requires: markdown-yaml, session-rhythm
     enforcement: invariant
     validation:
-      check: "Pipeline skills pass batch, source, artifacts, and optional commit_paths. /pipeline stages only those named paths and commits them."
+      check: "Pipeline skills pass batch, source, artifacts, and optional commit_paths. /process stages only those named paths and commits them."
     cognitive_grounding: "A lean handoff keeps the happy path understandable and avoids maintaining recovery machinery before the workflow proves it needs it."
 # Dependency graph (DAG):
 # markdown-yaml → description-field

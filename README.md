@@ -65,7 +65,7 @@ a persistent thinking system derived from how you actually work.
 - **Vault-local tooling** -- a copied `uv` Python project with two deterministic
   runtime commands: `seed` and `validate`.
 - **Automation** -- hooks that enforce structure on every write, detect maintenance
-  needs, and capture session state. `/pipeline` produces a single commit at the end of each batch.
+  needs, and capture session state. `/process` produces a single commit at the end of each batch.
 - **Navigation** -- Maps of Content (MOCs) at hub, domain, and topic levels.
 - **Schema contract** -- `ops/schema.yaml` as the single source of truth for note properties.
 
@@ -123,7 +123,7 @@ or `decisions/`), but the separation is invariant.
 
 | Command | What It Does |
 |---------|-------------|
-| `/pipeline` | End-to-end source processing |
+| `/process` | End-to-end source processing |
 
 #### Pipeline Sub-Skills
 

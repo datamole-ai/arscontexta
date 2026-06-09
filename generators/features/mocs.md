@@ -91,7 +91,7 @@ How to split: create sub-{DOMAIN:topic map}(s) named `parent-subtopic.md`. Move 
 2. If the {DOMAIN:note} spans multiple topics, add to all relevant {DOMAIN:topic maps}
 3. Update the {DOMAIN:note}'s Topics footer to list its {DOMAIN:topic maps}
 
-This is handled by /{DOMAIN:connect} in the pipeline. When creating {DOMAIN:notes} manually (not through the pipeline), you must do this yourself.
+This is handled by /connect in the pipeline. When creating {DOMAIN:notes} manually (not through the pipeline), you must do this yourself.
 
 **Condition-based checks:**
 
@@ -121,7 +121,7 @@ Topics:
 - [[relationships]]
 ```
 
-Cross-{DOMAIN:topic map} membership is a signal, not a problem. When a {DOMAIN:note} appears in multiple {DOMAIN:topic maps}, it often serves as a bridge between topic areas. The /{DOMAIN:connect} phase identifies these naturally.
+Cross-{DOMAIN:topic map} membership is a signal, not a problem. When a {DOMAIN:note} appears in multiple {DOMAIN:topic maps}, it often serves as a bridge between topic areas. The /connect phase identifies these naturally.
 
 ### Growing {DOMAIN:Topic Maps}
 

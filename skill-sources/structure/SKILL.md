@@ -1,6 +1,6 @@
 ---
 name: structure
-description: Internal pipeline skill -- groups source-backed claims into structured notes. Invoked by /pipeline as a subagent; do not invoke directly.
+description: Internal pipeline skill -- groups source-backed claims into structured notes. Invoked by /process as a subagent; do not invoke directly.
 context: fork
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 ---
@@ -61,6 +61,8 @@ After writing all artifacts, build lean state:
   ]
 }
 ```
+
+Preserve `commit_paths` when the input state contains it.
 
 Validate it:
 

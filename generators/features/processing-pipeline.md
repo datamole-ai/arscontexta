@@ -7,7 +7,7 @@
 
 **Correctness first, but every model turn and search must earn its cost.** Prefer deterministic scripts, compact outputs, and bounded search. Spend extra tokens only when they reduce material correctness risk.
 
-Every piece of content follows the same path: capture, then {DOMAIN:process}, then {DOMAIN:connect}, then verify. Each phase has a distinct purpose. Mixing them degrades both.
+Every source run follows the same path: capture, then `/process` orchestrates structure or capture, `/connect`, and `/verify`. Each phase has a distinct purpose. Mixing them degrades both.
 
 ### The Four-Phase Skeleton
 
@@ -72,22 +72,24 @@ The backward sub-phase is gated by guards (hub notes, framework notes, capture-g
 
 **The complete maintenance cycle:**
 ~~~
-CREATE -> CONNECT FORWARD AND BACKWARD (/{DOMAIN:connect}) -> EVOLVE
+CREATE -> CONNECT FORWARD AND BACKWARD (/connect) -> EVOLVE
 ~~~
 
 #### Phase 4: Verify
 
-Four checks in one phase:
+The final deterministic gate. `/verify` checks the produced artifact set against schema and graph facts, then returns the same lean pipeline state. It does not re-judge description quality, source faithfulness, or connection quality; those belong to the producer and connect phases.
 
-1. **Description quality (cold-read test)** — Read ONLY the title and description. Without reading the body, predict what the {DOMAIN:note} contains. Then read the body. If your prediction missed major content, the description needs improvement. This is the testing effect applied to vault quality: self-testing reveals weak descriptions before they cause retrieval failures in practice.
+`/verify` validates:
 
-2. **Schema compliance** — All required fields present, enum values valid, {DOMAIN:topic} links exist, no unknown fields. `ops/schema.yaml` defines what is valid.
+1. **Artifact existence** — Every path in `artifacts[]` exists.
 
-3. **Source faithfulness** — For source-backed {DOMAIN:notes}, titles, frontmatter descriptions, body claims, and footer bullets must be directly supported by the archived source unless explicitly marked as inference. Source links resolve separately from ordinary knowledge links.
+2. **Schema compliance** — All required fields are present, enum values are valid, Obsidian property rules pass, and no unknown fields are present. `ops/schema.yaml` defines what is valid.
 
-4. **Health check** — No broken wiki links (every `[[target]]` resolves to an existing file after title/slug normalization), no orphaned {DOMAIN:notes} (every {DOMAIN:note} appears in at least one {DOMAIN:topic map}), link density within healthy range (2+ outgoing links per {DOMAIN:note}).
+3. **Deterministic constraints** — `uv run arscontexta-vault validate --artifacts` passes for the lean pipeline state.
 
-**Failure handling:** Description quality failures get fixed immediately (rewrite the description). Schema failures get fixed immediately (add missing fields). Source-faithfulness failures get rewritten against the archive or explicitly marked as inference. Link failures get logged for the {DOMAIN:connect} phase to address in the next pass.
+4. **Obsidian graph facts** — Ordinary wiki links resolve through Obsidian CLI checks.
+
+**Failure handling:** Schema and deterministic constraint failures get fixed immediately. Broken ordinary wiki links get fixed when the target is clear, otherwise they are returned to the {DOMAIN:connect} phase. Description quality, source-boundedness, relationship quality, and {DOMAIN:topic map} membership failures should have been caught by /structure, /capture, or /connect.
 
 ### Inbox Processing
 
@@ -99,7 +101,7 @@ Everything enters through {DOMAIN:inbox/}. Do not think about structure at captu
 - Sources (PDFs, articles, research results)
 - Anything where destination is unclear
 
-**Processing inbox items:** Inbox items get processed via /structure or /capture based on source material and user intent. Research papers, meeting notes, and mixed-topic sources → /structure. Verbatim transcripts and reference documents where exact wording matters → /capture.
+**Processing inbox items:** Inbox items get processed via `/process <file> --structure` or `/process <file> --capture` based on source material and user intent. Research papers, meeting notes, and mixed-topic sources → `--structure`. Verbatim transcripts and reference documents where exact wording matters → `--capture`.
 
 **The core principle:** Capture needs to be FAST (zero friction, do not interrupt flow). Processing needs to be SLOW (careful extraction, quality connections). Separating these two activities is what makes both work. If it is in {DOMAIN:inbox/}, it is unprocessed. Once processed, the value moves to {DOMAIN:notes} and the raw material gets archived or discarded.
 
@@ -126,19 +128,18 @@ The happy-path pipeline completes in one invocation. It does not persist durable
 }
 ~~~
 
-`batch`, `source`, and `artifacts` are required. `commit_paths` is optional and lets /connect include topic maps or other graph notes it changed.
+`batch`, `source`, and `artifacts` are required. `commit_paths` is optional and lets /seed include moved inbox sources or /connect include topic maps or other graph notes it changed.
 
 **Runtime commands:**
 
 ~~~bash
-uv run arscontexta-vault seed --source "<file>" --mode structure
-uv run arscontexta-vault seed --source "<file>" --mode capture
+uv run arscontexta-vault seed --source "<file>" --mode "<structure|capture>"
 uv run arscontexta-vault validate --path "{DOMAIN:note_collection}/example.md"
 uv run arscontexta-vault validate --all
 printf '%s' "$PIPELINE_STATE" | uv run arscontexta-vault validate --artifacts
 ~~~
 
-**Recovery:** Durable resume mechanics are deferred. If a run fails, fix the reported deterministic or graph error and rerun /pipeline from the source.
+**Recovery:** Durable resume mechanics are deferred. Seed moves inbox sources into archive. If a run fails after seed, rerun /process on the same inbox path; seed will reuse the archived source.
 
 #### Maintenance via /health (Diagnostic, On-Demand)
 
@@ -176,28 +177,28 @@ The pipeline's quality depends on each phase getting your best attention. Your c
 Orchestrator seeds source -> invokes producer with lean state
   Producer writes Markdown directly, validates artifacts, returns lean state
   Connect runs qmd and Obsidian discovery, edits graph notes, returns updated lean state
-  Verify runs Obsidian checks plus validate --artifacts
-  Pipeline orchestrator stages only named paths from final state and commits
+  Verify runs Obsidian graph checks plus validate --artifacts
+  Pipeline stages only named paths from final state and commits
 ~~~
 
 **Why fresh context matters:**
 - {DOMAIN:Process} needs full attention on the source material
 - {DOMAIN:Connect} needs full attention on the knowledge graph (both forward connections and backward reconsideration of the target {DOMAIN:notes})
-- Verify needs neutral perspective, unbiased by creation
+- Verify needs isolated final-state facts
 
 Within a phase, the fork sees the full batch — sibling cross-linking and shared graph discovery happen in one pass.
 
-If all phases run in one session, the verify phase runs on degraded attention — you have already decided this {DOMAIN:note} is good during materialization, and confirmation bias sets in. Fresh context prevents this.
+If all phases run in one session, the final deterministic gate runs after the context is already crowded. Fresh context keeps verification focused on the final state and tool output.
 
 **Handoff through lean state:**
-- seed emits `batch` and `source`
+- seed emits `batch`, `source`, and optional `commit_paths`
 - producer skills emit `artifacts`
 - /connect may add `commit_paths`
 - /verify returns validated state
-- /pipeline commits source, artifacts, and commit_paths directly with git
-- /pipeline refreshes qmd after a successful commit so new {DOMAIN:notes} are searchable in the next run
+- /process commits source, artifacts, and commit_paths directly with git
+- /process refreshes qmd after a successful commit so new {DOMAIN:notes} are searchable in the next run
 
-**Processing is orchestrated by default.** /pipeline orchestrates the full sequence. Lean state drives what happens next.
+**Processing is orchestrated by default.** /process orchestrates the full sequence. Lean state drives what happens next.
 
 **Orchestration uses the Skill tool** with `context: fork` on each invoked skill, giving each phase a fresh forked context window and true context isolation. When you say "process this source through the full pipeline," follow the pattern: invoke each phase skill once with the current pipeline state; the phase skill opens only the files it needs and returns the next state.
 
@@ -207,7 +208,7 @@ Every vault ships with the complete pipeline active from the first session. All 
 
 The philosophy: it is easier to disable features you do not need than to discover and enable features you did not know existed. If a feature exists, it works on day one.
 
-**All skills are available from day one.** /structure, /capture, /{DOMAIN:connect}, /verify, /{DOMAIN:health}, and all other skills are ready to invoke on the first source you process. The full pipeline runs on the first {DOMAIN:note} you create.
+**All skills are available from day one.** /structure, /capture, /connect, /verify, /health, and all other skills are ready to invoke on the first source you process. The full pipeline runs on the first {DOMAIN:note} you create.
 
 ### Quality Gates Summary
 
@@ -215,18 +216,18 @@ Every phase has specific gates. Failing a gate does not block progress — it tr
 
 | Phase | Gate | Failure Action |
 |-------|------|---------------|
-| {DOMAIN:Process} | Selectivity — is this worth extracting? | Skip with logged reason |
-| {DOMAIN:Process} | Composability — does the title work as prose? | Rewrite title |
-| {DOMAIN:Process} | Description adds new info beyond title? | Rewrite description |
-| {DOMAIN:Process} | Duplicate check — semantic search run? | Run search, merge if duplicate |
-| {DOMAIN:Connect} | Genuine relationship — can you say WHY? | Do not force the connection |
-| {DOMAIN:Connect} | {DOMAIN:Topic map} updated | Add {DOMAIN:note} to relevant {DOMAIN:topic maps} |
-| {DOMAIN:Connect} | Backward sub-phase — target {DOMAIN:note} reconsidered (or guard fired)? | Apply changes or record skip reason |
-| Verify | Description predicts content (cold-read test) | Improve description |
-| Verify | Schema valid | Fix schema violations |
-| Verify | Source-backed claims match archive | Rewrite unsupported claims or mark inference |
-| Verify | No broken links | Fix or remove broken links |
-| Verify | {DOMAIN:Note} in at least one {DOMAIN:topic map} | Add to relevant {DOMAIN:topic map} |
+| /structure or /capture | Selectivity — is this worth extracting? | Skip with logged reason |
+| /structure or /capture | Composability — does the title work as prose? | Rewrite title |
+| /structure or /capture | Description adds new info beyond title? | Rewrite description |
+| /structure or /capture | Source-bounded claims and descriptions | Rewrite against the archive or mark inference |
+| /structure or /capture | Duplicate check — semantic search run? | Run search, merge if duplicate |
+| /connect | Genuine relationship — can you say WHY? | Do not force the connection |
+| /connect | {DOMAIN:Topic map} updated | Add {DOMAIN:note} to relevant {DOMAIN:topic maps} |
+| /connect | Backward sub-phase — target {DOMAIN:note} reconsidered (or guard fired)? | Apply changes or record skip reason |
+| /verify | Schema valid | Fix schema violations |
+| /verify | Artifact files exist | Restore missing artifacts or remove stale paths |
+| /verify | validate --artifacts passes | Fix reported deterministic violations |
+| /verify | Ordinary wiki links resolve through Obsidian CLI | Fix clear broken links or return to /connect |
 
 **Automation of quality gates:** A PostToolUse hook on Write validates YAML frontmatter, description fields, and topic links on {DOMAIN:note} creation. This makes methodology invisible — instead of remembering to validate, a hook catches drift automatically. Build hooks for any quality check you want to be automatic.
 
@@ -236,13 +237,13 @@ If a {DOMAIN:skill} exists for a task, use the {DOMAIN:skill}. Do not manually r
 
 | Trigger | Required {DOMAIN:Skill} |
 |---------|------------------------|
-| New content to {DOMAIN:process} | /structure or /capture |
-| New {DOMAIN:notes} need connections | /{DOMAIN:connect} |
-| Old {DOMAIN:notes} may need updating | /{DOMAIN:connect} |
+| New content to {DOMAIN:process} | /process |
+| New {DOMAIN:notes} need connections | /connect |
+| Old {DOMAIN:notes} may need updating | /connect |
 | Quality verification needed | /verify |
-| System health check | /{DOMAIN:health} |
-| User asks to find connections | /{DOMAIN:connect} (not manual grep) |
-| System feels disorganized | /{DOMAIN:health} (systematic checks, not ad-hoc) |
+| System health check | /health |
+| User asks to find connections | /connect (not manual grep) |
+| System feels disorganized | /health (systematic checks, not ad-hoc) |
 
 **The enforcement principle:** If a {DOMAIN:skill} exists for a task, use the {DOMAIN:skill}. Do not improvise the workflow manually. {DOMAIN:Skills} encode the methodology. Manual execution loses the quality gates.
 
@@ -255,7 +256,7 @@ Your attention degrades as context fills. The first ~40% of context is the "smar
 **The handoff protocol:** Every phase emits lean pipeline state as its final chat message. State transfers through JSON returns during one pipeline run, not through accumulated conversation across phases. This ensures:
 - No context contamination between phases
 - Each phase gets your best attention
-- /pipeline stages only named source/artifact/map paths
+- /process stages only named source/artifact/map paths
 - Recovery machinery stays out of the happy path until real friction justifies it
 - Multiple {DOMAIN:notes} are processed in one fork per phase, without per-note context resets and without per-phase narration accumulating across notes
 
@@ -265,7 +266,7 @@ Requires: yaml-schema, wiki-links, atomic-notes, mocs
 ## Skills Referenced
 - structure (group related claims into structured notes)
 - capture (preserve source verbatim with frontmatter)
-- {DOMAIN:connect} (find connections, update topic maps, reconsider target note against current graph state)
-- verify (combined quality gate: description, schema, links)
-- {DOMAIN:health} (systematic health checks)
+- connect (find connections, update topic maps, reconsider target note against current graph state)
+- verify (deterministic artifact, schema, and Obsidian graph gate)
+- health (systematic health checks)
 - {DOMAIN:rethink} (review accumulated observations and tensions)

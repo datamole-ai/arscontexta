@@ -66,7 +66,7 @@ Use Obsidian `move` or `rename` for graph-note path/name changes.
 5. Read candidate notes and topic maps before editing.
 6. Add only justified wiki links and topic-map entries.
 7. Re-run targeted Obsidian checks for changed paths.
-8. Return updated lean pipeline state.
+8. Return updated lean pipeline state. Preserve existing `commit_paths` when the input state contains them.
 
 ## Output
 

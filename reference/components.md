@@ -252,12 +252,12 @@ Check MOC coverage:
 **Why:** The happy-path pipeline should complete without maintaining durable recovery state. Lean state keeps handoffs explicit while avoiding queue machinery until standalone paused work proves necessary.
 
 **How to implement:**
-- `seed` emits `batch` and `source`
+- `seed` emits `batch`, `source`, and optional `commit_paths` when it moves an inbox source
 - producer skills emit `artifacts`
 - `/connect` may add `commit_paths`
-- `/pipeline` stages only named paths from final state and creates the git commit
+- `/process` stages only named paths from final state and creates the git commit
 
-**Quality gate:** Can `/pipeline` finish one source without reading durable queue state or staging unrelated paths? If yes, the happy-path lifecycle is achieved.
+**Quality gate:** Can `/process` finish one source without reading durable queue state or staging unrelated paths? If yes, the happy-path lifecycle is achieved.
 
 ---
 

@@ -63,7 +63,7 @@ Questions the engine must answer when generating session configuration:
 
 **Derivation Implication:** Generated systems with processing pipelines should include a processing session template in the context file. This template specifies: (1) carry lean state, (2) load the source/artifacts, (3) execute the phase, (4) validate artifacts, (5) pass state onward, and (6) commit named paths. Skip heavy orientation — processing sessions are mechanical, not exploratory.
 
-**Source:** Vault /pipeline orchestration pattern. Each skill invoked by /pipeline (via the Skill tool with `context: fork`) runs in a forked context following this minimal-orientation processing session pattern.
+**Source:** Vault /process orchestration pattern. Each skill invoked by /process (via the Skill tool with `context: fork`) runs in a forked context following this minimal-orientation processing session pattern.
 
 ---
 
@@ -105,7 +105,7 @@ Questions the engine must answer when generating session configuration:
 
 **Derivation Implication:** Generated context files should include session-type-specific context loading guidance. Rather than a single "orient" section, provide type-specific orientation checklists with approximate context costs. This helps agents make informed decisions about how much to load.
 
-**Source:** Vault operational experience. Pipeline phases invoked via /pipeline use minimal orientation (task file + skill instructions) to maximize smart-zone availability for the actual work.
+**Source:** Vault operational experience. Pipeline phases invoked via /process use minimal orientation (task file + skill instructions) to maximize smart-zone availability for the actual work.
 
 ---
 
@@ -123,11 +123,11 @@ Questions the engine must answer when generating session configuration:
 
 #### Session boundaries create natural points for automated behavior
 
-**Summary:** The beginning and end of a session are the two moments where automated behavior adds the most value. At session start: load orientation files, inject file tree, evaluate condition-based triggers against vault state, display health warnings. At processing boundaries (end of each /pipeline batch): validate that notes were saved, check for broken links introduced during the session, commit the batch's artifacts, push to remote. These are deterministic operations (verification, not judgment) that hooks or dedicated skill phases can handle without corrupting quality.
+**Summary:** The beginning and end of a session are the two moments where automated behavior adds the most value. At session start: load orientation files, inject file tree, evaluate condition-based triggers against vault state, display health warnings. At processing boundaries (end of each /process batch): validate that notes were saved, check for broken links introduced during the session, commit the batch's artifacts, push to remote. These are deterministic operations (verification, not judgment) that hooks or dedicated skill phases can handle without corrupting quality.
 
 **Derivation Implication:** Generate session-start hooks that automate the deterministic parts of orient and persist. The context file should explain what the hooks do so the agent understands the automated behavior.
 
-**Source:** Vault hook infrastructure plus pipeline-skill orchestration. The session-start hook (tree injection + condition evaluation) and the /pipeline end-of-batch commit are proven patterns that eliminate routine tasks without requiring judgment.
+**Source:** Vault hook infrastructure plus process-skill orchestration. The session-start hook (tree injection + condition evaluation) and the /process end-of-batch commit are proven patterns that eliminate routine tasks without requiring judgment.
 
 ---
 
@@ -135,7 +135,7 @@ Questions the engine must answer when generating session configuration:
 
 **Summary:** When a session ends without proper persistence, the agent in the next session lacks information about what was in progress, what was discovered, and what decisions were made. This is the agent equivalent of attention residue — incomplete tasks from a previous context contaminating the current context. The persist phase eliminates attention residue by explicitly capturing session state: what was done, what was discovered, what remains to do. Cal Newport's research on attention residue for humans translates directly: incomplete work contaminates future attention, and explicit closure rituals are the remedy.
 
-**Derivation Implication:** Generated context files must include an explicit session-end checklist. Minimum: update self/goals.md with current state, capture any observations, and push changes to remote. For pipeline sessions: ensure `/pipeline` completed its commit or record the failure in goals. For exploration sessions: update MOCs with discoveries. The checklist should be positioned prominently.
+**Derivation Implication:** Generated context files must include an explicit session-end checklist. Minimum: update self/goals.md with current state, capture any observations, and push changes to remote. For pipeline sessions: ensure `/process` completed its commit or record the failure in goals. For exploration sessions: update MOCs with discoveries. The checklist should be positioned prominently.
 
 **Source:** Newport, "Deep Work" (2016) — attention residue concept. Research claim: "closure rituals create clean breaks that prevent attention residue bleed." Vault operational experience with goals.md as the primary session-handoff mechanism.
 
@@ -157,7 +157,7 @@ Hooks automate session rhythm. A SessionStart hook injects the file tree and loa
 
 **Derivation Implication:** Generate hook configurations in `.claude/hooks/` that automate: (1) tree injection at session start, (2) self/ file loading at session start, (3) note validation on Write, (4) session-end reminders. The context file should document what hooks exist and what they do, so the agent understands the automated behavior and doesn't duplicate it.
 
-**Source:** Vault `.claude/hooks/` implementation. Proven hook patterns: session-start tree injection, PostToolUse validation. Batch-level persistence lives in the /pipeline skill as its final phase rather than in a hook.
+**Source:** Vault `.claude/hooks/` implementation. Proven hook patterns: session-start tree injection, PostToolUse validation. Batch-level persistence lives in the /process skill as its final phase rather than in a hook.
 
 ---
 
@@ -165,7 +165,7 @@ Hooks automate session rhythm. A SessionStart hook injects the file tree and loa
 
 #### Context contamination occurs when one task's context degrades another task's quality
 
-**Summary:** When an agent chains multiple tasks in a single session, the context from task A contaminates the reasoning for task B. Processing a dense research paper fills context with source-specific vocabulary and concepts. If the agent then immediately switches to writing a new note about a different topic, the source vocabulary bleeds into the new note's phrasing. Fresh context per task — the principle behind /pipeline's per-skill context forking — prevents this contamination by giving each task a clean context window.
+**Summary:** When an agent chains multiple tasks in a single session, the context from task A contaminates the reasoning for task B. Processing a dense research paper fills context with source-specific vocabulary and concepts. If the agent then immediately switches to writing a new note about a different topic, the source vocabulary bleeds into the new note's phrasing. Fresh context per task — the principle behind /process's per-skill context forking — prevents this contamination by giving each task a clean context window.
 
 **Derivation Implication:** Generated context files should include a "one task per session" discipline section for systems with processing = heavy. For lighter systems where context contamination is less severe, the guidance can be softer: "If you are switching between very different tasks, consider whether the previous task's context might influence your current work." The pipeline architecture (fresh context per phase) is the structural solution; session discipline is the behavioral solution.
 
@@ -177,7 +177,7 @@ Hooks automate session rhythm. A SessionStart hook injects the file tree and loa
 
 **Summary:** The orient and work phases are naturally motivated — the agent needs orientation to function, and work is the session's purpose. The persist phase has no natural motivation: the agent's session is ending, the user may have moved on, and the "save your progress" step feels like overhead. But skipping persist means the next session starts without handoff, goals.md is outdated, observations are lost, and newly created notes may not be committed.
 
-**Derivation Implication:** Generated systems should make the persist phase as prominent and explicit as possible. For persist actions (goals.md update, observation capture, git commit): generate reminders or automation. The vault's /pipeline skill is an example of automating the most commonly skipped persist action (committing changes to git) for batch work; session-level work outside /pipeline still requires an explicit commit.
+**Derivation Implication:** Generated systems should make the persist phase as prominent and explicit as possible. For persist actions (goals.md update, observation capture, git commit): generate reminders or automation. The vault's /process skill is an example of automating the most commonly skipped persist action (committing changes to git) for batch work; session-level work outside /process still requires an explicit commit.
 
 **Source:** Vault operational observation. Multiple sessions ended without goals.md updates, producing orientation gaps in subsequent sessions.
 

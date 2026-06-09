@@ -23,7 +23,7 @@ tags: []                      # Obsidian tags property; use a YAML list when pop
 |-------|--------|-----|
 | `content_type` | routing + filtering skills | "show me all decisions" |
 | `granularity` | /structure, /capture pipelines | selects pipeline behavior |
-| `description` | /verify, progressive disclosure | filter-before-read |
+| `description` | /structure, /capture, progressive disclosure | filter-before-read |
 | `created_at` | archive, staleness checks | temporal queries |
 | `tags` | Obsidian, users, and agents | conversation-derived attributes and emergent labels |
 

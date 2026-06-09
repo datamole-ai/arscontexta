@@ -624,7 +624,7 @@ Read `${CLAUDE_PLUGIN_ROOT}/reference/schema.yaml` for canonical structure and t
 #### Pipeline Step 5: Skills (Skills Agent)
 
 **Agent scope:**
-- Write target: `.claude/skills/<domain-skill-name>/SKILL.md` (7 files), copied from source skills and then domain-adjusted.
+- Write target: `.claude/skills/<target-name>/SKILL.md` (7 files), copied from source skills and then domain-adjusted.
 - Read: `${CLAUDE_PLUGIN_ROOT}/skill-sources/*/SKILL.md`, `ops/derivation.md`
 
 The skills agent uses a specialized prompt (below); source skills are copied first, then adjusted.
@@ -639,7 +639,7 @@ The skills agent uses a specialized prompt (below); source skills are copied fir
    - `{TIER_A_TABLE}` — populate from the Skill Sources table below, Tier A rows only
    - `{TIER_B_TABLE}` — populate from the Skill Sources table below, Tier B rows only
    - `{DOMAIN_MAP}` — build from the vocabulary mapping in `ops/derivation.md`, one row per `{DOMAIN:xxx}` → domain value. Include every `{DOMAIN:xxx}` pattern that appears in any Tier B source.
-   - `{N_SKILLS}` — total number of generated source skills (8)
+   - `{N_SKILLS}` — total number of copied source skills (7)
 2. Dispatch the skills agent via the `Agent` tool, passing the built prompt as the `prompt` argument.
 3. On return, parse the handoff block (Files Created, Issues, Verification). If `{DOMAIN:}` remaining is non-zero, STOP and surface the error.
 
@@ -647,17 +647,17 @@ The skills agent uses a specialized prompt (below); source skills are copied fir
 
 ##### Skill Sources (reference table — used by the main agent to build {TIER_A_TABLE} and {TIER_B_TABLE})
 
-| Source Directory                                     | Source Name   | Tier | Domain-rename? | Notes                                              |
+| Source Directory                                     | Target Name   | Tier | Domain-rename? | Notes                                              |
 | ---------------------------------------------------- | ------------- | ---- | -------------- | -------------------------------------------------- |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/connect/`       | connect       | A    | no (universal) | Universal infra; frontmatter `name:` and `description:` unchanged       |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/health/`        | health        | A    | no             | Local generated diagnostics; keep `health` as the target name |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/seed/`          | seed          | B    | no             | Keep `seed` as the target name                     |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/pipeline/`      | pipeline      | B    | no             | Keep `pipeline` as the target name                 |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/pipeline/`      | process       | B    | no             | Source directory stays `pipeline`; generate as `/process` |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/verify/`        | verify        | B    | no             | Keep `verify` as the target name                   |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/structure/`     | structure     | B    | no (universal) | Universal infra; frontmatter `name:` unchanged     |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/capture/`       | capture       | B    | no (universal) | Universal infra; frontmatter `name:` unchanged     |
 
-**Rename rules:** `yes` → directory and frontmatter `name:` both become the domain-native verb from `ops/derivation.md`. `no` → keep source name. `no (universal)` (`structure`, `capture`, `connect`) → keep frontmatter `name:` and `description:` unchanged; only body `{DOMAIN:xxx}` substitutes. `verify` is fixed: directory, frontmatter `name:`, and command reference stay `verify` / `/verify`.
+**Rename rules:** `yes` → directory and frontmatter `name:` both become the domain-native verb from `ops/derivation.md`. `no` → use the table's target name. `no (universal)` (`structure`, `capture`, `connect`) → keep frontmatter `name:` and `description:` unchanged; only body `{DOMAIN:xxx}` substitutes. `verify` is fixed: directory, frontmatter `name:`, and command reference stay `verify` / `/verify`. The process command is fixed: copy from `skill-sources/pipeline/` into `.claude/skills/process/SKILL.md` with frontmatter `name: process`.
 
 ---
 
@@ -670,19 +670,19 @@ You are the skills agent of the Ars Contexta generation pipeline. Install all pr
 
 ## Workspace
 - Vault root: {vault_root}
-- Skill sources: {CLAUDE_PLUGIN_ROOT}/skill-sources/<source-name>/SKILL.md
+- Skill sources: source directories listed in the Skill Sources tables
 - Output: {vault_root}/.claude/skills/<target-name>/SKILL.md
 - Derivation file: {vault_root}/ops/derivation.md
 
 ## Procedure
 
-Read `ops/derivation.md` first. Copy each source skill into the vault, then apply the domain substitutions and frontmatter changes described below.
+Read `ops/derivation.md` first. Copy each source skill from its listed source directory into the listed target directory, then apply the domain substitutions and frontmatter changes described below.
 
-**Step 1 — Copy sources + substitute bodies.** For all {N_SKILLS} skills, create the target skill directories, copy the source `SKILL.md` files, and replace every Tier B `{DOMAIN:xxx}` body placeholder using the DOMAIN Substitution Map.
+**Step 1 — Copy sources + substitute bodies.** For all {N_SKILLS} skills, create `.claude/skills/<target-name>/`, copy the source `SKILL.md` file into it, and replace every Tier B `{DOMAIN:xxx}` body placeholder using the DOMAIN Substitution Map.
 
 Universal skills (`structure`, `capture`) also carry `{DOMAIN:xxx}` body placeholders that need resolution; only their frontmatter is exempt.
 
-**Step 2 — Per-skill frontmatter edits** For each skill marked `Domain-rename? yes`, modify `name:` in the frontmatter to the domain-native verb. Leave every `no` skill name untouched, including `verify`.
+**Step 2 — Per-skill frontmatter edits** For each skill marked `Domain-rename? yes`, modify `name:` in the frontmatter to the domain-native verb. For `Domain-rename? no`, the copied frontmatter `name:` must match the listed target name.
 
 Never touch `{vocabulary.xxx}` patterns — they resolve at runtime from `ops/derivation-manifest.yaml`.
 
@@ -966,7 +966,7 @@ Show available commands in the user's vocabulary. Resolve command names from `op
 ```
 Here's what you can do:
 
-  /{domain:pipeline}              -- end-to-end processing of inbox items
+  /process                        -- end-to-end processing of inbox items
   /ask                            -- query your system's self-knowledge
   /health                         -- local diagnostics and metrics
 ```
@@ -1001,6 +1001,7 @@ IMPORTANT: Restart Claude Code now to activate skills and hooks.
 Next steps:
   1. Quit and restart Claude Code
   2. Read self/ space and CLAUDE.md - it guides the agent how to work
-  3. Drop a file in {domain:inbox}/ and run /{domain:pipeline} to try your first end-to-end run
+  3. Open this folder as an Obsidian vault and leave Obsidian running
+  4. Drop a file in {domain:inbox}/ and run /process to try your first end-to-end run
 
 ```

@@ -99,13 +99,15 @@ Guide the derivation engine in composing search modalities at query time. Semant
 
 ---
 
-#### Description quality testing requires semantic search without reranking
+#### Description retrieval testing requires semantic search without reranking
 
 **Summary:** Testing whether a note's description enables retrieval means searching for the note using only its description, without the title. If semantic search (without LLM reranking) finds the note from its description alone, the description is doing its job as a retrieval filter. If it fails, the description needs improvement. Using reranking would hide bad descriptions behind the LLM's ability to infer relevance — the test must use raw vector similarity to expose weak descriptions.
 
-**Derivation Implication:** Generated systems with a verify or recite phase should use pure vector search (`qmd vsearch "…"`, not the bare `qmd query "…"` form that reranks) for description quality testing. The absence of reranking is intentional — it tests what agents will actually encounter during routine search.
+**Derivation Implication:** The current `/verify` phase is a deterministic artifact, schema, and Obsidian graph gate.
 
-**Source:** Vault operational experience. The recite and verify skills call `qmd vsearch "…"` to test description findability, specifically avoiding the rerank stage that a bare `qmd query` would apply.
+If a generated system includes an explicit description-retrieval diagnostic, use pure vector search (`qmd vsearch "…"`, not the bare `qmd query "…"` form that reranks).
+
+**Source:** Vault operational experience with description findability checks, specifically avoiding the rerank stage that a bare `qmd query` would apply.
 
 ---
 

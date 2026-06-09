@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Internal pipeline skill -- checks final artifacts with Obsidian CLI and deterministic runtime validation. Invoked by /pipeline as a subagent.
+description: Internal pipeline skill -- checks final artifacts with Obsidian CLI and deterministic runtime validation. Invoked by /process as a subagent.
 context: fork
 model: haiku
 allowed-tools: Bash
@@ -39,6 +39,7 @@ Rules:
 - Do not call `uv run arscontexta-vault verify`; that runtime command does not exist.
 - Do not call `complete-verify`.
 - Do not mutate queue state.
+- Preserve `commit_paths` when the input state contains it.
 - Do not judge source faithfulness, description quality, or connection quality here.
 - Fail if any artifact path has unresolved links, missing files, invalid frontmatter, invalid enum values, bad dates, overlong descriptions, or malformed tags.
 

@@ -13,15 +13,14 @@ The target must include a source path and exactly one mode: `--structure` or `--
 Run from the vault root:
 
 ```bash
-uv run arscontexta-vault seed --source "$FILE" --mode structure
-uv run arscontexta-vault seed --source "$FILE" --mode capture
+uv run arscontexta-vault seed --source "$FILE" --mode "$MODE"
 ```
 
 The runtime:
 
 - validates the source path
-- copies the source into `archive/<date>-<batch>.md`
-- emits only `ok`, `command`, `batch`, and `source`
+- moves inbox sources into `archive/<date>-<batch>.md`; copies non-inbox sources
+- emits `ok`, `command`, `batch`, `source`, and optional `commit_paths` for moved inbox sources
 - does not create durable queue entries
 
 ## Output

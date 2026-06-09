@@ -85,7 +85,7 @@ Before ending a work session:
 - [ ] New {DOMAIN:notes} are linked from at least one {DOMAIN:topic map}
 - [ ] Wiki links in new {DOMAIN:notes} point to real files
 - [ ] Descriptions add information beyond the title
-- [ ] Changes are committed (automatic inside `/pipeline`; manual otherwise)
+- [ ] Changes are committed (automatic inside `/process`; manual otherwise)
 
 ### The Maintenance Mindset
 

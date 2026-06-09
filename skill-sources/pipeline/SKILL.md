@@ -1,6 +1,6 @@
 ---
-name: pipeline
-description: End-to-end source processing -- seed, structure/capture, connect, verify, and commit. Triggers on "/pipeline", "/pipeline [file]", "process this end to end", "full pipeline".
+name: process
+description: End-to-end source processing -- seed, structure/capture, connect, verify, and commit. Triggers on "/process", "/process [file]", "process this end to end", "full pipeline".
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 argument-hint: " [file path] [--structure|--capture]"
 ---
@@ -37,18 +37,32 @@ Pass this lean state between phases:
 }
 ```
 
-Only `batch`, `source`, and `artifacts` are required. `commit_paths` is optional and is used by `/connect` when it edits topic maps or other graph notes that are not already in `artifacts`.
+Only `batch`, `source`, and `artifacts` are required. `commit_paths` is optional and is used when `/seed` moves an inbox source or `/connect` edits topic maps or other graph notes that are not already in `artifacts`.
 
 ## Flow
+
+0. Run the Obsidian readiness gate before seed or any file changes:
+
+   ```bash
+   command -v obsidian >/dev/null 2>&1
+   pgrep -x Obsidian >/dev/null 2>&1
+   test -d .obsidian
+   obsidian unresolved >/dev/null 2>&1
+   ```
+
+   Run these shell checks only, in this order. Suppress command output exactly as shown where redirection is present. On any failure, stop before invoking `/seed`, writing files, archiving the source, staging changes, or attempting recovery. Emit exactly:
+
+   ```json
+   {"status":"error","error":"obsidian is not ready for this vault","next_step":"Open this folder as a vault in Obsidian, leave Obsidian running, then rerun /process."}
+   ```
 
 1. Seed the source:
 
    ```bash
-   uv run arscontexta-vault seed --source "$SOURCE" --mode structure
-   uv run arscontexta-vault seed --source "$SOURCE" --mode capture
+   uv run arscontexta-vault seed --source "$SOURCE" --mode "$MODE"
    ```
 
-   Stop on non-zero exit. Parse the JSON result and keep only `batch` and `source`.
+   Stop on non-zero exit. Parse the JSON result and keep `batch`, `source`, and optional `commit_paths`.
 
 2. Invoke `/structure` or `/capture` with the current state JSON. The producer writes Markdown directly and then validates its artifacts with:
 

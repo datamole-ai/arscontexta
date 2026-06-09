@@ -1,6 +1,6 @@
 ---
 name: capture
-description: Internal pipeline skill -- preserves source material verbatim with frontmatter. Invoked by /pipeline as a subagent; do not invoke directly.
+description: Internal pipeline skill -- preserves source material verbatim with frontmatter. Invoked by /process as a subagent; do not invoke directly.
 context: fork
 model: sonnet
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
@@ -68,7 +68,7 @@ tags:
 
 ## Validation
 
-After writing the capture note, validate lean state:
+After writing the capture note, validate lean state. Preserve `commit_paths` when the input state contains it:
 
 ```bash
 printf '%s' "$PIPELINE_STATE" | uv run arscontexta-vault validate --artifacts
