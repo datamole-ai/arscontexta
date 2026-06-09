@@ -20,15 +20,15 @@ obsidian properties
 obsidian tags
 ```
 
-Deterministic Ars schema checks:
+Deterministic schema checks:
 
 ```bash
-uv run arscontexta-vault validate --all
+uv run vault validate --all
 ```
 
 Rules:
 
-- Do not call `uv run arscontexta-vault health`; that runtime command does not exist.
+- Do not call `uv run vault health`; that runtime command does not exist.
 - Use stdout output only; this is an ephemeral diagnostic workflow.
 - Report measured vault facts only; do not invent persistent diagnostic state.
 

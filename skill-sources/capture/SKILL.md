@@ -71,7 +71,7 @@ tags:
 After writing the capture note, validate lean state. Preserve `commit_paths` when the input state contains it:
 
 ```bash
-printf '%s' "$PIPELINE_STATE" | uv run arscontexta-vault validate --artifacts
+printf '%s' "$PIPELINE_STATE" | uv run vault validate --artifacts
 ```
 
 Fix deterministic validation failures once. If validation still fails, emit the failure JSON and stop.

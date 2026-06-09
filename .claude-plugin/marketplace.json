@@ -1,5 +1,5 @@
 {
-  "name": "datamole-ai-arscontexta",
+  "name": "datamole-ai-second-brain",
   "owner": {
     "name": "Datamole",
     "email": "marek.nevole@datamole.ai"
@@ -10,7 +10,7 @@
   },
   "plugins": [
     {
-      "name": "arscontexta",
+      "name": "second-brain",
       "source": "./"
     }
   ]

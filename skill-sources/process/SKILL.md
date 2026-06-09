@@ -10,7 +10,7 @@ argument-hint: " [file path] [--structure|--capture]"
 Target: `$ARGUMENTS`
 
 Parse:
-- source file path, required
+- source file path, required; must be a file in the inbox folder
 - exactly one mode: `--structure` or `--capture`; if absent, ask the user which mode to use
 
 Read runtime vocabulary:
@@ -37,7 +37,7 @@ Pass this lean state between phases:
 }
 ```
 
-Only `batch`, `source`, and `artifacts` are required. `commit_paths` is optional and is used when `/seed` moves an inbox source or `/connect` edits topic maps or other graph notes that are not already in `artifacts`.
+Only `batch`, `source`, and `artifacts` are required. `commit_paths` is optional and is used when `vault seed` moves an inbox source or `/connect` edits topic maps or other graph notes that are not already in `artifacts`.
 
 ## Flow
 
@@ -50,7 +50,7 @@ Only `batch`, `source`, and `artifacts` are required. `commit_paths` is optional
    obsidian unresolved >/dev/null 2>&1
    ```
 
-   Run these shell checks only, in this order. Suppress command output exactly as shown where redirection is present. On any failure, stop before invoking `/seed`, writing files, archiving the source, staging changes, or attempting recovery. Emit exactly:
+   Run these shell checks only, in this order. Suppress command output exactly as shown where redirection is present. On any failure, stop before running `vault seed`, writing files, archiving the source, staging changes, or attempting recovery. Emit exactly:
 
    ```json
    {"status":"error","error":"obsidian is not ready for this vault","next_step":"Open this folder as a vault in Obsidian, leave Obsidian running, then rerun /process."}
@@ -59,7 +59,7 @@ Only `batch`, `source`, and `artifacts` are required. `commit_paths` is optional
 1. Seed the source:
 
    ```bash
-   uv run arscontexta-vault seed --source "$SOURCE" --mode "$MODE"
+   uv run vault seed --source "$SOURCE"
    ```
 
    Stop on non-zero exit. Parse the JSON result and keep `batch`, `source`, and optional `commit_paths`.
@@ -67,7 +67,7 @@ Only `batch`, `source`, and `artifacts` are required. `commit_paths` is optional
 2. Invoke `/structure` or `/capture` with the current state JSON. The producer writes Markdown directly and then validates its artifacts with:
 
    ```bash
-   printf '%s' "$PIPELINE_STATE" | uv run arscontexta-vault validate --artifacts
+   printf '%s' "$PIPELINE_STATE" | uv run vault validate --artifacts
    ```
 
 3. Invoke `/connect` with the validated state JSON. `/connect` owns qmd discovery, Obsidian graph facts, topic-map edits, and any `commit_paths` it adds.
@@ -86,10 +86,10 @@ Only `batch`, `source`, and `artifacts` are required. `commit_paths` is optional
 6. Refresh semantic search after the commit:
 
    ```bash
-   bash .claude/hooks/qmd-sync.sh
+   qmd update && qmd embed
    ```
 
-   If sync fails, report the commit hash and the qmd sync error. Do not amend, roll back, retry, or stage additional files.
+   If refresh fails, report the commit hash and the qmd refresh error. Do not amend, roll back, retry, or stage additional files.
 
 ## Output
 
@@ -99,6 +99,6 @@ Emit a concise human summary after the commit succeeds:
 - source path
 - artifact paths
 - commit hash
-- qmd sync status
+- qmd refresh status
 
 On any handled runtime failure, surface the returned JSON and stop. Do not attempt recovery, queue repair, extra cleanup, or manual Git staging.

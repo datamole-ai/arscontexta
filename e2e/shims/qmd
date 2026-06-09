@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+[ -n "$E2E_SHIM_LOG" ] && echo "qmd $*" >> "$E2E_SHIM_LOG"
+
+case "$1" in
+  -v|--version)
+    echo "qmd 2.5.0"
+    exit 0
+    ;;
+  collections)
+    echo "[]"
+    exit 0
+    ;;
+  collection|update|embed)
+    exit 0
+    ;;
+  query|vsearch)
+    echo "no results"
+    exit 0
+    ;;
+  *)
+    exit 0
+    ;;
+esac

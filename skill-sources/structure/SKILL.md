@@ -67,7 +67,7 @@ Preserve `commit_paths` when the input state contains it.
 Validate it:
 
 ```bash
-printf '%s' "$PIPELINE_STATE" | uv run arscontexta-vault validate --artifacts
+printf '%s' "$PIPELINE_STATE" | uv run vault validate --artifacts
 ```
 
 If validation fails, fix the Markdown once and rerun validation. If it still fails, emit the failure JSON and stop.

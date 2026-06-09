@@ -28,15 +28,15 @@ obsidian links
 obsidian backlinks
 ```
 
-Use the runtime only for deterministic Ars schema/artifact validation:
+Use the runtime only for deterministic schema/artifact validation:
 
 ```bash
-printf '%s' "$PIPELINE_STATE" | uv run arscontexta-vault validate --artifacts
+printf '%s' "$PIPELINE_STATE" | uv run vault validate --artifacts
 ```
 
 Rules:
 
-- Do not call `uv run arscontexta-vault verify`; that runtime command does not exist.
+- Do not call `uv run vault verify`; that runtime command does not exist.
 - Do not call `complete-verify`.
 - Do not mutate queue state.
 - Preserve `commit_paths` when the input state contains it.
