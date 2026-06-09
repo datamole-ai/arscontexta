@@ -1,185 +1,143 @@
 # Ars Contexta
 
-**A second brain for your agent.**
+Ars Contexta is a Claude Code plugin that turns a setup conversation into a local Markdown knowledge system for your agent.
 
-A Claude Code plugin that generates complete knowledge systems from conversation.
-You describe how you think and work. The engine derives a cognitive architecture
--- folder structure, context files, processing pipeline, hooks, navigation maps,
-and note schema -- tailored to your domain and backed by 242 research claims.
+You describe what you want to track, remember, or think through. The plugin derives the folders, context files, processing skills, hooks, navigation maps, and note schema for that work. The result is a generated vault, not a template copied into this repo.
 
-No templates. No configuration. Just conversation.
+## Contents
 
----
+- [Install](#install)
+- [Prerequisites](#prerequisites)
+- [What setup creates](#what-setup-creates)
+- [Setup flow](#setup-flow)
+- [Generated architecture](#generated-architecture)
+- [Commands](#commands)
+- [Processing pipeline](#processing-pipeline)
+- [Hooks](#hooks)
+- [Development](#development)
+
+## Install
+
+Make sure the [prerequisites](#prerequisites) are installed before you run setup.
+
+Run these commands inside Claude Code:
+
+```text
+/plugin marketplace add datamole-ai-arscontexta/arscontexta
+/plugin install arscontexta@datamole-ai-arscontexta
+```
+
+Restart Claude Code, then run:
+
+```text
+/arscontexta:setup
+```
+
+Setup asks a short set of questions about your domain. It usually takes about 20 minutes because the plugin reads its references, derives your vocabulary, and writes the generated system.
+
+After setup finishes:
+
+1. Restart Claude Code again so generated hooks and skills load.
+2. Open the generated folder as an Obsidian vault and leave Obsidian running before using `/process`.
 
 ## Prerequisites
 
-Install these before running `/arscontexta:setup`. All six are expected — the generated system assumes they are present and its skills call them directly.
+Install these before running `/arscontexta:setup`. Setup checks them before it writes files.
 
 | Dependency | Purpose |
 |-----------|---------|
 | [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Plugin host |
-| `tree` | Workspace structure injection |
-| `ripgrep` (`rg`) | YAML queries, schema validation |
-| [uv](https://docs.astral.sh/uv/) | Runs and locks vault-local Python tooling |
-| [qmd](https://github.com/tobi/qmd) v2+ | Semantic search (invariant kernel primitive — see below) |
+| `tree` | Workspace tree injection |
+| `ripgrep` (`rg`) | YAML queries and schema validation |
+| [uv](https://docs.astral.sh/uv/) | Vault-local Python tooling |
+| [qmd](https://github.com/tobi/qmd) v2+ | Semantic search |
 | Obsidian CLI (`obsidian`) | Vault-native file, link, property, and graph facts |
 
----
+## What setup creates
 
-## Installation
+- A vault of plain Markdown files connected by wiki links.
+- An inbox-to-notes processing pipeline.
+- Vault-local tooling, copied as a `uv` Python project, with deterministic `seed` and `validate` commands.
+- Hooks that inject session context and show maintenance signals.
+- Maps of Content for hub, domain, and topic navigation.
+- `ops/schema.yaml`, the schema contract for note properties.
 
-1. Add the marketplace to Claude Code:
-   ```
-   /plugin marketplace add datamole-ai-arscontexta/arscontexta
-   ```
+The main choice is derivation instead of templating. Setup uses your vocabulary, maps it to the fixed architecture, then records why those choices were made.
 
-2. Install the plugin:
-   ```
-   /plugin install arscontexta@datamole-ai-arscontexta
-   ```
+## Setup flow
 
-3. Restart Claude Code, then run:
-   ```
-   /arscontexta:setup
-   ```
+`/arscontexta:setup` runs this process:
 
-4. Answer 2-6 questions about your domain (~20 minutes -- token-intensive but one-time)
+| Phase | What happens |
+|-------|--------------|
+| Detection | Checks Claude Code and required local tools |
+| Understanding | Asks 2-4 conversation turns about your domain |
+| Derivation | Maps your vocabulary to folders, note types, tags, and navigation |
+| Proposal | Shows what will be generated before writing files |
+| Generation | Writes the context file, folders, schema, skills, hooks, and hub MOC |
+| Validation | Checks generated dependencies and deterministic runtime validation |
 
-5. The engine generates your complete knowledge system
-
-6. Restart Claude Code again to activate generated hooks and skills
-
----
-
-## What It Does
-
-Most AI tools start every session blank. Ars Contexta changes that by generating
-a persistent thinking system derived from how you actually work.
-
-**What you get:**
-
-- **A vault** -- plain markdown files connected by wiki links, forming a traversable
-  knowledge graph. No database, no cloud, no lock-in.
-- **A processing pipeline** -- skills that extract insights, find connections, update
-  old notes with new context, and verify quality.
-- **Vault-local tooling** -- a copied `uv` Python project with two deterministic
-  runtime commands: `seed` and `validate`.
-- **Automation** -- hooks that enforce structure on every write, detect maintenance
-  needs, and capture session state. `/process` produces a single commit at the end of each batch.
-- **Navigation** -- Maps of Content (MOCs) at hub, domain, and topic levels.
-- **Schema contract** -- `ops/schema.yaml` as the single source of truth for note properties.
-
-**The key differentiator:** derivation, not templating. Every choice traces to
-specific research claims. The engine reasons from principles about what your
-domain needs and why.
-
----
-
-## The Setup Flow
-
-`/arscontexta:setup` runs a 6-phase process:
-
-| Phase | What Happens |
-|-------|-------------|
-| **Detection** | Detects Claude Code environment and capabilities |
-| **Understanding** | 2-4 conversation turns where you describe your domain |
-| **Derivation** | Maps signals to vocabulary; schema stays fixed and attributes become tags |
-| **Proposal** | Shows what will be generated and why, in your vocabulary |
-| **Generation** | Produces all files: context file, folders, schema, skills, hooks, and hub MOC |
-| **Validation** | Checks generated dependencies and deterministic runtime validation |
-
-The whole process takes about 20 minutes. It's token-intensive because the engine
-reads research claims, reasons about your domain, and generates substantial output.
-This is a one-time investment -- after setup, your agent remembers.
-
----
-
-## Three-Space Architecture
+## Generated architecture
 
 Every generated system separates content into three spaces:
 
 | Space | Purpose | Growth |
 |-------|---------|--------|
-| **self/** | Agent persistent mind -- identity, methodology, goals | Slow (tens of files) |
-| **notes/** | Knowledge graph -- the reason the system exists | Steady (10-50/week) |
-| **ops/** | Operational coordination -- schema, derivation, sessions | Fluctuating |
+| `self/` | Agent identity, methodology, and goals | Slow, usually tens of files |
+| `notes/` | The knowledge graph | Steady, often 10-50 files per week |
+| `ops/` | Schema, derivation records, sessions, and coordination | Fluctuating |
 
-Names adapt to your domain (`notes/` might become `reflections/`, `claims/`,
-or `decisions/`), but the separation is invariant.
-
----
+Names adapt to your domain. For example, `notes/` might become `reflections/`, `claims/`, or `decisions/`. The separation stays the same.
 
 ## Commands
 
-### Plugin-Level
+### Plugin-level
 
-| Command | What It Does |
-|---------|-------------|
-| `/arscontexta:setup` | Conversational onboarding -- generates your full system |
+| Command | What it does |
+|---------|--------------|
+| `/arscontexta:setup` | Runs conversational setup and generates the full system |
 
-### Generated (available after setup)
+### Generated after setup
 
-#### Pipeline
+| Command | What it does |
+|---------|--------------|
+| `/process` | Runs end-to-end source processing |
+| `/seed` | Archives a source and creates initial pipeline state |
+| `/structure` | Turns source material into finished notes |
+| `/capture` | Preserves source material verbatim |
+| `/connect` | Runs qmd discovery, gathers Obsidian graph facts, and updates MOCs |
+| `/verify` | Checks Obsidian links and deterministic schema validation |
+| `/health` | Runs Obsidian diagnostics plus `validate --all` |
 
-| Command | What It Does |
-|---------|-------------|
-| `/process` | End-to-end source processing |
+## Processing pipeline
 
-#### Pipeline Sub-Skills
+| Phase | What happens | Command |
+|-------|--------------|---------|
+| Record | Capture source material into the inbox | User action |
+| Reduce | Extract notes or preserve source text | `/structure`, `/capture` |
+| Connect | Find links, update MOCs, and reconsider older notes | `/connect` |
+| Verify | Check links and schema before the batch is committed | `/verify` |
 
-| Command | What It Does |
-|---------|-------------|
-| `/seed` | Pipeline-internal source archival and initial state |
-| `/structure` | Group claims into finished notes and apply enrichments to existing notes |
-| `/capture` | Verbatim capture — preserves source without transformation |
-| `/connect` | Run qmd discovery, gather Obsidian graph facts, update MOCs |
-| `/verify` | Obsidian link checks plus deterministic schema validation |
-
-#### Operational
-
-| Command | What It Does |
-|---------|-------------|
-| `/health` | Obsidian diagnostics plus `validate --all` |
-
----
-
-## Processing Pipeline
-
-
-| Phase | What Happens | Command |
-|-------|-------------|---------|
-| **Record** | Zero-friction capture into inbox/ | User action |
-| **Reduce** | Extract insights with domain-native categories | `/structure`, `/capture` |
-| **Connect** | Find connections, update MOCs, reconsider older notes | `/connect` |
-| **Verify** | Obsidian link checks plus deterministic schema validation | `/verify` |
-
----
+`/process` orchestrates the full pipeline and creates one git commit at the end of each successful batch.
 
 ## Hooks
 
-| Hook | Event | What It Does |
-|------|-------|-------------|
-| **Session Orient** | `SessionStart` | Injects workspace tree, loads identity, surfaces maintenance signals |
-
----
+| Hook | Event | What it does |
+|------|-------|--------------|
+| Session orient | `SessionStart` | Injects the workspace tree, loads identity, and shows maintenance signals |
 
 ## Development
 
-Clone this repo and add the marketplace to Claude Code:
+Clone this repo, then add and install the local marketplace inside Claude Code:
 
-```
+```text
 /plugin marketplace add ~/path-to-arscontexta
-```
-
-Install the plugin:
-
-```
 /plugin install arscontexta@datamole-ai-arscontexta
 ```
 
-Every time you make changes, re-install the plugin:
+Reinstall after each change:
 
-```
+```text
 /plugin uninstall arscontexta@datamole-ai-arscontexta
 /plugin install arscontexta@datamole-ai-arscontexta
 ```
