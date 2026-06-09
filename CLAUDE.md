@@ -45,7 +45,7 @@ docs/             superpowers/{plans,specs}          design specs
 | Mutate | `seed/` |
 | Connect | `connect/` |
 | Verify | `verify/` |
-| Orchestration | `pipeline/` |
+| Orchestration | `process/` |
 | Diagnostics | `health/` |
 
 Each `SKILL.md` uses `{DOMAIN:…}` placeholders that the derivation engine rewrites at generation.

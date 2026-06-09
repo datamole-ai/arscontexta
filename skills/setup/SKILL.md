@@ -652,12 +652,12 @@ The skills agent uses a specialized prompt (below); source skills are copied fir
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/connect/`       | connect       | A    | no (universal) | Universal infra; frontmatter `name:` and `description:` unchanged       |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/health/`        | health        | A    | no             | Local generated diagnostics; keep `health` as the target name |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/seed/`          | seed          | B    | no             | Keep `seed` as the target name                     |
-| `${CLAUDE_PLUGIN_ROOT}/skill-sources/pipeline/`      | process       | B    | no             | Source directory stays `pipeline`; generate as `/process` |
+| `${CLAUDE_PLUGIN_ROOT}/skill-sources/process/`       | process       | B    | no             | Generate as `/process` |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/verify/`        | verify        | B    | no             | Keep `verify` as the target name                   |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/structure/`     | structure     | B    | no (universal) | Universal infra; frontmatter `name:` unchanged     |
 | `${CLAUDE_PLUGIN_ROOT}/skill-sources/capture/`       | capture       | B    | no (universal) | Universal infra; frontmatter `name:` unchanged     |
 
-**Rename rules:** `yes` → directory and frontmatter `name:` both become the domain-native verb from `ops/derivation.md`. `no` → use the table's target name. `no (universal)` (`structure`, `capture`, `connect`) → keep frontmatter `name:` and `description:` unchanged; only body `{DOMAIN:xxx}` substitutes. `verify` is fixed: directory, frontmatter `name:`, and command reference stay `verify` / `/verify`. The process command is fixed: copy from `skill-sources/pipeline/` into `.claude/skills/process/SKILL.md` with frontmatter `name: process`.
+**Rename rules:** `yes` → directory and frontmatter `name:` both become the domain-native verb from `ops/derivation.md`. `no` → use the table's target name. `no (universal)` (`structure`, `capture`, `connect`) → keep frontmatter `name:` and `description:` unchanged; only body `{DOMAIN:xxx}` substitutes. `verify` is fixed: directory, frontmatter `name:`, and command reference stay `verify` / `/verify`. The process command is fixed: copy from `skill-sources/process/` into `.claude/skills/process/SKILL.md` with frontmatter `name: process`.
 
 ---
 
