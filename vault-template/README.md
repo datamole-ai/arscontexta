@@ -9,8 +9,7 @@ uv run arscontexta-vault <command>
 Intended commands:
 
 ```bash
-uv run arscontexta-vault seed --source "<file>" --mode structure
-uv run arscontexta-vault seed --source "<file>" --mode capture
+uv run arscontexta-vault seed --source "<file>" --mode "<structure|capture>"
 uv run arscontexta-vault validate --path "notes/example.md"
 uv run arscontexta-vault validate --all
 printf '%s' "$PIPELINE_STATE" | uv run arscontexta-vault validate --artifacts

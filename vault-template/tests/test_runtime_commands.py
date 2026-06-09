@@ -38,12 +38,13 @@ def test_seed_archives_source_and_emits_lean_state(vault: Path) -> None:
     assert result["ok"] is True
     assert result["command"] == "seed"
     assert result["batch"] == "source-file"
-    assert set(result) == {"ok", "command", "batch", "source"}
+    assert set(result) == {"ok", "command", "batch", "source", "commit_paths"}
     assert result["source"].startswith("archive/")
     assert result["source"].endswith("-source-file.md")
+    assert result["commit_paths"] == ["inbox/Source File.md"]
     assert (vault / result["source"]).read_text(encoding="utf-8") == "# Source\n"
     assert not (vault / "archive" / "source-file").exists()
-    assert source.exists()
+    assert not source.exists()
     assert not (vault / "ops" / "queue" / "queue.json").exists()
 
 

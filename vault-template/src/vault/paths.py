@@ -13,6 +13,7 @@ class VaultPaths:
     root: Path
     note_collection_dir: Path
     archive_dir: Path
+    inbox_dir: Path
 
     @classmethod
     def discover(cls, start: Path | None = None) -> VaultPaths:
@@ -30,6 +31,7 @@ class VaultPaths:
                     root=candidate,
                     note_collection_dir=candidate / _vocab(vocabulary, "note_collection"),
                     archive_dir=candidate / _vocab(vocabulary, "archive"),
+                    inbox_dir=candidate / _vocab(vocabulary, "inbox"),
                 )
         raise VaultError(".arscontexta marker not found; run from a generated vault")
 
