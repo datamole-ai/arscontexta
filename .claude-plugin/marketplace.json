@@ -5,7 +5,7 @@
     "email": "marek.nevole@datamole.ai"
   },
   "metadata": {
-    "description": "Conversational derivation engine for agent-native knowledge systems",
+    "description": "Fixed knowledge-system template with a conversational starter tag registry",
     "version": "1.0.1"
   },
   "plugins": [

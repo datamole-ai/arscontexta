@@ -30,7 +30,7 @@ def test_seed_moves_inbox_file_to_archive(vault: Path) -> None:
     result = run_json(["seed", "--source", "inbox/Source File.md"])
 
     assert result["source"].startswith("archive/")
-    assert result["commit_paths"] == ["inbox/Source File.md"]
+    assert "commit_paths" not in result, "seed must not name the gitignored inbox path"
     assert (vault / result["source"]).read_text(encoding="utf-8") == "# Source\n"
     assert not source.exists()
 
@@ -72,7 +72,7 @@ def test_seed_rejects_existing_archive_when_inbox_file_exists(vault: Path) -> No
     assert "archive source already exists" in failure["errors"][0]
 
 
-def test_validate_artifacts_preserves_commit_paths(vault: Path) -> None:
+def test_validate_artifacts_drops_legacy_commit_paths(vault: Path) -> None:
     write_note(vault / "notes" / "good.md", "Good")
     state = {
         "batch": "batch",
@@ -83,4 +83,5 @@ def test_validate_artifacts_preserves_commit_paths(vault: Path) -> None:
 
     result = run_json(["validate", "--artifacts"], input=json.dumps(state))
 
-    assert result["commit_paths"] == ["inbox/batch.md"]
+    assert result["ok"] is True
+    assert "commit_paths" not in result, "artifacts is the only channel into the commit"

@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import pytest
+import yaml
 
 
 @pytest.fixture
@@ -13,40 +14,22 @@ def vault(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     (tmp_path / "inbox").mkdir()
     (tmp_path / "archive").mkdir()
     (tmp_path / "ops").mkdir()
-    (tmp_path / "ops" / "derivation-manifest.yaml").write_text(
-        """
----
-vocabulary:
-  note_collection: "notes"
-  inbox: "inbox"
-  archive: "archive"
-  note: "note"
-  note_plural: "notes"
-  topic_map: "topic map"
-  topic_maps: "topic maps"
-  qmd_collection: "notes"
-""".lstrip(),
-        encoding="utf-8",
-    )
     (tmp_path / "ops" / "schema.yaml").write_text(
         """required:
   - content_type
   - granularity
   - description
-  - created_at
   - tags
 enums:
   granularity:
-    - structure
-    - capture
+    - verbatim
+    - distilled
   content_type:
-    - claim
-    - source
+    - moc
+    - note
 constraints:
   description:
     max_length: 200
-  created_at:
-    format: "ISO 8601 date (YYYY-MM-DD)."
   tags:
     format: "Array of strings."
 """,
@@ -56,12 +39,15 @@ constraints:
     return tmp_path
 
 
+def write_tag_registry(root: Path, entries: list[dict[str, str]]) -> None:
+    (root / "ops" / "tags.yaml").write_text(yaml.safe_dump({"tags": entries}), encoding="utf-8")
+
+
 def write_note(path: Path, title: str, links: str = "", tags: list[str] | None = None) -> None:
     payload = {
-        "content_type": "claim",
-        "granularity": "structure",
+        "content_type": "note",
+        "granularity": "distilled",
         "description": f"Description for {title}",
-        "created_at": "2026-05-11",
         "tags": tags or [],
     }
     path.write_text(

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
-from conftest import write_note
+from conftest import write_note, write_tag_registry
 from typer.testing import CliRunner
 
 from vault import __version__
@@ -41,7 +42,7 @@ def test_short_help_alias_is_available() -> None:
 def test_root_lists_only_intended_runtime_commands(vault: Path) -> None:
     result = run_json([])
 
-    assert result == {"ok": True, "commands": ["seed", "validate"]}
+    assert result == {"ok": True, "commands": ["capture", "seed", "validate"]}
 
 
 def test_seed_archives_source_and_emits_lean_state(vault: Path) -> None:
@@ -53,10 +54,10 @@ def test_seed_archives_source_and_emits_lean_state(vault: Path) -> None:
     assert result["ok"] is True
     assert result["command"] == "seed"
     assert result["batch"] == "source-file"
-    assert set(result) == {"ok", "command", "batch", "source", "commit_paths"}
+    assert set(result) == {"ok", "command", "batch", "source"}
     assert result["source"].startswith("archive/")
     assert result["source"].endswith("-source-file.md")
-    assert result["commit_paths"] == ["inbox/Source File.md"]
+    assert re.fullmatch(r"archive/\d{4}-\d{2}-\d{2}-source-file\.md", result["source"])
     assert (vault / result["source"]).read_text(encoding="utf-8") == "# Source\n"
     assert not (vault / "archive" / "source-file").exists()
     assert not source.exists()
@@ -68,8 +69,7 @@ def test_validate_path_success_and_handled_failure(vault: Path) -> None:
     (vault / "notes" / "bad.md").write_text(
         "---\n"
         "content_type: draft\n"
-        "granularity: structure\n"
-        "created_at: bad\n"
+        "granularity: distilled\n"
         "tags: nope\n"
         "---\n"
         "# Bad\n",
@@ -90,17 +90,15 @@ def test_validate_path_success_and_handled_failure(vault: Path) -> None:
     assert failure["path"] == "notes/bad.md"
     assert "missing required field: description" in failure["errors"]
     assert "invalid content_type: draft" in failure["errors"]
-    assert "created_at must use YYYY-MM-DD" in failure["errors"]
     assert "tags must be a list" in failure["errors"]
 
 
 def test_validate_rejects_obsidian_incompatible_properties(vault: Path) -> None:
     (vault / "notes" / "bad-tags.md").write_text(
         "---\n"
-        "content_type: claim\n"
-        "granularity: structure\n"
+        "content_type: note\n"
+        "granularity: distilled\n"
         "description: Bad tag examples\n"
-        "created_at: 2026-05-20\n"
         "tag: legacy\n"
         "tags:\n"
         "  - '#prefixed'\n"
@@ -127,10 +125,9 @@ def test_validate_rejects_obsidian_incompatible_properties(vault: Path) -> None:
 def test_validate_accepts_obsidian_default_properties(vault: Path) -> None:
     (vault / "notes" / "with-obsidian-defaults.md").write_text(
         "---\n"
-        "content_type: claim\n"
-        "granularity: structure\n"
+        "content_type: note\n"
+        "granularity: distilled\n"
         "description: Obsidian defaults example\n"
-        "created_at: 2026-05-20\n"
         "tags:\n"
         "  - status/draft\n"
         "aliases:\n"
@@ -149,18 +146,12 @@ def test_validate_accepts_obsidian_default_properties(vault: Path) -> None:
     }
 
 
-def test_validate_accepts_reserved_moc_content_type(vault: Path) -> None:
-    schema = vault / "ops" / "schema.yaml"
-    schema.write_text(
-        schema.read_text(encoding="utf-8").replace("    - claim\n", "    - moc\n    - claim\n"),
-        encoding="utf-8",
-    )
+def test_validate_accepts_moc_content_type(vault: Path) -> None:
     (vault / "notes" / "index.md").write_text(
         "---\n"
         "content_type: moc\n"
-        "granularity: structure\n"
+        "granularity: distilled\n"
         "description: Entry point for the note collection\n"
-        "created_at: 2026-05-20\n"
         "tags: []\n"
         "---\n"
         "# index\n",
@@ -174,47 +165,125 @@ def test_validate_accepts_reserved_moc_content_type(vault: Path) -> None:
     }
 
 
-def test_validate_enforces_configured_tag_prefixes_only_for_namespaced_tags(
+def test_validate_enforces_tag_registry_only_when_tags_file_exists(
     vault: Path,
 ) -> None:
-    schema = vault / "ops" / "schema.yaml"
-    schema.write_text(
-        schema.read_text(encoding="utf-8")
-        + "    allowed_prefixes:\n"
-        + "      - project/\n"
-        + "      - customer/\n",
-        encoding="utf-8",
-    )
-    write_note(vault / "notes" / "allowed-tag.md", "Allowed Tag", tags=["project/mso"])
-    write_note(vault / "notes" / "bare-tag.md", "Bare Tag", tags=["mso"])
-    write_note(vault / "notes" / "bad-prefix.md", "Bad Prefix", tags=["vendor/lely"])
+    write_note(vault / "notes" / "unchecked-tag.md", "Unchecked Tag", tags=["vendor/lely"])
 
-    assert run_json(["validate", "--path", "notes/allowed-tag.md"]) == {
+    assert run_json(["validate", "--path", "notes/unchecked-tag.md"]) == {
         "ok": True,
         "command": "validate",
-        "path": "notes/allowed-tag.md",
+        "path": "notes/unchecked-tag.md",
     }
-    assert run_json(["validate", "--path", "notes/bare-tag.md"]) == {
+
+    write_tag_registry(
+        vault,
+        [
+            {"tag": "mso", "meaning": "MSO customer work"},
+            {"tag": "project/*", "meaning": "Project family"},
+        ],
+    )
+    write_note(vault / "notes" / "family-tag.md", "Family Tag", tags=["project/mso"])
+    write_note(vault / "notes" / "exact-tag.md", "Exact Tag", tags=["mso"])
+
+    assert run_json(["validate", "--path", "notes/family-tag.md"]) == {
         "ok": True,
         "command": "validate",
-        "path": "notes/bare-tag.md",
+        "path": "notes/family-tag.md",
     }
-    exit_code, failure = invoke_json(["validate", "--path", "notes/bad-prefix.md"])
+    assert run_json(["validate", "--path", "notes/exact-tag.md"]) == {
+        "ok": True,
+        "command": "validate",
+        "path": "notes/exact-tag.md",
+    }
+    exit_code, failure = invoke_json(["validate", "--path", "notes/unchecked-tag.md"])
 
     assert exit_code == 1
     assert (
-        "namespaced tag must use an allowed prefix (project/, customer/): vendor/lely"
-        in failure["errors"]
+        "tag not in ops/tags.yaml: vendor/lely; "
+        "use a registered tag or append an entry with tag and meaning"
+    ) in failure["errors"]
+
+
+def test_validate_tag_registry_family_and_exact_boundaries(vault: Path) -> None:
+    write_tag_registry(
+        vault,
+        [
+            {"tag": "pattern", "meaning": "A cross-cutting insight"},
+            {"tag": "customer/*", "meaning": "The client account"},
+        ],
     )
+    write_note(vault / "notes" / "deep-child.md", "Deep Child", tags=["customer/lely/mio"])
+    write_note(vault / "notes" / "bare-prefix.md", "Bare Prefix", tags=["customer"])
+    write_note(vault / "notes" / "exact-child.md", "Exact Child", tags=["pattern/foo"])
+
+    assert run_json(["validate", "--path", "notes/deep-child.md"]) == {
+        "ok": True,
+        "command": "validate",
+        "path": "notes/deep-child.md",
+    }
+    rejected = [("notes/bare-prefix.md", "customer"), ("notes/exact-child.md", "pattern/foo")]
+    for note, tag in rejected:
+        exit_code, failure = invoke_json(["validate", "--path", note])
+
+        assert exit_code == 1
+        assert (
+            f"tag not in ops/tags.yaml: {tag}; "
+            "use a registered tag or append an entry with tag and meaning"
+        ) in failure["errors"]
+
+
+def test_validate_empty_tag_registry_rejects_every_tag(vault: Path) -> None:
+    write_tag_registry(vault, [])
+    write_note(vault / "notes" / "untagged.md", "Untagged")
+    write_note(vault / "notes" / "tagged.md", "Tagged", tags=["pattern"])
+
+    assert run_json(["validate", "--path", "notes/untagged.md"]) == {
+        "ok": True,
+        "command": "validate",
+        "path": "notes/untagged.md",
+    }
+    exit_code, failure = invoke_json(["validate", "--path", "notes/tagged.md"])
+
+    assert exit_code == 1
+    assert (
+        "tag not in ops/tags.yaml: pattern; "
+        "use a registered tag or append an entry with tag and meaning"
+    ) in failure["errors"]
+
+
+def test_validate_rejects_malformed_tag_registry(vault: Path) -> None:
+    write_note(vault / "notes" / "good.md", "Good")
+    malformed = [
+        "tags:\n  - tag: pattern\n",
+        "tags:\n  - tag: pattern\n    meaning: One\n  - tag: pattern\n    meaning: Two\n",
+        "tags: pattern\n",
+        "tags:\n  - tag: '*'\n    meaning: Anything\n",
+        "tags:\n  - tag: 'customer/*/extra'\n    meaning: Misplaced star\n",
+        "tags:\n  - tag: '/*'\n    meaning: Empty prefix\n",
+    ]
+
+    for content in malformed:
+        (vault / "ops" / "tags.yaml").write_text(content, encoding="utf-8")
+
+        exit_code, payload = invoke_json(["validate", "--path", "notes/good.md"])
+
+        assert exit_code == 1, content
+        assert payload["ok"] is False
+        assert any("ops/tags.yaml" in error for error in payload["errors"]), payload
+
+        exit_code, payload = invoke_json(["validate", "--all"])
+
+        assert exit_code == 1, content
+        assert any("ops/tags.yaml" in error for error in payload["errors"]), payload
 
 
 def test_validate_rejects_nested_note_properties(vault: Path) -> None:
     (vault / "notes" / "nested.md").write_text(
         "---\n"
-        "content_type: claim\n"
-        "granularity: structure\n"
+        "content_type: note\n"
+        "granularity: distilled\n"
         "description: Nested property example\n"
-        "created_at: 2026-05-20\n"
         "tags: []\n"
         "aliases:\n"
         "  nested: value\n"
@@ -233,11 +302,10 @@ def test_validate_rejects_nested_note_properties(vault: Path) -> None:
 def test_validate_rejects_duplicate_yaml_properties(vault: Path) -> None:
     (vault / "notes" / "duplicate.md").write_text(
         "---\n"
-        "content_type: claim\n"
-        "content_type: source\n"
-        "granularity: structure\n"
+        "content_type: note\n"
+        "content_type: moc\n"
+        "granularity: distilled\n"
         "description: Duplicate property example\n"
-        "created_at: 2026-05-20\n"
         "tags: []\n"
         "---\n"
         "# Duplicate\n",
@@ -256,7 +324,6 @@ def test_validate_all_and_artifacts(vault: Path) -> None:
         "batch": "batch",
         "source": "archive/2026-05-22-batch.md",
         "artifacts": [{"kind": "note", "path": "notes/good.md"}],
-        "commit_paths": ["notes/topic-map.md"],
     }
 
     assert run_json(["validate", "--all"]) == {
@@ -271,7 +338,6 @@ def test_validate_all_and_artifacts(vault: Path) -> None:
         "batch": "batch",
         "source": "archive/2026-05-22-batch.md",
         "artifacts": [{"kind": "note", "path": "notes/good.md"}],
-        "commit_paths": ["notes/topic-map.md"],
     }
 
 

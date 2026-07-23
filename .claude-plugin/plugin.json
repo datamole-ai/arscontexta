@@ -1,7 +1,7 @@
 {
   "name": "second-brain",
   "version": "4.2.0",
-  "description": "Conversational derivation engine — generate agent-native memory architecture from natural conversation.",
+  "description": "Fixed knowledge-system template with a conversational starter tag registry.",
   "author": {
     "name": "Datamole",
     "email": "marek.nevole@datamole.ai"
@@ -12,7 +12,7 @@
     "knowledge-management",
     "tools-for-thought",
     "agent-memory",
-    "derivation-engine",
+    "tag-governance",
     "zettelkasten",
     "cognitive-architecture"
   ]

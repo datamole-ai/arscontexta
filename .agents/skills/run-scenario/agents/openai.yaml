@@ -1,0 +1,7 @@
+interface:
+  display_name: "Run Scenario"
+  short_description: "Run and delegate a scenario evaluation"
+  default_prompt: "Use $run-scenario to run the requested scenario, delegate only its evaluation, then investigate the verbatim report and suggest fixes."
+
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,1 @@
+"""Inbox seeding domain."""

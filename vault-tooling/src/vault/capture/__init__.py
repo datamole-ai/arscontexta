@@ -1,0 +1,1 @@
+"""Verbatim note capture domain."""

@@ -1,0 +1,62 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "autoAllowBashIfSandboxed": true,
+    "excludedCommands": [
+      "qmd init",
+      "qmd collection add *",
+      "qmd update",
+      "qmd embed",
+      "qmd query *",
+      "qmd vsearch *",
+      "qmd update && qmd embed",
+      "command -v obsidian *",
+      "pgrep -x Obsidian *",
+      "obsidian links *",
+      "obsidian backlinks *",
+      "obsidian unresolved",
+      "obsidian unresolved *",
+      "obsidian properties",
+      "obsidian properties *",
+      "obsidian tags",
+      "obsidian tags *",
+      "obsidian orphans",
+      "obsidian deadends"
+    ],
+    "allowUnsandboxedCommands": false,
+    "filesystem": {
+      "disabled": true
+    },
+    "network": {
+      "allowedDomains": []
+    }
+  },
+  "permissions": {
+    "allow": [
+      "Bash(qmd init)",
+      "Bash(qmd collection add *)",
+      "Bash(qmd update)",
+      "Bash(qmd embed)",
+      "Bash(qmd query *)",
+      "Bash(qmd vsearch *)",
+      "Bash(qmd update && qmd embed)",
+      "Bash(command -v obsidian *)",
+      "Bash(pgrep -x Obsidian *)",
+      "Bash(obsidian links *)",
+      "Bash(obsidian backlinks *)",
+      "Bash(obsidian unresolved)",
+      "Bash(obsidian unresolved *)",
+      "Bash(obsidian properties)",
+      "Bash(obsidian properties *)",
+      "Bash(obsidian tags)",
+      "Bash(obsidian tags *)",
+      "Bash(obsidian orphans)",
+      "Bash(obsidian deadends)"
+    ],
+    "deny": [
+      "WebFetch",
+      "WebSearch"
+    ]
+  }
+}

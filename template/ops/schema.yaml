@@ -1,0 +1,20 @@
+required:
+  - content_type
+  - granularity
+  - description
+  - tags
+enums:
+  content_type:
+    - moc
+    - note
+  granularity:
+    - verbatim
+    - distilled
+fields:
+  granularity:
+    description: "verbatim = source preserved byte-exactly by vault capture, machine-checked; distilled = agent-authored content. A reader-facing trust label."
+constraints:
+  description:
+    max_length: 200
+  tags:
+    format: "Array of strings."

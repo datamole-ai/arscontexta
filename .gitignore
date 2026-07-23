@@ -1,4 +1,6 @@
 .DS_Store
+.env
+.codex/config.toml
 *.local.md
 .claude/settings.local.json
 docs/superpowers/

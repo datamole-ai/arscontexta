@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-[ -n "$E2E_SHIM_LOG" ] && echo "pgrep $*" >> "$E2E_SHIM_LOG"
-
-if [ "$1" = "-x" ] && [ "$2" = "Obsidian" ]; then
-    echo "99999"
-    exit 0
-fi
-
-exec /usr/bin/pgrep "$@"

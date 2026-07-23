@@ -1,0 +1,6 @@
+# ops/tags.yaml -- governed tag registry.
+# Every tag on every note must match an entry here.
+# Exact entries permit that one tag. Family entries ("x/*") permit any
+# "x/<value>" at any depth, but not the bare "x".
+# Pick existing entries first; append {tag, meaning} when none fits.
+tags: []
