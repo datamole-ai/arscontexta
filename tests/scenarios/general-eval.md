@@ -4,6 +4,10 @@ It is a list of checks that need to be performed on the final vault individually
 
 For each criteria group, spawn an evaluator agent that evaluates the criteria group and returns important information you need to generate the report.
 
+If the scenario contains `eval.md`, read it only during evaluation. It is the answer key
+for prompts under that scenario's `questions/` directory and must not be exposed to the
+candidate.
+
 ## Criteria groups
 
 ### Vault structure
@@ -13,7 +17,7 @@ Set of checks focusing on the structure of the vault.
 - Immutable generated files match their repository sources: `CLAUDE.md`, `.gitignore`, `ops/schema.yaml`, generated skills, and tooling source; allow `ops/tags.yaml` and notes to evolve
 - Source accounting is exact: inbox is empty, every scenario source appears exactly once in `archive/` with identical content, and no unrelated archived sources exist
 - All knowledge notes are direct children of `notes/`; no nested note directories exist
-- Every note includes the four governed frontmatter fields `content_type`, `granularity`, `description`, and `tags`; no note contains `created_at`
+- Every note has exactly the four governed frontmatter fields `content_type`, `granularity`, `description`, and `tags`
 - Final operational state is complete: qmd has the single `notes` collection with mask `notes/**/*.md`, Git contains the initial commit and one pipeline commit per scenario source, and no tracked changes remain
 
 ### Verification
@@ -48,6 +52,20 @@ Use one evaluator for the setup logs and one evaluator for each processing run.
 - The process stages only the archived source, reported artifacts, and `ops/tags.yaml`
 - The batch commit occurs only after successful verification
 
+### Knowledge answers
+
+If the scenario has a `questions/` directory, use one evaluator for each question turn.
+
+- Every question prompt is run after all scenario sources have been processed, in question filename order
+- Every question uses a fresh candidate session, and the exact prompt plus its stream log are preserved in the run
+- There is exactly one recorded answer for every question listed in the scenario's `eval.md`, with no extra or missing question turns
+- Check only the final answer returned to the user, not hidden reasoning or tool output
+- Mark an answer as passing when it states every required fact listed for that question in `eval.md`
+- Accept wording, capitalization, accents, and formatting variants when they express the same fact
+- Do not require citations, source paths, reasoning, a specific retrieval command, or exact wording
+- Ignore unrelated extra material unless it directly contradicts or negates a required fact
+- Treat each question as one pass/fail check and report separate totals for single-source and multi-source questions
+
 ### Statistics
 Use an evaluation agent to collect metrics.
 
@@ -55,6 +73,7 @@ Runtime
 - total wall time
 - setup time
 - processing time per source
+- question-answering time per prompt
 - turns, tool calls, failed calls
 
 Knowledge output
@@ -68,12 +87,17 @@ Knowledge output
 Costs
 - input, reasoning, output tokens
 
+Knowledge answers
+- correct answers out of total
+- single-source correct answers out of total
+- multi-source correct answers out of total
+
 ## Output report
 
 Aggregate the results of the criteria groups returned by the evaluator agents 
 to standalone markdown file acting as a report.
 
-Start the report with a summary of the criteria groups and the overall score followed by statistics.
+Start the report with a summary of the criteria groups and the overall score followed by statistics. Include each knowledge question as one check in the overall score.
 
 After the first section, the report should focus on bringing out the key issues 
 and reasons why the candidate failed to meet the criteria so that the output is

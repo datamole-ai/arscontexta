@@ -11,7 +11,12 @@ scenario with Claude Code and saves the resulting vault, logs, and evaluation.
 3. Register the generated vault in Obsidian after setup succeeds.
 4. Process files under `inbox/` in filename order. Use a fresh `claude -p` session for each
    file.
-5. Lastly read tests/scenarios/general-eval.md and run the evaluation against the final vault.
+5. If the scenario has a `questions/` directory, run its prompts in filename order after
+   every source has been processed. Use a fresh `claude -p` session for each question and
+   save each prompt and log in the run. Do not expose the scenario's `eval.md` to the
+   candidate or copy it into the vault.
+6. Lastly read `tests/scenarios/general-eval.md` and run the evaluation against the final
+   vault, logs, and the scenario's `eval.md` when it exists.
 
 ## General instructions
 

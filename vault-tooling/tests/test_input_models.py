@@ -169,24 +169,26 @@ def test_validate_mode_is_a_typer_error_while_capture_input_is_json(vault: Path)
     assert validate_result.exit_code == 2
 
 
-def test_validate_rejects_removed_created_at_property(vault: Path) -> None:
-    (vault / "notes" / "dated.md").write_text(
+def test_validate_rejects_unknown_frontmatter_property(vault: Path) -> None:
+    (vault / "notes" / "unknown-property.md").write_text(
         "---\n"
         "content_type: note\n"
         "granularity: distilled\n"
-        "description: Note with removed metadata\n"
-        "created_at: 2026-06-01\n"
+        "description: Note with an unknown property\n"
+        "status: active\n"
         "tags: []\n"
         "---\n"
-        "# Dated\n",
+        "# Unknown property\n",
         encoding="utf-8",
     )
 
-    exit_code, payload = invoke_json(["validate", "--path", "notes/dated.md"])
+    exit_code, payload = invoke_json(
+        ["validate", "--path", "notes/unknown-property.md"]
+    )
 
     assert exit_code == 1
     assert payload["errors"] == [
-        "unknown property: created_at; use tags for conversation-derived attributes"
+        "unknown property: status; use tags for conversation-derived attributes"
     ]
 
 
