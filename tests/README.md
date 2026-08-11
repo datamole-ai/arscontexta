@@ -1,4 +1,19 @@
-# Running scenarios
+# Tests
+
+## Check generated tooling
+
+Run the focused setup contract check after changing setup or vault packaging:
+
+```bash
+tests/scripts/check-generated-tooling.sh
+```
+
+It copies the real template into a temporary vault, verifies that its `uv.lock` is byte-identical
+to `vault-tooling/uv.lock`, confirms setup does not resolve a new lock, and validates the generated
+vault with `uv run --locked`. It also changes the copied project metadata and checks that a locked
+run fails without rewriting `uv.lock`.
+
+## Run scenarios
 
 Each directory under `tests/scenarios/` is a real-tool evaluation. An agent runs the
 scenario with Claude Code and saves the resulting vault, logs, and evaluation.

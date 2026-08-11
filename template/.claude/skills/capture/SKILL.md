@@ -38,7 +38,7 @@ Then read the entire `source` file.
 Decide three things from the source: a prose title, a source-bounded description (<=200 chars), and any tags (omit leading `#`, no spaces, `/` for nesting). Then run:
 
 ```bash
-uv run --project ops/tooling vault capture \
+uv run --project ops/tooling --locked vault capture \
   --source "$SOURCE" \
   --title "<prose title describing the captured content>" \
   --description "<source-bounded description>" \
@@ -54,7 +54,7 @@ Append the returned path to state as `{"kind": "note", "path": "<note>"}`.
 Validate lean state:
 
 ```bash
-printf '%s' "$PIPELINE_STATE" | uv run --project ops/tooling vault validate --artifacts
+printf '%s' "$PIPELINE_STATE" | uv run --project ops/tooling --locked vault validate --artifacts
 ```
 
 Validation byte-compares the note's fenced payload against the source named in its `Source:` footer; it fails if anything altered the content. Fix deterministic validation failures once (wrong enum value, bad tag form), never by editing the fenced block or the `Source:` line. If validation still fails, emit the failure JSON and stop.

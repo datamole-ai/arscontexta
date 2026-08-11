@@ -55,7 +55,7 @@ All three fields are required. `artifacts` is the single channel for every file 
 1. Seed the source:
 
    ```bash
-   uv run --project ops/tooling vault seed --source "$SOURCE"
+   uv run --project ops/tooling --locked vault seed --source "$SOURCE"
    ```
 
    Stop on non-zero exit. Parse the JSON result and keep `batch` and `source`.

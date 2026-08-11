@@ -107,7 +107,6 @@ Run from the empty vault root:
 
 ```bash
 bash "${CLAUDE_PLUGIN_ROOT}/skills/setup/scripts/copy-template.sh" "$PWD"
-uv lock --project ops/tooling
 ```
 
 The script copies the root `template/` tree, which contains:
@@ -117,9 +116,11 @@ The script copies the root `template/` tree, which contains:
 - all six skills under `.claude/skills/`
 - the vault `.gitignore`
 
-The script copies the template and the runtime subset into `ops/tooling/`.
+The script copies the template and the reviewed runtime snapshot into `ops/tooling/`, including
+`uv.lock`.
 
-Stop and surface the command output if the script or `uv lock` fails. Do not edit `CLAUDE.md`, `notes/index.md`, `ops/schema.yaml`, or the copied skills.
+Stop and surface the command output if the script fails. Do not edit `CLAUDE.md`,
+`notes/index.md`, `ops/schema.yaml`, the copied lockfile, or the copied skills.
 
 ### Step 2: Write starter tags
 
@@ -153,7 +154,7 @@ Stop and surface the command output if any command fails.
 Run:
 
 ```bash
-uv run --project ops/tooling vault validate --all
+uv run --project ops/tooling --locked vault validate --all
 ```
 
 Continue only when it returns JSON with `"ok": true`. Then run:

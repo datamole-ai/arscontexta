@@ -38,7 +38,7 @@ commands, loops, pipes, semicolons, `&&`, or shell command substitutions.
 Use the runtime only for deterministic schema/artifact validation:
 
 ```bash
-printf '%s' "$PIPELINE_STATE" | uv run --project ops/tooling vault validate --artifacts
+printf '%s' "$PIPELINE_STATE" | uv run --project ops/tooling --locked vault validate --artifacts
 ```
 
 Rules:
