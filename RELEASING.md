@@ -9,6 +9,12 @@ generator version from conventional commits since the latest numeric tag:
 
 Squash merge pull requests so the checked conventional PR title becomes the commit on main.
 
+To bootstrap a repository with no release tag, publish the merged pull request that introduced
+the release files. It already carries version `1.0.0` and its recorded base commit. Run
+`Publish release archive` with that pull request number; do not run `Prepare release` first.
+If main advances before the pull request merges, rebase it onto current main and update
+`.github/release-base-sha` to that main commit before squash merging.
+
 Run `Prepare release` from GitHub Actions. It opens a `release/X.Y.Z-BASE` pull request using
 the repository's `GITHUB_TOKEN`. Approve its workflows, review the version, then squash merge
 it through the usual branch protection. Require release branches to be up to date with main
