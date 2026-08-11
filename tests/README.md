@@ -9,9 +9,8 @@ tests/scripts/check-generated-tooling.sh
 ```
 
 It copies the real template into a temporary vault, verifies that its `uv.lock` is byte-identical
-to `vault-tooling/uv.lock`, confirms setup does not resolve a new lock, and validates the generated
-vault with `uv run --locked`. It also changes the copied project metadata and checks that a locked
-run fails without rewriting `uv.lock`.
+to `vault-tooling/uv.lock`, confirms setup does not resolve a new lock, validates the generated
+vault, and checks that a normal `uv run` leaves the copied lock unchanged.
 
 ## Run scenarios
 

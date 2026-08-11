@@ -27,7 +27,7 @@ commands, loops, pipes, semicolons, `&&`, or shell command substitutions.
 Deterministic schema checks:
 
 ```bash
-uv run --project ops/tooling --locked vault validate --all
+uv run --project ops/tooling vault validate --all
 ```
 
 Rules:

@@ -154,7 +154,7 @@ Stop and surface the command output if any command fails.
 Run:
 
 ```bash
-uv run --project ops/tooling --locked vault validate --all
+uv run --project ops/tooling vault validate --all
 ```
 
 Continue only when it returns JSON with `"ok": true`. Then run:

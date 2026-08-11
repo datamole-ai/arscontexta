@@ -66,7 +66,7 @@ After writing all artifacts, build lean state:
 Validate it:
 
 ```bash
-printf '%s' "$PIPELINE_STATE" | uv run --project ops/tooling --locked vault validate --artifacts
+printf '%s' "$PIPELINE_STATE" | uv run --project ops/tooling vault validate --artifacts
 ```
 
 If validation fails, fix the Markdown once and rerun validation. If it still fails, emit the failure JSON and stop.
