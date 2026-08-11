@@ -2,21 +2,32 @@
 
 Second Brain is a Claude Code plugin that generates a local Markdown knowledge system with fixed defaults and a small starter tag registry.
 
-## Install
+## Install from a release
 
-Install [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [uv](https://docs.astral.sh/uv/), [qmd](https://github.com/tobi/qmd) v2+, and the Obsidian CLI. Then run:
+Install [Claude Code](https://docs.anthropic.com/en/docs/claude-code) v2.1.128 or newer, [uv](https://docs.astral.sh/uv/), [qmd](https://github.com/tobi/qmd) v2+, Obsidian, and the Obsidian CLI. Create an empty target directory and start Claude Code with a pinned release:
 
-```text
-/plugin marketplace add /path/to/second-brain
-/plugin install second-brain@datamole-ai-second-brain
+```bash
+mkdir my-second-brain
+cd my-second-brain
+claude --plugin-url https://github.com/datamole-ai/arscontexta/releases/download/v4.2.0/second-brain.zip
 ```
 
-Restart Claude Code and run `/second-brain:setup`. Setup checks the prerequisites, asks which starter tags matter, copies the fixed system, and validates it.
+Run `/second-brain:setup` in that session. The plugin URL loads only for the current session, and the version in the URL pins the downloaded archive. Setup checks the prerequisites, asks which starter tags matter, copies the fixed system, and validates it.
+
+For a persistent installation, add this repository as a marketplace from Claude Code:
+
+```text
+/plugin marketplace add datamole-ai/arscontexta
+/plugin install second-brain@datamole-ai-second-brain
+/reload-plugins
+```
+
+Then start Claude Code in an empty target directory and run `/second-brain:setup`.
 
 When setup finishes:
 
-1. Restart Claude Code so the generated skills load.
-2. Open the generated folder as an Obsidian vault and leave Obsidian running.
+1. Quit and restart Claude Code in the generated folder so its new project skills load.
+2. Open the generated folder as an Obsidian vault and leave Obsidian running while you use `/process`.
 3. Add a file to `inbox/` and run `/process`.
 
 ## What it creates
@@ -71,4 +82,11 @@ When changing a plugin or runtime version, run the manifest consistency test:
 
 ```bash
 python3 -m unittest tests/test_version_manifest.py
+```
+
+Build and verify the same archive published by the release workflow:
+
+```bash
+python3 scripts/release-archive.py build --output dist/second-brain.zip
+python3 scripts/release-archive.py verify dist/second-brain.zip
 ```

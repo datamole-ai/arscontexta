@@ -8,4 +8,5 @@ todo.md
 docs/
 CONTEXT.md
 **.pyc
+/dist/
 AGENTS.md

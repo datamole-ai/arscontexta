@@ -1,0 +1,63 @@
+name: Publish release archive
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out tag
+        uses: actions/checkout@v4
+
+      - name: Run repository tests
+        run: python3 -m unittest discover -s tests -p "test_*.py"
+
+      - name: Build and verify archive
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          python3 scripts/release-archive.py build \
+            --tag "$RELEASE_TAG" \
+            --output dist/second-brain.zip
+          python3 scripts/release-archive.py verify \
+            --tag "$RELEASE_TAG" \
+            dist/second-brain.zip
+
+      - name: Check reproducible output
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          python3 scripts/release-archive.py build \
+            --tag "$RELEASE_TAG" \
+            --output dist/rebuilt.zip
+          cmp dist/second-brain.zip dist/rebuilt.zip
+
+      - name: Write SHA-256 checksum
+        run: |
+          set -euo pipefail
+          cd dist
+          sha256sum second-brain.zip > second-brain.zip.sha256
+          sha256sum --check second-brain.zip.sha256
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          gh release create "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --generate-notes \
+            --title "Second Brain $RELEASE_TAG" \
+            dist/second-brain.zip \
+            dist/second-brain.zip.sha256
