@@ -107,7 +107,6 @@ Run from the empty vault root:
 
 ```bash
 bash "${CLAUDE_PLUGIN_ROOT}/skills/setup/scripts/copy-template.sh" "$PWD"
-uv lock --project ops/tooling
 ```
 
 The script copies the root `template/` tree, which contains:
@@ -117,9 +116,11 @@ The script copies the root `template/` tree, which contains:
 - all six skills under `.claude/skills/`
 - the vault `.gitignore`
 
-The script copies the template and the runtime subset into `ops/tooling/`.
+The script copies the template and the reviewed runtime snapshot into `ops/tooling/`, including
+`uv.lock`.
 
-Stop and surface the command output if the script or `uv lock` fails. Do not edit `CLAUDE.md`, `notes/index.md`, `ops/schema.yaml`, or the copied skills.
+Stop and surface the command output if the script fails. Do not edit `CLAUDE.md`,
+`notes/index.md`, `ops/schema.yaml`, the copied lockfile, or the copied skills.
 
 ### Step 2: Write starter tags
 
@@ -189,6 +190,13 @@ Created:
 Available commands:
   /process                        -- process one inbox source
   /health                         -- run vault diagnostics
+
+Lifecycle:
+  Notes and normal vault content remain editable and can grow over time.
+  The copied template, skills, schema, and tooling are a fixed snapshot.
+  Plugin updates affect only vaults generated later.
+  There is no second-brain upgrade command. To adopt a newer system,
+  create a new vault and migrate content deliberately.
 
 IMPORTANT: Restart Claude Code now to activate the generated skills.
 

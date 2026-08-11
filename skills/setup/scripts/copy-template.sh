@@ -10,5 +10,5 @@ tooling_dir="$plugin_root/vault-tooling"
 cp -R "$plugin_root/template"/. "$vault_root"/
 
 tar -C "$tooling_dir" --exclude '__pycache__' --exclude '*.py[co]' \
-  -cf - pyproject.toml src/vault |
+  -cf - pyproject.toml uv.lock src/vault |
   tar -xf - -C "$vault_root/ops/tooling"

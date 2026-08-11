@@ -1,6 +1,6 @@
 # Second Brain vault tooling
 
-Setup copies this project's runtime subset (`pyproject.toml`, `src/vault/`) into each vault at `ops/tooling/`; this README, the tests, and the lockfile stay in the engine checkout. Inside a vault, runtime commands use:
+Setup copies this project's runtime snapshot (`pyproject.toml`, `uv.lock`, and `src/vault/`) into each vault at `ops/tooling/`; this README and the tests stay in the engine checkout. Inside a vault, uv uses the copied lock automatically:
 
 ```bash
 uv run --project ops/tooling vault <command>

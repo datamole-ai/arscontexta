@@ -2,51 +2,24 @@
 
 Second Brain is a Claude Code plugin that generates a local Markdown knowledge system with fixed defaults and a small starter tag registry.
 
-## Install
+## Install from a release
 
-Install [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [uv](https://docs.astral.sh/uv/), [qmd](https://github.com/tobi/qmd) v2+, and the Obsidian CLI. Then run:
+Install [Claude Code](https://docs.anthropic.com/en/docs/claude-code) v2.1.129 or newer, [uv](https://docs.astral.sh/uv/), [qmd](https://github.com/tobi/qmd) v2+, Obsidian, and the Obsidian CLI. Then create an empty directory and start Claude Code with the latest release:
 
-```text
-/plugin marketplace add /path/to/second-brain
-/plugin install second-brain@datamole-ai-second-brain
+```bash
+mkdir my-second-brain
+cd my-second-brain
+claude --plugin-url https://github.com/datamole-ai/arscontexta/releases/latest/download/second-brain.zip
 ```
 
-Restart Claude Code and run `/second-brain:setup`. Setup checks the prerequisites, asks which starter tags matter, copies the fixed system, and validates it.
+Run `/second-brain:setup`. When setup finishes, restart Claude Code in the generated folder and open that folder as an Obsidian vault. Keep Obsidian running while you use the vault.
 
-When setup finishes:
+## Use it
 
-1. Restart Claude Code so the generated skills load.
-2. Open the generated folder as an Obsidian vault and leave Obsidian running.
-3. Add a file to `inbox/` and run `/process`.
-
-## What it creates
-
-Every vault uses:
-
-- `notes/` for a flat, linked knowledge graph
-- `inbox/` for new material
-- `archive/` for processed sources
-- `ops/` for schema, tooling, and coordination
-
-Setup customizes only the starter entries in `ops/tags.yaml`. Storage, prose, navigation, the four-field note schema (`content_type`, `granularity`, `description`, `tags`), and the Record → Reduce → Connect → Verify pipeline stay fixed. `content_type` is always `moc` or `note`.
-
-## Commands
+Add a source file to `inbox/`, then run one of these commands:
 
 | Command | Purpose |
 |---|---|
-| `/second-brain:setup` | Generate a vault |
-| `/process` | Process one inbox source end to end |
-| `/health` | Diagnose the vault |
-
-`/process` preserves or distills the source, connects the result, verifies it, and commits the successful batch.
-
-## Develop
-
-Reinstall the plugin after a change:
-
-```text
-/plugin uninstall second-brain@datamole-ai-second-brain
-/plugin install second-brain@datamole-ai-second-brain
-```
-
-See [CLAUDE.md](CLAUDE.md) for the code map and change-specific checks, and [vault-tooling/README.md](vault-tooling/README.md) for the runtime CLI.
+| `/process inbox/source.md --structure` | Turn a source into distilled notes |
+| `/process inbox/source.md --capture` | Preserve a source verbatim |
+| `/health` | Check the vault |
