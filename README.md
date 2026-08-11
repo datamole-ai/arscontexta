@@ -30,6 +30,16 @@ Every vault uses:
 
 Setup customizes only the starter entries in `ops/tags.yaml`. Storage, prose, navigation, the four-field note schema (`content_type`, `granularity`, `description`, `tags`), and the Record → Reduce → Connect → Verify pipeline stay fixed. `content_type` is always `moc` or `note`.
 
+### Vault versions
+
+The root `.second-brain` file is both the vault marker and a JSON version manifest. It records:
+
+- `generator_version`: the Second Brain plugin release that generated the vault
+- `template_version`: the version of the fixed vault format copied by setup
+- `runtime_version`: the version of the `dtml-second-brain` package copied to `ops/tooling/`
+
+The manifest stays with the vault, so users can identify which plugin, template format, and runtime it received even after they uninstall the plugin.
+
 ## Commands
 
 | Command | Purpose |
@@ -50,3 +60,9 @@ Reinstall the plugin after a change:
 ```
 
 See [CLAUDE.md](CLAUDE.md) for the code map and change-specific checks, and [vault-tooling/README.md](vault-tooling/README.md) for the runtime CLI.
+
+When changing a plugin or runtime version, run the manifest consistency test:
+
+```bash
+python3 -m unittest tests/test_version_manifest.py
+```
