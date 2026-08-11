@@ -7,9 +7,9 @@ import tomllib
 import unittest
 from pathlib import Path
 
-
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_PATH = REPOSITORY_ROOT / "template" / ".second-brain"
+RELEASE_PROJECT_PATH = REPOSITORY_ROOT / "pyproject.toml"
 EXPECTED_FIELDS = {
     "generator_version",
     "template_version",
@@ -37,6 +37,7 @@ class VersionManifestTest(unittest.TestCase):
     def test_manifest_matches_generator_and_runtime_sources(self) -> None:
         manifest = read_json(MANIFEST_PATH)
         plugin = read_json(REPOSITORY_ROOT / ".claude-plugin" / "plugin.json")
+        generator_version = read_project_version(RELEASE_PROJECT_PATH)
 
         self.assertEqual(set(manifest), EXPECTED_FIELDS)
         for field in EXPECTED_FIELDS:
@@ -44,7 +45,12 @@ class VersionManifestTest(unittest.TestCase):
                 self.assertIsInstance(manifest[field], str)
                 self.assertTrue(manifest[field])
 
-        self.assertEqual(manifest["generator_version"], plugin["version"])
+        self.assertEqual(plugin["version"], generator_version)
+        self.assertEqual(manifest["generator_version"], generator_version)
+        self.assertIn(
+            f"/releases/download/{generator_version}/second-brain.zip",
+            (REPOSITORY_ROOT / "README.md").read_text(encoding="utf-8"),
+        )
         self.assertEqual(
             manifest["runtime_version"],
             read_project_version(REPOSITORY_ROOT / "vault-tooling" / "pyproject.toml"),

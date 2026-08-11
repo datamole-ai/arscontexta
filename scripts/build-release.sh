@@ -5,11 +5,10 @@ script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd -- "$script_dir/.." && pwd)"
 output=${1:-dist/second-brain.zip}
 
-plugin_version="$(
-  uv run --python 3.12 python -c \
-    'import json, pathlib, sys; print(json.loads(pathlib.Path(sys.argv[1]).read_text())["version"])' \
-    "$repo_root/.claude-plugin/plugin.json"
-)"
+if ! git -C "$repo_root" diff --quiet HEAD --; then
+  echo "release archive requires a clean tracked worktree" >&2
+  exit 1
+fi
 
 case "$output" in
   /*) ;;
@@ -27,4 +26,4 @@ git -C "$repo_root" archive --format=zip --output "$output" HEAD -- \
   vault-tooling/src/vault
 
 unzip -tq "$output"
-echo "built $output for plugin version $plugin_version"
+echo "built $output"

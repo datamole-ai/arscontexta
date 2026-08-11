@@ -9,7 +9,7 @@ Install [Claude Code](https://docs.anthropic.com/en/docs/claude-code) v2.1.129 o
 ```bash
 mkdir my-second-brain
 cd my-second-brain
-claude --plugin-url https://github.com/datamole-ai/arscontexta/releases/download/v4.2.0/second-brain.zip
+claude --plugin-url https://github.com/datamole-ai/arscontexta/releases/download/1.0.0/second-brain.zip
 ```
 
 Run `/second-brain:setup`. When setup finishes, restart Claude Code in the generated folder and open that folder as an Obsidian vault. Keep Obsidian running while you use the vault.

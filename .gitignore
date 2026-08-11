@@ -9,4 +9,5 @@ docs/
 CONTEXT.md
 **.pyc
 /dist/
+/.venv/
 AGENTS.md
