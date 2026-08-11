@@ -22,6 +22,17 @@ select_release_bump() {
   fi
 }
 
+sync_generator_version() {
+  local version=$1
+  local plugin_json
+  local vault_json
+
+  plugin_json="$(jq --arg version "$version" '.version = $version' .claude-plugin/plugin.json)"
+  vault_json="$(jq --arg version "$version" '.generator_version = $version' template/.second-brain)"
+  printf '%s\n' "$plugin_json" > .claude-plugin/plugin.json
+  printf '%s\n' "$vault_json" > template/.second-brain
+}
+
 main() {
   cd "$repo_root"
 
@@ -50,8 +61,7 @@ main() {
   fi
 
   uv version --bump "$bump"
-
-  uv run --python 3.12 python scripts/sync-generator-version.py
+  sync_generator_version "$(uv version --short)"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then

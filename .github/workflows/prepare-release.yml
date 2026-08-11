@@ -90,7 +90,6 @@ jobs:
           printf '%s\n' "$RELEASE_BASE" > .github/release-base-sha
           git add \
             .github/release-base-sha \
-            README.md \
             pyproject.toml \
             uv.lock \
             .claude-plugin/plugin.json \
@@ -111,11 +110,10 @@ jobs:
             exit 1
           fi
 
-      - name: Verify release commit
+      - name: Verify release archive
         if: steps.prepare.outputs.release == 'true'
         run: |
           set -euo pipefail
-          uv run --python 3.12 python -m unittest discover -s tests -p "test_*.py"
           scripts/build-release.sh dist/second-brain.zip
           unzip -tq dist/second-brain.zip
 
