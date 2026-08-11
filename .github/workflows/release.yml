@@ -85,12 +85,30 @@ jobs:
           set -euo pipefail
           version="$(uv version --short)"
           tag="$version"
+          prepared_base="$(tr -d '\n' < .github/release-base-sha)"
+          merge_parent="$(git rev-parse "${RELEASE_SHA}^1")"
 
           if [ "$(git rev-parse HEAD)" != "$RELEASE_SHA" ]; then
             echo "checked-out commit does not match the release pull request" >&2
             exit 1
           fi
-          if [ "$RELEASE_HEAD" != "release/$tag" ]; then
+          if [ "${#prepared_base}" -ne 40 ]; then
+            echo "release preparation has an invalid base commit: $prepared_base" >&2
+            exit 1
+          fi
+          case "$prepared_base" in
+            *[!0-9a-f]*)
+              echo "release preparation has an invalid base commit: $prepared_base" >&2
+              exit 1
+              ;;
+          esac
+          if [ "$merge_parent" != "$prepared_base" ]; then
+            echo "release pull request was prepared from $prepared_base but merged onto $merge_parent" >&2
+            echo "prepare a new release from the current default branch" >&2
+            exit 1
+          fi
+          expected_head="release/$tag-${prepared_base:0:12}"
+          if [ "$RELEASE_HEAD" != "$expected_head" ]; then
             echo "release branch $RELEASE_HEAD does not match version $version" >&2
             exit 1
           fi
