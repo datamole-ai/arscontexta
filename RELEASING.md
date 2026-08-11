@@ -3,9 +3,11 @@
 The `Prepare release` action uses Convco and `.github/versionrc` to compute the next
 generator version from conventional commits since the latest numeric tag:
 
-- A breaking change bumps the major version.
-- `feat` bumps the minor version.
-- `fix` and every other commit type bump the patch version.
+- A breaking change bumps the minor version.
+- `feat` and `fix` bump the patch version.
+- Every other commit type is ignored.
+
+The generator does not use major version bumps.
 
 Squash merge pull requests so the checked conventional PR title becomes the commit on main.
 

@@ -43,10 +43,20 @@ jobs:
           chmod +x /usr/local/bin/convco
 
       - name: Prepare release files
-        run: scripts/prepare-release.sh
+        id: prepare
+        run: |
+          set -euo pipefail
+          scripts/prepare-release.sh
+          if git diff --quiet HEAD --; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "No releasable conventional commits." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Select release identity
         id: release
+        if: steps.prepare.outputs.release == 'true'
         run: |
           set -euo pipefail
           version="$(uv version --short)"
@@ -69,6 +79,7 @@ jobs:
           echo "base=$base" >> "$GITHUB_OUTPUT"
 
       - name: Commit release preparation
+        if: steps.prepare.outputs.release == 'true'
         env:
           RELEASE_BASE: ${{ steps.release.outputs.base }}
           RELEASE_BRANCH: ${{ steps.release.outputs.branch }}
@@ -101,6 +112,7 @@ jobs:
           fi
 
       - name: Verify release commit
+        if: steps.prepare.outputs.release == 'true'
         run: |
           set -euo pipefail
           uv run --python 3.12 python -m unittest discover -s tests -p "test_*.py"
@@ -108,6 +120,7 @@ jobs:
           unzip -tq dist/second-brain.zip
 
       - name: Push branch and open pull request
+        if: steps.prepare.outputs.release == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}

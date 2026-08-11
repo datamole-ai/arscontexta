@@ -4,6 +4,24 @@ set -euo pipefail
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd -- "$script_dir/.." && pwd)"
 
+select_release_bump() {
+  local released_version=$1
+  local conventional_version=$2
+
+  if [ "$conventional_version" = "$released_version" ]; then
+    printf '%s\n' none
+    return
+  fi
+
+  local released_major=${released_version%%.*}
+  local conventional_major=${conventional_version%%.*}
+  if [ "$conventional_major" != "$released_major" ]; then
+    printf '%s\n' minor
+  else
+    printf '%s\n' patch
+  fi
+}
+
 main() {
   cd "$repo_root"
 
@@ -25,11 +43,13 @@ main() {
   fi
 
   next_version="$(convco version --prefix '' --bump --config .github/versionrc)"
-  if [ "$next_version" = "$released_version" ]; then
-    uv version --bump patch
-  else
-    uv version "$next_version"
+  bump="$(select_release_bump "$released_version" "$next_version")"
+  if [ "$bump" = none ]; then
+    echo "there are no releasable conventional commits"
+    return
   fi
+
+  uv version --bump "$bump"
 
   uv run --python 3.12 python scripts/sync-generator-version.py
 }

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -63,12 +64,34 @@ class ReleaseVersionTest(unittest.TestCase):
                 (root / "README.md").read_text(),
             )
 
-    def test_prepare_release_uses_convco_and_uv(self) -> None:
-        script = (REPOSITORY_ROOT / "scripts" / "prepare-release.sh").read_text()
+    def test_prepare_release_maps_conventional_bumps(self) -> None:
+        script = REPOSITORY_ROOT / "scripts" / "prepare-release.sh"
 
-        self.assertIn("convco version --prefix '' --bump", script)
-        self.assertIn('uv version "$next_version"', script)
-        self.assertIn("uv version --bump patch", script)
+        def select(released: str, conventional: str) -> str:
+            result = subprocess.run(
+                [
+                    "bash",
+                    "-c",
+                    'source "$1"; select_release_bump "$2" "$3"',
+                    "select-release-bump",
+                    str(script),
+                    released,
+                    conventional,
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            return result.stdout.strip()
+
+        self.assertEqual(select("1.2.3", "2.0.0"), "minor")
+        self.assertEqual(select("1.2.3", "1.3.0"), "patch")
+        self.assertEqual(select("1.2.3", "1.2.4"), "patch")
+        self.assertEqual(select("1.2.3", "1.2.3"), "none")
+
+        contents = script.read_text()
+        self.assertIn("convco version --prefix '' --bump", contents)
+        self.assertIn('uv version --bump "$bump"', contents)
 
     def test_release_workflows_bind_the_merge_to_the_preparation_base(self) -> None:
         prepare = (
@@ -80,6 +103,7 @@ class ReleaseVersionTest(unittest.TestCase):
 
         self.assertIn(".github/release-base-sha", prepare)
         self.assertIn('branch="release/$tag-${base:0:12}"', prepare)
+        self.assertIn('if: steps.prepare.outputs.release == \'true\'', prepare)
         self.assertIn('merge_parent="$(git rev-parse "${RELEASE_SHA}^1")"', publish)
         self.assertIn('[ "$merge_parent" != "$prepared_base" ]', publish)
         self.assertNotIn("expected_head", publish)
