@@ -191,6 +191,13 @@ Available commands:
   /process                        -- process one inbox source
   /health                         -- run vault diagnostics
 
+Lifecycle:
+  Notes and normal vault content remain editable and can grow over time.
+  The copied template, skills, schema, and tooling are a fixed snapshot.
+  Plugin updates affect only vaults generated later.
+  There is no second-brain upgrade command. To adopt a newer system,
+  create a new vault and migrate content deliberately.
+
 IMPORTANT: Restart Claude Code now to activate the generated skills.
 
 Next steps:

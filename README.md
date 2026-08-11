@@ -40,6 +40,12 @@ The root `.second-brain` file is both the vault marker and a JSON version manife
 
 The manifest stays with the vault, so users can identify which plugin, template format, and runtime it received even after they uninstall the plugin.
 
+## Vault lifecycle
+
+The system copied into each vault is an immutable snapshot of the generator version that created it. Notes and other normal vault content remain editable and can grow over time, but the copied template, skills, schema, and tooling do not update in place.
+
+Updating or reinstalling the plugin affects only vaults generated afterward. There is no `second-brain upgrade` command. To adopt a newer system, create a new vault and migrate content deliberately.
+
 ## Commands
 
 | Command | Purpose |
