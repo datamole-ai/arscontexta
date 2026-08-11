@@ -4,7 +4,7 @@ Second Brain is a Claude Code plugin that generates a local Markdown knowledge s
 
 ## Install from a release
 
-Install [Claude Code](https://docs.anthropic.com/en/docs/claude-code) v2.1.128 or newer, [uv](https://docs.astral.sh/uv/), [qmd](https://github.com/tobi/qmd) v2+, Obsidian, and the Obsidian CLI. Create an empty target directory and start Claude Code with a pinned release:
+Install [Claude Code](https://docs.anthropic.com/en/docs/claude-code) v2.1.129 or newer, [uv](https://docs.astral.sh/uv/), [qmd](https://github.com/tobi/qmd) v2+, Obsidian, and the Obsidian CLI. Create an empty target directory and start Claude Code with a pinned release:
 
 ```bash
 mkdir my-second-brain

@@ -25,6 +25,7 @@ EXACT_PATHS = (
     "skills/setup/SKILL.md",
     COPY_SCRIPT_PATH,
     "vault-tooling/pyproject.toml",
+    "vault-tooling/uv.lock",
 )
 DIRECTORY_PATHS = (
     "template",
