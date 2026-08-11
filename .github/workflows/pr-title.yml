@@ -10,18 +10,24 @@ permissions:
 
 env:
   CONVCO_VERSION: v0.4.2
+  CONVCO_SHA256: b83ca3aff647ac3cd17c1b68f15005244a7f9022f4fadbcf76bc9e3461905a11
 
 jobs:
   validate:
     name: Conventional PR title
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
       - name: Install convco
         run: |
-          curl -sSfL "https://github.com/convco/convco/releases/download/${CONVCO_VERSION}/convco-ubuntu.zip" \
-            | zcat \
-            > /usr/local/bin/convco
+          archive="$RUNNER_TEMP/convco.zip"
+          curl -sSfL \
+            "https://github.com/convco/convco/releases/download/${CONVCO_VERSION}/convco-ubuntu.zip" \
+            --output "$archive"
+          printf '%s  %s\n' "$CONVCO_SHA256" "$archive" | sha256sum --check
+          zcat "$archive" > /usr/local/bin/convco
           chmod +x /usr/local/bin/convco
       - name: Check PR title is conventional
         env:

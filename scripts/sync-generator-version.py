@@ -4,7 +4,6 @@ import argparse
 import json
 import re
 import tomllib
-from datetime import UTC, datetime
 from pathlib import Path
 
 VERSION_PATTERN = re.compile(r"[0-9]+\.[0-9]+\.[0-9]+")
@@ -41,41 +40,13 @@ def sync(root: Path) -> str:
     return version
 
 
-def initialize_changelog(root: Path, version: str) -> None:
-    changelog_path = root / "CHANGELOG.md"
-    if changelog_path.exists():
-        raise ValueError(f"initial changelog already exists: {changelog_path}")
-    release_date = datetime.now(UTC).date().isoformat()
-    changelog_path.write_text(
-        "\n".join(
-            [
-                "# Changelog",
-                "",
-                f"## {version}",
-                "",
-                f"Released on {release_date}.",
-                "",
-                "### Changes",
-                "",
-                "- Initial release.",
-                "",
-            ]
-        ),
-        encoding="utf-8",
-    )
-
-
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("repository", nargs="?", type=Path, default=Path(__file__).parents[1])
-    parser.add_argument("--initial-changelog", action="store_true")
     arguments = parser.parse_args()
 
     root = arguments.repository.resolve()
-    version = sync(root)
-    if arguments.initial_changelog:
-        initialize_changelog(root, version)
-    print(version)
+    print(sync(root))
 
 
 if __name__ == "__main__":

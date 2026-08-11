@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import importlib.util
 import json
-import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -64,48 +63,12 @@ class ReleaseVersionTest(unittest.TestCase):
                 (root / "README.md").read_text(),
             )
 
-            module.initialize_changelog(root, version)
-            changelog = (root / "CHANGELOG.md").read_text()
-            self.assertIn("## 2.3.4", changelog)
-            self.assertIn("- Initial release.", changelog)
-
-    def test_release_bump_uses_highest_label_priority(self) -> None:
-        script = REPOSITORY_ROOT / "scripts" / "prepare-release.sh"
-
-        def select(output: str) -> str:
-            result = subprocess.run(
-                [
-                    "bash",
-                    "-c",
-                    'source "$1"; select_release_bump "$2"',
-                    "select-release-bump",
-                    str(script),
-                    output,
-                ],
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-            return result.stdout.strip()
-
-        self.assertEqual(
-            select(
-                "Detected major version change due label breaking\n"
-                "Detected minor version change due label enhancement"
-            ),
-            "major",
-        )
-        self.assertEqual(
-            select("Detected minor version change due label enhancement"),
-            "minor",
-        )
-        self.assertEqual(select("Detected patch version change"), "patch")
-
-    def test_prepare_release_passes_the_selected_bump_to_rooster(self) -> None:
+    def test_prepare_release_uses_convco_and_uv(self) -> None:
         script = (REPOSITORY_ROOT / "scripts" / "prepare-release.sh").read_text()
 
-        self.assertIn("--no-update-version-files", script)
-        self.assertIn('rooster release --bump "$bump"', script)
+        self.assertIn("convco version --prefix '' --bump", script)
+        self.assertIn('uv version "$next_version"', script)
+        self.assertIn("uv version --bump patch", script)
 
     def test_release_workflows_bind_the_merge_to_the_preparation_base(self) -> None:
         prepare = (
@@ -119,6 +82,7 @@ class ReleaseVersionTest(unittest.TestCase):
         self.assertIn('branch="release/$tag-${base:0:12}"', prepare)
         self.assertIn('merge_parent="$(git rev-parse "${RELEASE_SHA}^1")"', publish)
         self.assertIn('[ "$merge_parent" != "$prepared_base" ]', publish)
+        self.assertNotIn("expected_head", publish)
 
 
 if __name__ == "__main__":
