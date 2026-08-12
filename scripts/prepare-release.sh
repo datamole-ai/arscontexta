@@ -24,20 +24,38 @@ select_release_bump() {
 
 sync_product_version() {
   local version=$1
-  local marketplace_json
   local plugin_json
   local vault_json
 
   plugin_json="$(jq --arg version "$version" '.version = $version' .claude-plugin/plugin.json)"
-  marketplace_json="$(
-    jq --arg version "$version" '.metadata.version = $version' .claude-plugin/marketplace.json
-  )"
   vault_json="$(jq --arg version "$version" '{version: $version}' template/.second-brain)"
 
   uv version --project vault-tooling --no-sync "$version"
   printf '%s\n' "$plugin_json" > .claude-plugin/plugin.json
-  printf '%s\n' "$marketplace_json" > .claude-plugin/marketplace.json
   printf '%s\n' "$vault_json" > template/.second-brain
+}
+
+increment_version() {
+  local version=$1
+  local bump=$2
+
+  if [[ ! "$version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+    echo "plugin version must use X.Y.Z format: $version" >&2
+    return 1
+  fi
+
+  local major=${BASH_REMATCH[1]}
+  local minor=${BASH_REMATCH[2]}
+  local patch=${BASH_REMATCH[3]}
+
+  case "$bump" in
+    minor) printf '%s.%s.0\n' "$major" "$((minor + 1))" ;;
+    patch) printf '%s.%s.%s\n' "$major" "$minor" "$((patch + 1))" ;;
+    *)
+      echo "unsupported release bump: $bump" >&2
+      return 1
+      ;;
+  esac
 }
 
 main() {
@@ -48,11 +66,11 @@ main() {
     exit 1
   fi
 
-  project_version="$(uv version --short)"
+  product_version="$(jq -er '.version | select(type == "string")' .claude-plugin/plugin.json)"
   released_version="$(convco version --prefix '' --config .github/versionrc)"
 
-  if [ "$project_version" != "$released_version" ]; then
-    echo "project version $project_version does not match release tag $released_version" >&2
+  if [ "$product_version" != "$released_version" ]; then
+    echo "plugin version $product_version does not match release tag $released_version" >&2
     exit 1
   fi
   if [ "$(git rev-list --count "$released_version..HEAD")" -eq 0 ]; then
@@ -67,8 +85,7 @@ main() {
     return
   fi
 
-  uv version --bump "$bump"
-  sync_product_version "$(uv version --short)"
+  sync_product_version "$(increment_version "$product_version" "$bump")"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then

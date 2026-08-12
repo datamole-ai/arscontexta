@@ -59,7 +59,7 @@ jobs:
         if: steps.prepare.outputs.release == 'true'
         run: |
           set -euo pipefail
-          version="$(uv version --short)"
+          version="$(jq -er '.version | select(type == "string")' .claude-plugin/plugin.json)"
           tag="$version"
           branch="release/$tag"
 
@@ -85,9 +85,6 @@ jobs:
           set -euo pipefail
           git switch -c "$RELEASE_BRANCH"
           git add \
-            pyproject.toml \
-            uv.lock \
-            .claude-plugin/marketplace.json \
             .claude-plugin/plugin.json \
             template/.second-brain \
             vault-tooling/pyproject.toml \
