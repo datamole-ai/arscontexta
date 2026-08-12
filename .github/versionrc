@@ -1,19 +1,20 @@
-# Convco rules for PR titles and release version selection.
-# scripts/prepare-release.sh maps feat and fix to patch, breaking changes to minor,
-# and all other types to no release. Use ! only for an incompatible supported contract.
+# Release: feat/fix -> patch; breaking -> minor; everything else -> none.
 
 types:
+  # Generated vault
   - type: feat
   - type: fix
-  - type: docs
   - type: refactor
   - type: perf
+
+  # Repository only
+  - type: docs
   - type: test
   - type: build
   - type: ci
   - type: chore
 
-# Scopes are optional. When useful, name the affected subsystem in lowercase kebab-case.
+# Optional lowercase kebab-case subsystem.
 scopeRegex: "^([a-z][a-z0-9-]*)?$"
 
 lineLength: 100
