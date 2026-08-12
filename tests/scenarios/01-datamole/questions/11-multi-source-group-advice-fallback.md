@@ -1,0 +1,1 @@
+Horizon displays a group feed-drop warning on one particular animal. Does that mean this animal alone caused the group classification? Explain why the warning is attached to one animal and how that animal is selected.

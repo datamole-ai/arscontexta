@@ -1,0 +1,1 @@
+Twelve animal lactations fall in the same 20-day bin. Three each have a `feed_allowance_kg_ma_10_days_diff` of `-0.13` kg for exactly three consecutive days. Does the group satisfy the documented research definition, the deployed defaults, both, or neither?

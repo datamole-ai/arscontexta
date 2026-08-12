@@ -1,0 +1,1 @@
+The group-level research chose its cow-level threshold so the share of groups flagged would be close to an estimate from subject-matter experts. What percentage supplied that calibration target, and what feature threshold is used by the deployed model?

@@ -1,0 +1,1 @@
+Five of twenty animal lactations in the same 20-day bin show a sharp drop in `feed_intake_concentrate_kg`, but none shows a drop in `feed_allowance_kg`. Should the group feed-drop detector classify the group as having suboptimal feed settings from those intake changes alone?
