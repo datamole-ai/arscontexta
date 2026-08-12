@@ -87,8 +87,11 @@ jobs:
           git add \
             pyproject.toml \
             uv.lock \
+            .claude-plugin/marketplace.json \
             .claude-plugin/plugin.json \
-            template/.second-brain
+            template/.second-brain \
+            vault-tooling/pyproject.toml \
+            vault-tooling/uv.lock
           git diff --cached --check
           if git diff --cached --quiet; then
             echo "release preparation produced no changes" >&2
@@ -109,6 +112,7 @@ jobs:
         if: steps.prepare.outputs.release == 'true'
         run: |
           set -euo pipefail
+          uv run --python 3.12 python -m unittest discover -s tests -p "test_*.py"
           scripts/build-release.sh dist/second-brain.zip
           unzip -tq dist/second-brain.zip
 

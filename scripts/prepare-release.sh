@@ -22,14 +22,21 @@ select_release_bump() {
   fi
 }
 
-sync_generator_version() {
+sync_product_version() {
   local version=$1
+  local marketplace_json
   local plugin_json
   local vault_json
 
   plugin_json="$(jq --arg version "$version" '.version = $version' .claude-plugin/plugin.json)"
-  vault_json="$(jq --arg version "$version" '.generator_version = $version' template/.second-brain)"
+  marketplace_json="$(
+    jq --arg version "$version" '.metadata.version = $version' .claude-plugin/marketplace.json
+  )"
+  vault_json="$(jq --arg version "$version" '{version: $version}' template/.second-brain)"
+
+  uv version --project vault-tooling --no-sync "$version"
   printf '%s\n' "$plugin_json" > .claude-plugin/plugin.json
+  printf '%s\n' "$marketplace_json" > .claude-plugin/marketplace.json
   printf '%s\n' "$vault_json" > template/.second-brain
 }
 
@@ -61,7 +68,7 @@ main() {
   fi
 
   uv version --bump "$bump"
-  sync_generator_version "$(uv version --short)"
+  sync_product_version "$(uv version --short)"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
