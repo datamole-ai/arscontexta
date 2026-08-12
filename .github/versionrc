@@ -1,4 +1,6 @@
-# Convco configuration for the conventional PR-title check.
+# Convco rules for PR titles and release version selection.
+# scripts/prepare-release.sh maps feat and fix to patch, breaking changes to minor,
+# and all other types to no release. Use ! only for an incompatible supported contract.
 
 types:
   - type: feat
@@ -11,7 +13,7 @@ types:
   - type: ci
   - type: chore
 
-# Replace this generic rule with documented repository scopes when available.
+# Scopes are optional. When useful, name the affected subsystem in lowercase kebab-case.
 scopeRegex: "^([a-z][a-z0-9-]*)?$"
 
 lineLength: 100
