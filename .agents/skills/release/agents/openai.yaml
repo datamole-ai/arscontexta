@@ -1,0 +1,7 @@
+interface:
+  display_name: "Release"
+  short_description: "Prepare and publish the next release"
+  default_prompt: "Use $release to prepare, merge, publish, and verify the next Second Brain release."
+
+policy:
+  allow_implicit_invocation: false
