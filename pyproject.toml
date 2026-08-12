@@ -1,8 +1,0 @@
-[project]
-name = "second-brain-release-tools"
-version = "1.0.1"
-requires-python = ">=3.12"
-dependencies = []
-
-[tool.uv]
-package = false
