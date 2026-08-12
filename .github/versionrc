@@ -1,17 +1,20 @@
-# Convco configuration for the conventional PR-title check.
+# Release: feat/fix -> patch; breaking -> minor; everything else -> none.
 
 types:
+  # Generated vault
   - type: feat
   - type: fix
-  - type: docs
   - type: refactor
   - type: perf
+
+  # Repository only
+  - type: docs
   - type: test
   - type: build
   - type: ci
   - type: chore
 
-# Replace this generic rule with documented repository scopes when available.
+# Optional lowercase kebab-case subsystem.
 scopeRegex: "^([a-z][a-z0-9-]*)?$"
 
 lineLength: 100
