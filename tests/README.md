@@ -1,14 +1,5 @@
 # Running scenarios
 
-## Check the product version contract
-
-Run the root tests after changing release metadata, the vault manifest, setup copying, or runtime
-packaging:
-
-```bash
-uv run --python 3.12 python -m unittest discover -s tests -p "test_*.py"
-```
-
 Each directory under `tests/scenarios/` is a real-tool evaluation. An agent runs the
 scenario with Claude Code and saves the resulting vault, logs, and evaluation.
 

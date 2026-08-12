@@ -20,7 +20,7 @@ This repository generates vaults; it is not a vault. Never scaffold one here. Us
 - Each vault has a project-local `.qmd/` index with one fixed collection named `notes`.
 - Setup copies `template/` through `skills/setup/scripts/copy-template.sh`; only `ops/tags.yaml` varies with the setup conversation.
 - Keep the skills under `template/.claude/skills/` generation-ready. Use fixed storage paths and do not add generation-time placeholders.
-- Root `pyproject.toml` owns the product version. Release preparation mirrors it into the plugin and marketplace metadata, `template/.second-brain`, and `vault-tooling/pyproject.toml`. Keep every occurrence aligned with `tests/test_version_manifest.py`.
+- Root `pyproject.toml` owns the product version. Release preparation mirrors it into the plugin and marketplace metadata, `template/.second-brain`, and `vault-tooling/pyproject.toml`.
 - Setup validates the vault before its initial commit. Treat `skills/setup/SKILL.md` as high blast radius.
 
 ## Checks
