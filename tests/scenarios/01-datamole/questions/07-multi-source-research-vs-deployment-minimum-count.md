@@ -1,0 +1,1 @@
+Eight animal lactations fall in the same 20-day bin. Exactly two have feed-allowance drops that satisfy both cow-level definitions. Does the group satisfy the documented research rule, the deployed defaults, both, or neither?
