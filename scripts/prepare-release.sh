@@ -35,29 +35,6 @@ sync_product_version() {
   printf '%s\n' "$vault_json" > template/.second-brain
 }
 
-increment_version() {
-  local version=$1
-  local bump=$2
-
-  if [[ ! "$version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
-    echo "plugin version must use X.Y.Z format: $version" >&2
-    return 1
-  fi
-
-  local major=${BASH_REMATCH[1]}
-  local minor=${BASH_REMATCH[2]}
-  local patch=${BASH_REMATCH[3]}
-
-  case "$bump" in
-    minor) printf '%s.%s.0\n' "$major" "$((minor + 1))" ;;
-    patch) printf '%s.%s.%s\n' "$major" "$minor" "$((patch + 1))" ;;
-    *)
-      echo "unsupported release bump: $bump" >&2
-      return 1
-      ;;
-  esac
-}
-
 main() {
   cd "$repo_root"
 
@@ -85,7 +62,7 @@ main() {
     return
   fi
 
-  sync_product_version "$(increment_version "$product_version" "$bump")"
+  sync_product_version "$(uv version --project vault-tooling --dry-run --bump "$bump" --short)"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
