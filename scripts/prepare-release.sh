@@ -4,37 +4,6 @@ set -euo pipefail
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd -- "$script_dir/.." && pwd)"
 
-select_release_bump() {
-  local released_version=$1
-  local conventional_version=$2
-
-  if [ "$conventional_version" = "$released_version" ]; then
-    printf '%s\n' none
-    return
-  fi
-
-  local released_major=${released_version%%.*}
-  local conventional_major=${conventional_version%%.*}
-  if [ "$conventional_major" != "$released_major" ]; then
-    printf '%s\n' minor
-  else
-    printf '%s\n' patch
-  fi
-}
-
-sync_product_version() {
-  local version=$1
-  local plugin_json
-  local vault_json
-
-  plugin_json="$(jq --arg version "$version" '.version = $version' .claude-plugin/plugin.json)"
-  vault_json="$(jq --arg version "$version" '{version: $version}' template/.second-brain)"
-
-  uv version --project vault-tooling --no-sync "$version"
-  printf '%s\n' "$plugin_json" > .claude-plugin/plugin.json
-  printf '%s\n' "$vault_json" > template/.second-brain
-}
-
 main() {
   cd "$repo_root"
 
@@ -55,14 +24,17 @@ main() {
     exit 1
   fi
 
-  next_version="$(convco version --prefix '' --bump --config .github/versionrc)"
-  bump="$(select_release_bump "$released_version" "$next_version")"
-  if [ "$bump" = none ]; then
-    echo "there are no releasable conventional commits"
-    return
-  fi
+  case "$(convco version --prefix '' --bump --label --config .github/versionrc)" in
+    release) echo "there are no releasable conventional commits"; return ;;
+    major) bump=minor ;;
+    *) bump=patch ;;
+  esac
 
-  sync_product_version "$(uv version --project vault-tooling --dry-run --bump "$bump" --short)"
+  version="$(convco version --prefix '' "--$bump")"
+  plugin_json="$(jq --arg version "$version" '.version = $version' .claude-plugin/plugin.json)"
+  vault_json="$(jq --arg version "$version" '{version: $version}' template/.second-brain)"
+  printf '%s\n' "$plugin_json" > .claude-plugin/plugin.json
+  printf '%s\n' "$vault_json" > template/.second-brain
 }
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then

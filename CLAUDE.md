@@ -20,7 +20,7 @@ This repository generates vaults; it is not a vault. Never scaffold one here. Us
 - Each vault has a project-local `.qmd/` index with one fixed collection named `notes`.
 - Setup copies `template/` through `skills/setup/scripts/copy-template.sh`; only `ops/tags.yaml` varies with the setup conversation.
 - Keep the skills under `template/.claude/skills/` generation-ready. Use fixed storage paths and do not add generation-time placeholders.
-- `.claude-plugin/plugin.json` owns the product version. Release preparation mirrors it into `template/.second-brain` and `vault-tooling/pyproject.toml`.
+- `.claude-plugin/plugin.json` owns the product version. Release preparation mirrors it into `template/.second-brain`.
 - Setup validates the vault before its initial commit. Treat `skills/setup/SKILL.md` as high blast radius.
 
 ## Checks

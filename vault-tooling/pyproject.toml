@@ -1,6 +1,6 @@
 [project]
 name = "dtml-second-brain"
-version = "1.0.1"
+version = "0.0.0" # Packaging placeholder; not used at runtime.
 description = "Vault-local deterministic tooling for Second Brain generated knowledge systems"
 requires-python = ">=3.12"
 dependencies = [

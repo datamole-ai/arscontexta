@@ -7,7 +7,6 @@ from pathlib import Path
 from conftest import write_note, write_tag_registry
 from typer.testing import CliRunner
 
-from vault import __version__
 from vault.cli import app
 
 runner = CliRunner()
@@ -23,13 +22,6 @@ def run_json(args: list[str], *, input: str | None = None) -> dict:
     exit_code, payload = invoke_json(args, input=input)
     assert exit_code == 0, payload
     return payload
-
-
-def test_version_option_exits_with_package_version() -> None:
-    result = runner.invoke(app, ["--version"])
-
-    assert result.exit_code == 0
-    assert result.stdout == f"vault {__version__}\n"
 
 
 def test_short_help_alias_is_available() -> None:
