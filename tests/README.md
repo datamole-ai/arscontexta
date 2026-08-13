@@ -39,4 +39,6 @@ tests/scripts/run-claude-turn.sh "$RUN_ROOT" "$LABEL" "$PROMPT"
 ```
 
 The script exports `.env`, isolates Claude config, runs from the vault, writes both logs,
-and refuses to overwrite them.
+and refuses to overwrite them. After Claude exits, it removes empty
+`.claude/.cc-writes` staging directories from the vault. Nonempty staging directories
+remain available for failed-write recovery.

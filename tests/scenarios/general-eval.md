@@ -33,7 +33,7 @@ Use one evaluator for the setup logs and one evaluator for each processing run.
 
 - Setup runs the prerequisite commands before asking questions or writing files
 - Setup presents the proposed tags and receives approval before the first file write
-- Generation follows the required order: copy template, lock tooling dependencies, write approved tags, initialize qmd, validate, then create the initial Git commit
+- Generation follows the required order: copy the fixed template, write approved tags, initialize qmd, validate, then create the initial Git commit
 - Setup changes only the approved tag registry; it does not generate or rewrite fixed template files manually
 - Every command succeeds before setup advances to the next phase
 

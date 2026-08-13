@@ -16,6 +16,19 @@ die() {
   exit 2
 }
 
+cleanup_claude_write_staging() {
+  local staging_dir claude_dir
+
+  [ -d "$vault_root" ] || return 0
+
+  while IFS= read -r -d '' staging_dir; do
+    if rmdir "$staging_dir" 2>/dev/null; then
+      claude_dir="${staging_dir%/.cc-writes}"
+      rmdir "$claude_dir" 2>/dev/null || true
+    fi
+  done < <(find "$vault_root" -type d -path '*/.claude/.cc-writes' -print0 2>/dev/null)
+}
+
 if [ "${1:-}" = '-h' ] || [ "${1:-}" = '--help' ]; then
   usage
   exit 0
@@ -65,6 +78,7 @@ repo_root="$(CDPATH= cd -- "$script_dir/../.." && pwd)"
 
 [ -d "$run_root_input" ] || die "run root does not exist: $run_root_input"
 run_root="$(CDPATH= cd -- "$run_root_input" && pwd)"
+vault_root="$run_root/vault"
 
 case "$label" in
   ''|[!A-Za-z0-9]*|*[!A-Za-z0-9._-]*) die "invalid label: $label" ;;
@@ -80,7 +94,7 @@ case "$prompt" in
 esac
 
 [ -s "$prompt" ] || die "prompt is empty: $prompt"
-[ -d "$run_root/vault" ] || die "vault directory does not exist: $run_root/vault"
+[ -d "$vault_root" ] || die "vault directory does not exist: $vault_root"
 [ -d "$run_root/logs" ] || die "logs directory does not exist: $run_root/logs"
 [ -d "$run_root/claude-config" ] || die "Claude config directory does not exist: $run_root/claude-config"
 [ -f "$repo_root/tests/claude-scenario-settings.json" ] || die 'scenario settings are missing'
@@ -121,7 +135,11 @@ if [ -n "$resume_session" ]; then
   claude_args+=(--resume "$resume_session")
 fi
 
-cd "$run_root/vault"
+cd "$vault_root"
+
+# Claude Code creates these directories for atomic writes during sandbox setup.
+# Clean them only after Claude exits, and leave nonempty recovery directories alone.
+trap cleanup_claude_write_staging EXIT
 
 set +e
 claude "${claude_args[@]}" < "$prompt" 2> "$stderr_log" | tee "$stream_log"
