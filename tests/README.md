@@ -37,6 +37,3 @@ tests/scripts/run-claude-turn.sh \
 # Processing and questions
 tests/scripts/run-claude-turn.sh "$RUN_ROOT" "$LABEL" "$PROMPT"
 ```
-
-The script exports `.env`, isolates Claude config, runs from the vault, writes both logs,
-and refuses to overwrite them.
